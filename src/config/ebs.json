@@ -1,0 +1,39 @@
+{
+	"EBS": [{
+			"RESTART_COMMAND": ["systemd/systemctl", "--user", "restart", "ebs"]
+		},
+		{
+			"START_COMMAND": ["systemd/systemctl", "--user", "start", "ebs"]
+		},
+		{
+			"STOP_COMMAND": ["systemd/systemctl", "--user", "stop", "ebs"]
+		},
+		{
+			"TOKENS": 2
+		},
+		{
+			"INTERVAL": 300
+		},
+		{
+			"SCAN_INTERVAL": 1
+		},
+		{
+			"DEBUG": false
+		},
+		{
+			"FIFO_PATH": "../../systemd/system/broadcast_actuator/+broadcast.pipe"
+		},
+		{
+			"SERVER_NAME": "localhost:5003"
+		},
+		{
+			"TEMPLATE_FOLDER": "templates"
+		},
+		{
+			"STATIC_FOLDER": "static"
+		},
+		{
+			"DATE_FORMAT": "%Y-%m-%d %H:%M:%S.%f"
+		}
+	]
+}

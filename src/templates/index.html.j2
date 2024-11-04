@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MagPi</title>
+    <link rel="stylesheet" href="/static/css/index.css">
+    <link rel="stylesheet" href="{{ url_for('root_bp.static', filename='css/index.css') }}">
+
+    <script src="static/js/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous">
+    </script>
+
+</head>
+<body>
+    <div>
+        <div style="position:absolute;left:0px;top:0px;">
+            <iframe id="camcontroller" class="camcontroller" style="border:none;" scrolling="no" src="http://cam.localhost:5002/ctrl"></iframe>
+        </div>
+        <div style="position:absolute;left:710px;top:0px;">
+            <iframe id="wifiscanner" class="wifiscanner" style="border:none;" scrolling="no" src="http://wifi.localhost:5006/scanner"></iframe>
+        </div>
+        <div style="position:absolute;left:0px;top:490px;">
+            <iframe id="gpsmapper" class="gpsmapper" style="border:none;" scrolling="no" src="http://localhost:5173/" allow="geolocation"></iframe>
+        </div>
+    </div>
+</body>
+</html>

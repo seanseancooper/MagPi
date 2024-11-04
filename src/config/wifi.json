@@ -1,0 +1,117 @@
+{
+	"SCANNER": [
+		{
+			"DEBUG": false
+		},
+		{
+			"SERVER_NAME": "localhost:5006"
+		},
+		{
+			"TEMPLATE_FOLDER": "templates"
+		},
+		{
+			"STATIC_FOLDER": "static"
+		},
+		{
+			"INTERFACE": "wlan0"
+		},
+		{
+			"SCAN_TIMEOUT": 2
+		},
+		{
+			"GPS_ENDPOINT": "http://gps.localhost:5004/position"
+		},
+		{
+			"TOKENS": 2
+		},
+		{
+			"SIGNAL_CACHE_MAX": 162
+		},
+		{
+			"MUTE_TIME": 999999
+		},
+		{
+			"return_all": true
+		},
+		{
+			"COLUMNS": [
+				"SSID",
+				"Quality",
+				"Channel",
+				"Frequency",
+				"Encryption",
+				"BSSID",
+				"Signal",
+				"Noise",
+				"BitRates",
+				"Mode",
+				"Last",
+				"Vendor"
+			]
+		},
+		{
+			"VENDORMACS_FILE": "vendorMacs.xml"
+		},
+		{
+			"DOCTYPE": "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\t\t\t\t<plist version=\"1.0\">\t\t<array></array>\t\t</plist>"
+		},
+		{
+			"DATE_FORMAT": "%Y-%m-%d"
+		},
+		{
+			"TIME_FORMAT": "%H:%M:%S"
+		},
+		{
+			"TIMER_FORMAT": "%H:%M:%S"
+		},
+		{
+			"DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S"
+		},
+		{
+			"XML_SIGNAL_DEBUG": false
+		},
+		{
+			"XML_DATA_DEBUG": false
+		},
+		{
+			"XML_PARSE_DEBUG": false
+		},
+		{
+			"XML_ROOT_DEBUG": false
+		},
+		{
+			"XML_ELEMENT_DEBUG": false
+		},
+		{
+			"XML_FOUNDCELL_DEBUG": false
+		},
+		{
+			"XML_APPEND_DEBUG": false
+		},
+		{
+			"XML_PARSEDCELL_DEBUG": false
+		},
+
+		{"SEARCHMAP": {}},
+		{"BLACKLIST":
+			{
+				"5C:5B:35:78:8B:64": {
+					"ssid": "HEATKTE",
+					"tests": {},
+					"return_all": true
+				},
+				"5C:5B:35:78:8B:66": {
+					"ssid": "HEATKTE2",
+					"tests": {},
+					"return_all": true
+				}
+			}
+		},
+		{
+			"OUTFILE_PATH": "../../_out"
+		},
+		{
+			"OUT_FILE": "scanner_found"
+		}
+	]
+}

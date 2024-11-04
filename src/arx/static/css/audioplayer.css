@@ -1,0 +1,40 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+.arx_container {
+    border-style:solid;
+    border-width:2px;
+    border-radius:6px;
+    border-color:rgba(255,255,255,0.0);
+    height:33px;
+    width:99px;
+    background-color:rgba(255,255,255,0.0);
+}
+
+.arx_button {
+    width:33px;
+    height:33px;
+    font-weight: bold;
+}
+
+.bar_container {
+    position:relative;
+    top:-33px;
+    left:33px;
+    width:66px;
+    border-radius:4px;
+    text-align:left;
+    background-color:none;
+}
+
+.bar {
+    height:33px;
+    border-radius:3px;
+}
+
+.peak_bar {
+    height:33px;
+    border-radius:3px;
+}

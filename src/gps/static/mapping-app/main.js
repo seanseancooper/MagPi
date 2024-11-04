@@ -1,0 +1,440 @@
+import Feature from 'ol/Feature.js';
+import Geolocation from 'ol/Geolocation.js';
+import Map from 'ol/Map.js';
+import Point from 'ol/geom/Point.js';
+import Circle from 'ol/geom/Circle.js';
+import View from 'ol/View.js';
+import {toRadians} from 'ol/math.js';
+import {DragRotateAndZoom, defaults as defaultInteractions} from 'ol/interaction.js';
+import {OverviewMap, Control, defaults as defaultControls} from 'ol/control.js';
+import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
+import {OSM, Vector} from 'ol/source.js';
+import VectorSource from 'ol/source/Vector.js';
+import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
+import {toStringHDMS, toStringXY, degreesToStringHDMS} from 'ol/coordinate.js';
+import {transform as xform, fromLonLat} from 'ol/proj.js';
+import {Heatmap as HeatmapLayer} from 'ol/layer.js';
+//import {JSONFeature as JSONFeature} from 'ol/format/JSONFeature.js'; <-- abstract, doesn't import. read direct from response
+
+var click = 0;
+var tmpCoord;
+var features = [];
+var selMarker;
+
+/*
+docs @ https://openlayers.org/en/latest/apidoc/
+*/
+
+class RotateNorthControl extends Control {
+
+    constructor(opt_options) {
+        const options = opt_options || {};
+        const n_button = document.createElement('button');
+        n_button.innerHTML = 'N';
+
+        const n_element = document.createElement('div');
+        n_element.className = 'rotate-north ol-unselectable ol-control';
+        n_element.id = 'rotate-north';
+        n_element.appendChild(n_button);
+
+        super({
+            element: n_element,
+            target: options.target,
+        });
+
+        n_button.addEventListener('click', this.handleRotateNorth.bind(this), false);
+    }
+
+    handleRotateNorth() {
+        this.getMap().getView().setRotation(0);
+    }
+}
+
+class TrackingControl extends Control {
+    /* REQUIRES JAVASCRIPT AND GEOLOCATION */
+    constructor(opt_options) {
+
+        const options = opt_options || {};
+
+        const t_button = document.createElement('button');
+        t_button.innerHTML = 'T';
+
+        const t_element = document.createElement('div');
+        t_element.className = 'track ol-unselectable ol-control';
+        t_element.id = 'track';
+        t_element.appendChild(t_button);
+
+        super({
+            element: t_element,
+            target: options.target,
+        });
+
+        const t_button_hi = document.getElementById('track');
+        t_button.addEventListener('click', this.handleTrackingButton.bind(this), false);
+    }
+
+    handleTrackingButton() {
+
+        if (geolocation){
+            geolocation.setTracking(!geolocation.getTracking());
+        }
+
+        if (geolocation.getTracking() == true){
+            info.innerHTML = "<div id=\"tracking_ind\" class=\"ol-unselectable\" style=\"background:green\" width=\"6\" height=\"22\">&nbsp;</div>";
+            info.style.display = '';
+            const coordJS = geolocation.getPosition();
+            positionFeature.setGeometry(new Point(coordJS));
+            view.setCenter(coordJS);
+        } else {
+            info.innerHTML = "<div id=\"tracking_ind\" class=\"ol-unselectable\" style=\"background:red\" width=\"6\" height=\"22\">&nbsp;</div>";
+            info.style.display = '';
+        }
+    }
+}
+
+function setHeaders(xhttp, host){
+    xhttp.setRequestHeader('Access-Control-Allow-Origin', host);
+    xhttp.setRequestHeader('Access-Control-Allow-Methods', 'GET');
+    xhttp.setRequestHeader('Content-Type', 'text/html');
+    xhttp.setRequestHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-*');
+};
+
+const positionFeature = new Feature();
+const accuracyFeature = new Feature();
+
+positionFeature.setStyle(
+    new Style({
+            image: new CircleStyle({
+                radius: 5,
+            fill: new Fill({
+                color: '#0000FF',
+            }),
+            stroke: new Stroke({
+                color: '#FFF',
+                width: 1,
+            }),
+        }),
+    })
+);
+
+// a default value to get us started.
+const currentWebMercator = fromLonLat([-105.0437, 39.9168]);
+
+const view = new View({
+    center: currentWebMercator,
+    /*
+        #IDEA 'Zoom 5000': A single button that magnifies the current view to a radius of n ft.
+    */
+    zoom: 19,
+});
+
+const geolocation = new Geolocation({
+    trackingOptions: {
+        enableHighAccuracy: true,
+    }
+});
+
+geolocation.setTracking(true);
+
+geolocation.on('change', function (evt) {
+
+    var xhttp = new XMLHttpRequest();
+    var block = true;
+    xhttp.open("GET", 'http://gps.localhost:5004/position', block);
+
+    setHeaders(xhttp, 'gps.localhost:5004');
+
+    xhttp.onload = function(){
+        const resp = xhttp.response;
+        let json = JSON.parse(resp);
+        const hdweCoords = fromLonLat([json['GPS']['LONGITUDE'], json['GPS']['LATITUDE']]);
+        animate(hdweCoords);
+        update(hdweCoords);
+    };
+
+    xhttp.send();
+
+});
+
+geolocation.on('error', function (error) {
+    const info = document.getElementById('info');
+    info.innerHTML = error.message;
+    info.style.display = '';
+});
+
+function el(id) {
+    return document.getElementById(id);
+}
+
+const overviewMapControl = new OverviewMap({
+    // see in overviewmap-custom.html to see the custom CSS used
+    className: 'ol-overviewmap ol-custom-overviewmap',
+    layers: [
+        new TileLayer({
+        source: new OSM(
+                    new Vector({
+                         features : [accuracyFeature]
+                    }),
+            ),
+        }),
+    ],
+    collapseLabel: '\u00BB',
+    label: '\u00AB',
+    collapsed: true,
+    rotateWithView: true,
+});
+
+const blur = document.getElementById('blur');
+const radius = document.getElementById('radius');
+
+const heatMap = new HeatmapLayer({
+    source: new Vector({features:features}),
+    blur: parseInt(blur.value, 10),
+    radius: parseInt(radius.value, 10),
+    weight: .5
+});
+
+blur.addEventListener('input', function () {
+  heatMap.setBlur(parseInt(blur.value, 10));
+});
+
+radius.addEventListener('input', function () {
+  heatMap.setRadius(parseInt(radius.value, 10));
+});
+
+const info = document.getElementById('info');
+
+let currentFeature;
+
+const displayFeatureInfo = function (pixel, target) {
+  const feature = target.closest('.ol-control')
+    ? undefined
+    : map.forEachFeatureAtPixel(pixel, function (feature) {
+        return feature;
+      });
+  if (feature) {
+    info.style.left = pixel[0] - 80 + 'px';
+    info.style.top = pixel[1] - 80 + 'px';
+    if (feature !== currentFeature) {
+      info.style.visibility = 'visible';
+      info.innerText = feature.get('LINE1'.toUpperCase())+ "\n" + feature.get('LINE2') + " " + feature.get('LINE3');
+    }
+  } else {
+    info.style.visibility = 'hidden';
+  }
+  currentFeature = feature;
+};
+
+function getCircleStyle(signal_color, strength) {
+    var circlestyle = new Style({
+          stroke: new Stroke({
+              color: signal_color,
+              width: 1
+          }),
+          fill: new Fill({
+              color: signal_color
+          })
+    });
+
+    /* alternate style option
+    var circlestyle = new Style({
+          stroke: new Stroke({
+              color: signal_color,
+              width: (strength + 100)/10*10 // stroke width is strength
+          })
+    });*/
+
+    return circlestyle;
+}
+
+function addCircle(coordinate, signal_color, strength, cell) {
+
+    var source = v_layer.getSource();
+    var diameter = (strength + 100)/10*10;
+
+    const circleFeature = new Feature({
+      geometry: new Circle(coordinate, diameter), // strength is diameter
+    });
+    circleFeature.setStyle(getCircleStyle(signal_color, strength)); // strength is stroke
+
+    circleFeature.set('LINE1', "SSID: " + cell.SSID, true);
+    circleFeature.set('LINE2', "BSSID: " + cell.BSSID, true);
+    circleFeature.set('LINE3', "["+parseInt(strength)+" db]", true);
+
+    source.addFeature(circleFeature);
+}
+
+function getPointStyle(signal_color) {
+    var pointstyle = new Style({
+          stroke: new Stroke({
+              color: 'rgba(0,0,0,1.0)', // stroke AROUND signal color
+              width: 1
+          }),
+          fill: new Fill({
+              color: signal_color       // the signal color
+          })
+    });
+    return pointstyle;
+}
+
+function addPoint(id, coordinate, signal_color, strength, cell) {
+
+    var source = v_layer.getSource();
+    var featuresList = document.getElementById("featuresList");
+    featuresList.innerHTML = "Features: " + source.getFeatures().length;
+
+    const pointFeature = new Feature({
+      geometry: new Circle(coordinate, 1), // lat, lon coordinate indicator
+    });
+
+    pointFeature.setStyle(getPointStyle(signal_color));
+    pointFeature.setId(id);  // UNIQUE.
+    pointFeature.set('LINE1', "SSID :" + cell.SSID, true);
+    pointFeature.set('LINE2', "BSSID :" + cell.BSSID, true); // or created? updated?
+    pointFeature.set('LINE3', "["+parseInt(strength)+" db]", true);
+    source.addFeature(pointFeature);
+}
+
+function createCircle(coordinate, signal_color, strength, cell) {
+    addCircle(coordinate, signal_color, strength, cell);
+}
+
+function createPoint(id, coordinate, signal_color, strength, cell) {
+    addPoint(id, coordinate, signal_color, strength, cell);
+}
+
+const map = new Map({
+    controls: defaultControls().extend([
+        overviewMapControl,
+        new RotateNorthControl(),
+        new TrackingControl()
+    ]),
+    interactions: defaultInteractions().extend([new DragRotateAndZoom()]),
+    layers: [
+        new TileLayer({
+            source: new OSM(),
+        }),
+        new VectorLayer({
+            source: new Vector({features:features}),
+        }),
+//        new VectorLayer({
+//            source: heatMap,
+//        }),
+    ],
+    target: 'map',
+    view: view,
+});
+
+const v_layer = (
+    map.getAllLayers()
+        .find(function (layer) {
+            if (layer instanceof VectorLayer
+                    && layer.getSource() instanceof Vector
+                )
+            {
+                return layer;
+            }
+        })
+);
+
+map.on('pointermove', function (evt) {
+    if (evt.dragging) {
+        info.style.visibility = 'hidden';
+        currentFeature = undefined;
+        return;
+    }
+
+    const pixel = map.getEventPixel(evt.originalEvent);
+    displayFeatureInfo(pixel, evt.originalEvent.target);
+});
+
+map.on('click', function (mapClickEvent) {
+    displayFeatureInfo(mapClickEvent.pixel, mapClickEvent.originalEvent.target);
+})
+
+map.getTargetElement().addEventListener('pointerleave', function () {
+    currentFeature = undefined;
+    info.style.visibility = 'hidden';
+});
+
+new VectorLayer({
+    map: map,
+    source: new Vector({
+        features: [accuracyFeature, positionFeature],
+    }),
+});
+
+new VectorLayer({
+    map: overviewMapControl,
+    source: new Vector({
+        features: [accuracyFeature],
+    }),
+});
+
+function animate(coordinate) {
+
+    var xhttp = new XMLHttpRequest();
+    let URL = "http://wifi.localhost:5006/tracked";
+    xhttp.open("GET", URL, true);
+
+    setHeaders(xhttp, 'wifi.localhost:5006');
+
+    xhttp.onload = function(){
+        const resp = xhttp.response;
+
+        if (xhttp.status == 200){
+
+            var tracked_signals = JSON.parse(resp);
+
+            // clear the ENTIRE layer source
+            v_layer.getSource().clear();
+
+            tracked_signals.forEach(function(cell) {
+
+                if (!cell.is_mute){
+
+                    let _color = (function(){
+                           var parts = cell.BSSID.split(':');
+                           var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
+                           var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
+                           var B = (parseInt(parts[4], 16) + parseInt(parts[5], 16)) % 255;
+                           return [R,G,B];
+                    })(cell);
+
+                    for (const s of cell.signal_cache) {
+
+                        const sgnlPt = JSON.parse(s);
+                        var id = sgnlPt.id;
+                        var pointCoords = fromLonLat([sgnlPt.lon, sgnlPt.lat]);
+                        var pointStrength = parseInt(sgnlPt.sgnl);
+
+                        // pass current strength as the alpha channel
+                        var c_signal_color = 'rgba(' + _color + ',' + parseFloat( ((pointStrength + 100)/100).toFixed(2) ) + ')';
+                        var p_signal_color = 'rgba(' + _color + ', 1.0)';
+
+                        console.log("SIGNALPOINT:[" +id + "] " + cell.BSSID + " c_signal_color:" + c_signal_color + " sgnlPt.lon:" + sgnlPt.lon + " sgnlPt.lat:" +  sgnlPt.lat + " sgnlPt.sgnl:" +  pointStrength );
+
+                        // ...lay a circle shaded to indicate signal, and pass strength as the diameter.
+                        createCircle(pointCoords, c_signal_color, pointStrength, cell);
+
+                        // ...put a point colored to indicate signal
+                        createPoint(id, pointCoords, p_signal_color, pointStrength, cell);
+                   }
+                }
+            });
+            map.render();
+            return true;
+        } else {
+            return false;
+        };
+    };
+    xhttp.send();
+};
+
+function update(hdweCoords) {
+    positionFeature.setGeometry(new Point(hdweCoords));
+    positionFeature.set('LINE1', toStringHDMS(hdweCoords), true);
+    positionFeature.set('LINE2', '', true);
+    positionFeature.set('LINE3', '', true);
+    view.setCenter(hdweCoords);
+};

@@ -1,0 +1,60 @@
+{
+	"GPS": [{
+			"DEBUG": false
+		},
+		{
+			"SERVER_NAME": "localhost:5004"
+		},
+		{
+			"TEMPLATE_FOLDER": "templates"
+		},
+		{
+			"STATIC_FOLDER": "static"
+		},
+		{
+			"NODE_START_COMMAND": ["/usr/local/bin/npm", "start"]
+		},
+		{
+			"NODE_STOP_COMMAND": ["kill", "-9"]
+		},
+		{
+			"TEST_FILE": "./lib/test_file.txt"
+		},
+		{
+			"RETRIEVER_METHOD": "JavaScriptGPSRetriever"
+		},
+		{
+			"GPS_HOST": "10.99.77.1"
+		},
+		{
+			"GPS_PORT": 80
+		},
+		{
+			"GPS_CONNECT_TIMEOUT": 10
+		},
+		{
+			"MAP_HOST": "localhost:5173"
+		},
+		{
+			"MAP_TEMPLATE": "gps_map.html.j2"
+		},
+		{
+			"TOKENS": 4
+		},
+		{
+			"INTERVAL": 60
+		},
+		{
+			"DATE_FORMAT": "%Y-%m-%d"
+		},
+		{
+			"TIME_FORMAT": "%H:%M:%S.%f"
+		},
+		{
+			"DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S"
+		},
+		{
+			"OUT_PATH": "gps.out"
+		}
+	]
+}

@@ -1,0 +1,92 @@
+{
+	"CAM": [{
+			"DEBUG" : false
+		},
+		{
+			"SERVER_NAME": "localhost:5002"
+		},
+		{
+			"TEMPLATE_FOLDER": "templates"
+		},
+		{
+			"STATIC_FOLDER": "static"
+		},
+		{
+			"FORWARD_VIDEO_URL" : "http://10.99.77.1/blackvue_live.cgi"
+		},
+		{
+			"REVERSE_VIDEO_URL" : "http://10.99.77.1/blackvue_live.cgi?direction=R"
+		},
+		{
+			"FORWARD_TEST_URL" : ""
+		},
+		{
+			"PLUGIN_NAME" : "blackview_test_vis"
+		},
+		{
+			"MOTION_CPANEL_URL" : "http://192.168.1.4:8080"
+		},
+		{
+			"MOTION_ALERT_URL" : "http://192.168.1.4:9046"
+		},
+		{
+			"MOTION_IMAGES_DIR": "/tmp/motion"
+		},
+		{
+			"DATETIME_FORMAT": "%Y%m%d_%H%M%S"
+		},
+		{
+			"DATE_FORMAT": "%Y-%m-%d %H:%M:%S.%f"
+		},
+		{
+			"TIME_FORMAT": "%H%M%S"
+		},
+		{
+			"OUTFILE_PATH": "../../_out"
+		},
+		{
+			"OUTFILE_NAME": "cam_snap"
+		},
+		{
+			"PLUGINS":
+				{"blackview_test_vis": {
+					"capture_param_capture_width": 704,
+					"capture_param_capture_height": 480,
+					"capture_output_show_time": false,
+					"capture_output_show_stats": false,
+					"capture_output_log_stats": false,
+					"plugin_process_frames": true,
+					"plugin_process_copies": false,
+					"plugin_displays": false,
+					"display_proc_stats": false,
+					"log_proc_stats": false,
+					"display_rect_stats": false,
+					"log_rect_stats": false,
+					"streams": true,
+					"streaming_port": 6100,
+					"streaming_path": "/stream",
+					"write_mp4": false,
+					"plugin_cv_color": "255, 255, 255",
+					"tokens": 2,
+					"interval": 60,
+					"debug": false,
+					"fifo_path": "/+broadcast.pipe",
+					"f_limit": 1,
+					"frame_delta": 20.0,
+					"frm_delta_pcnt": 100.0,
+					"asset_classes": [
+						{"cascade": "plugin_cascade_xml" }
+					],
+					"cascade": [
+						{"plugin_cascade_xml": "haarcascade_frontalface_alt.xml"},
+						{"plugin_cascade_scaleFactor": 1.01},
+						{"plugin_cascade_minNeighbors": 3},
+						{"plugin_cascade_minSize": "50,50"},
+						{"plugin_cascade_maxSize": "500, 500"},
+						{"plugin_cascade_flags": "cv.CASCADE_SCALE_IMAGE"}
+					]
+				}
+			}
+		}
+	]
+}

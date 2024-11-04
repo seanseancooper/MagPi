@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AudioPlayer</title>
+
+    <link rel="stylesheet" href="{{ url_for('arx_bp.static', filename='css/audioplayer.css') }}">
+
+    <script src="{{ url_for('arx_bp.static', filename='js/jquery-3.3.1.min.js') }}"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous">
+    </script>
+    <script>
+        function make_meter() {
+
+            const bar = document.createElement('div');
+            bar.id = 'bar';
+
+            function update_meter() {
+                setTimeout(function() {
+                    const xhttp = new XMLHttpRequest();
+
+                    xhttp.open('GET', "http://arx.localhost:5001/meter");
+                    xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
+                    xhttp.setRequestHeader('Access-Control-Allow-Methods', 'GET');
+                    xhttp.setRequestHeader('Content-Type', 'text/html');
+                    xhttp.setRequestHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-*');
+                    xhttp.send();
+
+                    xhttp.onload = function() {
+                        const resp = xhttp.response;
+                        // an excuse to play with the 2nd parameter of JSON.parse()... 'reviver'
+                        const c_meter = JSON.parse(resp, function (key, value) {
+                            if (key == "peak_percentage") {
+                                // return the normalized value for peak_percentage
+                                return Math.round(value * 100);
+                            } else {
+                                // return the raw value for max | file
+                                return value;
+                            }
+                        });
+
+
+                        // default coloring
+                        bar.className = 'bar';
+
+                        if (c_meter.peak_percentage >= 100){
+                            // change the bar for peaks...
+                            bar.className = 'peak_bar';
+                            document.getElementById('bar').style = "background-color:rgba(0,0,255,1.0);width:100%;transition: all 0.1s;";
+                        } else if (c_meter.peak_percentage < 5.0){
+                            // emulate a noise floor; givee an indication of 'running' even when there is no sound input.
+                            document.getElementById('bar').style = "background-color:rgba(0,255,0,1.0);width:" + Math.random() * (5 - 1) + 1 + "px;transition: all 0.1s;";
+                        } else {
+                            document.getElementById('bar').style = "background-color:rgba(0,255,0,0.50);transition: all 0.1s;";
+                            document.getElementById('bar').style.width = c_meter.peak_percentage + '%';
+                        }
+
+                        var muted = document.getElementById('arx_button').value;
+
+                        if (muted == "") {
+                            update_meter();
+                        }
+                    };
+
+                }, 50);
+            }
+            document.getElementById('meter').appendChild(bar);
+            update_meter();
+        }
+
+        function arx_mute(){
+            var xhttp = new XMLHttpRequest();
+
+            xhttp.open("POST", "http://arx.localhost:5001/mute", true);
+            xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
+            xhttp.setRequestHeader('Access-Control-Allow-Methods', 'POST');
+            xhttp.setRequestHeader('Content-Type', 'text/html');
+            xhttp.setRequestHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-*');
+            xhttp.send();
+
+
+            xhttp.onload = function() {
+                const muted  = xhttp.response;
+                if (muted == "True") {
+                    document.getElementById('arx_button').className = "arx_button";
+                    document.getElementById('arx_button').value = "MUTED";
+
+                    //  right-pointing triangle Unicode: U+25B6 U+FE0F, UTF-8: E2 96 B6 EF B8 8F
+                    document.getElementById('mute_button_text').innerHTML = "▶️";
+                } else {
+                    document.getElementById('arx_button').className = "arx_button";
+                    document.getElementById('arx_button').value = "";
+
+                    // ⏹ stop symbol Unicode: U+23F9, UTF-8: E2 8F B9
+                    document.getElementById('mute_button_text').innerHTML = "⏹";
+                    make_meter();
+                }
+            };
+        }
+    </script>
+</head>
+<body>
+    <div id="arx_container" style="position:absolute;left:207px;top:-2px;" class="arx_container">
+        <button id="arx_button" style="" class="arx_button" value="" onClick="arx_mute()">
+            <div id="mute_button_text" class="">⏹</div>
+        </button>
+        <div id="bar_container" style="" class="bar_container">
+            <div id="meter" style=""><script>make_meter()</script></div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,136 @@
+import os
+import threading
+import cv2 as cv
+
+import logging.handlers
+from src.cam.Showxating.capture import ShowxatingCapture
+
+#TODO: put in config
+os.environ[
+    "OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "flags;low_delay;live;framedrop|probesize;32|analyzeduration;0|sync;ext|sn" \
+                                       "|hide_banner|rtsp_transport;tcp|loglevel;debug "
+os.environ[
+    "OPENCV_FFMPEG_WRITER_OPTIONS"] = "loglevel;debug"
+
+cam_logger = logging.getLogger('cam_logger')
+logger_root = logging.getLogger('root')
+
+
+class ShowxatingPlugin(threading.Thread):
+    """plugin implementation for OpenCV code to be inserted into a RTSP video processing chain created by a
+    ShowxatingVideoCapture(). This implementation allows 'chaining' the processes by passing frames between
+    named, serialized instances of the component."""
+
+    def __init__(self):
+        super().__init__()
+
+        self.plugin_name = None
+
+        self.plugin_elapsed_time = None
+        self.plugin_current_time = None
+
+        # encapsulated config
+        self.plugin_config = {}
+
+        # encapsulated capture
+        self.plugin_capture = None
+
+        # args on the cli
+        self.plugin_args_capture_src = None
+        self.plugin_args_capture_frame_rate = None
+        self.plugin_args_capture_width = None
+        self.plugin_args_capture_height = None
+
+        # process_frames? The point is to be able to...
+        self.plugin_process_frames = False
+
+        # my encapsulated display(s)
+        self.plugin_displays = False
+        self.plugin_display = {}
+
+        self.start_time = None
+        self.frame_rate = None
+        self.frame_delta = None
+        self.frame_id = None
+
+        # magic highlight color
+        self.majic_color = None
+
+        # cascade specific impls
+        self.plugin_cascade = None
+        self.plugin_cv_color = None
+        self.plugin_output_processing_time = 0.0
+
+        # configured?
+        self.plugin_configured = False
+
+    def set_capture(self):
+        self.plugin_capture = ShowxatingCapture(self.plugin_name,
+                                                self.plugin_args_capture_src,
+                                                self.plugin_args_capture_frame_rate,
+                                                self.plugin_args_capture_width,
+                                                self.plugin_args_capture_height,
+                                                self.plugin_config)
+        cam_logger.debug(f"{self.plugin_name} initialized plugin capture: src:{self.plugin_args_capture_src}"
+                            f" fps:{self.plugin_args_capture_frame_rate} "
+                            f"{self.plugin_args_capture_width}x{self.plugin_args_capture_width}")
+
+    def get_config(self):
+        from src.config import CONFIG_PATH, readConfig
+        temp = {}
+
+        readConfig(os.path.join(CONFIG_PATH, 'cam.json'), temp)
+        self.plugin_config = temp['PLUGINS'][self.plugin_name]
+
+        self.plugin_process_frames = self.plugin_config['plugin_process_frames']
+
+    def display(self, frame):
+        if frame is not None:
+            cv.imshow(self.plugin_name, frame)
+        else:
+            cam_logger.warning("DISPLAY GOT NO FRAME!!!")
+
+    def render(self, frame):
+        if self.plugin_config['plugin_displays']:
+            self.display(frame)
+
+    def process_frame(self, frame):
+        return frame
+
+    def run(self):
+        """ event loop for generic plugin """
+        try:
+
+            self.get_config()
+            self.set_capture()
+
+            for frame in self.plugin_capture.run():
+                # TODO: make this a list comprehension calling a method
+                #  impl gets statistics
+                self.start_time = self.plugin_capture.statistics['capture_start_time']
+                self.frame_rate = self.plugin_capture.statistics['capture_frame_rate']
+                self.frame_delta = self.plugin_capture.statistics['capture_frame_period']
+                self.frame_id = self.plugin_capture.statistics['capture_frame_id']
+                self.majic_color = self.plugin_capture.statistics['capture_majic_color']
+                processed = self.process_frame(frame)
+                self.render(processed)
+
+                if cv.waitKey(1) & 0xFF == ord('x'):
+                    break
+        except ValueError:
+            print(f"no frame!!")
+        except KeyboardInterrupt:
+            pass
+
+
+if __name__ == "__main__":
+
+    plugin = ShowxatingPlugin()
+
+    def plugin_stops():
+        cam_logger.info(f"{plugin.plugin_name} plugin stopped.")
+
+    import atexit
+    atexit.register(plugin_stops)
+
+    plugin.run()

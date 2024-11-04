@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MOT CAP</title>
+
+    <link rel="stylesheet" href="{{ url_for('mot_bp.static', filename='css/normalize.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('mot_bp.static', filename='css/w3.css') }}">
+    <link rel="stylesheet" href="{{ url_for('mot_bp.static', filename='css/motion_cap.css') }}">
+
+    <script src="{{ url_for('mot_bp.static', filename='js/motion_cap.js') }}"></script>
+    <script src="{{ url_for('mot_bp.static', filename='js/jquery-3.3.1.min.js') }}"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous">
+    </script>
+
+</head>
+<body>
+    <div class="w3-panel">
+        <div class="w3-cell">
+            <header class="w3-container w3-blue-gray">
+                <h1>recent motion captures</h1>
+            </header>
+
+            <div class="w3-cell">
+                <div class="w3-display-container">
+                {% for name in image_names: %}
+                    <button class="w3-button w3-display-left w3-blue-gray" onclick="plusDivs(-1)">&#10094;</button>
+                        <a href="{{ url_for('static', filename='cam_images/' + name) }}">
+                            <img class="motion_capture_image" src="{{ url_for('static', filename='cam_images/' + name) }}" width="480" height="320">
+                        </a>
+                    <button class="w3-button w3-display-right w3-blue-gray" onclick="plusDivs(+1)">&#10095;</button>
+                {% endfor %}
+                </div>
+                <div class="w3-panel w3-blue-gray">
+                    <p></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        var slideIndex = 1;
+        showDivs(slideIndex);
+
+        function plusDivs(n) {
+          showDivs(slideIndex += n);
+        }
+
+        function showDivs(n) {
+          var i;
+          var x = document.getElementsByClassName("motion_capture_image");
+          if (n > x.length) {slideIndex = 1}
+          if (n < 1) {slideIndex = x.length} ;
+          for (i = 0; i < x.length; i++) {
+            x[i].style.display = "none";
+          }
+          x[slideIndex-1].style.display = "block";
+        }
+
+    </script>
+</body>
+</html>

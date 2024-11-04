@@ -1,0 +1,9 @@
+Flask==2.3.2
+gpsdclient==1.3.2
+psutil==5.8.0
+requests==2.27.1
+Werkzeug==2.3.3
+sounddevice~=0.4.5
+matplotlib~=3.4.2
+numpy~=1.21.0
+soundfile~=0.10.3.post1

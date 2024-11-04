@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0" />
+    <title>Open Layers</title>
+    <link rel="stylesheet" href="./node_modules/ol/ol.css">
+    <style>
+
+    .rotate-north {
+      top: 65px;
+      left: 8px;
+    }
+
+    .track {
+      top: 92px;
+      left: 8px;
+    }
+
+    .map .ol-custom-overviewmap,
+    .map .ol-custom-overviewmap.ol-uncollapsible {
+        bottom: auto;
+        left: auto;
+        right: 0;
+        top: 0;
+    }
+
+    .map .ol-custom-overviewmap:not(.ol-collapsed)  {
+        border: 1px solid black;
+    }
+
+    .map .ol-custom-overviewmap .ol-overviewmap-map {
+        border: 1px solid black;
+        width: 300px;
+    }
+
+    .map .ol-custom-overviewmap .ol-overviewmap-box {
+        border: 2px solid red;
+    }
+
+    .map .ol-custom-overviewmap:not(.ol-collapsed) button{
+        bottom: auto;
+        left: auto;
+        right: 1px;
+        top: 1px;
+    }
+
+    .map .ol-rotate {
+        top: 170px;
+        right: 0;
+    }
+
+    #info {
+        position: absolute;
+        font-family: Helvetica;
+        font-size: 10px;
+        display: inline-block;
+        height: auto;
+        width: 120px;
+        z-index: 100;
+        background-color: #333;
+        color: #fff;
+        text-align: left;
+        border-radius: 2px;
+        padding: 5px;
+        left: 50%;
+        transform: translateX(3%);
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    </style>
+</head>
+<body>
+    <div id="map" class="map" style="position:absolute;top:0px;left:1px;width:707px;height:443px;"></div>
+    <div id="heatmap_ctrl" style="position:absolute;top:125px;left:8px;width:25px;height:300px;text-align:center;">
+        <input id="radius" type="range" min="1" max="50" step="1" value="5" orient="vertical" style="height:130px;" /><br>
+        <label for="radius">Ø</label>
+        <br>
+        <input id="blur" type="range" min="1" max="50" step="1" value="15" orient="vertical" style="height:130px;" /><br>
+        <label for="blur">ß</label>
+    </div>
+    <a style="position:absolute;top:424px;left:280px;" href="https://openlayers.org/en/latest/apidoc/" target="_blank">https://openlayers.org/en/latest/apidoc/</a><br>
+    <div style="position:absolute;top:424px;left:80px;" id="featuresList"></div>
+    <div style="position:absolute;top:95px;left:35px;">
+        <div>
+            <div id="info" style=""></div>
+            <div id="output" style=""></div>
+        </div>
+    </div>
+    <script type="module" src="main.js"></script>
+</body>
+</html>

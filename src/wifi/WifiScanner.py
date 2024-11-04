@@ -1,0 +1,312 @@
+import platform
+import subprocess
+import threading
+import time
+import json
+from datetime import datetime
+from collections import defaultdict
+import requests
+from flask.signals import Namespace
+from contextlib import contextmanager
+
+from src.config.__init__ import readConfig
+
+# TODO: move 'overrides' to utils
+from src.wifi.lib.wifi_utils import get_timing, get_vendor, write_trackedJSON
+
+# TODO: import the correct versions of methods
+from src.wifi.lib.iw_parse import print_table, get_parsed_cells, get_name, get_quality, get_channel, get_frequency, \
+    get_encryption, get_address, get_signal_level, get_noise_level, get_bit_rates, get_mode
+
+# TODO: this airport thing...
+from src.wifi.lib.airport_parse import get_macos_parsed_cells, scan_macos_wifi
+
+from src.wifi.lib.SignalPoint import SignalPoint
+from src.wifi.WifiWorker import WifiWorker
+
+import logging
+
+wifi_signals = Namespace()
+wifi_started = wifi_signals.signal('WIFI START')
+wifi_updated = wifi_signals.signal('WIFI UPDATED')
+wifi_failed = wifi_signals.signal('WIFI FAILED')
+wifi_stopped = wifi_signals.signal('WIFI STOP')
+
+logger_root = logging.getLogger('root')
+wifi_logger = logging.getLogger('wifi_logger')
+
+def format_time(_, fmt):
+    return f'{_.strftime(fmt)}'
+
+
+class WifiScanner(threading.Thread):
+    """ Wifi Scanner class; poll the wifi, match BSSID and report as parsed_signals. """
+    def __init__(self):
+        super().__init__()
+
+        self.config = {}
+        self.interface = None
+        self.searchmap = {}
+        self.stats = {}                         # new
+
+        self.parsed_signals = []                # signals received by scanning
+        self.workers = []                       # units assigned to monitor a discrete signal
+        self.tracked_signals = {}               # parsed_signals is a list, this is a map?!
+        self.signal_cache = defaultdict(list)   # a mapping of lists of SignalPoint
+
+        self.blacklist = {}
+        self.sort_order = "Signal"
+        self.reverse = False
+
+        # TODO: timekeeping
+        self.start_time = datetime.now()
+        self.elapsed = None
+        self.polling_count = 0
+
+        self.latitude = 0.0
+        self.longitude = 0.0
+
+        self._OUTFILE = None
+        self._OUTDIR = None
+        self.DEBUG = False
+
+    def scan_wifi(self):
+
+        try:
+            process = subprocess.Popen(['iwlist', self.config['INTERFACE'], 'scan'],
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE,
+                                       universal_newlines=True)
+            return process.stdout.readlines()
+
+        except Exception as e:
+            print(f"can't open iwlist process! {e}")
+
+    def config_worker(self, worker):
+        worker.scanner = self
+        worker.config = self.config
+        worker.created = datetime.now()
+        worker.DEBUG = self.config['DEBUG']
+
+    def get_worker(self, bssid):
+        worker = None
+        try:
+            worker = [worker for worker in self.workers if worker.bssid == bssid.upper()][0]
+            if worker:
+                return worker
+        except IndexError:
+            worker = WifiWorker(bssid)
+            self.config_worker(worker)
+            self.workers.append(worker)
+            worker.run()
+        finally:
+            return worker
+
+    def configure(self, config_file):
+        readConfig(config_file, self.config)
+
+        self.searchmap = self.config['SEARCHMAP']
+        self.blacklist = self.config['BLACKLIST']
+        self.DEBUG = self.config['DEBUG']
+        self._OUTDIR = self.config['OUTFILE_PATH']
+
+        [self.workers.append(WifiWorker(BSSID)) for BSSID in self.searchmap.keys()]
+        [self.config_worker(worker) for worker in self.workers]
+
+    def parse_signals(self, readlines):
+        """ loads Wifi signals from either iwlist or airport """
+
+        rules = {
+            "SSID"      : get_name,
+            "Quality"   : get_quality,
+            "Channel"   : get_channel,
+            "Frequency" : get_frequency,
+            "Encryption": get_encryption,
+            "BSSID"     : get_address,
+            "Signal"    : get_signal_level,
+            "Noise"     : get_noise_level,
+            "BitRates"  : get_bit_rates,
+            "Mode"      : get_mode,
+            "Last"      : get_timing,
+            "Vendor"    : get_vendor,
+        }
+
+        self.elapsed = datetime.now() - self.start_time
+
+        if platform.system() == 'Darwin':
+            self.parsed_signals = get_macos_parsed_cells(readlines)
+        else:
+            self.parsed_signals = get_parsed_cells(readlines, rules=rules)
+
+    def print_table(self, table):
+        ''' deprecated print table. Using the one in iw_parse (ln. 243)'''
+
+        justified_table = []
+
+        def make_line(line):
+            justified_line = []
+            [justified_line.append([j for j in el]) for i, el in enumerate(line)]
+            justified_table.append(justified_line)
+
+        [make_line(line) for line in table]
+        [print("\t".join(line[0])) for line in justified_table]
+
+    def print_signals(self, sgnls, columns):
+        table = [columns]
+
+        def print_signal(sgnl):
+            sgnl_properties = []
+
+            def make_cols(column):
+                try:
+                    # make boolean a str to print (needs 'width').
+                    if isinstance(sgnl[column], bool):
+                        sgnl_properties.append(str(sgnl[column]))
+                    else:
+                        sgnl_properties.append(sgnl[column])
+                except KeyError as e:
+                    print(f"KeyError getting column for {e}")
+
+            [make_cols(column) for column in columns]
+            table.append(sgnl_properties)
+
+        [print_signal(sgnl) for sgnl in sgnls]
+        print_table(table)
+
+    def get_location(self):
+        """ gets location from GPS endpoint"""
+        try:
+            resp = requests.get(self.config.get('GPS_ENDPOINT', 'http://gps.localhost:5004/position'))
+            GPS = json.loads(resp.text)
+            position = dict(GPS['GPS'])
+            self.latitude = position.get('LATITUDE', position.get('lat'))
+            self.longitude = position.get('LONGITUDE', position.get('lon'))
+        except Exception as e:
+            wifi_logger.warning(f"GPS Retrieval Error: {e}")
+
+    def makeSignalPoint(self, bssid, signal):
+        sgnlPt = SignalPoint(bssid, self.longitude, self.latitude, signal)
+        self.signal_cache[bssid].append(sgnlPt)
+
+        def manage_signal_cache(_bssid):
+            while len(self.signal_cache[_bssid]) >= self.config['SIGNAL_CACHE_MAX']:
+                self.signal_cache[_bssid].pop(0)
+
+        manage_signal_cache(bssid)
+
+        return sgnlPt
+
+    def compare_MFCC(self):
+        # TODO
+        pass
+
+    def analyze_periodicity(self):
+        # TODO
+        pass
+
+    def update_signal(self, sgnl, worker, fmt):
+        ''' update a signal with data from it's worker '''
+        sgnl['Vendor'] = worker.vendor
+        sgnl['Channel'] = worker.channel
+        sgnl['Frequency'] = worker.frequency
+        sgnl['Quality'] = worker.quality
+        sgnl['Encryption'] = worker.is_encrypted
+
+        sgnl['created'] = format_time(worker.stats.get('created', datetime.now()), fmt)  # TODO created can fail on ghosts.
+        sgnl['updated'] = format_time(worker.stats['updated'], fmt)
+        sgnl['elapsed'] = format_time(datetime.strptime(str(worker.stats['elapsed']), "%H:%M:%S.%f"), fmt)
+
+        sgnl['is_mute'] = worker.is_mute
+        sgnl['tracked'] = worker.tracked
+
+        sgnl['signal_cache'] = [json.dumps(sgnl.get()) for sgnl in self.signal_cache.get(worker.bssid)]
+        sgnl['results'] = str(worker.stats.get('results', [result for result in worker.test_results]))
+
+    def get_parsed_signals(self):
+        ''' updates and returns ALL signals '''
+        fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
+        [self.update_signal(sgnl, self.get_worker(sgnl['BSSID']), fmt) for sgnl in self.parsed_signals]
+
+        return self.parsed_signals
+
+    def get_tracked_signals(self):
+        ''' update and return ONLY tracked signals '''
+        fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
+        o = []
+
+        def update(bssid):
+            worker = self.get_worker(bssid)
+            sgnl = {'BSSID': bssid, 'SSID': worker.ssid}
+            self.update_signal(sgnl, worker, fmt)
+            o.append(sgnl)
+
+        [update(bssid) for bssid in [sgnl for sgnl in self.tracked_signals if self.get_worker(sgnl).tracked is True]]
+        return o
+
+    def get_missing_signals(self):
+        ''' tracked signals MISSING from parsed_signals; 'greyed' out... '''
+
+        parsed = frozenset([key['BSSID'] for key in self.get_parsed_signals()])
+        tracked = frozenset([key['BSSID'] for key in self.get_tracked_signals()])
+        fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
+        o = []
+
+        def update(bssid):
+            worker = self.get_worker(bssid)
+            sgnl = {'BSSID': bssid, 'SSID': worker.ssid}
+            self.update_signal(sgnl, worker, fmt)
+            o.append(sgnl)
+
+        [update(str(item)) for item in tracked.difference(parsed)]
+        return o
+
+    def stop(self):
+        write_trackedJSON(self.config, self.tracked_signals)
+        self.parsed_signals.clear()  # ensure no data is available
+        wifi_stopped.send(self)
+        wifi_logger.info(f"[{__name__}]: WifiScanner stopped. {self.polling_count} iterations.")
+
+    @contextmanager
+    def run(self):
+
+        self.start_time = datetime.now()
+        # self.stats =  {}
+        wifi_started.send(self)
+
+        while True:
+
+            scanned = ""
+
+            if platform.system() == 'Linux':
+                scanned = self.scan_wifi()
+            if platform.system() == 'Darwin':
+                scanned = scan_macos_wifi()
+
+            if len(scanned) > 0:
+                self.parse_signals(scanned)
+
+                self.get_location()
+
+                def blacklist(sgnl):
+                    if sgnl['BSSID'] in self.blacklist.keys():
+                        try:
+                            self.parsed_signals.remove(sgnl)
+                        except Exception as e:
+                            pass
+
+                [blacklist(sgnl) for sgnl in self.parsed_signals.copy()]
+
+                self.parsed_signals.sort(key=lambda el: el[self.sort_order], reverse=self.reverse)
+
+                try:
+                    self.print_signals(self.parsed_signals, list(self.parsed_signals[0].keys()))
+                except IndexError: pass
+
+                [worker.run() for worker in self.workers]
+
+                self.polling_count += 1
+                wifi_updated.send(self)
+                time.sleep(self.config.get('SCAN_TIMEOUT', 5))
+            else:
+                wifi_failed.send(self)
+                print(f"no signals.{self.polling_count}")

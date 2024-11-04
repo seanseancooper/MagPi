@@ -1,0 +1,60 @@
+{
+	"ARX": [{
+			"DEBUG": false
+		},
+		{
+			"SERVER_NAME": "localhost:5001"
+		},
+		{
+			"TEMPLATE_FOLDER": "templates"
+		},
+		{
+			"STATIC_FOLDER": "static"
+		},
+		{
+			"INPUT_DEVICE": 0
+		},
+		{
+			"OUTPUT_DEVICE": 1
+		},
+		{
+			"SR": 44100
+		},
+		{
+			"CHANNELS": 2
+		},
+		{
+			"BLOCKSIZE": 1000
+		},
+		{
+			"DTYPE": "float32"
+		},
+		{
+			"LATENCY": 0.1
+		},
+		{
+			"OUTFILE_NAME": "arx_audio"
+		},
+		{
+			"OUTFILE_EXTENSION": ".wav"
+		},
+		{
+			"OUTFILE_PATH": "../../_out"
+		},
+		{
+			"DATETIME_FORMAT": "%Y%m%d_%H%M%S"
+		},
+		{
+			"DATE_FORMAT": "%Y%m%d"
+		},
+		{
+			"TIME_FORMAT": "%H%M%S"
+		}
+	]
+}
+
+
+
+
+
+
