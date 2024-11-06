@@ -147,7 +147,7 @@ geolocation.on('change', function (evt) {
     xhttp.onload = function(){
         const resp = xhttp.response;
         let json = JSON.parse(resp);
-        const hdweCoords = fromLonLat([json['GPS']['lon'], json['GPS']['lat']]);
+        var hdweCoords = [json['GPS']['lon'], json['GPS']['lat']]
         animate(hdweCoords);
         update(hdweCoords);
     };
@@ -217,7 +217,7 @@ const displayFeatureInfo = function (pixel, target) {
     info.style.top = pixel[1] - 80 + 'px';
     if (feature !== currentFeature) {
       info.style.visibility = 'visible';
-      info.innerText = feature.get('SSID'.toUpperCase())+ "\n" + feature.get('BSSID') + " [" + feature.get('STRENGTH') + "]";
+      info.innerText = feature.get('LINE0'.toUpperCase()) + feature.get('LINE1') + feature.get('LINE2');
     }
   } else {
     info.style.visibility = 'hidden';
@@ -258,9 +258,9 @@ function addCircle(coordinate, signal_color, strength, cell) {
     circleFeature.setStyle(getCircleStyle(signal_color, strength)); // strength is stroke
 
     // circleFeature.setId();
-    circleFeature.set('SSID', cell.SSID, true);
-    circleFeature.set('BSSID', cell.BSSID, true);
-    circleFeature.set('STRENGTH', parseInt(strength), true);
+    circleFeature.set('LINE0', cell.SSID  + '\n', true);
+    circleFeature.set('LINE1', cell.BSSID  + '\n', true);
+    circleFeature.set('LINE2', "[" + parseInt(strength) + "]", true);
 
     source.addFeature(circleFeature);
     return circleFeature;
@@ -279,11 +279,9 @@ function getPointStyle(signal_color) {
     return pointstyle;
 }
 
-function addPoint(id, coordinate, signal_color, cell) {
+function addPoint(id, coordinate, signal_color, strength, cell) {
 
     var source = v_layer.getSource();
-    var featuresList = document.getElementById("featuresList");
-    featuresList.innerHTML = "Features: " + source.getFeatures().length;
 
     const pointFeature = new Feature({
       geometry: new Circle(coordinate, 1), // lat, lng coordinate indicator
@@ -291,8 +289,9 @@ function addPoint(id, coordinate, signal_color, cell) {
 
     pointFeature.setStyle(getPointStyle(signal_color));
     pointFeature.setId(id);  // UNIQUE.
-    pointFeature.set('SSID', cell.SSID, true);
-    pointFeature.set('BSSID', cell.BSSID, true);
+    pointFeature.set('LINE0', cell.SSID + '\n', true);
+    pointFeature.set('LINE1', coordinate + '\n', true);
+    pointFeature.set('LINE2', parseInt(strength), true);
     source.addFeature(pointFeature);
     return pointFeature;
 }
@@ -301,8 +300,8 @@ function createCircle(coordinate, signal_color, strength, cell) {
     addCircle(coordinate, signal_color, strength, cell);
 }
 
-function createPoint(id, coordinate, signal_color, cell) {
-    addPoint(id, coordinate, signal_color, cell);
+function createPoint(id, coordinate, signal_color, strength, cell) {
+    addPoint(id, coordinate, signal_color, strength, cell);
 }
 
 const map = new Map({
@@ -375,6 +374,8 @@ new VectorLayer({
 
 function animate(coordinate) {
 
+    const hdweCoords = fromLonLat(coordinate);
+
     var xhttp = new XMLHttpRequest();
     let URL = "http://wifi.localhost:5006/tracked";
     xhttp.open("GET", URL, true);
@@ -405,22 +406,21 @@ function animate(coordinate) {
 
                     for (const s of cell.signal_cache) {
 
-                        const sgnlPt = JSON.parse(s);
-                        var id = sgnlPt.id;
-                        var pointCoords = fromLonLat([sgnlPt.lon, sgnlPt.lat]);
-                        var pointStrength = parseInt(sgnlPt.sgnl);
+                        const sgnl = JSON.parse(s);
+                        var sgnlPt = fromLonLat([sgnl.lon, sgnl.lat]);
+                        var sgnlStrength = parseInt(sgnl.sgnl);
 
                         // pass current strength as the alpha channel
-                        var c_signal_color = 'rgba(' + _color + ',' + parseFloat( ((pointStrength + 100)/100).toFixed(2) ) + ')';
+                        var c_signal_color = 'rgba(' + _color + ',' + parseFloat( ((sgnlStrength + 100)/100).toFixed(2) ) + ')';
                         var p_signal_color = 'rgba(' + _color + ', 1.0)';
 
-                        console.log("SIGNALPOINT:[" +id + "]" + cell.BSSID + "c_signal_color:" + c_signal_color + " sgnlPt.lon:" + sgnlPt.lon + " sgnlPt.lat:" +  sgnlPt.lat + " sgnlPt.sgnl:" +  pointStrength );
+                        console.log("SIGNALPOINT:[" + sgnl.id + "]" + cell.BSSID + "c_signal_color:" + c_signal_color + " sgnl.lon:" + sgnl.lon + " sgnl.lat:" +  sgnl.lat + " sgnl.sgnl:" +  sgnlStrength );
 
                         // ...lay a circle shaded to indicate signal, and pass strength as the diameter.
-                        createCircle(pointCoords, c_signal_color, pointStrength, cell);
+                        createCircle(sgnlPt, c_signal_color, sgnlStrength, cell);
 
-                        // ...put a point colored to indicate signal
-                        createPoint(id, pointCoords, p_signal_color, cell);
+                        // ...a point colored to indicate signal
+                        createPoint(sgnl.id, sgnlPt, p_signal_color, sgnlStrength, cell);
                    }
                 }
             });
@@ -433,7 +433,17 @@ function animate(coordinate) {
     xhttp.send();
 };
 
-function update(hdweCoords) {
-    positionFeature.setGeometry(new Point(hdweCoords));
-    view.setCenter(hdweCoords);
+function update(coordinate) {
+
+    var source = v_layer.getSource();
+    var featuresList = document.getElementById("featuresList");
+    featuresList.innerHTML = "Features: " + source.getFeatures().length;
+
+    positionFeature.setGeometry(new Point(fromLonLat(coordinate)));
+
+    positionFeature.set('LINE0', 'ORIGIN'  + '\n', true);
+    positionFeature.set('LINE1', coordinate[0] + ", " + coordinate[1]   + '\n', true);
+    positionFeature.set('LINE2', '', true);
+
+    view.setCenter(fromLonLat(coordinate));
 };
