@@ -31,13 +31,6 @@ class GPSController(threading.Thread):
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
 
-            import os
-            home = os.getcwd()
-
-            os.chdir('static/mapping-app/')
-            __init__.node.run()
-
-            os.chdir(home)
             __init__.gpsRet.run()
         except KeyboardInterrupt:
             pass
