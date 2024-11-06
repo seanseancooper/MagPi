@@ -1,0 +1,42 @@
+{
+	"MAP": [{
+			"DEBUG": false
+		},
+		{
+			"BUILD": true
+		},
+		{
+			"SERVER_NAME": "localhost:5005"
+		},
+		{
+			"MAP_HOST": "localhost:5173"
+		},
+		{
+			"MAP_TEMPLATE": "map.html.j2"
+		},
+		{
+			"TEMPLATE_FOLDER": "src"
+		},
+		{
+			"STATIC_FOLDER": "/static"
+		},
+		{
+			"NODE_START_COMMAND": ["/usr/local/bin/npm", "start"]
+		},
+		{
+			"NODE_BUILD_COMMAND": ["/usr/local/bin/npm", "run", "build"]
+		},
+		{
+			"NODE_STOP_COMMAND": ["kill", "-9"]
+		},
+		{
+			"DATE_FORMAT": "%Y-%m-%d"
+		},
+		{
+			"TIME_FORMAT": "%H:%M:%S.%f"
+		},
+		{
+			"DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S"
+		}
+	]
+}
