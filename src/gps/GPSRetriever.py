@@ -124,11 +124,12 @@ class GPSRetriever(threading.Thread):
     def DummyGPSRetriever(self, *, c, **retriever_args):
 
         import json
-        lines = [json.loads(line.strip()) for line in open(self.config['TEST_FILE'], 'r')]
+        lines = [line.replace('LATITUDE', 'lat').replace('LONGITUDE', 'lon').strip() for line in open(self.config['TEST_FILE'], 'r')]
+        lines = [json.loads(line) for line in lines]
 
         while True:
             # {'GPS': {'LATITUDE': 39.916828, 'LONGITUDE': -105.068689}, 'time': '2024-10-31 20:58:22'}
-            for i in range(len(lines) -1):
+            for i in range(len(lines) - 1):
                 self.result = lines[i]
                 self.result['time'] = datetime.now().__format__("%Y-%m-%d %H:%M:%S")
                 # print(f'{self.result}')
@@ -152,10 +153,13 @@ class GPSRetriever(threading.Thread):
                 self.tx_result()
 
     def gps_time(self):
-        return str(self.time)
+        return str(self.time) # needs a format
 
     def gps_position(self):
         return self.result
+
+    def gps_location(self):
+        return str(self.lat, self.lon)
 
     def gps_altitude(self):
         return str(self.altitude)
