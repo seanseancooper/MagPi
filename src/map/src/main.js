@@ -147,7 +147,7 @@ geolocation.on('change', function (evt) {
     xhttp.onload = function(){
         const resp = xhttp.response;
         let json = JSON.parse(resp);
-        const hdweCoords = fromLonLat([json['GPS']['LONGITUDE'], json['GPS']['LATITUDE']]);
+        const hdweCoords = fromLonLat([json['GPS']['lon'], json['GPS']['lat']]);
         animate(hdweCoords);
         update(hdweCoords);
     };
@@ -217,7 +217,7 @@ const displayFeatureInfo = function (pixel, target) {
     info.style.top = pixel[1] - 80 + 'px';
     if (feature !== currentFeature) {
       info.style.visibility = 'visible';
-      info.innerText = feature.get('LINE1'.toUpperCase())+ "\n" + feature.get('LINE2') + " " + feature.get('LINE3');
+      info.innerText = feature.get('SSID'.toUpperCase())+ "\n" + feature.get('BSSID') + " [" + feature.get('STRENGTH') + "]";
     }
   } else {
     info.style.visibility = 'hidden';
@@ -257,11 +257,13 @@ function addCircle(coordinate, signal_color, strength, cell) {
     });
     circleFeature.setStyle(getCircleStyle(signal_color, strength)); // strength is stroke
 
-    circleFeature.set('LINE1', "SSID: " + cell.SSID, true);
-    circleFeature.set('LINE2', "BSSID: " + cell.BSSID, true);
-    circleFeature.set('LINE3', "["+parseInt(strength)+" db]", true);
+    // circleFeature.setId();
+    circleFeature.set('SSID', cell.SSID, true);
+    circleFeature.set('BSSID', cell.BSSID, true);
+    circleFeature.set('STRENGTH', parseInt(strength), true);
 
     source.addFeature(circleFeature);
+    return circleFeature;
 }
 
 function getPointStyle(signal_color) {
@@ -277,30 +279,30 @@ function getPointStyle(signal_color) {
     return pointstyle;
 }
 
-function addPoint(id, coordinate, signal_color, strength, cell) {
+function addPoint(id, coordinate, signal_color, cell) {
 
     var source = v_layer.getSource();
     var featuresList = document.getElementById("featuresList");
     featuresList.innerHTML = "Features: " + source.getFeatures().length;
 
     const pointFeature = new Feature({
-      geometry: new Circle(coordinate, 1), // lat, lon coordinate indicator
+      geometry: new Circle(coordinate, 1), // lat, lng coordinate indicator
     });
 
     pointFeature.setStyle(getPointStyle(signal_color));
     pointFeature.setId(id);  // UNIQUE.
-    pointFeature.set('LINE1', "SSID :" + cell.SSID, true);
-    pointFeature.set('LINE2', "BSSID :" + cell.BSSID, true); // or created? updated?
-    pointFeature.set('LINE3', "["+parseInt(strength)+" db]", true);
+    pointFeature.set('SSID', cell.SSID, true);
+    pointFeature.set('BSSID', cell.BSSID, true);
     source.addFeature(pointFeature);
+    return pointFeature;
 }
 
 function createCircle(coordinate, signal_color, strength, cell) {
     addCircle(coordinate, signal_color, strength, cell);
 }
 
-function createPoint(id, coordinate, signal_color, strength, cell) {
-    addPoint(id, coordinate, signal_color, strength, cell);
+function createPoint(id, coordinate, signal_color, cell) {
+    addPoint(id, coordinate, signal_color, cell);
 }
 
 const map = new Map({
@@ -412,13 +414,13 @@ function animate(coordinate) {
                         var c_signal_color = 'rgba(' + _color + ',' + parseFloat( ((pointStrength + 100)/100).toFixed(2) ) + ')';
                         var p_signal_color = 'rgba(' + _color + ', 1.0)';
 
-                        console.log("SIGNALPOINT:[" +id + "] " + cell.BSSID + " c_signal_color:" + c_signal_color + " sgnlPt.lon:" + sgnlPt.lon + " sgnlPt.lat:" +  sgnlPt.lat + " sgnlPt.sgnl:" +  pointStrength );
+                        console.log("SIGNALPOINT:[" +id + "]" + cell.BSSID + "c_signal_color:" + c_signal_color + " sgnlPt.lon:" + sgnlPt.lon + " sgnlPt.lat:" +  sgnlPt.lat + " sgnlPt.sgnl:" +  pointStrength );
 
                         // ...lay a circle shaded to indicate signal, and pass strength as the diameter.
                         createCircle(pointCoords, c_signal_color, pointStrength, cell);
 
                         // ...put a point colored to indicate signal
-                        createPoint(id, pointCoords, p_signal_color, pointStrength, cell);
+                        createPoint(id, pointCoords, p_signal_color, cell);
                    }
                 }
             });
@@ -433,8 +435,5 @@ function animate(coordinate) {
 
 function update(hdweCoords) {
     positionFeature.setGeometry(new Point(hdweCoords));
-    positionFeature.set('LINE1', toStringHDMS(hdweCoords), true);
-    positionFeature.set('LINE2', '', true);
-    positionFeature.set('LINE3', '', true);
     view.setCenter(hdweCoords);
 };

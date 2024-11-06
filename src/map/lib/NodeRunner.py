@@ -1,13 +1,11 @@
-from src.config import CONFIG_PATH
-
 import os
 import subprocess
 import threading
 
 import logging
-from src.config import readConfig
+from src.config import CONFIG_PATH, readConfig
 
-gps_logger = logging.getLogger('gps_logger')
+map_logger = logging.getLogger('gps_logger')
 
 
 class NodeRunner(threading.Thread):
@@ -26,7 +24,7 @@ class NodeRunner(threading.Thread):
 
     def runOSCommand(self, command: list):
         try:
-            gps_logger.info(f"[{__name__}]: running {command[3].upper()} \"{command[2]}\"")
+            map_logger.info(f"[{__name__}]: running {command[3].upper()} \"{command[2]}\"")
         except Exception as e:
             pass  # missing element, etc. don't care
 
@@ -55,19 +53,28 @@ class NodeRunner(threading.Thread):
             # os.execvpe(command[0], command[1:], os.environ)
 
             ps = subprocess.Popen(command)
-            gps_logger.debug(f"[{__name__}]: PID --> {ps.pid}")
+            map_logger.debug(f"[{__name__}]: PID --> {ps.pid}")
             return ps.pid
         except OSError as e:
-            gps_logger.error(f"[{__name__}]:couldn't create a process for \'{command}\': {e}")
+            map_logger.error(f"[{__name__}]:couldn't create a process for \'{command}\': {e}")
         return 0
 
     def node_stop(self):
         command = self.config['NODE_STOP_COMMAND'].append(str(self.pid))
 
         if self.runOSCommand(command) > 0:
-            gps_logger.info(f"[{__name__}]: OK")
+            map_logger.info(f"[{__name__}]: OK")
         else:
-            gps_logger.error(f"[{__name__}]: FAIL! Verify NODE_STOP_COMMAND: {self.config['NODE_STOP_COMMAND']} "
+            map_logger.error(f"[{__name__}]: FAIL! Verify NODE_STOP_COMMAND: {self.config['NODE_STOP_COMMAND']} "
+                             f" is correctly formed.")
+
+    def node_build(self):
+        command = self.config['NODE_BUILD_COMMAND'].append(str(self.pid))
+
+        if self.runOSCommand(command) > 0:
+            map_logger.info(f"[{__name__}]: OK")
+        else:
+            map_logger.error(f"[{__name__}]: FAIL! Verify NODE_BUILD_COMMAND: {self.config['NODE_BUILD_COMMAND']} "
                              f" is correctly formed.")
 
     def run(self):
@@ -75,9 +82,9 @@ class NodeRunner(threading.Thread):
         self.pid = self.runOSCommand(self.config['NODE_START_COMMAND'])
         if self.pid > 0:
             os.chdir(home)
-            gps_logger.info(f"[{__name__}]: OK {self.pid}")
+            map_logger.info(f"[{__name__}]: OK {self.pid}")
         else:
-            gps_logger.error(f"[{__name__}]: FAIL! Verify NODE_START_COMMAND: {self.config['NODE_START_COMMAND']} "
+            map_logger.error(f"[{__name__}]: FAIL! Verify NODE_START_COMMAND: {self.config['NODE_START_COMMAND']} "
                              f"is correctly formed.")
 
 

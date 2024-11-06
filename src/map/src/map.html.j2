@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GPSMapper</title>
-    <link rel="stylesheet" href="{{ url_for('gps_bp.static', filename='css/gps.css') }}">
+    <link rel="stylesheet" href="{{ url_for('map_bp.static', filename='css/map.css') }}">
 </head>
 <body>
 <div>
     <!-- this embeds the mapping-app for this module/blueprint -->
-    <iframe src="http://localhost:5173/" allow="geolocation"></iframe>
+    <iframe width="709" height="444" src="http://localhost:5173/" allow="geolocation"></iframe>
 </div>
 </body>
 </html>
