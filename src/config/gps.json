@@ -12,16 +12,10 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
-			"NODE_START_COMMAND": ["/usr/local/bin/npm", "start"]
-		},
-		{
-			"NODE_STOP_COMMAND": ["kill", "-9"]
-		},
-		{
 			"TEST_FILE": "./lib/test_file.txt"
 		},
 		{
-			"RETRIEVER_METHOD": "JavaScriptGPSRetriever"
+			"RETRIEVER_METHOD": "DummyGPSRetriever"
 		},
 		{
 			"GPS_HOST": "10.99.77.1"
@@ -31,12 +25,6 @@
 		},
 		{
 			"GPS_CONNECT_TIMEOUT": 10
-		},
-		{
-			"MAP_HOST": "localhost:5173"
-		},
-		{
-			"MAP_TEMPLATE": "gps_map.html.j2"
 		},
 		{
 			"TOKENS": 4
