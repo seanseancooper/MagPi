@@ -7,10 +7,6 @@ from src.config import CONFIG_PATH
 gpsRet = GPSRetriever()
 gpsRet.configure(os.path.join(CONFIG_PATH, 'gps.json'))
 
-from src.gps.lib.NodeRunner import NodeRunner
-node = NodeRunner()
-node.configure(os.path.join(CONFIG_PATH, 'gps.json'))
-
 gps_bp = Blueprint(
         'gps_bp', __name__, subdomain='gps',
         template_folder=gpsRet.config['TEMPLATE_FOLDER'],
@@ -19,25 +15,12 @@ gps_bp = Blueprint(
 )
 
 
-@gps_bp.route('/')
+@gps_bp.route('/', subdomain="gps")
 def index():
-    return redirect("/map", code=302)
+    return redirect("/position", code=302)
 
 
-@gps_bp.route("/map", methods=['GET'])
-def gps_map():
-    return render_template(gpsRet.config['MAP_TEMPLATE'],
-                           lat=gpsRet.lat,
-                           lon=gpsRet.lon,
-                           time=gpsRet.time,
-                           heading=gpsRet.heading,
-                           speed=gpsRet.speed,
-                           altitude=gpsRet.altitude,
-                           climb=gpsRet.climb,
-                           )
-
-
-@gps_bp.route("/time", methods=['GET'])
+@gps_bp.route("/time", methods=['GET'], subdomain="gps")
 def gps_time():
     return gpsRet.gps_time()
 
@@ -45,6 +28,11 @@ def gps_time():
 @gps_bp.route("/position", methods=['GET'], subdomain="gps")
 def gps_position():
     return gpsRet.gps_position()
+
+
+@gps_bp.route("/location", methods=['GET'], subdomain="gps")
+def gps_location():
+    return gpsRet.gps_location()
 
 
 @gps_bp.route("/altitude", methods=['GET'], subdomain="gps")
