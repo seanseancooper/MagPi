@@ -309,6 +309,18 @@
         },
     });
 
+    function colorBSSID(data){
+           var parts = data.BSSID.split(':');
+           var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
+           var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
+           var B = (parseInt(parts[4], 16) + parseInt(parts[5], 16)) % 255;
+           return [R,G,B];
+    };
+
+    function colorAvg([R,G,B]){
+           let avg = R+G+B/3;
+           return (avg > 128)? "00,00,00": "255,255,255";
+    };
 
     var table = new Tabulator("#wifi_scanner", {
         ajaxURL:"{{ url_for('wifi_bp.wifi_scan') }}",   // request URI
@@ -338,19 +350,15 @@
             {field:"tracked", width:102, formatter: function(cell, formatterParams) {
                 const data = cell.getRow().getData();
 
-                let _color = (function(){
-                       var parts = data.BSSID.split(':');
-                       var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
-                       var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
-                       var B = (parseInt(parts[4], 16) + parseInt(parts[5], 16)) % 255;
-                       return R.toString(16)+G.toString(16)+B.toString(16)
-                })(data.BSSID);
+                var _color = colorBSSID(data);
+                var p_signal_color = 'rgba(' + _color + ', 1.0)';
+                var comp_color = 'rgba(' + colorAvg(_color) + ', 1.0)';
 
                 if (data.tracked == true) {
                     if (data.is_mute == false) {
-                        return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='background-color:#" + _color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE'>MUTE</button>";
+                        return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='color:" + comp_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE'>MUTE</button>";
                     } else {
-                        return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='background-color:#" + _color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE'>UNMUTE</button>";
+                        return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='color:" + comp_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE'>UNMUTE</button>";
                     }
                 } else {
                     return "<button id='wifi_add_button_" + data.BSSID + "' style='width:96px;' class='trk_btn add_button button' value='"+data.BSSID+"' data-action='ADD'>ADD</button>";
@@ -396,27 +404,16 @@
 
         columns:[
             {field:"tracked", width:102, formatter: function(cell, formatterParams) {
-                const data = cell.getRow().getData();
+                var data = cell.getRow().getData();
 
-                let _color = (function(){
-
-                       var parts = data.BSSID.split(':');
-                       var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
-                       var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
-                       var B = (parseInt(parts[4], 16) + parseInt(parts[5], 16)) % 255;
-                       console.log('BSSID: '  + data.BSSID)
-
-                       console.log("R:" + R.toString(16))
-                       console.log("G:" + G.toString(16))
-                       console.log("B:" + B.toString(16))
-
-                       return R.toString(16) + G.toString(16) + B.toString(16)
-                })(data.BSSID);
+                var _color = colorBSSID(data);
+                var p_signal_color = 'rgba(' + _color + ', 1.0)';
+                var comp_color = 'rgba(' + colorAvg(_color) + ', 1.0)';
 
                 if (data.is_mute == false) {
-                    return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='background-color:#" + _color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE'>MUTE</button>";
+                    return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='color:" + comp_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE'>MUTE</button>";
                 } else {
-                    return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='background-color:#" + _color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE'>UNMUTE</button>";
+                    return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='color:" + comp_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE'>UNMUTE</button>";
                 }
             }},
             {title:"SSID", field:"SSID", formatter:ssidFormatter, formatterParams:{

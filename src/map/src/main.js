@@ -247,17 +247,13 @@ function getCircleStyle(signal_color, strength) {
     return circlestyle;
 }
 
-function addCircle(coordinate, signal_color, strength, cell) {
-
-    var source = v_layer.getSource();
-    var diameter = (strength + 100)/10*10;
+function addCircle(source, coordinate, signal_color, strength, cell) {
 
     const circleFeature = new Feature({
-      geometry: new Circle(coordinate, diameter), // strength is diameter
+      geometry: new Circle(coordinate, (strength + 100)/10*10),
     });
-    circleFeature.setStyle(getCircleStyle(signal_color, strength)); // strength is stroke
+    circleFeature.setStyle(getCircleStyle(signal_color, strength));
 
-    // circleFeature.setId();
     circleFeature.set('LINE0', cell.SSID  + '\n', true);
     circleFeature.set('LINE1', cell.BSSID  + '\n', true);
     circleFeature.set('LINE2', "[" + parseInt(strength) + "]", true);
@@ -269,39 +265,38 @@ function addCircle(coordinate, signal_color, strength, cell) {
 function getPointStyle(signal_color) {
     var pointstyle = new Style({
           stroke: new Stroke({
-              color: 'rgba(0,0,0,1.0)', // stroke AROUND signal color
+              color: 'rgba(0,0,0,1.0)', // stroke AROUND color
               width: 1
           }),
           fill: new Fill({
-              color: signal_color       // the signal color
+              color: signal_color
           })
     });
     return pointstyle;
 }
 
-function addPoint(id, coordinate, signal_color, strength, cell) {
-
-    var source = v_layer.getSource();
+function addPoint(source, id, lonlat, signal_color, strength, cell) {
 
     const pointFeature = new Feature({
-      geometry: new Circle(coordinate, 1), // lat, lng coordinate indicator
+      geometry: new Circle(fromLonLat(lonlat), 1),
     });
 
     pointFeature.setStyle(getPointStyle(signal_color));
-    pointFeature.setId(id);  // UNIQUE.
+    pointFeature.setId(id);
     pointFeature.set('LINE0', cell.SSID + '\n', true);
-    pointFeature.set('LINE1', coordinate + '\n', true);
-    pointFeature.set('LINE2', parseInt(strength), true);
+    pointFeature.set('LINE1', lonlat[0] + ", " + lonlat[1] + '\n', true);
+    pointFeature.set('LINE2', "[" + parseInt(strength) + "]", true);
+
     source.addFeature(pointFeature);
-    return pointFeature;
+
 }
 
-function createCircle(coordinate, signal_color, strength, cell) {
-    addCircle(coordinate, signal_color, strength, cell);
+function createCircle(source, coordinate, signal_color, strength, cell) {
+    addCircle(source, coordinate, signal_color, strength, cell);
 }
 
-function createPoint(id, coordinate, signal_color, strength, cell) {
-    addPoint(id, coordinate, signal_color, strength, cell);
+function createPoint(source, id, coordinate, signal_color, strength, cell) {
+    addPoint(source, id, coordinate, signal_color, strength, cell);
 }
 
 const map = new Map({
@@ -389,8 +384,8 @@ function animate(coordinate) {
 
             var tracked_signals = JSON.parse(resp);
 
-            // clear the ENTIRE layer source
-            v_layer.getSource().clear();
+            var source = v_layer.getSource();
+            source.clear();
 
             tracked_signals.forEach(function(cell) {
 
@@ -407,20 +402,17 @@ function animate(coordinate) {
                     for (const s of cell.signal_cache) {
 
                         const sgnl = JSON.parse(s);
-                        var sgnlPt = fromLonLat([sgnl.lon, sgnl.lat]);
+                        var lonlat = fromLonLat([sgnl.lon, sgnl.lat]);
+                        var sgnlPt = [sgnl.lon, sgnl.lat];
                         var sgnlStrength = parseInt(sgnl.sgnl);
 
-                        // pass current strength as the alpha channel
                         var c_signal_color = 'rgba(' + _color + ',' + parseFloat( ((sgnlStrength + 100)/100).toFixed(2) ) + ')';
                         var p_signal_color = 'rgba(' + _color + ', 1.0)';
 
-                        console.log("SIGNALPOINT:[" + sgnl.id + "]" + cell.BSSID + "c_signal_color:" + c_signal_color + " sgnl.lon:" + sgnl.lon + " sgnl.lat:" +  sgnl.lat + " sgnl.sgnl:" +  sgnlStrength );
+                        console.log("SIGNALPOINT: [" + sgnl.id + "] " + cell.BSSID + " c_signal_color:" + c_signal_color + " sgnl.lon:" + sgnl.lon + " sgnl.lat:" +  sgnl.lat + " sgnl.sgnl:" +  sgnlStrength );
 
-                        // ...lay a circle shaded to indicate signal, and pass strength as the diameter.
-                        createCircle(sgnlPt, c_signal_color, sgnlStrength, cell);
-
-                        // ...a point colored to indicate signal
-                        createPoint(sgnl.id, sgnlPt, p_signal_color, sgnlStrength, cell);
+                        createCircle(source, lonlat, c_signal_color, sgnlStrength, cell);
+                        createPoint(source, sgnl.id, sgnlPt, p_signal_color, sgnlStrength, cell);
                    }
                 }
             });
