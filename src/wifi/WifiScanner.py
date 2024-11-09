@@ -1,5 +1,3 @@
-import platform
-import subprocess
 import threading
 import time
 import json
@@ -11,15 +9,8 @@ from contextlib import contextmanager
 
 from src.config.__init__ import readConfig
 
-# TODO: move 'overrides' to utils
-from src.wifi.lib.wifi_utils import get_timing, get_vendor, write_trackedJSON
-
-# TODO: import the correct versions of methods
-from src.wifi.lib.iw_parse import print_table, get_parsed_cells, get_name, get_quality, get_channel, get_frequency, \
-    get_encryption, get_address, get_signal_level, get_noise_level, get_bit_rates, get_mode
-
-# TODO: this airport thing...
-from src.wifi.lib.airport_parse import get_macos_parsed_cells, scan_macos_wifi
+from src.wifi.lib.wifi_utils import write_trackedJSON
+from src.wifi.lib.iw_parse import print_table
 
 from src.wifi.lib.SignalPoint import SignalPoint
 from src.wifi.WifiWorker import WifiWorker
@@ -35,6 +26,9 @@ wifi_stopped = wifi_signals.signal('WIFI STOP')
 logger_root = logging.getLogger('root')
 wifi_logger = logging.getLogger('wifi_logger')
 
+wifi_retrievers = {}
+
+
 def format_time(_, fmt):
     return f'{_.strftime(fmt)}'
 
@@ -45,11 +39,12 @@ class WifiScanner(threading.Thread):
         super().__init__()
 
         self.config = {}
-        self.interface = None
-        self.searchmap = {}
-        self.stats = {}                         # new
+        self.retriever = None
 
-        self.parsed_signals = []                # signals received by scanning
+        self.searchmap = {}
+        self.stats = {}                         # new, not yet used.
+
+        self.parsed_signals = []                # signals represented as a list of dictionaries.
         self.workers = []                       # units assigned to monitor a discrete signal
         self.tracked_signals = {}               # parsed_signals is a list, this is a map?!
         self.signal_cache = defaultdict(list)   # a mapping of lists of SignalPoint
@@ -69,18 +64,6 @@ class WifiScanner(threading.Thread):
         self._OUTFILE = None
         self._OUTDIR = None
         self.DEBUG = False
-
-    def scan_wifi(self):
-
-        try:
-            process = subprocess.Popen(['iwlist', self.config['INTERFACE'], 'scan'],
-                                       stdout=subprocess.PIPE,
-                                       stderr=subprocess.PIPE,
-                                       universal_newlines=True)
-            return process.stdout.readlines()
-
-        except Exception as e:
-            print(f"can't open iwlist process! {e}")
 
     def config_worker(self, worker):
         worker.scanner = self
@@ -102,9 +85,26 @@ class WifiScanner(threading.Thread):
         finally:
             return worker
 
+    def get_retriever(self, name):
+
+        try:
+            components = name.split('.')
+            mod = __import__(components[0])
+            for comp in components[1:]:
+                mod = getattr(mod, comp)
+            return mod
+        except AttributeError as e:
+            wifi_logger.fatal(f'no retriever found {e}')
+            exit(1)
+
     def configure(self, config_file):
         readConfig(config_file, self.config)
+        #  get the collectioon  of available plugins
 
+        #  select and configure retriever here
+        golden_retriever = self.get_retriever("retrievers." + self.config['RETRIEVER'])
+        self.retriever = golden_retriever()
+        self.retriever.configure(config_file)
         self.searchmap = self.config['SEARCHMAP']
         self.blacklist = self.config['BLACKLIST']
         self.DEBUG = self.config['DEBUG']
@@ -113,43 +113,18 @@ class WifiScanner(threading.Thread):
         [self.workers.append(WifiWorker(BSSID)) for BSSID in self.searchmap.keys()]
         [self.config_worker(worker) for worker in self.workers]
 
-    def parse_signals(self, readlines):
-        """ loads Wifi signals from either iwlist or airport """
-
-        rules = {
-            "SSID"      : get_name,
-            "Quality"   : get_quality,
-            "Channel"   : get_channel,
-            "Frequency" : get_frequency,
-            "Encryption": get_encryption,
-            "BSSID"     : get_address,
-            "Signal"    : get_signal_level,
-            "Noise"     : get_noise_level,
-            "BitRates"  : get_bit_rates,
-            "Mode"      : get_mode,
-            "Last"      : get_timing,
-            "Vendor"    : get_vendor,
-        }
-
-        self.elapsed = datetime.now() - self.start_time
-
-        if platform.system() == 'Darwin':
-            self.parsed_signals = get_macos_parsed_cells(readlines)
-        else:
-            self.parsed_signals = get_parsed_cells(readlines, rules=rules)
-
-    def print_table(self, table):
-        ''' deprecated print table. Using the one in iw_parse (ln. 243)'''
-
-        justified_table = []
-
-        def make_line(line):
-            justified_line = []
-            [justified_line.append([j for j in el]) for i, el in enumerate(line)]
-            justified_table.append(justified_line)
-
-        [make_line(line) for line in table]
-        [print("\t".join(line[0])) for line in justified_table]
+    # def print_table(self, table):
+    #     ''' deprecated print table. Using the one in iw_parse (ln. 243)'''
+    #
+    #     justified_table = []
+    #
+    #     def make_line(line):
+    #         justified_line = []
+    #         [justified_line.append([j for j in el]) for i, el in enumerate(line)]
+    #         justified_table.append(justified_line)
+    #
+    #     [make_line(line) for line in table]
+    #     [print("\t".join(line[0])) for line in justified_table]
 
     def print_signals(self, sgnls, columns):
         table = [columns]
@@ -197,11 +172,11 @@ class WifiScanner(threading.Thread):
         return sgnlPt
 
     def compare_MFCC(self):
-        # TODO
+        # TODO: just not here
         pass
 
     def analyze_periodicity(self):
-        # TODO
+        # TODO: just not here
         pass
 
     def update_signal(self, sgnl, worker, fmt):
@@ -212,9 +187,9 @@ class WifiScanner(threading.Thread):
         sgnl['Quality'] = worker.quality
         sgnl['Encryption'] = worker.is_encrypted
 
-        sgnl['created'] = format_time(worker.stats.get('created', datetime.now()), fmt)  # TODO created can fail on ghosts.
-        sgnl['updated'] = format_time(worker.stats['updated'], fmt)
-        sgnl['elapsed'] = format_time(datetime.strptime(str(worker.stats['elapsed']), "%H:%M:%S.%f"), fmt)
+        sgnl['created'] = format_time(worker.created, fmt)
+        sgnl['updated'] = format_time(worker.updated, fmt)
+        sgnl['elapsed'] = format_time(datetime.strptime(str(worker.elapsed), "%H:%M:%S.%f"), fmt)
 
         sgnl['is_mute'] = worker.is_mute
         sgnl['tracked'] = worker.tracked
@@ -222,12 +197,15 @@ class WifiScanner(threading.Thread):
         sgnl['signal_cache'] = [json.dumps(sgnl.get()) for sgnl in self.signal_cache.get(worker.bssid)]
         sgnl['results'] = str(worker.stats.get('results', [result for result in worker.test_results]))
 
-    def get_parsed_signals(self):
+    def get_parsed_signals(self): # rename me, easily confused w retriever impl
         ''' updates and returns ALL signals '''
         fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
         [self.update_signal(sgnl, self.get_worker(sgnl['BSSID']), fmt) for sgnl in self.parsed_signals]
 
         return self.parsed_signals
+
+    def parse_signals(self, readlines):
+        self.parsed_signals = self.retriever.get_parsed_cells(readlines)
 
     def get_tracked_signals(self):
         ''' update and return ONLY tracked signals '''
@@ -271,19 +249,15 @@ class WifiScanner(threading.Thread):
 
         self.start_time = datetime.now()
         # self.stats =  {}
+
         wifi_started.send(self)
 
         while True:
 
-            scanned = ""
-
-            if platform.system() == 'Linux':
-                scanned = self.scan_wifi()
-            if platform.system() == 'Darwin':
-                scanned = scan_macos_wifi()
+            scanned = self.retriever.scan_wifi()
 
             if len(scanned) > 0:
-                self.parse_signals(scanned)
+                self.parse_signals(scanned)  # now use the retriever method
 
                 self.get_location()
 

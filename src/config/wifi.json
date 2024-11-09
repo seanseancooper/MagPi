@@ -13,6 +13,9 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
+			"RETRIEVER": "MacOSAirportWifiRetriever"
+		},
+		{
 			"INTERFACE": "wlan0"
 		},
 		{
