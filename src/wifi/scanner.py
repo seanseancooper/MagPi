@@ -85,7 +85,8 @@ class WifiScanner(threading.Thread):
         finally:
             return worker
 
-    def get_retriever(self, name):
+    @staticmethod
+    def get_retriever(name):
 
         try:
             components = name.split('.')
@@ -182,7 +183,7 @@ class WifiScanner(threading.Thread):
         sgnl['signal_cache'] = [json.dumps(sgnl.get()) for sgnl in self.signal_cache.get(worker.bssid)]
         sgnl['results'] = str(worker.stats.get('results', [result for result in worker.test_results]))
 
-    def get_parsed_signals(self): # rename me, easily confused w retriever impl
+    def get_parsed_signals(self):  # rename me, easily confused w retriever impl (cells vs. signals)
         ''' updates and returns ALL signals '''
         self.elapsed = datetime.now() - self.start_time
         fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
@@ -191,6 +192,12 @@ class WifiScanner(threading.Thread):
         return self.parsed_signals
 
     def parse_signals(self, readlines):
+
+        # this returns a list of dicts [{key: value},...] that key is a 'column' name.
+        # So, this class needs to deal with conflicting columns names dynamically!!
+        # vis å vis multiple scan sources (wifi, and bluetoooth, and sdr, and etc..)
+        # Also note that this is only a single retriever dealing with wifi!
+
         self.parsed_signals = self.retriever.get_parsed_cells(readlines)
 
     def get_tracked_signals(self):
