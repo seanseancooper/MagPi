@@ -22,9 +22,9 @@ class WifiWorker:
         self.quality = ''
         self.is_encrypted = ''
 
-        self.created = None             # when signal was found
+        self.created = datetime.now()   # when signal was found
         self.updated = datetime.now()   # when signal was last reported
-        self.elapsed = None             # time signal has been tracked.
+        self.elapsed = datetime.now()   # time signal has been tracked.
 
         self.is_mute = False            # is BSSID muted
         self.tracked = False            # is BSSID in scanner.tracked_signals
