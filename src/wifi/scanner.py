@@ -99,9 +99,7 @@ class WifiScanner(threading.Thread):
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
-        #  get the collectioon  of available plugins
 
-        #  select and configure retriever here
         golden_retriever = self.get_retriever("retrievers." + self.config['RETRIEVER'])
         self.retriever = golden_retriever()
         self.retriever.configure(config_file)
@@ -186,6 +184,7 @@ class WifiScanner(threading.Thread):
 
     def get_parsed_signals(self): # rename me, easily confused w retriever impl
         ''' updates and returns ALL signals '''
+        self.elapsed = datetime.now() - self.start_time
         fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
         [self.update_signal(sgnl, self.get_worker(sgnl['BSSID']), fmt) for sgnl in self.parsed_signals]
 
@@ -244,8 +243,7 @@ class WifiScanner(threading.Thread):
             scanned = self.retriever.scan_wifi()
 
             if len(scanned) > 0:
-                self.parse_signals(scanned)  # now use the retriever method
-
+                self.parse_signals(scanned)
                 self.get_location()
 
                 def blacklist(sgnl):
