@@ -113,19 +113,6 @@ class WifiScanner(threading.Thread):
         [self.workers.append(WifiWorker(BSSID)) for BSSID in self.searchmap.keys()]
         [self.config_worker(worker) for worker in self.workers]
 
-    # def print_table(self, table):
-    #     ''' deprecated print table. Using the one in iw_parse (ln. 243)'''
-    #
-    #     justified_table = []
-    #
-    #     def make_line(line):
-    #         justified_line = []
-    #         [justified_line.append([j for j in el]) for i, el in enumerate(line)]
-    #         justified_table.append(justified_line)
-    #
-    #     [make_line(line) for line in table]
-    #     [print("\t".join(line[0])) for line in justified_table]
-
     def print_signals(self, sgnls, columns):
         table = [columns]
 

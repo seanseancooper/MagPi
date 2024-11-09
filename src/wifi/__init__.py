@@ -1,7 +1,7 @@
 import os
 from flask import Blueprint, render_template, redirect, jsonify
 
-from src.wifi.WifiScanner import WifiScanner
+from src.wifi.scanner import WifiScanner
 from src.config import CONFIG_PATH
 
 scanner = WifiScanner()
