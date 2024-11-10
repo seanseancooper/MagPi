@@ -1,0 +1,60 @@
+{
+	"TRX": [{
+			"DEBUG": false
+		},
+		{
+			"SERVER_NAME": "localhost:5009"
+		},
+		{
+			"TEMPLATE_FOLDER": "templates"
+		},
+		{
+			"STATIC_FOLDER": "static"
+		},
+		{
+			"TEST_FILE": "/Users/scooper/PycharmProjects/MagPi/src/trx/TRX1-20241107.csv"
+		},
+		{
+			"TEST_FILE_TIME_MAX": 2
+		},
+		{
+			"DEVICE": "/dev/cu.URT1"
+		},
+		{
+			"RATE": 115200
+		},
+		{
+			"PARITY": "serial.PARITY_NONE"
+		},
+		{
+			"STOPBITS": "serial.STOPBITS_ONE"
+		},
+		{
+			"BYTESIZE": "serial.EIGHTBITS"
+		},
+		{
+			"OUTFILE_NAME": "trx_out"
+		},
+		{
+			"OUTFILE_EXTENSION": ".wav"
+		},
+		{
+			"OUTFILE_PATH": "../../_out"
+		},
+		{
+			"DATETIME_FORMAT": "%Y%m%d_%H%M%S"
+		},
+		{
+			"DATE_FORMAT": "%m/%d/%Y"
+		},
+		{
+			"TIME_FORMAT": "%H:%M:%S"
+		}
+	]
+}
+
+
+
+
+
+
