@@ -41,7 +41,6 @@ class MAPController(threading.Thread):
 
             while True:  # perhaps log requests?
                 time.sleep(1)
-                pass
 
         except KeyboardInterrupt:
             pass
