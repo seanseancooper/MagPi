@@ -225,7 +225,23 @@ const displayFeatureInfo = function (pixel, target) {
   currentFeature = feature;
 };
 
+function getPointStyle(signal_color) {
+    // ANY signal: origin point
+    var pointstyle = new Style({
+          stroke: new Stroke({
+              color: 'rgba(0,0,0,1.0)',
+              width: 1
+          }),
+          fill: new Fill({
+              color: signal_color
+          })
+    });
+    return pointstyle;
+}
+
+
 function getCircleStyle(signal_color, strength) {
+    // Wifi Signals
     var circlestyle = new Style({
           stroke: new Stroke({
               color: signal_color,
@@ -236,13 +252,29 @@ function getCircleStyle(signal_color, strength) {
           })
     });
 
-    /* alternate style option
+    return circlestyle;
+}
+
+function getAltCircleStyle(signal_color, strength) {
+    // ? signals
     var circlestyle = new Style({
           stroke: new Stroke({
               color: signal_color,
               width: (strength + 100)/10*10 // stroke width is strength
           })
-    });*/
+    });
+
+    return circlestyle;
+}
+
+function getConcentricStyle(signal_color) {
+    // TRX signals
+    var circlestyle = new Style({
+          stroke: new Stroke({
+              color: signal_color,
+              width: 2
+          }),
+    });
 
     return circlestyle;
 }
@@ -252,6 +284,7 @@ function addCircle(source, coordinate, signal_color, strength, cell) {
     const circleFeature = new Feature({
       geometry: new Circle(coordinate, (strength + 100)/10*10),
     });
+
     circleFeature.setStyle(getCircleStyle(signal_color, strength));
 
     circleFeature.set('LINE0', cell.SSID  + '\n', true);
@@ -260,19 +293,6 @@ function addCircle(source, coordinate, signal_color, strength, cell) {
 
     source.addFeature(circleFeature);
     return circleFeature;
-}
-
-function getPointStyle(signal_color) {
-    var pointstyle = new Style({
-          stroke: new Stroke({
-              color: 'rgba(0,0,0,1.0)', // stroke AROUND color
-              width: 1
-          }),
-          fill: new Fill({
-              color: signal_color
-          })
-    });
-    return pointstyle;
 }
 
 function addPoint(source, id, lonlat, signal_color, strength, cell) {
@@ -289,6 +309,25 @@ function addPoint(source, id, lonlat, signal_color, strength, cell) {
 
     source.addFeature(pointFeature);
 
+}
+
+function createConcentric(source, coordinate, circles, signal_color, strength, cell) {
+
+    for (var total = 0; total < circles; total = total+1) {
+        // var diameter = (circles-total) * (strength + 100)/10*10;
+
+        const concentricFeature = new Feature({
+          geometry: new Circle(coordinate, (circles-total) * (strength + 100)/10*10),
+        });
+
+        concentricFeature.setStyle(getConcentricStyle(signal_color));
+
+        concentricFeature.set('LINE0', cell.SSID  + '\n', true);
+        concentricFeature.set('LINE1', cell.BSSID  + '\n', true);
+        concentricFeature.set('LINE2', "[" + parseInt(strength) + "]", true);
+
+        source.addFeature(concentricFeature);
+    }
 }
 
 function createCircle(source, coordinate, signal_color, strength, cell) {
@@ -411,8 +450,11 @@ function animate(coordinate) {
 
                         console.log("SIGNALPOINT: [" + sgnl.id + "] " + cell.BSSID + " c_signal_color:" + c_signal_color + " sgnl.lon:" + sgnl.lon + " sgnl.lat:" +  sgnl.lat + " sgnl.sgnl:" +  sgnlStrength );
 
-                        createCircle(source, lonlat, c_signal_color, sgnlStrength, cell);
+                        // choose the feature based on signal type and
+                        // pass one call SignalPoint(source, id, point, p_signal_color, style, c_signal_color, strength, cell)
                         createPoint(source, sgnl.id, sgnlPt, p_signal_color, sgnlStrength, cell);
+                        createCircle(source, lonlat, c_signal_color, sgnlStrength, cell);
+                        createConcentric(source, lonlat, 10, c_signal_color, sgnlStrength, cell);
                    }
                 }
             });
