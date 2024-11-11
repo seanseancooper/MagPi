@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, redirect, render_template
+from flask import Blueprint, redirect, json
 
 from src.trx.TRXRetriever import TRXRetriever
 from src.config import CONFIG_PATH
@@ -22,7 +22,7 @@ def index():
 
 @trx_bp.route("/scan", methods=['GET'], subdomain="trx")
 def trx_scan():
-    import json
-    return trxRet.run()
+    signals = trxRet.out
+    return [json.dumps(signals)]
 
 
