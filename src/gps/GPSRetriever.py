@@ -128,11 +128,9 @@ class GPSRetriever(threading.Thread):
         lines = [json.loads(line) for line in lines]
 
         while True:
-            # {'GPS': {'LATITUDE': 39.916828, 'LONGITUDE': -105.068689}, 'time': '2024-10-31 20:58:22'}
             for i in range(len(lines) - 1):
                 self.result = lines[i]
                 self.result['time'] = datetime.now().__format__("%Y-%m-%d %H:%M:%S")
-                # print(f'{self.result}')
                 self.tx_result()
                 time.sleep(1)
 
@@ -145,7 +143,7 @@ class GPSRetriever(threading.Thread):
                         if not result:
                             break
                         self.result = result
-                        # print(f'{self.result}')
+
             except Exception as e:
                 gps_logger.error(f"JavaScriptGPSRetriever: {e}")  # unable to connect to Blackview
                 self.gone_offline()

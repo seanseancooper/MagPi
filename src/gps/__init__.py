@@ -22,16 +22,19 @@ def index():
 
 @gps_bp.route("/time", methods=['GET'], subdomain="gps")
 def gps_time():
+    """ return unformatted time [2024-11-10 23:43:3] """
     return gpsRet.gps_time()
 
 
 @gps_bp.route("/position", methods=['GET'], subdomain="gps")
 def gps_position():
+    """  return entire result """
     return gpsRet.gps_position()
 
-
+#TODO: all these below return a string. hmmmmm?
 @gps_bp.route("/location", methods=['GET'], subdomain="gps")
 def gps_location():
+    """ return lat, lon """
     return gpsRet.gps_location()
 
 
