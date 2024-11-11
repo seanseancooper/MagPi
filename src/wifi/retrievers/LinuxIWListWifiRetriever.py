@@ -71,5 +71,6 @@ class LinuxIWListWifiRetriever(threading.Thread):
     def run(self):
         while True:
             scanned = self.scan_wifi()
+            time.sleep(.1)
             if len(scanned) > 0:
                 self.parse_signals(scanned)
