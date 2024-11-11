@@ -12,7 +12,7 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
-			"TEST_FILE": "/Users/scooper/PycharmProjects/MagPi/src/trx/TRX1-20241107.csv"
+			"TEST_FILE": "TEST_FILE.csv"
 		},
 		{
 			"TEST_FILE_TIME_MAX": 2
