@@ -35,7 +35,7 @@ class MAPController(threading.Thread):
 
             import os
             os.chdir('src/')
-            # run the build command, but don't start the server
+            #TODO: run the build command, but don't start the server
             # ✓ built in 3.28s... takes a second.
             __init__.node.run()
 
