@@ -1,6 +1,7 @@
 import os
 import threading
 import random
+from collections import defaultdict
 
 import serial
 
@@ -26,6 +27,7 @@ class TRXRetriever(threading.Thread):
         self.stopbits = None
 
         self.out = None
+        self.signal_cache = []
 
         self.retrieving = False
         self.thread = None
@@ -57,14 +59,15 @@ class TRXRetriever(threading.Thread):
                 while True:
                     for line in lines[1:-1]:
                         vals = line.split(',')
-                        self.out = dict([(keys[i], vals[i]) for i in range(len(keys))])
+                        self.out = dict( [ (keys[i], vals[i]) for i in range(len(keys)) ] )
                         if FIX_TIME:
                             self.out['COMP_DATE'] = format(datetime.now(), self.config['DATE_FORMAT'])
                             self.out['COMP_TIME'] = format(datetime.now(), self.config['TIME_FORMAT'])
                             self.out['SCAN_DATE'] = format(datetime.now(), self.config['DATE_FORMAT'])
                             self.out['SCAN_TIME'] = format(datetime.now(), self.config['TIME_FORMAT'])
                         time.sleep(random.randint(1, self.config['TEST_FILE_TIME_MAX']))
-                        print(f'{self.out}')
+                        self.signal_cache.insert(-1, self.out)
+                        print(self.out)
             else:
 
                 # <STX>  An ASCII “Start of Text” symbol (0x02)
@@ -95,7 +98,7 @@ class TRXRetriever(threading.Thread):
                             ser.write(STX + msgCode + ETX + bytes(SUM))
                             self.out = ser.readline()
                             # self.out = ser.read(10)
-                            print(f'{self.out}')
+                            print(self.out)
 
                 except Exception as e:
                     print(f'{e}')

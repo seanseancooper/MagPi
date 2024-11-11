@@ -22,7 +22,11 @@ def index():
 
 @trx_bp.route("/scan", methods=['GET'], subdomain="trx")
 def trx_scan():
-    signals = trxRet.out
-    return [json.dumps(signals)]
+    return trxRet.out
+
+
+@trx_bp.route("/scanned", methods=['GET'], subdomain="trx")
+def trx_scanned():
+    return trxRet.signal_cache
 
 
