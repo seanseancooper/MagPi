@@ -40,6 +40,6 @@ class EBSManager(threading.Thread):
         self.ebs_start()
         # while True:
         #     try:
-        #         pass
+        #         time.sleep(1)
         #     except KeyboardInterrupt:
         #         exit(0)

@@ -39,6 +39,6 @@ class MOTManager(threading.Thread):
         self.mot_start()
         # while True:
         #     try:
-        #         pass
+        #         time.sleep(1)
         #     except KeyboardInterrupt:
         #         exit(0)
