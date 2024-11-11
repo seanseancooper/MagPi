@@ -210,11 +210,11 @@ class WifiScanner(threading.Thread):
             sgnl = {'BSSID': bssid, 'SSID': worker.ssid}
             self.update_signal(sgnl, worker, fmt)
             o.append(sgnl)
-
+        #TODO: would it ever be False?
         [update(bssid) for bssid in [sgnl for sgnl in self.tracked_signals if self.get_worker(sgnl).tracked is True]]
         return o
 
-    def get_missing_signals(self):
+    def get_ghost_signals(self):
         ''' tracked signals MISSING from parsed_signals; 'greyed' out... '''
 
         parsed = frozenset([key['BSSID'] for key in self.get_parsed_signals()])

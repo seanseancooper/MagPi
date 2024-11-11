@@ -34,7 +34,7 @@ def wifi_tracked():
 
 @wifi_bp.route('/ghosts', methods=['GET', 'POST'], subdomain='wifi')
 def wifi_ghosts():
-    return jsonify(scanner.get_missing_signals())
+    return jsonify(scanner.get_ghost_signals())
 
 
 @wifi_bp.route('/mute/<bssid>', methods=['POST'], subdomain='wifi')

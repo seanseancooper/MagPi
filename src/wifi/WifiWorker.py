@@ -170,7 +170,7 @@ class WifiWorker:
         ''' match a BSSID and populate data '''
 
         [self.match_sgnl(sgnl) for sgnl in self.scanner.parsed_signals]
-        [self.match_sgnl(sgnl) for sgnl in self.scanner.get_missing_signals()]
+        [self.match_sgnl(sgnl) for sgnl in self.scanner.get_ghost_signals()]
 
         if self.tracked:
             write_foundLIST(self.config, self.__str__(), self.stats)
