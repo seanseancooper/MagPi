@@ -25,6 +25,7 @@ class CAMManager(threading.Thread):
         self.plugin_args_capture_height = None
 
         #TODO 'snap' config needs to move to config
+        #TODO create/use a namespace for "plugins"; auto-discoover them.
         self.plugin_config = {
             "asset_classes"               : {},
             "capture_is_image"            : False,
@@ -98,7 +99,7 @@ class CAMManager(threading.Thread):
         def noop(f):
             return f
 
-        # TODO: which?
+        # TODO: which? this is complicated.
         self.plugin.plugin_args_capture_src = URL
         self.plugin.plugin_capture.capture_param_capture_src = URL
         self.plugin.streamservice.requesthandler.src = URL
@@ -111,6 +112,7 @@ class CAMManager(threading.Thread):
         self.plugin.streamservice.reload(URL)
 
     def cam_multibutton(self, mode):
+        #TODO: multibutton enumeration, less brittle.
         """ set mode of ShowxatingBlackviewPlugin """
         if mode == 'OFF':
             self.plugin.has_symbology = False
@@ -127,24 +129,24 @@ class CAMManager(threading.Thread):
 
     def cam_snap(self):
 
-        # IDEA: perhaps this should be in the plugin. It may be more
-        #  efficient to write frames via delegation than by force.
-        #  Also, there is a need to write imagecache that still
-        #  has not been resolved.
+        # IDEA: Move to plugin. It may be more efficient to
+        #  write frames via delegation than by force ('we've got that "B" roll!').
+
+        #TODO: write to imagecache, or create a vector that can later be compared.
 
         def _snap(frame):
             if frame is not None:
                 writer = ImageWriter("CAMManager")
                 writer.write("CAM_SNAP", frame)
 
-        # DBUG: throttle me; I can be overloaded by requests
-        #  and crash the capture!
+        # NOFIX: throttle me; I can be overloaded by requests
+        #  and crash the capture! [this is for stills, not movies. Not fixing it.]
         for frame in self.plugin.plugin_capture.run():
             _snap(frame)
             break
 
     def cam_plugin(self, field, value):
-        # TODO: BRITTLE CODE! Change my mind... ;)
+        # TODO: FIX BRITTLE CODE!
         if field == 'crop':
 
             json_value = json.loads(value)
@@ -179,7 +181,8 @@ class CAMManager(threading.Thread):
         return "OK"
 
     def ircam_move(self, command):
-        # TODO:  deprecated, also brittle!
+        # NOFIX:  deprecated, also brittle! [removing. 'moving a camera'
+        # is not a "focus" for this project. Instead, use a 'plugin']
 
         def makeRequest(url):
             import os
