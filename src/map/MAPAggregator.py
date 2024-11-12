@@ -19,9 +19,6 @@ class MAPAggregator(threading.Thread):
     """ MAPAggregator visits module REST contexts, retrieves data, and
     aggregates to a unified defaultdict for the MAP to consume via a
     single localized module REST context.
-
-    BUG: This currently will not update if the module goes offline!
-     The last update stays in the map and is NOT erased.
     """
     def __init__(self):
         super().__init__()
@@ -67,15 +64,12 @@ class MAPAggregator(threading.Thread):
                 self.dead_modules.append(mod)
 
     def aggregate(self, mod):
-
+        """ collect responses into aggregation """
         try:
             resp = requests.get('http://' + mod.lower() + '.' + self.configs[mod]['SERVER_NAME'])
-
             if resp.ok:
                 self.aggregated[mod] = resp.json()
-
             time.sleep(self.config.get('AGGREGATOR_TIMEOUT', .5))
-
         except Exception as e:
             map_logger.warning(f'Aggregator Warning! {e}')
 
@@ -93,9 +87,9 @@ class MAPAggregator(threading.Thread):
 
             self.register_modules()
 
-            for m in self.dead_modules:
+            for mod in self.dead_modules:
                 try:
-                    self.aggregated.pop(m)
+                    self.aggregated.pop(mod)
                 except KeyError: pass  # 'missing' is fine.
 
             print(f'aggregated: {list(self.aggregated.keys())}) live: {[m for m in self.live_modules]} dead: {[m for m in self.dead_modules]}')
