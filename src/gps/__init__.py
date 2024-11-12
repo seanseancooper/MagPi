@@ -31,7 +31,6 @@ def gps_position():
     """  return entire result """
     return gpsRet.gps_position()
 
-#TODO: all these below return a string. hmmmmm?
 @gps_bp.route("/location", methods=['GET'], subdomain="gps")
 def gps_location():
     """ return lat, lon """
