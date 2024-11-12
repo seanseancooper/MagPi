@@ -9,9 +9,9 @@ from typing import Union, Iterable, Dict, Any
 class BlackViewGPSClient:
     def __init__(
             self,
-            host: str = "10.99.77.1",
-            port: Union[str, int] = "80",
-            timeout: Union[float, int, None] = 1,
+            host: str,
+            port: Union[str, int],
+            timeout: Union[float, int, None],
     ):
         self.host = host
         self.port = port
@@ -24,6 +24,7 @@ class BlackViewGPSClient:
 
         self.conn = client.HTTPConnection(self.host)
         self.conn.set_debuglevel(1)
+        self.conn.timeout = self.timeout
         self.conn.request("GET", "http://" + self.host + "/blackvue_livedata.cgi")
         self.resp = self.conn.getresponse()
         self.conn.close()
