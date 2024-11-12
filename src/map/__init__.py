@@ -5,7 +5,13 @@ from src.config import CONFIG_PATH, readConfig
 config = {}
 readConfig(os.path.join(CONFIG_PATH, 'map.json'), config)
 
+from src.map.MAPAggregator import MAPAggregator
+
+mapAgg = MAPAggregator()
+mapAgg.configure(os.path.join(CONFIG_PATH, 'map.json'))
+
 from src.map.lib.NodeRunner import NodeRunner
+
 node = NodeRunner()
 node.configure(os.path.join(CONFIG_PATH, 'map.json'))
 
@@ -19,10 +25,14 @@ map_bp = Blueprint(
 
 @map_bp.route('/', subdomain='map')
 def index():
-    return redirect("/map", code=302)
+    return redirect("/aggregated", code=302)
 
 
 @map_bp.route("/map", methods=['GET'], subdomain='map')
 def map():
     return render_template(config['MAP_TEMPLATE'])
 
+
+@map_bp.route("/aggregated", methods=['GET'], subdomain='map')
+def aggregated():
+    return mapAgg.aggregated
