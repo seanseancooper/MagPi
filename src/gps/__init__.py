@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, redirect, render_template
+from flask import Blueprint, redirect
 
 from src.gps.GPSRetriever import GPSRetriever
 from src.config import CONFIG_PATH
