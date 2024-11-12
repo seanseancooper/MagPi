@@ -138,8 +138,7 @@ class WifiScanner(threading.Thread):
         """ gets location from GPS endpoint"""
         try:
             resp = requests.get(self.config.get('GPS_ENDPOINT', 'http://gps.localhost:5004/position'))
-            GPS = json.loads(resp.text)
-            position = dict(GPS['GPS'])
+            position = json.loads(resp.text)
             self.latitude = position.get('LATITUDE', position.get('lat'))
             self.longitude = position.get('LONGITUDE', position.get('lon'))
         except Exception as e:
