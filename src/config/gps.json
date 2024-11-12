@@ -12,10 +12,16 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
-			"TEST_FILE": "./lib/test_file.txt"
+			"TEST_FILE": "./lib/TEST_FILE.txt"
+		},
+		{
+			"DUMMYRETRIEVER_TIMEOUT": 1
 		},
 		{
 			"RETRIEVER_METHOD": "DummyGPSRetriever"
+		},
+		{
+			"BLACKVIEWGPSRETRIEVER_TIMEOUT": 0.1
 		},
 		{
 			"GPS_HOST": "10.99.77.1"
@@ -24,7 +30,7 @@
 			"GPS_PORT": 80
 		},
 		{
-			"GPS_CONNECT_TIMEOUT": 10
+			"GPS_CONNECT_TIMEOUT": 1
 		},
 		{
 			"TOKENS": 4
