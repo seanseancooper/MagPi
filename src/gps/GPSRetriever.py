@@ -2,6 +2,7 @@ import os
 from collections import defaultdict
 from datetime import datetime
 import threading
+import json
 import logging
 import time
 from gpsdclient import GPSDClient
@@ -81,35 +82,12 @@ class GPSRetriever(threading.Thread):
                     for result in client.dict_stream():
                         if not result:
                             break
-                        # send: b'GET http://10.99.77.1/blackvue_livedata.cgi HTTP/1.1\r\n
-                        # Host: 10.99.77.1\r\n
-                        # Accept-Encoding: identity\r\n\r\n'
-                        # reply: 'HTTP/1.1 200 OK\r\n'
-                        # header: Date: Tue, 12 Nov 2024 20:33:24 GMT
-                        # header: Server: DR750S-2CH
-                        # header: Accept-Ranges: bytes
-                        # header: Connection: close
-                        # header: Content-Type: application/json; boundary=--ptaboundary
-                        # {'GPS': {'LATITUDE': 39.917143, 'LONGITUDE': -105.068342, 'UPDATED': '2024-11-12 13:33:22'}}
-                        # {'lat': 39.917143, 'lon': -105.068342, 'time': '2024-11-12 13:33:22'}
-                        # {'lat': 39.917143, 'lon': -105.068342, 'time': '2024-11-12 13:33:22'}
-                        # {'GPS': {'LATITUDE': 39.917144, 'LONGITUDE': -105.068342, 'UPDATED': '2024-11-12 13:33:22'}}
-                        # {'lat': 39.917144, 'lon': -105.068342, 'time': '2024-11-12 13:33:22'}
-                        # {'lat': 39.917144, 'lon': -105.068342, 'time': '2024-11-12 13:33:22'}
-                        # {'GPS': {'LATITUDE': 39.917145, 'LONGITUDE': -105.068343, 'UPDATED': '2024-11-12 13:33:22'}}
-                        # {'lat': 39.917145, 'lon': -105.068343, 'time': '2024-11-12 13:33:22'}
-                        # {'lat': 39.917145, 'lon': -105.068343, 'time': '2024-11-12 13:33:22'}
-                        # {'GPS': {'LATITUDE': 39.917145, 'LONGITUDE': -105.068343, 'UPDATED': '2024-11-12 13:33:22'}}
-                        # {'lat': 39.917145, 'lon': -105.068343, 'time': '2024-11-12 13:33:22'}
-                        # {'lat': 39.917145, 'lon': -105.068343, 'time': '2024-11-12 13:33:22'}
-                        # {'GPS': {'LATITUDE': 39.917146, 'LONGITUDE': -105.068344, 'UPDATED': '2024-11-12 13:33:25'}}
-                        # {'lat': 39.917146, 'lon': -105.068344, 'time': '2024-11-12 13:33:25'}
-                        # {'lat': 39.917146, 'lon': -105.068344, 'time': '2024-11-12 13:33:25'}
                         gps_logger.debug(f'{result}')
-                        lat = result['GPS']['LATITUDE']
-                        lon = result['GPS']['LONGITUDE']
-                        updt = result['GPS']['UPDATED']
-                        self.result = {"lat": lat, "lon": lon, "time": updt}
+
+                        self.result = {"lat": result['GPS']['LATITUDE'],
+                                       "lon": result['GPS']['LONGITUDE'],
+                                       "time": result['GPS']['UPDATED']}
+
                         gps_logger.debug(f'{self.result}')
                         time.sleep(self.config.get('BLACKVIEWGPSRETRIEVER_TIMEOUT', 1))
             except OSError as e:
@@ -118,16 +96,24 @@ class GPSRetriever(threading.Thread):
     @register_retriever
     def DummyGPSRetriever(self, *, c, **retriever_args):
 
-        import json
         lines = [line.replace('LATITUDE', 'lat').replace('LONGITUDE', 'lon').strip() for line in open(self.config['TEST_FILE'], 'r')]
         lines = [json.loads(line.replace("\'","\"")) for line in lines]
 
         while True:
             for i in range(len(lines) - 1):
                 result = lines[i]
-                lat = result['GPS']['lat']
-                lon = result['GPS']['lon']
-                self.result = {"lat": lat, "lon": lon, "time": datetime.now().__format__("%Y-%m-%d %H:%M:%S")}
+                self.result = {"lat": result['GPS']['lat'],
+                               "lon": result['GPS']['lon'],
+
+                               # these are truly fake...
+                               "heading": result.get('GPS''heading', 0.0),
+                               "track": result.get('GPS''track', 0.0),
+                               "speed": result.get('GPS''speed', 0.0),
+                               "altitude": result.get('GPS''altitude', 0.0),
+                               "climb": result.get('GPS''climb', 0.0),
+
+                               "time": datetime.now().__format__("%Y-%m-%d %H:%M:%S")}
+                print(self.result)
                 time.sleep(self.config.get('DUMMYRETRIEVER_TIMEOUT', 1))
 
     @register_retriever
