@@ -39,8 +39,7 @@ class MAPController(threading.Thread):
             # ✓ built in 3.28s... takes a second.
             __init__.node.run()
 
-            while True:  # perhaps log requests?
-                time.sleep(1)
+            __init__.mapAgg.run()
 
         except KeyboardInterrupt:
             pass
