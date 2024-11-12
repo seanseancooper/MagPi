@@ -1,4 +1,3 @@
-import json
 import os
 import glob
 import threading
@@ -17,12 +16,12 @@ def format_time(_, fmt):
 
 
 class MAPAggregator(threading.Thread):
-    """ New MAPAggregator stub to visit module REST contexts, retrieve data,
-    'tag' it, and aggregate to a unified defaultdict for the MAP to consume
-    via single localized module REST context.
+    """ MAPAggregator visits module REST contexts, retrieves data, and
+    aggregates to a unified defaultdict for the MAP to consume via a
+    single localized module REST context.
 
-    This will not update the aggregation if the module goes offline!
-
+    BUG: This currently will not update if the module goes offline!
+     The last update stays in the map and is NOT erased.
     """
     def __init__(self):
         super().__init__()
@@ -62,9 +61,8 @@ class MAPAggregator(threading.Thread):
         for mod in self.modules:
             try:
                 test = requests.get('http://' + mod.lower() + '.' + self.configs[mod]['SERVER_NAME'])
-                if test.status_code == 200 or 302:
+                if test.ok:
                     self.live_modules.append(mod)
-                test.close()
             except Exception:
                 self.dead_modules.append(mod)
 
@@ -73,15 +71,9 @@ class MAPAggregator(threading.Thread):
         try:
             resp = requests.get('http://' + mod.lower() + '.' + self.configs[mod]['SERVER_NAME'])
 
-            if resp.status_code == 200 or 302:
-                self.aggregated[mod] = json.loads(resp.text)
-            else:
-                try:
-                    del self.aggregated[mod]  # can't remove?! this will not update if module goes offline!
-                except Exception as e:
-                    map_logger.warning(f'Aggregator Warning! Module resolution failed {mod}: {e}')
+            if resp.ok:
+                self.aggregated[mod] = resp.json()
 
-            resp.close()
             time.sleep(self.config.get('AGGREGATOR_TIMEOUT', .5))
 
         except Exception as e:
@@ -100,6 +92,12 @@ class MAPAggregator(threading.Thread):
                 self.aggregate(mod)
 
             self.register_modules()
+
+            for m in self.dead_modules:
+                try:
+                    self.aggregated.pop(m)
+                except KeyError: pass  # 'missing' is fine.
+
             print(f'aggregated: {list(self.aggregated.keys())}) live: {[m for m in self.live_modules]} dead: {[m for m in self.dead_modules]}')
 
         map_logger.warning("no running modules!!!")
