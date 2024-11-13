@@ -4,6 +4,8 @@ from datetime import datetime
 
 from .iw_parse import matching_line
 from src.config import CONFIG_PATH, readConfig
+from src.lib.utils import make_path, write_file
+import json
 
 import logging
 logger_root = logging.getLogger('root')
@@ -16,12 +18,7 @@ vendorsMacs_XML = ET.parse(os.path.join(CONFIG_PATH, config['VENDORMACS_FILE']))
 
 
 def proc_vendors(vendor):
-    mac_prefix = vendor.attrib["mac_prefix"]
-    vendor_name = vendor.attrib["vendor_name"]
-    vendors[mac_prefix] = vendor_name
-
-
-[proc_vendors(vendor) for vendor in vendorsMacs_XML.getroot()]
+    vendors[vendor.attrib["mac_prefix"]] = vendor.attrib["vendor_name"]
 
 
 def get_vendor(cell):
@@ -39,6 +36,9 @@ def get_vendor(cell):
         return "no cell!"
 
 
+[proc_vendors(vendor) for vendor in vendorsMacs_XML.getroot()]
+
+
 def get_timing(cell):
     """ Gets the mode of a network / cell.
     @param string cell
@@ -54,22 +54,18 @@ def get_timing(cell):
     return time
 
 
-def write_foundLIST(config, found_cell, stats):
+def append_to_outfile(config, cell):
     """Append found cells to a rolling list"""
-    from src.lib.utils import make_path, write_file
 
     make_path(config.get('OUTFILE_PATH', "out"))
-    _time = datetime.now().strftime(config.get('DATETIME_FORMAT', "%Y-%m-%d %H:%M:%S.%f"))
-    write_file(config['OUTFILE_PATH'], config['OUT_FILE'] + ".out", f"{_time}: {found_cell} {stats}", "a")
+    _time = datetime.now().strftime(config.get('DATETIME_FORMAT', "%Y%m%d_%H%M%S"))
+    write_file(config['OUTFILE_PATH'], config['OUT_FILE'] + ".out", json.dumps(cell, indent=1), "a")
 
 
-def write_trackedJSON(config, searchmap):
+def write_to_scanlist(config, searchmap):
     """Write current SEARCHMAP out as JSON"""
-    from src.lib.utils import make_path, write_file
-    import json
 
     make_path(config.get('OUTFILE_PATH', "out"))
-    _time = datetime.now().strftime(config.get('DATETIME_FORMAT', "%Y-%m-%d %H:%M:%S.%f"))
-    write_file(config['OUTFILE_PATH'], "scanlist_" + _time + ".json", json.dumps(searchmap, indent=1), "x")
-
-    return True
+    _time = datetime.now().strftime(config.get('DATETIME_FORMAT', "%Y%m%d_%H%M%S"))
+    if write_file(config['OUTFILE_PATH'], "scanlist_" + _time + ".json", json.dumps(searchmap, indent=1), "x"):
+        return True
