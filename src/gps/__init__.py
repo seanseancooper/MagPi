@@ -55,3 +55,8 @@ def gps_heading():
 @gps_bp.route("/climb", methods=['GET'], subdomain="gps")
 def gps_climb():
     return gpsRet.gps_climb()
+
+
+@gps_bp.route("/config", methods=['GET'], subdomain="gps")
+def gps_config():
+    return gpsRet.config
