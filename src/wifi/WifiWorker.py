@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import logging
-from src.wifi.lib.wifi_utils import write_foundLIST
+from src.wifi.lib.wifi_utils import append_to_outfile
 
 logger_root = logging.getLogger('root')
 wifi_logger = logging.getLogger('wifi_logger')
@@ -24,7 +24,7 @@ class WifiWorker:
 
         self.created = datetime.now()   # when signal was found
         self.updated = datetime.now()   # when signal was last reported
-        self.elapsed = datetime.now()   # time signal has been tracked.
+        self.elapsed = timedelta()      # time signal has been tracked.
 
         self.is_mute = False            # is BSSID muted
         self.tracked = False            # is BSSID in scanner.tracked_signals
@@ -40,39 +40,20 @@ class WifiWorker:
     def __str__(self):
         return {"SSID"          : self.ssid,
                 "BSSID"         : self.bssid,
-
                 "vendor"        : self.vendor,
                 "channel"       : self.channel,
                 "frequency"     : self.frequency,
                 "quality"       : self.quality,
                 "encryption"    : self.is_encrypted,
-
-                "created"       : str(self.created),
-                "updated"       : str(self.updated),
-                "elapsed"       : str(self.elapsed),
-                "is_mute"       : str(self.is_mute),
-
-                "tracked"       : str(self.tracked),
-                "signal_cache"  : self.stats['signal_cache'],
-                "test_results"  : [item for item in self.test_results],
+                "stats"         : self.stats
                 }
-
-    def populate_stats(self):
-
-        self.stats['created'] = self.created
-        self.stats['updated'] = self.updated = datetime.now()
-        self.stats['elapsed'] = self.elapsed = datetime.now() - self.created
-        self.stats['is_mute'] = self.is_mute
-
-        self.stats['tracked'] = self.tracked = self.bssid in self.scanner.tracked_signals.keys()
-        self.stats['signal_cache'] = [pt.get() for pt in self.scanner.signal_cache[self.bssid]]
-        self.stats['results'] = self.test_results
 
     def get_MFCC(self):
         # TODO
         pass
 
     def process_cell(self, cell):
+        """ update static fields, tests"""
 
         if cell['SSID'] == '' or None:
             cell['SSID'] = "*HIDDEN SSID*"
@@ -82,8 +63,7 @@ class WifiWorker:
         self.frequency = cell['Frequency']
         self.quality = cell['Quality']
         self.is_encrypted = cell['Encryption']
-
-        self.scanner.makeSignalPoint(self.bssid, int(cell.get('Signal', -99)))  # fails on missing signals
+        self.update(cell)
 
         def test(cell):
             # TODO: use this as an entrypoint to a discrete test in a test
@@ -108,16 +88,23 @@ class WifiWorker:
                 #     return any(self.results)
             except KeyError:
                 return True  # no test, np
+
             return True
 
         return cell if test(cell) else None
 
-    def match_sgnl(self, cell):
+    def update(self, sgnl):
+        """ updates  *dynamic* fields"""
+        self.updated = datetime.now()
+        self.elapsed = datetime.now() - self.created
+        self.tracked = self.bssid in self.scanner.tracked_signals.keys()
+        self.scanner.makeSignalPoint(self.bssid, int(sgnl.get('Signal', -99)))
+
+    def match(self, cell):
         """ process the matching BSSID and return data in it as a 'cell' """
         if self.bssid.upper() == cell['BSSID'].upper():
             self.process_cell(cell)
             self.auto_unmute()
-            self.populate_stats()
 
     def mute(self):
         from src.lib.utils import mute
@@ -127,8 +114,7 @@ class WifiWorker:
     def auto_unmute(self):
         ''' this is the polled function to UNMUTE signals AUTOMATICALLY after the MUTE_TIME. '''
         if self.config['MUTE_TIME'] > 0:
-            elapsed = datetime.now() - self.updated
-            if elapsed > timedelta(seconds=self.config['MUTE_TIME']):
+            if datetime.now() - self.updated > timedelta(seconds=self.config['MUTE_TIME']):
                 self.is_mute = False
                 # SIGNAL: AUTO UNMUTE
 
@@ -169,9 +155,9 @@ class WifiWorker:
     def run(self):
         ''' match a BSSID and populate data '''
 
-        [self.match_sgnl(sgnl) for sgnl in self.scanner.parsed_signals]
-        [self.match_sgnl(sgnl) for sgnl in self.scanner.get_ghost_signals()]
+        [self.match(sgnl) for sgnl in self.scanner.parsed_signals]
+        [self.update(sgnl) for sgnl in self.scanner.get_ghost_signals()]
 
         if self.tracked:
-            write_foundLIST(self.config, self.__str__(), self.stats)
+            append_to_outfile(self.config, self.__str__())
 
