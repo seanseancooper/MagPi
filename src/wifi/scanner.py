@@ -9,7 +9,8 @@ from contextlib import contextmanager
 
 from src.config.__init__ import readConfig
 
-from src.wifi.lib.wifi_utils import write_trackedJSON
+from src.lib.utils import format_time
+from src.wifi.lib.wifi_utils import write_to_scanlist
 from src.wifi.lib.iw_parse import print_table
 
 from src.wifi.lib.SignalPoint import SignalPoint
@@ -28,9 +29,6 @@ wifi_logger = logging.getLogger('wifi_logger')
 
 wifi_retrievers = {}
 
-
-def format_time(_, fmt):
-    return f'{_.strftime(fmt)}'
 
 
 class WifiScanner(threading.Thread):
@@ -137,6 +135,7 @@ class WifiScanner(threading.Thread):
     def get_location(self):
         """ gets location from GPS endpoint"""
         try:
+            #TODO: don't hardcode URL in CONFIG;  get it from flask, config REST
             resp = requests.get(self.config.get('GPS_ENDPOINT', 'http://gps.localhost:5004/position'))
             position = json.loads(resp.text)
             self.latitude = position.get('LATITUDE', position.get('lat'))
@@ -179,8 +178,8 @@ class WifiScanner(threading.Thread):
         sgnl['is_mute'] = worker.is_mute
         sgnl['tracked'] = worker.tracked
 
-        sgnl['signal_cache'] = [json.dumps(sgnl.get()) for sgnl in self.signal_cache.get(worker.bssid)]
-        sgnl['results'] = str(worker.stats.get('results', [result for result in worker.test_results]))
+        sgnl['signal_cache'] = [json.dumps(sgnl.get()) for sgnl in self.signal_cache[worker.bssid]]
+        sgnl['results'] = [json.dumps(result) for result in worker.test_results]
 
     def get_parsed_signals(self):  # rename me, easily confused w retriever impl (cells vs. signals)
         ''' updates and returns ALL signals '''
@@ -199,39 +198,28 @@ class WifiScanner(threading.Thread):
 
         self.parsed_signals = self.retriever.get_parsed_cells(readlines)
 
+    def update(self, bssid, o):
+        worker = self.get_worker(bssid)
+        sgnl = {'BSSID': bssid, 'SSID': worker.ssid}
+        self.update_signal(sgnl, worker, self.config.get('TIME_FORMAT', "%H:%M:%S"))
+        o.append(sgnl)
+
     def get_tracked_signals(self):
         ''' update and return ONLY tracked signals '''
-        fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
         o = []
-
-        def update(bssid):
-            worker = self.get_worker(bssid)
-            sgnl = {'BSSID': bssid, 'SSID': worker.ssid}
-            self.update_signal(sgnl, worker, fmt)
-            o.append(sgnl)
-        #TODO: would it ever be False?
-        [update(bssid) for bssid in [sgnl for sgnl in self.tracked_signals if self.get_worker(sgnl).tracked is True]]
+        [self.update(bssid, o) for bssid in [sgnl for sgnl in self.tracked_signals]]
         return o
 
     def get_ghost_signals(self):
         ''' tracked signals MISSING from parsed_signals; 'greyed' out... '''
-
-        parsed = frozenset([key['BSSID'] for key in self.get_parsed_signals()])
         tracked = frozenset([key['BSSID'] for key in self.get_tracked_signals()])
-        fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
+        parsed = frozenset([key['BSSID'] for key in self.get_parsed_signals()])
         o = []
-
-        def update(bssid):
-            worker = self.get_worker(bssid)
-            sgnl = {'BSSID': bssid, 'SSID': worker.ssid}
-            self.update_signal(sgnl, worker, fmt)
-            o.append(sgnl)
-
-        [update(str(item)) for item in tracked.difference(parsed)]
+        [self.update(str(item), o) for item in tracked.difference(parsed)]
         return o
 
     def stop(self):
-        write_trackedJSON(self.config, self.tracked_signals)
+        write_to_scanlist(self.config, self.tracked_signals)
         self.parsed_signals.clear()  # ensure no data is available
         wifi_stopped.send(self)
         wifi_logger.info(f"[{__name__}]: WifiScanner stopped. {self.polling_count} iterations.")
