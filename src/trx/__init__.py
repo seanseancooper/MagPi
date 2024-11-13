@@ -1,10 +1,10 @@
 import os
 from flask import Blueprint, redirect
 
-from src.trx.TRXRetriever import TRXRetriever
+from src.trx.TRXSerialRetriever import TRXSerialRetriever
 from src.config import CONFIG_PATH
 
-trxRet = TRXRetriever()
+trxRet = TRXSerialRetriever()
 trxRet.configure(os.path.join(CONFIG_PATH, 'trx.json'))
 
 trx_bp = Blueprint(
@@ -17,7 +17,7 @@ trx_bp = Blueprint(
 
 @trx_bp.route('/', subdomain="trx")
 def index():
-    return redirect("/scan", code=302)
+    return redirect("/scanned", code=302)
 
 
 @trx_bp.route("/scan", methods=['GET'], subdomain="trx")
