@@ -8,7 +8,6 @@ import xml.parsers.expat
 from xml.parsers.expat import ExpatError
 
 from src.wifi.lib.iw_parse import matching_line
-from src.wifi.lib.wifi_utils import vendors
 
 from src.config.__init__ import readConfig, CONFIG_PATH
 import logging
@@ -56,8 +55,6 @@ class MacOSAirportWifiRetriever(threading.Thread):
     def configure(self, config_file):
         readConfig(os.path.join(CONFIG_PATH, config_file), self.config)
 
-        # configure the interface
-        
         self.SIGNAL_DEBUG = self.config.get('XML_SIGNAL_DEBUG')
         self.DATA_DEBUG = self.config.get('XML_DATA_DEBUG')
         self.PARSE_DEBUG = self.config.get('XML_PARSE_DEBUG')
@@ -171,28 +168,6 @@ class MacOSAirportWifiRetriever(threading.Thread):
                         wifi_logger.debug(f"[{__name__}]:(element_key: {element_key}, "
                                           f"element.tag: {element.tag}, element.text: {element.text}")
 
-            # def parse_element(element):
-            #
-            #     element_key = None
-            #     element_val = None
-            #
-            #     if element.tag == 'key':
-            #         element_key = element.text
-            #         return
-            #     if element.tag == 'dict':
-            #         pass
-            #         # element_key = unwrap(element)
-            #     elif element.tag == 'string' or element.tag == 'integer' or element.tag == 'data':
-            #         element_val = element.text
-            #
-            #     if element_key and element_val:
-            #         u_record[element_key] = element_val
-            #         if self.ELEMENT_DEBUG:
-            #             wifi_logger.debug(f"[{__name__}]:(element_key: {element_key}, "
-            #                               f"element.tag: {element.tag}, element.text: {element.text}")
-            #
-            # [parse_element(element) for element in record]
-
             return u_record
 
         def clean_bssid(elided):
@@ -246,6 +221,7 @@ class MacOSAirportWifiRetriever(threading.Thread):
                 IS_MUTE = False
 
                 try:
+                    from src.wifi.lib.wifi_utils import vendors
                     VENDOR = vendors[BSSID[0:8]]
                 except KeyError:
                     VENDOR = f"UNKNOWN"
@@ -258,7 +234,6 @@ class MacOSAirportWifiRetriever(threading.Thread):
                     "Frequency" : FREQUENCY,
                     'Quality'   : QUALITY,
                     'Encryption': SECURITY,
-                    # 'is_mute'   : "False",  # later, this is replaced with the current value.
                     'Vendor'    : VENDOR,
                 }
 
@@ -274,10 +249,3 @@ class MacOSAirportWifiRetriever(threading.Thread):
             wifi_logger.debug(f"[{__name__}]: PARSED_CELLS: >> {parsed_cells}")
 
         return parsed_cells
-
-    def run(self):
-        while True:
-            scanned = self.scan_wifi()
-            time.sleep(.1)
-            if len(scanned) > 0:
-                self.parse_signals(scanned)
