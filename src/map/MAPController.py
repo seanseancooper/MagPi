@@ -35,10 +35,9 @@ class MAPController(threading.Thread):
 
             import os
             os.chdir('src/')
-            #TODO: run the build command, but don't start the server
+            #TODO: run the build command, but don't start the node server
             # ✓ built in 3.28s... takes a second.
-            __init__.node.run()
-
+            __init__.node.run()  # this exits badly!!!
             __init__.mapAgg.run()
 
         except KeyboardInterrupt:
