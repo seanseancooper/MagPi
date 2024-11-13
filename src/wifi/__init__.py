@@ -56,6 +56,7 @@ def wifi_scan():
 
 @wifi_bp.route('/scan/<bssid>', methods=['GET'], subdomain='wifi')
 def wifi_scan_bssid(bssid):
+    #DBUG this fails to get a worker?!
     worker = scanner.get_worker(bssid)
     if worker.ssid:
         return jsonify(worker.__str__())
@@ -75,8 +76,8 @@ def wifi_stop():
 
 @wifi_bp.route('/write', methods=['POST'], subdomain='wifi')
 def wifi_write():
-    from lib.wifi_utils import write_trackedJSON
-    if write_trackedJSON(scanner.config, scanner.tracked_signals):
+    from lib.wifi_utils import write_to_scanlist
+    if write_to_scanlist(scanner.config, scanner.tracked_signals):
         return "OK", 200
     return "", 500
 
