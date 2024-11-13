@@ -68,7 +68,7 @@
 			"TIMER_FORMAT": "%H:%M:%S"
 		},
 		{
-			"DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S"
+			"DATETIME_FORMAT": "%Y%m%d_%H%M%S"
 		},
 		{
 			"XML_SIGNAL_DEBUG": false
