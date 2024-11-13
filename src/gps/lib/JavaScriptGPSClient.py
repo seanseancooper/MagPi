@@ -21,6 +21,7 @@ class JavaScriptGPSClient:
 
     def javascript_lines(self):
         import requests
+        # TODO: don't hardcode the URL
         self.resp = requests.get("http://localhost:5173/JavaScriptGPSRetriever.jsx")
         return self.resp
 
