@@ -40,13 +40,19 @@ class WifiWorker:
     def __str__(self):
         return {"SSID"          : self.ssid,
                 "BSSID"         : self.bssid,
+                "created"       : str(self.created),
+                "updated"       : str(self.updated),
+                "elapsed"       : str(self.elapsed),
                 "vendor"        : self.vendor,
                 "channel"       : self.channel,
                 "frequency"     : self.frequency,
                 "quality"       : self.quality,
                 "encryption"    : self.is_encrypted,
-                "stats"         : self.stats
-                }
+                "is_mute"       : str(self.is_mute),
+                "tracked"       : str(self.tracked),
+                "signal_cache"  : [pt.get() for pt in self.scanner.signal_cache[self.bssid]],
+                "tests"         : [x for x in self.test_results]
+        }
 
     def get_MFCC(self):
         # TODO
@@ -94,7 +100,7 @@ class WifiWorker:
         return cell if test(cell) else None
 
     def update(self, sgnl):
-        """ updates  *dynamic* fields"""
+        """ updates *dynamic* fields"""
         self.updated = datetime.now()
         self.elapsed = datetime.now() - self.created
         self.tracked = self.bssid in self.scanner.tracked_signals.keys()
