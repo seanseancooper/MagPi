@@ -53,7 +53,7 @@ class WifiScanner(threading.Thread):
 
         # TODO: timekeeping
         self.start_time = datetime.now()
-        self.elapsed = None
+        self.elapsed = "00:00:00"
         self.polling_count = 0
 
         self.latitude = 0.0
@@ -185,6 +185,7 @@ class WifiScanner(threading.Thread):
         ''' updates and returns ALL signals '''
         self.elapsed = datetime.now() - self.start_time
         fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
+        self.elapsed = format_time(datetime.strptime(str(datetime.now() - self.start_time), "%H:%M:%S.%f"), fmt)
         [self.update_signal(sgnl, self.get_worker(sgnl['BSSID']), fmt) for sgnl in self.parsed_signals]
 
         return self.parsed_signals
@@ -258,6 +259,7 @@ class WifiScanner(threading.Thread):
                 [worker.run() for worker in self.workers]
 
                 self.polling_count += 1
+                self.elapsed = format_time(datetime.strptime(str(datetime.now() - self.start_time), "%H:%M:%S.%f"), self.config.get('TIME_FORMAT', "%H:%M:%S"))
                 wifi_updated.send(self)
                 time.sleep(self.config.get('SCAN_TIMEOUT', 5))
             else:
