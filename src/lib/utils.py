@@ -35,9 +35,13 @@ def make_path(outdir):
 
 
 def write_file(path, filename, message, mode):
-    # TODO: is this the only thing that writes files???
     with open(os.path.join(path, filename), mode) as outfile:
         outfile.write(f"{message}\n")
         return True
+
+
+def read_file(path, filename, mode):
+    with open(os.path.join(path, filename), mode) as infile:
+        return infile.read()
 
 
