@@ -182,8 +182,7 @@ class WifiScanner(threading.Thread):
         sgnl['results'] = [json.dumps(result) for result in worker.test_results]
 
     def get_parsed_signals(self):  # rename me, easily confused w retriever impl (cells vs. signals)
-        ''' updates and returns ALL signals '''
-        self.elapsed = datetime.now() - self.start_time
+        ''' updates and returns ALL parsed_signals '''
         fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
         self.elapsed = format_time(datetime.strptime(str(datetime.now() - self.start_time), "%H:%M:%S.%f"), fmt)
         [self.update_signal(sgnl, self.get_worker(sgnl['BSSID']), fmt) for sgnl in self.parsed_signals]
