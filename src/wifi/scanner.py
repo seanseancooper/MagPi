@@ -181,14 +181,6 @@ class WifiScanner(threading.Thread):
         sgnl['signal_cache'] = [json.dumps(sgnl.get()) for sgnl in self.signal_cache[worker.bssid]]
         sgnl['results'] = [json.dumps(result) for result in worker.test_results]
 
-    def get_parsed_signals(self):  # rename me, easily confused w retriever impl (cells vs. signals)
-        ''' updates and returns ALL parsed_signals '''
-        fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
-        self.elapsed = format_time(datetime.strptime(str(datetime.now() - self.start_time), "%H:%M:%S.%f"), fmt)
-        [self.update_signal(sgnl, self.get_worker(sgnl['BSSID']), fmt) for sgnl in self.parsed_signals]
-
-        return self.parsed_signals
-
     def parse_signals(self, readlines):
 
         # this returns a list of dicts [{key: value},...] that key is a 'column' name.
@@ -203,6 +195,14 @@ class WifiScanner(threading.Thread):
         sgnl = {'BSSID': bssid, 'SSID': worker.ssid}
         self.update_signal(sgnl, worker, self.config.get('TIME_FORMAT', "%H:%M:%S"))
         o.append(sgnl)
+
+    def get_parsed_signals(self):  # rename me, easily confused w retriever impl (cells vs. signals)
+        ''' updates and returns ALL parsed_signals '''
+        fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
+        self.elapsed = format_time(datetime.strptime(str(datetime.now() - self.start_time), "%H:%M:%S.%f"), fmt)
+        [self.update_signal(sgnl, self.get_worker(sgnl['BSSID']), fmt) for sgnl in self.parsed_signals]
+
+        return self.parsed_signals
 
     def get_tracked_signals(self):
         ''' update and return ONLY tracked signals '''
