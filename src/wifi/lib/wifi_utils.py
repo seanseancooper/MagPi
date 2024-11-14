@@ -67,5 +67,4 @@ def write_to_scanlist(config, searchmap):
 
     make_path(config.get('OUTFILE_PATH', "out"))
     _time = datetime.now().strftime(config.get('DATETIME_FORMAT', "%Y%m%d_%H%M%S"))
-    if write_file(config['OUTFILE_PATH'], "scanlist_" + _time + ".json", json.dumps(searchmap, indent=1), "x"):
-        return True
+    return write_file(config['OUTFILE_PATH'], "scanlist_" + _time + ".json", json.dumps(searchmap, indent=1), "x")
