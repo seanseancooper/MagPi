@@ -33,6 +33,16 @@ button {
     border-radius:3px;
 }
 
+.tab_button {
+    width:150px;
+    height:25px;
+    font-size: 15px;
+    font-weight: bold;
+    color: #333;
+    background-color: #999;
+    border-radius:3px;
+}
+
 .rem_button {
     position:absolute;
     top:1px;
