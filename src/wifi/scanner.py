@@ -45,6 +45,7 @@ class WifiScanner(threading.Thread):
         self.parsed_signals = []                # signals represented as a list of dictionaries.
         self.workers = []                       # units assigned to monitor a discrete signal
         self.tracked_signals = {}               # parsed_signals is a list, this is a map?!
+        self.ghost_signals = []                 # ghost_signals
         self.signal_cache = defaultdict(list)   # a mapping of lists of SignalPoint
 
         self.blacklist = {}
@@ -207,15 +208,13 @@ class WifiScanner(threading.Thread):
     def get_tracked_signals(self):
         ''' update and return ONLY tracked signals '''
         o = []
-        [self.update(bssid, o) for bssid in [sgnl for sgnl in self.tracked_signals]]
+        [self.update(bssid, o) for bssid in self.tracked_signals]
         return o
 
     def get_ghost_signals(self):
         ''' tracked signals MISSING from parsed_signals; 'greyed' out... '''
-        tracked = frozenset([key['BSSID'] for key in self.get_tracked_signals()])
-        parsed = frozenset([key['BSSID'] for key in self.get_parsed_signals()])
         o = []
-        [self.update(str(item), o) for item in tracked.difference(parsed)]
+        [self.update(item, o) for item in self.ghost_signals]
         return o
 
     def stop(self):
@@ -238,6 +237,14 @@ class WifiScanner(threading.Thread):
 
             if len(scanned) > 0:
                 self.parse_signals(scanned)
+
+                # find, load and update ghost_signals SignalPoints
+                # DBUG: delete removes *entire* collection due to using frozenset
+                tracked = frozenset([key['BSSID'] for key in self.get_tracked_signals()])
+                parsed = frozenset([key['BSSID'] for key in self.parsed_signals.copy()])
+                self.ghost_signals = tracked.difference(parsed)
+                [self.makeSignalPoint(str(item), -99) for item in self.ghost_signals]
+
                 self.get_location()
 
                 def blacklist(sgnl):
