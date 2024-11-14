@@ -239,7 +239,8 @@ class WifiScanner(threading.Thread):
                 self.parse_signals(scanned)
 
                 # find, load and update ghost_signals SignalPoints
-                # DBUG: delete removes *entire* collection due to using frozenset
+                # DBUG: delete removes *entire* collection due to using frozenset.
+                #  this diff logic was in a method, may need to put it back to have it work.
                 tracked = frozenset([key['BSSID'] for key in self.get_tracked_signals()])
                 parsed = frozenset([key['BSSID'] for key in self.parsed_signals.copy()])
                 self.ghost_signals = tracked.difference(parsed)
