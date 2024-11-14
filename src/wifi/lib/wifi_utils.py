@@ -1,14 +1,18 @@
 import os
 import xml.etree.ElementTree as ET
 from datetime import datetime
+import json
 
 from .iw_parse import matching_line
 from src.config import CONFIG_PATH, readConfig
 from src.lib.utils import make_path, write_file
-import json
 
 import logging
+from pythonjsonlogger import jsonlogger
+
 logger_root = logging.getLogger('root')
+json_logger = logging.getLogger('json_logger')
+wifi_logger = logging.getLogger('wifi_logger')
 
 config = {}
 readConfig(os.path.join(CONFIG_PATH, 'wifi.json'), config)
@@ -32,7 +36,7 @@ def get_vendor(cell):
             except KeyError:
                 return f"UNKNOWN"
     else:
-        logger_root.error(f"[{__name__}]:get_vendor got no cell!!")
+        wifi_logger.error(f"[{__name__}]:get_vendor got no cell!!")
         return "no cell!"
 
 
@@ -55,16 +59,16 @@ def get_timing(cell):
 
 
 def append_to_outfile(config, cell):
-    """Append found cells to a rolling list"""
-
-    make_path(config.get('OUTFILE_PATH', "out"))
-    _time = datetime.now().strftime(config.get('DATETIME_FORMAT', "%Y%m%d_%H%M%S"))
-    write_file(config['OUTFILE_PATH'], config['OUT_FILE'] + ".out", json.dumps(cell, indent=1), "a")
+    """Append a found cells to a rolling JSON list"""
+    logHandler = logging.StreamHandler()
+    formatter = jsonlogger.JsonFormatter()
+    logHandler.setFormatter(formatter)
+    json_logger.addHandler(logHandler)
+    json_logger.info({cell['BSSID']: cell})
 
 
 def write_to_scanlist(config, searchmap):
     """Write current SEARCHMAP out as JSON"""
-
     make_path(config.get('OUTFILE_PATH', "out"))
     _time = datetime.now().strftime(config.get('DATETIME_FORMAT', "%Y%m%d_%H%M%S"))
     return write_file(config['OUTFILE_PATH'], "scanlist_" + _time + ".json", json.dumps(searchmap, indent=1), "x")
