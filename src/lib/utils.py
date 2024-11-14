@@ -20,6 +20,14 @@ def enunciate(speakable, message):
         logger_root.debug(f"[{__name__}]:{message}")
 
 
+def format_time(_, fmt):
+    return f'{_.strftime(fmt)}'
+
+
+def format_delta(_, fmt):
+    return f'{_.strptime(fmt)}'
+
+
 def make_path(outdir):
     PATH = os.path.join(os.getcwd(), outdir)
     if not os.path.exists(PATH):
@@ -30,5 +38,6 @@ def write_file(path, filename, message, mode):
     # TODO: is this the only thing that writes files???
     with open(os.path.join(path, filename), mode) as outfile:
         outfile.write(f"{message}\n")
+        return True
 
 
