@@ -1,12 +1,13 @@
+import json
 import uuid
 from datetime import datetime
 
 
 class SignalPoint:
     """ discrete class to encapsulate a signal captured at a point.
-        A list of this type ae assumed to be arributed to a specific bssid.
-        The id field is to provide a unique representation of
-        the point to the map.
+        A list of this type are assumed to be attributed to a specific bssid.
+        The id field serves to provide a unique representation of a specific
+        point.
      """
 
     def __init__(self, bssid, lon, lat, sgnl):
