@@ -219,6 +219,7 @@ class WifiScanner(threading.Thread):
 
     def stop(self):
         write_to_scanlist(self.config, self.tracked_signals)
+        [worker.stop() for worker in self.workers]
         self.parsed_signals.clear()  # ensure no data is available
         wifi_stopped.send(self)
         wifi_logger.info(f"[{__name__}]: WifiScanner stopped. {self.polling_count} iterations.")
@@ -240,7 +241,8 @@ class WifiScanner(threading.Thread):
 
                 # find, load and update ghost_signals SignalPoints
                 # DBUG: delete removes *entire* collection due to using frozenset.
-                #  this diff logic was in a method, may need to put it back to have it work.
+                #  this diff logic could be implemented in a method, may need do that
+                #  to have it work.
                 tracked = frozenset([key['BSSID'] for key in self.get_tracked_signals()])
                 parsed = frozenset([key['BSSID'] for key in self.parsed_signals.copy()])
                 self.ghost_signals = tracked.difference(parsed)
@@ -268,6 +270,7 @@ class WifiScanner(threading.Thread):
                 self.polling_count += 1
                 self.elapsed = format_time(datetime.strptime(str(datetime.now() - self.start_time), "%H:%M:%S.%f"), self.config.get('TIME_FORMAT', "%H:%M:%S"))
                 wifi_updated.send(self)
+
                 time.sleep(self.config.get('SCAN_TIMEOUT', 5))
             else:
                 wifi_failed.send(self)
