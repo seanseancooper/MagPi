@@ -38,6 +38,7 @@ class WifiWorker:
         self.DEBUG = False
 
     def __str__(self):
+        max = max(int(self.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -(self.config.get('SIGNAL_CACHE_MAX')))
         return {"SSID"          : self.ssid,
                 "BSSID"         : self.bssid,
                 "created"       : str(self.created),
@@ -50,7 +51,7 @@ class WifiWorker:
                 "encryption"    : self.is_encrypted,
                 "is_mute"       : str(self.is_mute),
                 "tracked"       : str(self.tracked),
-                "signal_cache"  : [pt.get() for pt in self.scanner.signal_cache[self.bssid]],
+                "signal_cache"  : [pt.get() for pt in self.scanner.signal_cache[self.bssid]][max:],
                 "tests"         : [x for x in self.test_results]
         }
 
@@ -158,11 +159,11 @@ class WifiWorker:
         # SIGNAL: REMOVED ITEM
         return True
 
-    def run(self):
-        ''' match a BSSID and populate data '''
-
-        [self.match(sgnl) for sgnl in self.scanner.parsed_signals]
-
+    def stop(self):
         if self.tracked:
             append_to_outfile(self.config, self.__str__())
+
+    def run(self):
+        ''' match a BSSID and populate data '''
+        [self.match(sgnl) for sgnl in self.scanner.parsed_signals]
 
