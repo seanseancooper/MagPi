@@ -1,6 +1,6 @@
 import threading
 from flask import Flask
-import __init__
+import routes
 from src.lib.rest_server import RESTServer as RESTServer
 
 
@@ -17,16 +17,16 @@ class MOTController(threading.Thread):
 
         with app.app_context():
             if __name__ == '__main__':
-                app.config['SERVER_NAME'] = __init__.motMgr.config['MOT']['SERVER_NAME']
-                app.config['DEBUG'] = __init__.motMgr.config['DEBUG']
-                app.register_blueprint(__init__.mot_bp)
+                app.config['SERVER_NAME'] = routes.motMgr.config['MOT']['SERVER_NAME']
+                app.config['DEBUG'] = routes.motMgr.config['DEBUG']
+                app.register_blueprint(routes.mot_bp)
             return app
 
     def run(self) -> None:
         try:
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
-            __init__.motMgr.run()
+            routes.motMgr.run()
         except KeyboardInterrupt:
             pass
 

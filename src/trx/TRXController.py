@@ -1,7 +1,7 @@
 import threading
 from flask import Flask
 from flask_cors import CORS, cross_origin
-import __init__
+import routes
 from src.lib.rest_server import RESTServer as RESTServer
 
 
@@ -21,9 +21,9 @@ class TRXController(threading.Thread):
 
         with app.app_context():
             if __name__ == '__main__':
-                app.config['SERVER_NAME'] = __init__.trxRet.config['SERVER_NAME']
-                app.config['DEBUG'] = __init__.trxRet.config['DEBUG']
-                app.register_blueprint(__init__.trx_bp)
+                app.config['SERVER_NAME'] = routes.trxRet.config['SERVER_NAME']
+                app.config['DEBUG'] = routes.trxRet.config['DEBUG']
+                app.register_blueprint(routes.trx_bp)
             return app
 
     def run(self) -> None:
@@ -31,7 +31,7 @@ class TRXController(threading.Thread):
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
 
-            __init__.trxRet.run()
+            routes.trxRet.run()
         except KeyboardInterrupt:
             pass
 

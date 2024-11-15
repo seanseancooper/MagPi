@@ -1,7 +1,7 @@
 import threading
 from flask import Flask
 from flask_cors import CORS, cross_origin
-import __init__
+import routes
 from src.lib.rest_server import RESTServer as RESTServer
 
 
@@ -21,9 +21,9 @@ class GPSController(threading.Thread):
 
         with app.app_context():
             if __name__ == '__main__':
-                app.config['SERVER_NAME'] = __init__.gpsRet.config['SERVER_NAME']
-                app.config['DEBUG'] = __init__.gpsRet.config['DEBUG']
-                app.register_blueprint(__init__.gps_bp)
+                app.config['SERVER_NAME'] = routes.gpsRet.config['SERVER_NAME']
+                app.config['DEBUG'] = routes.gpsRet.config['DEBUG']
+                app.register_blueprint(routes.gps_bp)
             return app
 
     def run(self) -> None:
@@ -31,7 +31,7 @@ class GPSController(threading.Thread):
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
 
-            __init__.gpsRet.run()
+            routes.gpsRet.run()
         except KeyboardInterrupt:
             pass
 

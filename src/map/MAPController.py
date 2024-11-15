@@ -3,7 +3,7 @@ import time
 
 from flask import Flask
 from flask_cors import CORS, cross_origin
-import __init__
+import routes
 from src.lib.rest_server import RESTServer as RESTServer
 
 
@@ -23,9 +23,9 @@ class MAPController(threading.Thread):
 
         with app.app_context():
             if __name__ == '__main__':
-                app.config['SERVER_NAME'] = __init__.config['SERVER_NAME']
-                app.config['DEBUG'] = __init__.config['DEBUG']
-                app.register_blueprint(__init__.map_bp)
+                app.config['SERVER_NAME'] = routes.config['SERVER_NAME']
+                app.config['DEBUG'] = routes.config['DEBUG']
+                app.register_blueprint(routes.map_bp)
             return app
 
     def run(self) -> None:
@@ -37,8 +37,8 @@ class MAPController(threading.Thread):
             os.chdir('src/')
             #TODO: run the build command, but don't start the node server
             # ✓ built in 3.28s... takes a second.
-            __init__.node.run()  # this exits badly!!!
-            __init__.mapAgg.run()
+            routes.node.run()  # this exits badly!!!
+            routes.mapAgg.run()
 
         except KeyboardInterrupt:
             pass

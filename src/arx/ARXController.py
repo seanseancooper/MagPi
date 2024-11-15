@@ -1,7 +1,7 @@
 import threading
 from flask import Flask
 from flask_cors import CORS, cross_origin
-import __init__
+import routes
 from src.lib.rest_server import RESTServer as RESTServer
 
 
@@ -22,16 +22,16 @@ class ARXController(threading.Thread):
 
         with app.app_context():
             if __name__ == '__main__':
-                app.config['SERVER_NAME'] = __init__.arxRec.config['SERVER_NAME']
-                app.config['DEBUG'] = __init__.arxRec.config['DEBUG']
-                app.register_blueprint(__init__.arx_bp)
+                app.config['SERVER_NAME'] = routes.arxRec.config['SERVER_NAME']
+                app.config['DEBUG'] = routes.arxRec.config['DEBUG']
+                app.register_blueprint(routes.arx_bp)
             return app
 
     def run(self) -> None:
         try:
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
-            __init__.arxRec.run()
+            routes.arxRec.run()
         except KeyboardInterrupt:
             pass
 

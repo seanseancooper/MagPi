@@ -1,7 +1,7 @@
 import threading
 from flask import Flask
 from flask_cors import CORS, cross_origin
-import __init__
+import routes
 from src.lib.rest_server import RESTServer as RESTServer
 
 
@@ -22,16 +22,16 @@ class CAMController(threading.Thread):
 
         with app.app_context():
             if __name__ == '__main__':
-                app.config['SERVER_NAME'] = __init__.camMgr.config['SERVER_NAME']
-                app.config['DEBUG'] = __init__.camMgr.config['DEBUG']
-                app.register_blueprint(__init__.cam_bp)
+                app.config['SERVER_NAME'] = routes.camMgr.config['SERVER_NAME']
+                app.config['DEBUG'] = routes.camMgr.config['DEBUG']
+                app.register_blueprint(routes.cam_bp)
             return app
 
     def run(self) -> None:
         try:
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
-            __init__.camMgr.run()
+            routes.camMgr.run()
         except KeyboardInterrupt:
             pass
 
