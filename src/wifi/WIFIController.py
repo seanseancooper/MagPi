@@ -29,6 +29,13 @@ class WifiController(threading.Thread):
 
     def run(self) -> None:
         try:
+            import atexit
+
+            def stop():
+                __init__.scanner.stop()
+
+            atexit.register(stop)
+
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
             __init__.scanner.run()
