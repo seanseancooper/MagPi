@@ -58,7 +58,7 @@ def wifi_scan():
 def wifi_scan_bssid(bssid):
     #DBUG this fails to get a worker?!
     worker = scanner.get_worker(bssid)
-    if worker.ssid:
+    if worker:
         return jsonify(worker.__str__())
     return "", 404
 
