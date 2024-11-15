@@ -29,8 +29,6 @@ class WifiWorker:
         self.is_mute = False            # is BSSID muted
         self.tracked = False            # is BSSID in scanner.tracked_signals
 
-        self.stats = {}                 # statisics on this signal
-
         self.results = []               # a list of test results (this should be local to method)
         self.return_all = False         # return all/any
         self.test_results = {}          # mapping of results
@@ -38,7 +36,7 @@ class WifiWorker:
         self.DEBUG = False
 
     def __str__(self):
-        max = max(int(self.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -(self.config.get('SIGNAL_CACHE_MAX')))
+        cache_max = max(int(self.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -(self.config.get('SIGNAL_CACHE_MAX')))
         return {"SSID"          : self.ssid,
                 "BSSID"         : self.bssid,
                 "created"       : str(self.created),
@@ -51,7 +49,7 @@ class WifiWorker:
                 "encryption"    : self.is_encrypted,
                 "is_mute"       : str(self.is_mute),
                 "tracked"       : str(self.tracked),
-                "signal_cache"  : [pt.get() for pt in self.scanner.signal_cache[self.bssid]][max:],
+                "signal_cache"  : [pt for pt in self.scanner.signal_cache[self.bssid]][cache_max:],
                 "tests"         : [x for x in self.test_results]
         }
 
