@@ -56,7 +56,6 @@ def wifi_scan():
 
 @wifi_bp.route('/scan/<bssid>', methods=['GET'], subdomain='wifi')
 def wifi_scan_bssid(bssid):
-    #DBUG this fails to get a worker?!
     worker = scanner.get_worker(bssid)
     if worker:
         return jsonify(worker.__str__())
