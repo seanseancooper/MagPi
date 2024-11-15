@@ -14,6 +14,12 @@ logger_root = logging.getLogger('root')
 json_logger = logging.getLogger('json_logger')
 wifi_logger = logging.getLogger('wifi_logger')
 
+logHandler = logging.StreamHandler()
+formatter = jsonlogger.JsonFormatter()
+
+logHandler.setFormatter(formatter)
+json_logger.addHandler(logHandler)
+
 config = {}
 readConfig(os.path.join(CONFIG_PATH, 'wifi.json'), config)
 
@@ -60,10 +66,6 @@ def get_timing(cell):
 
 def append_to_outfile(config, cell):
     """Append a found cells to a rolling JSON list"""
-    logHandler = logging.StreamHandler()
-    formatter = jsonlogger.JsonFormatter()
-    logHandler.setFormatter(formatter)
-    json_logger.addHandler(logHandler)
     json_logger.info({cell['BSSID']: cell})
 
 
