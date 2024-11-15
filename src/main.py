@@ -6,10 +6,10 @@ import atexit
 
 
 from src.lib.rest_server import RESTServer
-import src.arx.ARXController as ARXController
-import src.gps.GPSController as GPSController
-import src.wifi.WIFIController as WIFIController
-import src.cam.CAMController as CAMController
+import src.arx.__init__ as ARXController
+import src.gps.__init__ as GPSController
+import src.wifi.__init__ as WIFIController
+import src.cam.__init__ as CAMController
 
 import src.arx.routes as arx
 import src.gps.routes as gps
