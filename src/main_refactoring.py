@@ -6,25 +6,99 @@ from flask import Flask
 import atexit
 import logging.config
 
-import __init__ as root
+import routes as root
 
 configuration = {}
 logger_root = logging.getLogger('root')
 
+# Controller [5000]
+
 #  ARXController [5001]
+#
+# @arx_bp.route('/', subdomain='arx') > redirect("/player", code=302)
+# @arx_bp.route('/player', methods=['GET'], subdomain='arx')
+# @arx_bp.route('/meter', methods=['GET'], subdomain='arx')
+# @arx_bp.route('/mute', methods=['POST'], subdomain='arx')
+
+
 #  CAMController [5002]
 #       "FORWARD_VIDEO_URL" = "http://10.99.77.1/blackvue_live.cgi"
 #       "REVERSE_VIDEO_URL"  = "http://10.99.77.1/blackvue_live.cgi?direction=R"
 #       ShowxatingBlackviewPlugin: localhost:6100 (in showxating_plugins.toml) <-- streams symbology & analysis
+#
+# @cam_bp.route('/') > redirect("/ctrl", code=302)
+# @cam_bp.route("/ctrl", methods=['GET'], subdomain='cam')
+# @cam_bp.route("/snap", methods=['POST'], subdomain='cam')
+# @cam_bp.route("/view/<direction>", methods=['GET', 'POST'], subdomain='cam')
+# @cam_bp.route("/multibutton/<mode>", methods=['POST'], subdomain='cam')
+# @cam_bp.route("/plugin/<field>/<value>", methods=['POST'], subdomain='cam')
+# @cam_bp.route("/move/<command>")
+
+
 #  EBSController [5003]
+#
+# @ebs_bp.route('/')
+# @ebs_bp.route('/run', methods=['GET', 'POST'])
+# @ebs_bp.route("/stop", methods=['GET', 'POST'])
+
+
 #  GPSController [5004]
 #       "GPS_HOST": "192.168.1.2"
 #       "MAP_HOST": "localhost:5173"
 #       mapping-app (how to move Node.js from default)
+#
+# @gps_bp.route('/', subdomain="gps") > redirect("/position", code=302)
+# @gps_bp.route("/time", methods=['GET'], subdomain="gps")
+# @gps_bp.route("/position", methods=['GET'], subdomain="gps")
+# @gps_bp.route("/location", methods=['GET'], subdomain="gps")
+# @gps_bp.route("/altitude", methods=['GET'], subdomain="gps")
+# @gps_bp.route("/speed", methods=['GET'], subdomain="gps")
+# @gps_bp.route("/heading", methods=['GET'], subdomain="gps")
+# @gps_bp.route("/climb", methods=['GET'], subdomain="gps")
+# @gps_bp.route("/config", methods=['GET'], subdomain="gps")
+
+#  MAPController [5005]
+#
+# @map_bp.route('/', subdomain='map') > redirect("/aggregated", code=302)
+# @map_bp.route("/map", methods=['GET'], subdomain='map')
+# @map_bp.route("/aggregated", methods=['GET'], subdomain='map')
+
+
 #  MOTController [5005]
 #  		"MOTION_CPANEL_URL" : "http://192.168.1.4:8080"
 #       "MOTION_ALERT_URL" : "http://192.168.1.4:9046"
-#  WifiController [5006]
+#
+# @mot_bp.route('/') > redirect("/controlpanel", code=302)
+# @mot_bp.route("/stop", methods=['GET', 'POST'])
+# # NOTE: MOT has a control panel of it's own
+# @mot_bp.route("/controlpanel", methods=['GET'])
+
+
+#  WIFIController [5006]
+#
+# @wifi_bp.route('/') > redirect("/scan", code=302)
+# @wifi_bp.route('/add/<bssid>', methods=['POST'], subdomain='wifi')
+# @wifi_bp.route('/tracked', methods=['GET', 'POST'], subdomain='wifi')
+# @wifi_bp.route('/ghosts', methods=['GET', 'POST'], subdomain='wifi')
+# @wifi_bp.route('/mute/<bssid>', methods=['POST'], subdomain='wifi')
+# @wifi_bp.route('/remove/<bssid>', methods=['POST'], subdomain='wifi')
+# @wifi_bp.route('/scan', methods=['GET'], subdomain='wifi')
+# @wifi_bp.route('/scan/<bssid>', methods=['GET'], subdomain='wifi')
+# @wifi_bp.route('/scanner', methods=['GET'], subdomain='wifi')
+# @wifi_bp.route('/stop', methods=['POST'], subdomain='wifi')
+# @wifi_bp.route('/write', methods=['POST'], subdomain='wifi')
+
+
+#  NETController [5007]
+#  SDRController [5008]
+
+
+#  TRXController [5009]
+#
+# @trx_bp.route('/', subdomain="trx") > redirect("/scanned", code=302)
+# @trx_bp.route("/scan", methods=['GET'], subdomain="trx")
+# @trx_bp.route("/scanned", methods=['GET'], subdomain="trx")
+
 if __name__ == '__main__':
 
     app = Flask('main', subdomain_matching=True)
@@ -49,12 +123,12 @@ if __name__ == '__main__':
 
         def load_module():
 
-            from ebs import __init__ as ebs
-            from arx import __init__ as arx
-            from gps import __init__ as gps
-            from mot import __init__ as mot
+            from ebs import routes as ebs
+            from arx import routes as arx
+            from gps import routes as gps
+            from mot import routes as mot
             from wifi import __init__ as wifi
-            from cam import __init__ as cam
+            from cam import routes as cam
 
             from src.lib.rest_server import RESTServer
 

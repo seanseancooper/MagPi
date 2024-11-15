@@ -1,12 +1,12 @@
 import os
 from flask import Flask
 
-import src.arx.__init__ as arx
-import src.gps.__init__ as gps
+import src.arx.routes as arx
+import src.gps.routes as gps
 import src.wifi.__init__ as wifi
-import src.cam.__init__ as cam
+import src.cam.routes as cam
 
-import __init__ as root
+import routes as root
 configuration = {}
 
 
