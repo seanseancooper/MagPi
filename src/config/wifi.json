@@ -111,6 +111,9 @@
 			}
 		},
 		{
+			"SIGNAL_CACHE_LOG_MAX": -5
+		},
+		{
 			"OUTFILE_PATH": "../../_out"
 		},
 		{
