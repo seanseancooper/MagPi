@@ -127,7 +127,7 @@ if __name__ == '__main__':
             from arx import routes as arx
             from gps import routes as gps
             from mot import routes as mot
-            from wifi import __init__ as wifi
+            from wifi import routes as wifi
             from cam import routes as cam
 
             from src.lib.rest_server import RESTServer

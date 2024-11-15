@@ -1,7 +1,7 @@
 import threading
 from flask import Flask
 from flask_cors import CORS, cross_origin
-import __init__
+import routes
 from src.lib.rest_server import RESTServer as RESTServer
 
 
@@ -22,9 +22,9 @@ class WifiController(threading.Thread):
 
         with app.app_context():
             if __name__ == '__main__':
-                app.config['SERVER_NAME'] = __init__.scanner.config['SERVER_NAME']
-                app.config['DEBUG'] = __init__.scanner.config['DEBUG']
-                app.register_blueprint(__init__.wifi_bp)
+                app.config['SERVER_NAME'] = routes.scanner.config['SERVER_NAME']
+                app.config['DEBUG'] = routes.scanner.config['DEBUG']
+                app.register_blueprint(routes.wifi_bp)
             return app
 
     def run(self) -> None:
@@ -32,13 +32,13 @@ class WifiController(threading.Thread):
             import atexit
 
             def stop():
-                __init__.scanner.stop()
+                routes.scanner.stop()
 
             atexit.register(stop)
 
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
-            __init__.scanner.run()
+            routes.scanner.run()
         except KeyboardInterrupt:
             pass
 

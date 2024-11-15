@@ -13,7 +13,7 @@ import src.cam.CAMController as CAMController
 
 import src.arx.routes as arx
 import src.gps.routes as gps
-import src.wifi.__init__ as wifi
+import src.wifi.routes as wifi
 import src.cam.routes as cam
 
 
