@@ -30,6 +30,9 @@
 			"NODE_BUILD_COMMAND": ["npm", "run", "build"]
 		},
 		{
+			"AGGREGATOR_TIMEOUT": 0.5
+		},
+		{
 			"DATE_FORMAT": "%Y-%m-%d"
 		},
 		{
