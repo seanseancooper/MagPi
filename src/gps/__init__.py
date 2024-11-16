@@ -28,6 +28,13 @@ class GPSController(threading.Thread):
 
     def run(self) -> None:
         try:
+            import atexit
+
+            def stop():
+                routes.gpsRet.stop()
+
+            atexit.register(stop)
+
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
 
