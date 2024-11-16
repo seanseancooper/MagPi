@@ -1,5 +1,6 @@
 import threading
 from flask import Flask
+from flask_cors import CORS, cross_origin
 import routes
 from src.lib.rest_server import RESTServer as RESTServer
 
@@ -14,6 +15,8 @@ class MOTController(threading.Thread):
         app = Flask('MOT',
                     instance_relative_config=True,
                     subdomain_matching=True)
+        cors = CORS(app)
+        app.config['CORS_HEADERS'] = 'Content-Type'
 
         with app.app_context():
             if __name__ == '__main__':
@@ -24,6 +27,13 @@ class MOTController(threading.Thread):
 
     def run(self) -> None:
         try:
+            import atexit
+
+            def stop():
+                routes.motMgr.stop()
+
+            atexit.register(stop)
+
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
             routes.motMgr.run()
