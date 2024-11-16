@@ -1,4 +1,6 @@
 import os
+import shutil
+import subprocess
 from datetime import datetime
 import logging
 
@@ -44,4 +46,15 @@ def read_file(path, filename, mode):
     with open(os.path.join(path, filename), mode) as infile:
         return infile.read()
 
+
+def runOSCommand(command: list):
+
+    try:
+        command[0] = shutil.which(command[0])
+        ps = subprocess.Popen(command)
+        logger_root.debug(f"[{__name__}]: PID --> {ps.pid}")
+        return ps.pid
+    except OSError as e:
+        logger_root.fatal(f"[{__name__}]:couldn't create a process for \'{command}\': {e}")
+    return 0
 

@@ -1,11 +1,10 @@
 import os
-import shutil
-import subprocess
 import threading
 
 import logging
 import time
 
+from src.lib.utils import runOSCommand
 from src.config import CONFIG_PATH, readConfig
 
 map_logger = logging.getLogger('gps_logger')
@@ -25,18 +24,9 @@ class NodeRunner(threading.Thread):
 
         readConfig(config_file, self.config)
 
-    def runOSCommand(self, command: list):
-        try:
-            command[0] = shutil.which(command[0])
-            ps = subprocess.Popen(command)
-            map_logger.debug(f"[{__name__}]: PID --> {ps.pid}")
-            return ps.pid
-        except OSError as e:
-            map_logger.error(f"[{__name__}]:couldn't create a process for \'{command}\': {e}")
-        return 0
 
     def build(self):
-        if self.runOSCommand(self.config['NODE_BUILD_COMMAND']) > 0:
+        if runOSCommand(self.config['NODE_BUILD_COMMAND']) > 0:
             time.sleep(5)
             map_logger.info(f"[{__name__}]: OK")
         else:
@@ -45,7 +35,7 @@ class NodeRunner(threading.Thread):
 
     def run(self):
         home = os.getcwd()
-        self.pid = self.runOSCommand(self.config['NODE_START_COMMAND'])
+        self.pid = runOSCommand(self.config['NODE_START_COMMAND'])
         if self.pid > 0:
             os.chdir(home)
             map_logger.info(f"[{__name__}]: OK {self.pid}")
