@@ -3,13 +3,13 @@ import time
 import json
 from datetime import datetime
 from collections import defaultdict
-import requests
+
 from flask.signals import Namespace
 from contextlib import contextmanager
 
 from src.config.__init__ import readConfig
 
-from src.lib.utils import format_time
+from src.lib.utils import get_location, format_time
 from src.wifi.lib.wifi_utils import write_to_scanlist
 from src.wifi.lib.iw_parse import print_table
 
@@ -133,16 +133,6 @@ class WifiScanner(threading.Thread):
         [print_signal(sgnl) for sgnl in sgnls]
         print_table(table)
 
-    def get_location(self):
-        """ gets location from GPS endpoint"""
-        try:
-            #TODO: don't hardcode URL in CONFIG;  get it from flask, config REST
-            resp = requests.get(self.config.get('GPS_ENDPOINT', 'http://gps.localhost:5004/position'))
-            position = json.loads(resp.text)
-            self.latitude = position.get('LATITUDE', position.get('lat'))
-            self.longitude = position.get('LONGITUDE', position.get('lon'))
-        except Exception as e:
-            wifi_logger.warning(f"GPS Retrieval Error: {e}")
 
     def makeSignalPoint(self, bssid, signal):
         sgnlPt = SignalPoint(bssid, self.longitude, self.latitude, signal)
@@ -248,7 +238,7 @@ class WifiScanner(threading.Thread):
                 self.ghost_signals = tracked.difference(parsed)
                 [self.makeSignalPoint(str(item), -99) for item in self.ghost_signals]
 
-                self.get_location()
+                get_location(self)
 
                 def blacklist(sgnl):
                     if sgnl['BSSID'] in self.blacklist.keys():
