@@ -69,7 +69,6 @@ class MAPAggregator(threading.Thread):
             resp = requests.get('http://' + mod.lower() + '.' + self.configs[mod]['SERVER_NAME'])
             if resp.ok:
                 self.aggregated[mod] = resp.json()
-            time.sleep(self.config.get('AGGREGATOR_TIMEOUT', .5))
         except Exception as e:
             map_logger.warning(f'Aggregator Warning! {e}')
 
@@ -80,7 +79,7 @@ class MAPAggregator(threading.Thread):
 
         self.register_modules()
 
-        while self.live_modules:
+        while True:
 
             for mod in self.live_modules:
                 self.aggregate(mod)
@@ -92,9 +91,8 @@ class MAPAggregator(threading.Thread):
                     self.aggregated.pop(mod)
                 except KeyError: pass  # 'missing' is fine.
 
-            print(f'aggregated: {list(self.aggregated.keys())}) live: {[m for m in self.live_modules]} dead: {[m for m in self.dead_modules]}')
-
-        map_logger.warning("no running modules!!!")
+            print(f'MAPAggregator: {list(self.aggregated.keys())}) live: {[m for m in self.live_modules]} dead: {[m for m in self.dead_modules]}')
+            time.sleep(self.config.get('AGGREGATOR_TIMEOUT', .5))
 
 
 if __name__ == '__main__':

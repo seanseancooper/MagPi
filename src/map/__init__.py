@@ -1,6 +1,4 @@
 import threading
-import time
-
 from flask import Flask
 from flask_cors import CORS, cross_origin
 import routes
@@ -30,14 +28,23 @@ class MAPController(threading.Thread):
 
     def run(self) -> None:
         try:
+            import atexit
+
+            def stop():
+                routes.mapAgg.stop()
+
+            atexit.register(stop)
+
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
 
             import os
             os.chdir('src/')
-            #TODO: run the build command, but don't start the node server
-            # ✓ built in 3.28s... takes a second.
-            routes.node.run()  # this exits badly!!!
+            if routes.config['NODE_BUILD'] is True:
+                routes.node.build()
+            else:
+                routes.node.run()
+
             routes.mapAgg.run()
 
         except KeyboardInterrupt:

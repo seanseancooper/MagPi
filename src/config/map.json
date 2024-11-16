@@ -21,13 +21,13 @@
 			"STATIC_FOLDER": "/static"
 		},
 		{
-			"NODE_START_COMMAND": ["/usr/local/bin/npm", "start"]
+			"NODE_START_COMMAND": ["npm", "start"]
 		},
 		{
-			"NODE_BUILD_COMMAND": ["/usr/local/bin/npm", "run", "build"]
+			"NODE_BUILD": false
 		},
 		{
-			"NODE_STOP_COMMAND": ["kill", "-9"]
+			"NODE_BUILD_COMMAND": ["npm", "run", "build"]
 		},
 		{
 			"DATE_FORMAT": "%Y-%m-%d"
