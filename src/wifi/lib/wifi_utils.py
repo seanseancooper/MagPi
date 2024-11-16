@@ -8,17 +8,8 @@ from src.config import CONFIG_PATH, readConfig
 from src.lib.utils import make_path, write_file
 
 import logging
-from pythonjsonlogger import jsonlogger
 
-logger_root = logging.getLogger('root')
 json_logger = logging.getLogger('json_logger')
-wifi_logger = logging.getLogger('wifi_logger')
-
-logHandler = logging.StreamHandler()
-formatter = jsonlogger.JsonFormatter()
-
-logHandler.setFormatter(formatter)
-json_logger.addHandler(logHandler)
 
 config = {}
 readConfig(os.path.join(CONFIG_PATH, 'wifi.json'), config)
@@ -32,6 +23,7 @@ def proc_vendors(vendor):
 
 
 def get_vendor(cell):
+    wifi_logger = logging.getLogger('wifi_logger')
     if cell:
         vendor_mac = matching_line(cell, "Address: ")[0:8]
         if vendor_mac is None:
