@@ -20,7 +20,7 @@ class MOTController(threading.Thread):
 
         with app.app_context():
             if __name__ == '__main__':
-                app.config['SERVER_NAME'] = routes.motMgr.config['MOT']['SERVER_NAME']
+                app.config['SERVER_NAME'] = routes.motMgr.config['SERVER_NAME']
                 app.config['DEBUG'] = routes.motMgr.config['DEBUG']
                 app.register_blueprint(routes.mot_bp)
             return app
