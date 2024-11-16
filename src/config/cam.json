@@ -18,7 +18,7 @@
 			"REVERSE_VIDEO_URL" : "http://10.99.77.1/blackvue_live.cgi?direction=R"
 		},
 		{
-			"FORWARD_TEST_URL" : ""
+			"FORWARD_TEST_URL" : "/Users/scooper/PycharmProjects/MagPi/src/cam/IMG_1956_small.mp4"
 		},
 		{
 			"PLUGIN_NAME" : "blackview_test_vis"
