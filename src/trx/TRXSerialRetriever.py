@@ -1,8 +1,6 @@
-import encodings
 import os
 import threading
 import random
-from collections import defaultdict
 
 import serial
 
@@ -11,7 +9,8 @@ from datetime import datetime
 
 from src.config import CONFIG_PATH, readConfig
 
-import logging
+from src.lib.utils import get_location
+from src.trx.lib.TRXSignalPoint import TRXSignalPoint
 
 
 class TRXSerialRetriever(threading.Thread):
@@ -26,6 +25,9 @@ class TRXSerialRetriever(threading.Thread):
         self.parity = None
         self.bytesize = None
         self.stopbits = None
+
+        self.latitude = 0.0
+        self.longitude = 0.0
 
         self.out = None
         self.signal_cache = []
@@ -48,8 +50,19 @@ class TRXSerialRetriever(threading.Thread):
     def get_scan(self):
         return self.out
 
+    def makeSignalPoint(self):
+        get_location(self)
+        sgnl = TRXSignalPoint(self.longitude, self.latitude, self.out)
+
+        def manage_signal_cache():
+            while len(self.signal_cache) >= self.config.get('SIGNAL_CACHE_MAX', 150):
+                self.signal_cache.pop(0)
+
+        manage_signal_cache()
+        self.signal_cache.append(sgnl)
+
     def get_scanned(self):
-        return self.signal_cache
+        return [x.get() for x in self.signal_cache]
 
     def run(self):
 
@@ -73,7 +86,9 @@ class TRXSerialRetriever(threading.Thread):
                             self.out['SCAN_DATE'] = format(datetime.now(), self.config['DATE_FORMAT'])
                             self.out['SCAN_TIME'] = format(datetime.now(), self.config['TIME_FORMAT'])
                         time.sleep(random.randint(1, self.config['TEST_FILE_TIME_MAX']))
-                        self.signal_cache.insert(-1, self.out)
+
+                        self.makeSignalPoint()
+
                         print(self.out)
             else:
 
