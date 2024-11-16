@@ -5,8 +5,7 @@ import numpy as np
 
 from src.cam.Showxating.plugin import ShowxatingPlugin
 from src.cam.Showxating.lib.FrameObjektTracker import FrameObjektTracker
-from src.cam.Showxating.lib.StreamService import StreamService, StreamingHandler
-from lib.__init__ import highlight
+from src.cam.Showxating.lib.StreamService import StreamService, StreamingHandler, highlight
 import logging
 
 cam_logger = logging.getLogger('cam_logger')

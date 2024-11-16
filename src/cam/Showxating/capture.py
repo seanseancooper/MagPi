@@ -2,7 +2,7 @@ import os
 import time
 from datetime import datetime
 import cv2 as cv
-from lib.__init__ import highlight
+from .lib.StreamService import highlight
 
 import logging
 import http.client
