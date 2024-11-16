@@ -58,3 +58,15 @@ def runOSCommand(command: list):
         logger_root.fatal(f"[{__name__}]:couldn't create a process for \'{command}\': {e}")
     return 0
 
+
+def get_location(locator):
+    """ gets location from GPS endpoint"""
+    import requests
+    import json
+    try:
+        resp = requests.get(locator.config.get('GPS_ENDPOINT', 'http://gps.localhost:5004/position'))
+        position = json.loads(resp.text)
+        locator.latitude = position.get('LATITUDE', position.get('lat'))
+        locator.longitude = position.get('LONGITUDE', position.get('lon'))
+    except Exception as e:
+        logger_root.warning(f"GPS Retrieval Error: {e}")
