@@ -15,7 +15,10 @@
 			"TEST_FILE": "TEST_FILE.csv"
 		},
 		{
-			"TEST_FILE_TIME_MAX": 2
+			"TEST_FILE_TIME_MAX": 90
+		},
+		{
+			"SIGNAL_CACHE_MAX": 150
 		},
 		{
 			"DEVICE": "/dev/cu.URT1"
