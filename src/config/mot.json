@@ -15,7 +15,7 @@
 			"MOTION_CAP_HTML" : "motion_cap.html.j2"
 		},
 		{
-			"SERVER_NAME": "localhost:5005"
+			"SERVER_NAME": "localhost:5010"
 		},
 		{
 			"TEMPLATE_FOLDER": "templates"
