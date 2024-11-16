@@ -88,7 +88,7 @@ class CAMManager(threading.Thread):
     def cam_direction(self, direction):
         #TODO: return self.config[direction]; note: 'FORE'/'AFT' hardcoded in the button
         if direction == "FORE":
-            return self.config['FORWARD_VIDEO_URL']
+            return self.config.get('FORWARD_TEST_URL', self.config['FORWARD_VIDEO_URL'])
         else:
             return self.config['REVERSE_VIDEO_URL']
 

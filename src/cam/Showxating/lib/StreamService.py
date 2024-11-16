@@ -7,9 +7,17 @@ import cv2 as cv
 import numpy as np
 import logging
 
-from __init__ import highlight
-
 cam_logger = logging.getLogger('cam_logger')
+
+
+def highlight(arr, x, y):
+    from PIL import Image
+    # sample a pixel position and use a combinatorial 'inversion'
+    # of the color value, so it's always visible.
+    img = Image.fromarray(arr, "RGB")
+    pix = img.load()
+    R, G, B = pix[x, y]
+    return (R + 128) % 255, (G + 128) % 255, (B + 128) % 255
 
 
 class StreamingHandler(server.BaseHTTPRequestHandler):
@@ -123,7 +131,7 @@ if __name__ == "__main__":
     readConfig(os.path.join(CONFIG_PATH, 'cam.json'), myconfig)
 
     handler = StreamingHandler  # choose the handler.
-    handler.src = myconfig.get('FORWARD_VIDEO_URL')  # set the handlers' 'source'.
+    handler.src = myconfig.get('FORWARD_TEST_URL', myconfig['FORWARD_VIDEO_URL'])  # set the handlers' 'source'.
     svc = StreamService(('cam.localhost', 5002), '/stream', handler)
     svc.stream()
 
