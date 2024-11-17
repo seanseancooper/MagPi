@@ -115,6 +115,45 @@ class TRXSerialRetriever(threading.Thread):
                 # and response for error checking.
                 SUM = (msgCode + msgData + ETX) and '\xFF'
 
+
+                # +-o Whistler TRX-1 Scanner@14600000  <class IOUSBHostDevice, id 0x100003a9d, registered, matched, active, busy 0 (189 ms), retain 31>
+                #   | {
+                #   |   "sessionID" = 49650240276763
+                #   |   "USBSpeed" = 1
+                #   |   "IOServiceLegacyMatchingRegistryID" = 4294982303
+                #   |   "idProduct" = 16
+                #   |   "iManufacturer" = 1
+                #   |   "bDeviceClass" = 0
+                #   |   "IOPowerManagement" = {"PowerOverrideOn"=Yes,"CapabilityFlags"=32768,"MaxPowerState"=2,"DevicePowerState"=2,"DriverPowerState"=0,"ChildrenPowerState"=2,"CurrentPowerState"=2}
+                #   |   "bcdDevice" = 1
+                #   |   "bMaxPacketSize0" = 8
+                #   |   "iProduct" = 2
+                #   |   "iSerialNumber" = 0
+                #   |   "bNumConfigurations" = 1
+                #   |   "USB Product Name" = "Whistler TRX_1 Scanner"
+                #   |   "USB Address" = 15
+                #   |   "locationID" = 341835776
+                #   |   "bDeviceSubClass" = 0
+                #   |   "bcdUSB" = 512
+                #   |   "Built-In" = No
+                #   |   "non-removable" = "no"
+                #   |   "IOCFPlugInTypes" = {"9dc7b780-9ec0-11d4-a54f-000a27052861"="IOUSBHostFamily.kext/Contents/PlugIns/IOUSBLib.bundle"}
+                #   |   "kUSBCurrentConfiguration" = 1
+                #   |   "bDeviceProtocol" = 0
+                #   |   "USBPortType" = 0
+                #   |   "IOServiceDEXTEntitlements" = (("com.apple.developer.driverkit.transport.usb"))
+                #   |   "USB Vendor Name" = "Whistler"
+                #   |   "Device Speed" = 1
+                #   |   "idVendor" = 10841
+                #   |   "kUSBProductString" = "Whistler TRX-1 Scanner"
+                #   |   "IOGeneralInterest" = "IOCommand is not serializable"
+                #   |   "kUSBAddress" = 15
+                #   |   "kUSBVendorString" = "Whistler"
+                #   |   "IOClassNameOverride" = "IOUSBDevice"
+                #   | }
+                #   |
+                #
+
                 try:
                     with serial.Serial(self.device,
                                        self.rate,
@@ -146,6 +185,7 @@ class TRXSerialRetriever(threading.Thread):
                 except Exception as e:
                     print(f'Serial Exception {e}')
                 finally:
+                    pass
                     ser.close()
 
         except Exception as e:

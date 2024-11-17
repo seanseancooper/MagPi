@@ -1,17 +1,16 @@
-import encodings
 import os
 import threading
 import random
-from collections import defaultdict
 
-import serial
+import hid
 
 import time
 from datetime import datetime
 
 from src.config import CONFIG_PATH, readConfig
 
-import logging
+from src.lib.utils import get_location
+from src.trx.lib.TRXSignalPoint import TRXSignalPoint
 
 
 class TRXUSBRetriever(threading.Thread):
@@ -21,11 +20,8 @@ class TRXUSBRetriever(threading.Thread):
         self.DEBUG = False
         self.config = {}
 
-        self.device = None  # ioreg -r -c IOUSBHostDevice -l
-        self.rate = 0
-        self.parity = None
-        self.bytesize = None
-        self.stopbits = None
+        self.latitude = 0.0
+        self.longitude = 0.0
 
         self.out = None
         self.signal_cache = []
@@ -39,17 +35,63 @@ class TRXUSBRetriever(threading.Thread):
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
-        self.device = self.config['DEVICE']
-        self.rate = self.config['RATE']
-        self.parity = eval(self.config['PARITY'])
-        self.bytesize = eval(self.config['BYTESIZE'])
-        self.stopbits = eval(self.config['STOPBITS'])
-
     def get_scan(self):
         return self.out
 
+    def makeSignalPoint(self):
+        get_location(self)
+        sgnl = TRXSignalPoint(self.longitude, self.latitude, self.out)
+
+        def manage_signal_cache():
+            while len(self.signal_cache) >= self.config.get('SIGNAL_CACHE_MAX', 150):
+                self.signal_cache.pop(0)
+
+        manage_signal_cache()
+        self.signal_cache.append(sgnl)
+
     def get_scanned(self):
         return self.signal_cache
+
+    @staticmethod
+    def write_to_adu(dev, msg_str):
+        print('Writing command: {}'.format(msg_str))
+
+        # message structure:
+        #   message is an ASCII string containing the command
+        #   8 bytes in length
+        #   0th byte must always be 0x01 (decimal 1)
+        #   bytes 1 to 7 are ASCII character values representing the command
+        #   remainder of message is padded to 8 bytes with character code 0
+
+        byte_str = chr(0x01) + msg_str + chr(0) * max(7 - len(msg_str), 0)
+
+        try:
+            num_bytes_written = dev.write(byte_str.encode())
+        except IOError as e:
+            print('Error writing command: {}'.format(e))
+            return None
+
+        return num_bytes_written
+
+    @staticmethod
+    def read_from_adu(dev, timeout):
+        try:
+            # read a maximum of 8 bytes from the device, with a user specified timeout
+            data = dev.read(8, timeout)
+        except IOError as e:
+            print('Error reading response: {}'.format(e))
+            return None
+
+        byte_str = ''.join(
+                chr(n) for n in data[1:])  # construct a string out of the read values, starting from the 2nd byte
+
+        result_str = byte_str.split('\x00', 1)[0]  # remove the trailing null '\x00' characters
+
+        if len(result_str) == 0:
+            return None
+
+        return result_str
+
 
     def run(self):
 
@@ -73,7 +115,9 @@ class TRXUSBRetriever(threading.Thread):
                             self.out['SCAN_DATE'] = format(datetime.now(), self.config['DATE_FORMAT'])
                             self.out['SCAN_TIME'] = format(datetime.now(), self.config['TIME_FORMAT'])
                         time.sleep(random.randint(1, self.config['TEST_FILE_TIME_MAX']))
-                        self.signal_cache.insert(-1, self.out)
+
+                        self.makeSignalPoint()
+
                         print(self.out)
             else:
 
@@ -140,49 +184,55 @@ class TRXUSBRetriever(threading.Thread):
                 #
 
                 try:
-                    import usb.core
-                    import usb.util
 
                     # find our device
                     idVendor = 10841
                     idProduct = 16
-                    dev = usb.core.find(idVendor=idVendor, idProduct=idProduct)
+                    kUSBProductString  = "Whistler TRX-1 Scanner"
+
+                    print('Connected devices:')
+                    #     The fields of dict are:
+                    #
+                    #      - 'path'
+                    #      - 'vendor_id'
+                    #      - 'product_id'
+                    #      - 'serial_number'
+                    #      - 'release_number'
+                    #      - 'manufacturer_string'
+                    #      - 'product_string'
+                    #      - 'usage_page'
+                    #      - 'usage'
+                    #      - 'interface_number'
+                    for d in hid.enumerate():
+                        print('    ADU: {} {} {} {}'.format(d['vendor_id'],
+                                                      d['product_id'],
+                                                      d['manufacturer_string'],
+                                                      d['interface_number'],
+                                                      ))
+                    print('')
+
+                    # https://www.ontrak.net/pythonhidapi.htm
+                    dev = hid.device()
+                    dev.open(idVendor, idProduct)
 
                     # was it found?
                     if dev is None:
                         raise ValueError('Device not found')
 
-                    # set the active configuration. With no arguments, the first
-                    # configuration will be the active one
-                    dev.set_configuration()
 
-                    # get an endpoint instance
-                    cfg = dev.get_active_configuration()
-                    intf = cfg[(0, 0)]
+                    # clear the read buffer of any unread values
+                    # this is important so that we don't read old values from previous requests sent to the device
+                    while True:
+                        if self.read_from_adu(dev, 200) is None:
+                            break
 
-                    ep = usb.util.find_descriptor(
-                            intf,
-                            # match the first OUT endpoint
-                            custom_match= \
-                                lambda e: \
-                                    usb.util.endpoint_direction(e.bEndpointAddress) == \
-                                    usb.util.ENDPOINT_OUT)
+                    bytes_written = self.write_to_adu(dev, 'RPA')  # request the status of PORT A in binary format
 
-                    assert ep is not None
-
-                    # write the data
-                    ALL = STX + msgCode + msgData + ETX + bytes(SUM, 'utf_8')
-                    # ep.write('STX A ETX' + SUM)
-
-                    msg = 'STX A ETX' + SUM
-                    # ep.write(msg)
-                    # assert len(ep.write(1, msg, 100)) == len(msg)
-                    # ret = ep.read(0x81, len(msg), 100)
-                    # sret = ''.join([chr(x) for x in ret])
-                    # assert sret == msg
-
-                    print(ep.read(0))
-
+                    data = self.read_from_adu(dev, 200)  # read the response from above PA request
+                    if data:
+                        print('Received string: {}'.format(data))
+                    # data_int = int(data) # if you wish to work with the data in integer format
+                    # print( 'Received int: {}'.format(data_int))
 
 
                 except Exception as e:
