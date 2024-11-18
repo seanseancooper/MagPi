@@ -1,6 +1,6 @@
 import uuid
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class TRXSignalPoint:
@@ -15,6 +15,13 @@ class TRXSignalPoint:
         self._id = uuid.uuid4()
         self._lon = lon
         self._lat = lat
+
+        self.created = datetime.now()   # when signal was found
+        self.updated = datetime.now()   # when signal was last reported
+        self.elapsed = timedelta()      # time signal has been tracked.
+
+        self.tracked = False
+        self.is_mute = False
 
         self.attributes = defaultdict(dict)
         #   ALPHATAG: name of system broadcasting
@@ -43,29 +50,24 @@ class TRXSignalPoint:
             self.attributes[k] = v
         [aggregate(k, str(v)) for k, v in attributes.items()]
 
-
     def getLatLon(self):
         return self._lat, self._lon
 
+    def update(self, tracked):
+        self.updated = datetime.now()
+        self.elapsed = datetime.now() - self.created
+        self.tracked = tracked
+
     def get(self):
-        config = {}
-
-        for k, v in self.attributes.items():
-            config[k] = v
-
         return {
             "datetime": str(self._dt),
             "id": str(self._id),
             "lon": self._lon,
             "lat": self._lat,
-            "attributes": dict(config.items())
-        }
-
-
-    def __str__(self):
-        return {
-            "datetime": str(self._dt),
-            "id": str(self._id),
-            "lon": self._lon,
-            "lat": self._lat,
+            "created": str(self.created),
+            "updated": str(self.updated),
+            "elapsed": str(self.elapsed),
+            "is_mute": self.is_mute,
+            "tracked": self.tracked,
+            "attributes": self.attributes
         }
