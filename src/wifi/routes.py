@@ -1,7 +1,7 @@
 import os
 from flask import Blueprint, redirect, render_template, jsonify
 
-from src.wifi.scanner import WifiScanner
+from src.wifi.WifiScanner import WifiScanner
 from src.config import CONFIG_PATH
 
 scanner = WifiScanner()
@@ -15,9 +15,9 @@ wifi_bp = Blueprint(
 )
 
 
-@wifi_bp.route('/')
+@wifi_bp.route('/', subdomain="wifi")
 def index():
-    return redirect("/tracked", code=302)
+    return redirect("/scan", code=302)
 
 
 @wifi_bp.route('/add/<bssid>', methods=['POST'], subdomain='wifi')
