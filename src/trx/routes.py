@@ -31,3 +31,28 @@ def trx_scanned():
     return trxRet.get_scanned()
 
 
+@trx_bp.route("/tracked", methods=['GET'], subdomain="trx")
+def get_tracked():
+    return trxRet.get_tracked()
+
+
+@trx_bp.route('/mute/<sgnl>', methods=['GET', 'POST'], subdomain="trx")
+def trx_mute(sgnl):
+    if trxRet.mute(sgnl):
+        return "OK", 200
+    return "", 404
+
+
+@trx_bp.route('/add/<freq>', methods=['GET', 'POST'], subdomain="trx")
+def trx_add(freq):
+    if trxRet.add(freq):
+        return "OK", 200
+    return "", 404
+
+
+@trx_bp.route('/remove/<freq>', methods=['GET', 'POST'], subdomain="trx")
+def trx_remove(freq):
+    if trxRet.remove(freq):
+        return "OK", 200
+    return "", 404
+
