@@ -21,8 +21,8 @@ class MAPController(threading.Thread):
 
         with app.app_context():
             if __name__ == '__main__':
-                app.config['SERVER_NAME'] = routes.config['SERVER_NAME']
-                app.config['DEBUG'] = routes.config['DEBUG']
+                app.config['SERVER_NAME'] = routes.mapAgg.config['SERVER_NAME']
+                app.config['DEBUG'] = routes.mapAgg.config['DEBUG']
                 app.register_blueprint(routes.map_bp)
             return app
 
