@@ -13,7 +13,7 @@ from src.lib.utils import get_location, format_time
 from src.wifi.lib.wifi_utils import write_to_scanlist
 from src.wifi.lib.iw_parse import print_table
 
-from src.wifi.lib.SignalPoint import SignalPoint
+from src.wifi.lib.WifiSignalPoint import WifiSignalPoint
 from src.wifi.WifiWorker import WifiWorker
 
 import logging
@@ -108,6 +108,7 @@ class WifiScanner(threading.Thread):
         self.DEBUG = self.config['DEBUG']
         self._OUTDIR = self.config['OUTFILE_PATH']
 
+        # TODO: make the worker append itself when created.
         [self.workers.append(WifiWorker(BSSID)) for BSSID in self.searchmap.keys()]
         [self.config_worker(worker) for worker in self.workers]
 
@@ -135,7 +136,7 @@ class WifiScanner(threading.Thread):
 
 
     def makeSignalPoint(self, bssid, signal):
-        sgnlPt = SignalPoint(bssid, self.longitude, self.latitude, signal)
+        sgnlPt = WifiSignalPoint(bssid, self.longitude, self.latitude, signal)
         self.signal_cache[bssid].append(sgnlPt)
 
         def manage_signal_cache(_bssid):
