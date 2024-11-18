@@ -17,7 +17,7 @@ wifi_bp = Blueprint(
 
 @wifi_bp.route('/')
 def index():
-    return redirect("/scan", code=302)
+    return redirect("/tracked", code=302)
 
 
 @wifi_bp.route('/add/<bssid>', methods=['POST'], subdomain='wifi')
