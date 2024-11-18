@@ -322,9 +322,9 @@ function createConcentric(source, coordinate, circles, signal_color, strength, c
 
         concentricFeature.setStyle(getConcentricStyle(signal_color));
 
-        concentricFeature.set('LINE0', cell.SSID  + '\n', true);
-        concentricFeature.set('LINE1', cell.BSSID  + '\n', true);
-        concentricFeature.set('LINE2', "[" + parseInt(strength) + "]", true);
+        concentricFeature.set('LINE0', cell.attributes['ALPHATAG']  + '\n', true);
+        concentricFeature.set('LINE1', cell.attributes['FREQ1'] != null? cell.attributes['FREQ1'] + 'Mhz\n':cell.attributes['FREQ2'] + 'Mhz\n', true);
+        concentricFeature.set('LINE2', cell.attributes['SITE'], true);
 
         source.addFeature(concentricFeature);
     }
@@ -500,27 +500,34 @@ function animate(coordinate) {
             }
             /*
 
-            tracked_signals.SDR.forEach(function(cell) {
-                console.log('SDR: ' +  cell);
-                // block for SDR (Concentric)
-                        // symbology for SDR SignalPoints
-                        // createConcentric(source, lonlat, 10, p_signal_color, sgnlStrength, cell);
-            });
+            if (tracked_signals.SDR) {
+                tracked_signals.SDR.forEach(function(cell) {
+                    console.log('SDR: ' +  cell);
+                    // block for SDR (Concentric)
+                            // symbology for SDR SignalPoints
+                            // createConcentric(source, lonlat, 10, p_signal_color, sgnlStrength, cell);
+                });
+            }
 
+            if (tracked_signals.CAM) {
             tracked_signals.CAM.forEach(function(cell) {
-                console.log('CAM: ' +  cell);
-                // block for CAM (a point)
-                         // origin points
-                         // createPoint(source, sgnl.id, sgnlPt, p_signal_color, sgnlStrength, cell);
-           });
+                    console.log('CAM: ' +  cell);
+                    // block for CAM (a point)
+                             // origin points
+                             // createPoint(source, sgnl.id, sgnlPt, p_signal_color, sgnlStrength, cell);
+               });
+            }
 
-            tracked_signals.ARX.forEach(function(cell) {
-                console.log('ARX: ' +  cell);
-                // block for ARX (NEW SYMBOL; moving or static)
-                         // either an origin oor a path?
-                         // createPoint(source, sgnl.id, sgnlPt, p_signal_color, sgnlStrength, cell);
-            });
+            if (tracked_signals.ARX) {
+                tracked_signals.ARX.forEach(function(cell) {
+                    console.log('ARX: ' +  cell);
+                    // block for ARX (NEW SYMBOL; moving or static)
+                             // either an origin oor a path?
+                             // createPoint(source, sgnl.id, sgnlPt, p_signal_color, sgnlStrength, cell);
+                });
+            }
             */
+
             map.render();
             return true;
         } else {
