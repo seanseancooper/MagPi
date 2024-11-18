@@ -8,7 +8,7 @@ logger_root = logging.getLogger('root')
 
 
 class RESTServer(threading.Thread):
-    ''' This is NOT a REST server, it is an entry point to the app Flask service! '''
+    ''' This is NOT a REST server, it is a 'wrapper'! '''
 
     def __init__(self, app):
         super().__init__()

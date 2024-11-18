@@ -96,6 +96,7 @@ class GPSRetriever(threading.Thread):
     @register_retriever
     def DummyGPSRetriever(self, *, c, **retriever_args):
 
+        # TODO: this is bad; I should be using with open() so the file closes when we exit.
         lines = [line.replace('LATITUDE', 'lat').replace('LONGITUDE', 'lon').strip() for line in open(self.config['TEST_FILE'], 'r')]
         lines = [json.loads(line.replace("\'","\"")) for line in lines]
 
