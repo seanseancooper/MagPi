@@ -50,7 +50,7 @@ class TRXUSBRetriever(threading.Thread):
         self.signal_cache.append(sgnl)
 
     def get_scanned(self):
-        return self.signal_cache
+        return [x.get() for x in self.signal_cache]
 
     @staticmethod
     def write_to_adu(dev, msg_str):
@@ -234,12 +234,12 @@ class TRXUSBRetriever(threading.Thread):
                     # data_int = int(data) # if you wish to work with the data in integer format
                     # print( 'Received int: {}'.format(data_int))
 
-
+                    dev.close()
                 except Exception as e:
                     print(f'USB Exception {e}')
                 finally:
                     pass
-                    # ser.close()
+
 
         except Exception as e:
             print(f'General Exception {e}')
