@@ -10,6 +10,7 @@ from datetime import datetime
 from src.config import CONFIG_PATH, readConfig
 
 from src.lib.utils import get_location
+from src.trx.TRXWorker import TRXWorker
 from src.trx.lib.TRXSignalPoint import TRXSignalPoint
 
 
@@ -32,11 +33,34 @@ class TRXSerialRetriever(threading.Thread):
         self.out = None
         self.signal_cache = []
 
+        self.tracked_signals = {}  #defaultdict(dict)
+        self.workers = []
+
         self.retrieving = False
         self.thread = None
 
     def __str__(self):
         return {f"TRXRetriever: "}
+
+    def config_worker(self, worker):
+        worker.retriever = self
+        worker.config = self.config
+        worker.created = datetime.now()
+        worker.DEBUG = self.config['DEBUG']
+
+    def get_worker(self, freq):
+        worker = None
+        try:
+            worker = [worker for worker in self.workers if worker.freq == freq][0]
+            if worker:
+                return worker
+        except IndexError:
+            worker = TRXWorker(freq)
+            self.config_worker(worker)
+            self.workers.append(worker)
+            worker.run()
+        finally:
+            return worker
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
@@ -46,6 +70,9 @@ class TRXSerialRetriever(threading.Thread):
         self.parity = eval(self.config['PARITY'])
         self.bytesize = eval(self.config['BYTESIZE'])
         self.stopbits = eval(self.config['STOPBITS'])
+
+        [self.workers.append(TRXWorker(f)) for f in self.tracked_signals.keys()]
+        [self.config_worker(worker) for worker in self.workers]
 
     def get_scan(self):
         return self.out
@@ -59,13 +86,22 @@ class TRXSerialRetriever(threading.Thread):
                 self.signal_cache.pop(0)
 
         manage_signal_cache()
+
+        # not quite, but close
+        freq1 = self.out.get('FREQ1')
+        freq2 = self.out.get('FREQ2')
+        self.workers.append(TRXWorker(max(freq2, freq1)))
+
         self.signal_cache.append(sgnl)
 
     def get_scanned(self):
-        return [x.get() for x in self.signal_cache]
+        return [sgnl.get() for sgnl in self.signal_cache]
+
+    def stop(self):
+        pass
 
     def run(self):
-
+        #  re-read config every pass.
         self.configure(os.path.join(CONFIG_PATH, 'trx.json'))
 
         try:
@@ -90,6 +126,8 @@ class TRXSerialRetriever(threading.Thread):
                         self.makeSignalPoint()
 
                         print(self.out)
+                        [self.config_worker(worker) for worker in self.workers]
+                        [worker.run() for worker in self.workers]
             else:
 
                 SPACE = b'\x32'
