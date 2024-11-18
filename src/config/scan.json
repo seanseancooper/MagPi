@@ -1,0 +1,28 @@
+{
+	"SCANNER": [
+		{
+			"DEBUG": false
+		},
+		{
+			"SERVER_NAME": "localhost:5110"
+		},
+		{
+			"TEMPLATE_FOLDER": "templates"
+		},
+		{
+			"STATIC_FOLDER": "static"
+		},
+		{
+			"DATE_FORMAT": "%Y-%m-%d"
+		},
+		{
+			"TIME_FORMAT": "%H:%M:%S"
+		},
+		{
+			"TIMER_FORMAT": "%H:%M:%S"
+		},
+		{
+			"DATETIME_FORMAT": "%Y%m%d_%H%M%S"
+		}
+	]
+}
