@@ -36,3 +36,13 @@ def map():
 @map_bp.route("/aggregated", methods=['GET'], subdomain='map')
 def aggregated():
     return mapAgg.aggregated
+
+
+@map_bp.route("/aggregated/<mod>", methods=['GET'], subdomain='map')
+def aggregated_by_module(mod):
+    return mapAgg.aggregated[mod]
+
+
+@map_bp.route("/aggregated/<mod>/<context>", methods=['GET'], subdomain='map')
+def aggregated_by_module_context(mod, context):
+    return redirect('http://' + mod.lower() + '.' + mapAgg.configs[mod]['SERVER_NAME'] + '/' + context, code=302)
