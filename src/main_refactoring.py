@@ -36,6 +36,12 @@ logger_root = logging.getLogger('root')
 # @ebs_bp.route("/stop", methods=['GET', 'POST'])
 
 
+
+
+
+
+
+
 #  WIFIController [5006]
 #
 # @wifi_bp.route('/') > redirect("/scan", code=302)
@@ -83,7 +89,15 @@ logger_root = logging.getLogger('root')
 # @cam_bp.route("/move/<command>")
 
 
-#  MOTController [5005]
+
+
+
+
+
+
+
+
+#  MOTController [5010]
 #  -->	"MOTION_CAM_URL" : ????
 #  		"MOTION_CPANEL_URL" : "http://192.168.1.4:8080"
 #       "MOTION_ALERT_URL" : "http://192.168.1.4:9046"
@@ -94,6 +108,11 @@ logger_root = logging.getLogger('root')
 # @mot_bp.route("/controlpanel", methods=['GET'])
 
 
+
+
+
+
+
 #  MAPController [5005]
 #       "MAP":      "localhost:5005"
 #       "MAP_HOST": "localhost:5173"
@@ -102,6 +121,9 @@ logger_root = logging.getLogger('root')
 # @map_bp.route("/map", methods=['GET'], subdomain='map')
 # @map_bp.route("/aggregated", methods=['GET'], subdomain='map')
 
+#  SCANController [5110]
+#       "SCAN":     "localhost:5110"
+#
 
 #  NETController [5007]
 
