@@ -265,4 +265,4 @@ class WifiScanner(threading.Thread):
                 time.sleep(self.config.get('SCAN_TIMEOUT', 5))
             else:
                 wifi_failed.send(self)
-                print(f"no signals: {self.polling_count}")
+                print(f"looking for data [{self.polling_count}] ...")
