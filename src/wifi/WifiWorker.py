@@ -47,8 +47,8 @@ class WifiWorker:
                 "frequency"     : self.frequency,
                 "quality"       : self.quality,
                 "encryption"    : self.is_encrypted,
-                "is_mute"       : str(self.is_mute),
-                "tracked"       : str(self.tracked),
+                "is_mute"       : self.is_mute,
+                "tracked"       : self.tracked,
                 "signal_cache"  : [pt for pt in self.scanner.signal_cache[self.bssid]][cache_max:],
                 "tests"         : [x for x in self.test_results]
         }
