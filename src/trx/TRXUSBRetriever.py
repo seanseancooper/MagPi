@@ -1,11 +1,12 @@
 import os
 import threading
 import random
+from collections import defaultdict
 
 import hid
 
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from src.config import CONFIG_PATH, readConfig
 
@@ -25,6 +26,8 @@ class TRXUSBRetriever(threading.Thread):
 
         self.out = None
         self.signal_cache = []
+
+        self.tracked_signals = defaultdict(dict)
 
         self.retrieving = False
         self.thread = None
@@ -50,7 +53,10 @@ class TRXUSBRetriever(threading.Thread):
         self.signal_cache.append(sgnl)
 
     def get_scanned(self):
-        return [x.get() for x in self.signal_cache]
+        return [sgnl.get() for sgnl in self.signal_cache]
+
+    def get_tracked(self):
+        return [self.tracked_signals[sgnl].get() for sgnl in self.tracked_signals]
 
     @staticmethod
     def write_to_adu(dev, msg_str):
@@ -92,6 +98,46 @@ class TRXUSBRetriever(threading.Thread):
 
         return result_str
 
+    def mute(self, sgnl):
+        from src.lib.utils import mute
+        # SIGNAL: MUTE/UNMUTE
+        return mute(self.tracked_signals[sgnl])
+
+    def auto_unmute(self, sgnl):
+        ''' this is the polled function to UNMUTE signals AUTOMATICALLY after the MUTE_TIME. '''
+        if self.config['MUTE_TIME'] > 0:
+            if datetime.now() - sgnl.updated > timedelta(seconds=self.config['MUTE_TIME']):
+                sgnl.is_mute = False
+                # SIGNAL: AUTO UNMUTE
+
+    def add(self, freq):
+
+        try:
+
+            def find(f):
+
+                return [sgnl for sgnl in self.signal_cache if sgnl.attributes['FREQ1'] == f][0]
+
+            sgnl = find(freq)
+            self.tracked_signals.update({freq: sgnl})
+
+            # SIGNAL: ADDED ITEM
+            return True
+        except IndexError:
+            return False  # not in tracked_signals
+
+    def remove(self, freq):
+        _copy = self.tracked_signals.copy()
+        self.tracked_signals.clear()
+        [self.add(remaining) for remaining in _copy if remaining != freq]
+        # SIGNAL: REMOVED ITEM
+        return True
+
+    def stop(self):
+        pass
+        # if self.sgnl.tracked:
+        #     append_to_outfile(self.config, self.__str__())
+
 
     def run(self):
 
@@ -119,6 +165,8 @@ class TRXUSBRetriever(threading.Thread):
                         self.makeSignalPoint()
 
                         print(self.out)
+
+                        [sgnl.update(sgnl.tracked) for sgnl in self.signal_cache]
             else:
 
                 SPACE = b'\x32'
