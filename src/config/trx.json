@@ -15,7 +15,10 @@
 			"TEST_FILE": "TEST_FILE.csv"
 		},
 		{
-			"TEST_FILE_TIME_MAX": 90
+			"TEST_FILE_TIME_MAX": 1
+		},
+		{
+			"MUTE_TIME": 30
 		},
 		{
 			"SIGNAL_CACHE_MAX": 150
