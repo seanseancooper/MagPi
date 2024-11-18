@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 
 
-class SignalPoint:
+class WifiSignalPoint:
     """ discrete class to encapsulate a signal captured at a point.
         A list of this type are assumed to be attributed to a specific bssid.
         The id field serves to provide a unique representation of a specific
@@ -25,9 +25,6 @@ class SignalPoint:
         return self._sgnl
 
     def get(self):
-        return self.__str__()
-
-    def __str__(self):
         return {
             "datetime": str(self._dt),
             "id": str(self._id),
