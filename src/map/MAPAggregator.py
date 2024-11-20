@@ -30,7 +30,7 @@ class MAPAggregator(threading.Thread):
         self.live_modules = []
         self.dead_modules = []
 
-        self.aggregated = defaultdict(str)
+        self.aggregated = defaultdict(str)  # a string representation of the dict.
 
         self.thread = None
 
@@ -41,6 +41,7 @@ class MAPAggregator(threading.Thread):
         # read ALL configs except controller
         configs = glob.glob(CONFIG_PATH + "/*.json")
         configs.remove(os.path.join(CONFIG_PATH, 'controller.json'))
+        configs.remove(os.path.join(CONFIG_PATH, 'scan.json'))
         configs.remove(os.path.join(CONFIG_PATH, config_file))
 
         for module_config in configs:
@@ -71,6 +72,18 @@ class MAPAggregator(threading.Thread):
                 self.aggregated[mod] = resp.json()
         except Exception as e:
             map_logger.warning(f'Aggregator Warning! {e}')
+
+    def reload(self, mod):
+        """ reload specific module """
+        self.unload(mod)
+        print(f'reloaded {mod}')
+        return True
+
+    def unload(self, mod):
+        """ unload a specific module, auto reload on next pass """
+        # self.aggregated.pop(mod) <-- nope
+        print(f'unloaded {mod}')
+        return True
 
     def stop(self):
         pass

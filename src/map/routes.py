@@ -46,3 +46,17 @@ def aggregated_by_module(mod):
 @map_bp.route("/aggregated/<mod>/<context>", methods=['GET'], subdomain='map')
 def aggregated_by_module_context(mod, context):
     return redirect('http://' + mod.lower() + '.' + mapAgg.configs[mod]['SERVER_NAME'] + '/' + context, code=302)
+
+
+@map_bp.route('/reload/<mod>', subdomain='map')
+def reload(mod):
+    if mapAgg.reload(mod):
+        return "OK", 200
+    return "FAIL", 500
+
+
+@map_bp.route('/unload/<mod>', subdomain='map')
+def unload(mod):
+    if mapAgg.unload(mod):
+        return "OK", 200
+    return "FAIL", 500
