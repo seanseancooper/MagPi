@@ -25,26 +25,26 @@ class TRXSignalPoint:
 
         self.attributes = defaultdict(dict)
         #   ALPHATAG: name of system broadcasting
-        # COMP_DATE: ??
-        # COMP_TIME: ??
+        #   COMP_DATE: ??
+        #   COMP_TIME: ??
         #   FREQ1: responding frequency?
         #   FREQ2: initial freq?
         # INFO
         #   OBJECT_ID: system object broadcasting
         # OTHER_TEXT
-        # RID1
-        # RID2
-        # SCAN_DATE: replaced date
-        # SCAN_TIME: replaced time
+        #   RID1
+        #   RID2
+        #   SCAN_DATE: replaced date
+        #   SCAN_TIME: replaced time
         #   SITE: broadcast site
         # SQ_MODE
         # SQ_VALUE
         #   SYSTEM: Broadcaster
-        # TGID1
-        # TGID2
-        # TSYS_ID
-        # TSYS_TYPE: broadcast system TYPE
-        # TYPE: broadcast type
+        #   TGID1
+        #   TGID2
+        #   TSYS_ID
+        #   TSYS_TYPE: broadcast system TYPE
+        #   TYPE: broadcast type
 
         def aggregate(k,v):
             self.attributes[k] = v
