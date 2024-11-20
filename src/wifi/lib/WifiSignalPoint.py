@@ -25,6 +25,9 @@ class WifiSignalPoint:
         return self._sgnl
 
     def get(self):
+        return self.__str__()
+
+    def __str__(self):
         return {
             "datetime": str(self._dt),
             "id": str(self._id),

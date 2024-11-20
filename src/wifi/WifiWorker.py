@@ -49,7 +49,7 @@ class WifiWorker:
                 "encryption"    : self.is_encrypted,
                 "is_mute"       : self.is_mute,
                 "tracked"       : self.tracked,
-                "signal_cache"  : [pt for pt in self.scanner.signal_cache[self.bssid]][cache_max:],
+                "signal_cache"  : [pt.get() for pt in self.scanner.signal_cache[self.bssid]][cache_max:],
                 "tests"         : [x for x in self.test_results]
         }
 
