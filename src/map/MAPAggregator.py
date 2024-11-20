@@ -76,13 +76,22 @@ class MAPAggregator(threading.Thread):
     def reload(self, mod):
         """ reload specific module """
         self.unload(mod)
+        self.aggregate(mod)
         print(f'reloaded {mod}')
         return True
 
-    def unload(self, mod):
+    def unload(self, unload):
         """ unload a specific module, auto reload on next pass """
-        # self.aggregated.pop(mod) <-- nope
-        print(f'unloaded {mod}')
+
+        copy = self.aggregated.copy()
+        self.aggregated.clear()
+
+        def add_module(mod):
+            self.aggregated[mod] = copy[mod]
+
+        [add_module(mod) for mod in copy if mod != unload]
+
+        print(f'unloaded {unload}')
         return True
 
     def stop(self):
