@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WifiScanner [ {{ scanner.polling_count }} ]</title>
+    <title>Scanner [ {{ scanner.polling_count }} ]</title>
     <link href="{{ url_for('scan_bp.static', filename='tabulator/css/tabulator_midnight.min.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('scan_bp.static', filename='css/wifi_scan.css') }}">
 
@@ -13,21 +13,22 @@
     <script>
         function setsHeaders(xhttp) {
             xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
-            xhttp.setRequestHeader('Access-Control-Allow-Methods', 'POST');
+            xhttp.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST');
             xhttp.setRequestHeader('Content-Type', 'text/html');
             xhttp.setRequestHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-*');
+            xhttp.setRequestHeader('MODULE_TARGET', 'WIFI');
         }
 
-        function mute(BSSID){
+        function mute(uniqId){
             var xhttp = new XMLHttpRequest();
 
-            xhttp.open("POST", "http://wifi.localhost:5006/mute/" + BSSID, true);
+            xhttp.open("POST", "{{ url_for('.index')}}mute/" + uniqId, true);
             setsHeaders(xhttp);
             xhttp.send();
 
             xhttp.onload = function() {
                 const resp = xhttp.response;
-                var mButton = document.getElementById("wifi_mute_button_" + BSSID);
+                var mButton = document.getElementById("wifi_mute_button_" + uniqId);
 
                 if (resp == "False"){
                     mButton.classList.value = "muting_button";
@@ -49,15 +50,15 @@
             };
         }
 
-        function add(BSSID){
+        function add(uniqId){
             var xhttp = new XMLHttpRequest();
-            xhttp.open("POST", "http://wifi.localhost:5006/add/" + BSSID, true);
+            xhttp.open("POST", "{{ url_for('.index')}}add/" + uniqId, true);
             setsHeaders(xhttp);
             xhttp.send();
 
             xhttp.onload = function() {
                 const resp = xhttp.response;
-                var aButton = document.getElementById("wifi_add_button_" + BSSID);
+                var aButton = document.getElementById("wifi_add_button_" + uniqId);
                 if (resp == "OK"){
                     aButton.classList.value = "adding_button";
                     aButton.innerHTML = "------";
@@ -72,22 +73,22 @@
             };
         }
 
-        function remove(BSSID){
+        function remove(uniqId){
             var xhttp = new XMLHttpRequest();
-            xhttp.open("POST", "http://wifi.localhost:5006/remove/" + BSSID, true);
+            xhttp.open("POST", "{{ url_for('.index')}}remove/" + uniqId, true);
             setsHeaders(xhttp);
             xhttp.send();
 
             xhttp.onload = function() {
                 const resp = xhttp.response;
-                rButton = document.getElementById("wifi_remove_button_" + BSSID);
+                rButton = document.getElementById("wifi_remove_button_" + uniqId);
                 if (resp == "OK"){
                     rButton.classList.value = "rem_button";
                     rButton.style = "color:white;";
                     rButton.innerHTML = "*";
                     setTimeout(function() {
-                        mButton = document.getElementById("wifi_mute_button_" + BSSID);
-                        uButton = document.getElementById("wifi_unmute_button_" + BSSID);
+                        mButton = document.getElementById("wifi_mute_button_" + uniqId);
+                        uButton = document.getElementById("wifi_unmute_button_" + uniqId);
 
                         if (mButton) {
                                 mButton.style = "display:none;"
@@ -113,7 +114,7 @@
 
             var xhttp = new XMLHttpRequest();
 
-            xhttp.open('POST', "http://wifi.localhost:5006/write/");
+            xhttp.open('POST', "{{ url_for('.index')}}write/", true);
             setsHeaders(xhttp);
             xhttp.send();
 
@@ -322,8 +323,8 @@
         return content
     };
 
-    // Formatter to generate BSSID links
-    var bssidFormatter = function(cell, params){
+    // Formatter to generate uniqId links
+    var uniqIdFormatter = function(cell, params){
         var content = document.createElement("span");
         const data = cell.getRow().getData();
         var url = "http://wifi.localhost:5006/scan/" + data.BSSID;
@@ -355,7 +356,7 @@
         },
     });
 
-    function colorBSSID(data){
+    function colorUniqId(data){
            var parts = data.BSSID.split(':');
            var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
            var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
@@ -368,11 +369,12 @@
            return (avg > 128)? "00,00,00": "255,255,255";
     };
 
+    var TARGET = 'WIFI';
     var scanner = new Tabulator("#wifi_scanner", {
-        ajaxURL:"http://map.localhost:5005/aggregated/WIFI",   // request URI
+        ajaxURL:"http://map.localhost:5005/aggregated/" + TARGET,   // request URI
         ajaxConfig:"GET",                               // ajax config options go here
         dataLoaderLoading:dataLoaderLoading,            // change "Loading" message to "&nbsp;"
-        index:"BSSID",                                  // use BSSID as index
+        index:"BSSID",                                  // use uniqId as index
         // minHeight:435,                               // set height of *table* (in CSS or here)
 
         rowFormatter:function(row){
@@ -394,7 +396,7 @@
             {field:"tracked", width:102, formatter: function(cell, formatterParams) {
                 const data = cell.getRow().getData();
 
-                var _color = colorBSSID(data);
+                var _color = colorUniqId(data);
                 var p_signal_color = 'rgba(' + _color + ', 1.0)';
                 var text_color = 'rgba(' + colorAvg(_color) + ', 1.0)';
 
@@ -452,15 +454,15 @@
             {field:"tracked", width:102, formatter: function(cell, formatterParams) {
                 var data = cell.getRow().getData();
 
-                var _color = colorBSSID(data);
+                var _color = colorUniqId(data);
                 var p_signal_color = 'rgba(' + _color + ', 1.0)';
                 var text_color = 'rgba(' + colorAvg(_color) + ', 1.0)';
 
-                if (data.is_mute == false) {
-                    return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE'>MUTE</button>";
-                } else {
-                    return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE'>UNMUTE</button>";
-                }
+                    if (data.is_mute == false) {
+                        return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE'>MUTE</button>";
+                    } else {
+                        return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE'>UNMUTE</button>";
+                    }
             }},
             {title:"SSID", field:"SSID", formatter:ssidFormatter, formatterParams:{
                 field:"Quality",
@@ -501,7 +503,7 @@
             {field:"tracked", width:102, formatter: function(cell, formatterParams) {
                 var data = cell.getRow().getData();
 
-                var _color = colorBSSID(data);
+                var _color = colorUniqId(data);
                 var p_signal_color = 'rgba(' + _color + ', 1.0)';
                 var text_color = 'rgba(' + colorAvg(_color) + ', 1.0)';
 
@@ -558,16 +560,55 @@
 
         columns:[
 
-            {title:"id", field:"id", width:140},
-            {title:"TYPE", field:"attributes.TYPE", width:140},
-            {title:"SYSTEM", field:"attributes.SYSTEM", width:140},
-            {title:"SITE", field:"attributes.SITE", width:140},
-            {title:"ALPHATAG", field:"attributes.ALPHATAG", width:140},
-            {title:"TSYS_TYPE", field:"attributes.TSYS_TYPE", width:140},
-            {title:"OBJECT_ID", field:"attributes.OBJECT_ID", width:140},
-            {title:"FREQ1", field:"attributes.FREQ1", width:140},
-            {title:"FREQ2", field:"attributes.FREQ2", width:140},
+            //
+            {field:"tracked", width:102, formatter: function(cell, formatterParams) {
+                var data = cell.getRow().getData();
+                let trx_color = (function(){
+                    var parts = data.id.substring(0,6).split('');
 
+                    var R = (parseInt(parts[0], 16) * parseInt(parts[1], 16)) % 255;
+                    var G = (parseInt(parts[2], 16) * parseInt(parts[3], 16)) % 255;
+                    var B = (parseInt(parts[4], 16) * parseInt(parts[5], 16)) % 255;
+                    return [R,G,B];
+                })(data);
+
+                var p_signal_color = 'rgba(' + trx_color + ', 1.0)';
+                var text_color = 'rgba(' + colorAvg(trx_color) + ', 1.0)';
+
+                if (data.tracked == true) {
+                    if (data.is_mute == false) {
+                        return "<button id='wifi_remove_button_"+ data.attributes.FREQ1 + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.attributes.FREQ1+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.attributes.FREQ1 + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.attributes.FREQ1 + "' data-action='MUTE'>MUTE</button>";
+                    } else {
+                        return "<button id='wifi_remove_button_"+ data.attributes.FREQ1 + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.attributes.FREQ1+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.attributes.FREQ1 + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.attributes.FREQ1 + "' data-action='MUTE'>UNMUTE</button>";
+                    }
+                } else {
+                    return "<button id='wifi_add_button_" + data.attributes.FREQ1 + "' style='width:96px;' class='trk_btn add_button button' value='"+data.attributes.FREQ1+"' data-action='ADD'>ADD</button>";
+                }
+            }},
+            //
+
+            {title:"ID", field:"id", width:30},
+            
+            {title:"SYSTEM", field:"attributes.SYSTEM", width:110},
+            {title:"ALPHATAG", field:"attributes.ALPHATAG", width:150},
+            {title:"SITE", field:"attributes.SITE", width:110},
+            
+            {title:"TYPE", field:"attributes.TYPE", width:80},
+            {title:"TSYS_TYPE", field:"attributes.TSYS_TYPE", width:40},
+            {title:"TSYS_ID", field:"attributes.TSYS_ID", width:40},
+            
+            {title:"FREQ1", field:"attributes.FREQ1", width:80},
+            {title:"FREQ2", field:"attributes.FREQ2", width:90},
+            
+            {title:"TGID1", field:"attributes.TGID1", width:90},
+            {title:"TGID2", field:"attributes.TGID2", width:90},
+            {title:"RID1", field:"attributes.RID1", width:90},
+            {title:"RID2", field:"attributes.RID2", width:90},
+            
+            {title:"SCAN_DATE", field:"attributes.SCAN_DATE", width:120},
+            {title:"SCAN_TIME", field:"attributes.SCAN_TIME", width:120},
+            {title:"COMP_DATE", field:"attributes.COMP_DATE", width:120},
+            {title:"COMP_TIME", field:"attributes.COMP_TIME", width:120}
         ],
     });
 

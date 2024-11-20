@@ -1,9 +1,11 @@
 import os
+import platform
 import threading
 import random
 from collections import defaultdict
 
-import hid
+import usb.core
+import usb.backend.libusb1
 
 import time
 from datetime import datetime, timedelta
@@ -12,6 +14,7 @@ from src.config import CONFIG_PATH, readConfig
 
 from src.lib.utils import get_location
 from src.trx.lib.TRXSignalPoint import TRXSignalPoint
+os.environ['PYUSB_DEBUG'] = 'debug'  # uncomment for verbose pyusb output
 
 
 class TRXUSBRetriever(threading.Thread):
@@ -59,38 +62,31 @@ class TRXUSBRetriever(threading.Thread):
         return [self.tracked_signals[sgnl].get() for sgnl in self.tracked_signals]
 
     @staticmethod
-    def write_to_adu(dev, msg_str):
-        print('Writing command: {}'.format(msg_str))
+    def write_to_adu(dev, endpoint, msg_str):
+        print("Writing command: {}".format(msg_str))
 
-        # message structure:
-        #   message is an ASCII string containing the command
-        #   8 bytes in length
-        #   0th byte must always be 0x01 (decimal 1)
-        #   bytes 1 to 7 are ASCII character values representing the command
-        #   remainder of message is padded to 8 bytes with character code 0
+        # return the string representing the character i
+        # byte_str = chr(0x02) + msg_str + chr(0x03)
 
-        byte_str = chr(0x01) + msg_str + chr(0) * max(7 - len(msg_str), 0)
+        num_bytes_written = 0
 
         try:
-            num_bytes_written = dev.write(byte_str.encode())
-        except IOError as e:
-            print('Error writing command: {}'.format(e))
-            return None
+            num_bytes_written = dev.write(endpoint, msg_str)
+        except usb.core.USBError as e:
+            print(e.args)
 
         return num_bytes_written
 
     @staticmethod
     def read_from_adu(dev, timeout):
         try:
-            # read a maximum of 8 bytes from the device, with a user specified timeout
-            data = dev.read(8, timeout)
-        except IOError as e:
-            print('Error reading response: {}'.format(e))
+            data = dev.read(0x83, 64, timeout)
+        except usb.core.USBError as e:
+            print("Error reading response: {}".format(e.args))
             return None
 
         byte_str = ''.join(
                 chr(n) for n in data[1:])  # construct a string out of the read values, starting from the 2nd byte
-
         result_str = byte_str.split('\x00', 1)[0]  # remove the trailing null '\x00' characters
 
         if len(result_str) == 0:
@@ -138,7 +134,6 @@ class TRXUSBRetriever(threading.Thread):
         # if self.sgnl.tracked:
         #     append_to_outfile(self.config, self.__str__())
 
-
     def run(self):
 
         self.configure(os.path.join(CONFIG_PATH, 'trx.json'))
@@ -146,18 +141,19 @@ class TRXUSBRetriever(threading.Thread):
         try:
             if self.config['TEST_FILE']:
 
-                lines = [line.strip().replace('"', '').replace('<', '').replace('  ', '') for line in open(self.config['TEST_FILE'], 'r')]
+                lines = [line.strip().replace('"', '').replace('<', '').replace('  ', '') for line in
+                         open(self.config['TEST_FILE'], 'r')]
                 keys = lines[0].split(',')
 
-                FIX_TIME = False
+                FIX_TIME = True
 
                 while True:
                     for line in lines[1:-1]:
                         vals = line.split(',')
-                        self.out = dict( [ (keys[i], vals[i]) for i in range(len(keys)) ] )
+                        self.out = dict([(keys[i], vals[i]) for i in range(len(keys))])
                         if FIX_TIME:
-                            self.out['COMP_DATE'] = format(datetime.now(), self.config['DATE_FORMAT'])
-                            self.out['COMP_TIME'] = format(datetime.now(), self.config['TIME_FORMAT'])
+                            # self.out['COMP_DATE'] = format(datetime.now(), self.config['DATE_FORMAT'])
+                            # self.out['COMP_TIME'] = format(datetime.now(), self.config['TIME_FORMAT'])
                             self.out['SCAN_DATE'] = format(datetime.now(), self.config['DATE_FORMAT'])
                             self.out['SCAN_TIME'] = format(datetime.now(), self.config['TIME_FORMAT'])
                         time.sleep(random.randint(1, self.config['TEST_FILE_TIME_MAX']))
@@ -168,121 +164,99 @@ class TRXUSBRetriever(threading.Thread):
 
                         [sgnl.update(sgnl.tracked) for sgnl in self.signal_cache]
             else:
-
-                SPACE = b'\x32'
-                # <STX>  An ASCII “Start of Text” symbol (0x02)
-                STX = b'\x02' + SPACE
-
-                # <msgCode>  A single character code that represents the command
-                # or response message type. Please be aware that this code is case
-                # sensitive (i.e. T and t are not the same)
-                msgCode = bytes('P', 'utf-8') + SPACE   # b'\x80'
-
-                # <msgData>  The data that accompanies a command or a response.
-                # Not all requests require this item. The length and format of
-                # this data depends on the type of request being made.
-                msgData = bytes('', 'utf-8') + SPACE
-
-                # <ETX>  An ASCII “End of Text” symbol (0x03)
-                ETX = b'\x03'
-
-                # <sum> An unsigned char type sum of all bytes starting with
-                # <msgCode> up to and including <ETX> anded with the value 0xFF.
-                # This value must be calculated and sent with every command
-                # and response for error checking.
-                SUM = (msgCode + msgData + ETX) and '\xFF'
-
-
-                # +-o Whistler TRX-1 Scanner@14600000  <class IOUSBHostDevice, id 0x100003a9d, registered, matched, active, busy 0 (189 ms), retain 31>
-                #   | {
-                #   |   "sessionID" = 49650240276763
-                #   |   "USBSpeed" = 1
-                #   |   "IOServiceLegacyMatchingRegistryID" = 4294982303
-                #   |   "idProduct" = 16
-                #   |   "iManufacturer" = 1
-                #   |   "bDeviceClass" = 0
-                #   |   "IOPowerManagement" = {"PowerOverrideOn"=Yes,"CapabilityFlags"=32768,"MaxPowerState"=2,"DevicePowerState"=2,"DriverPowerState"=0,"ChildrenPowerState"=2,"CurrentPowerState"=2}
-                #   |   "bcdDevice" = 1
-                #   |   "bMaxPacketSize0" = 8
-                #   |   "iProduct" = 2
-                #   |   "iSerialNumber" = 0
-                #   |   "bNumConfigurations" = 1
-                #   |   "USB Product Name" = "Whistler TRX_1 Scanner"
-                #   |   "USB Address" = 15
-                #   |   "locationID" = 341835776
-                #   |   "bDeviceSubClass" = 0
-                #   |   "bcdUSB" = 512
-                #   |   "Built-In" = No
-                #   |   "non-removable" = "no"
-                #   |   "IOCFPlugInTypes" = {"9dc7b780-9ec0-11d4-a54f-000a27052861"="IOUSBHostFamily.kext/Contents/PlugIns/IOUSBLib.bundle"}
-                #   |   "kUSBCurrentConfiguration" = 1
-                #   |   "bDeviceProtocol" = 0
-                #   |   "USBPortType" = 0
-                #   |   "IOServiceDEXTEntitlements" = (("com.apple.developer.driverkit.transport.usb"))
-                #   |   "USB Vendor Name" = "Whistler"
-                #   |   "Device Speed" = 1
-                #   |   "idVendor" = 10841
-                #   |   "kUSBProductString" = "Whistler TRX-1 Scanner"
-                #   |   "IOGeneralInterest" = "IOCommand is not serializable"
-                #   |   "kUSBAddress" = 15
-                #   |   "kUSBVendorString" = "Whistler"
-                #   |   "IOClassNameOverride" = "IOUSBDevice"
-                #   | }
-                #   |
-                #
-
                 try:
 
-                    # find our device
-                    idVendor = 10841
-                    idProduct = 16
-                    kUSBProductString  = "Whistler TRX-1 Scanner"
+                    VENDOR_ID = 10841
+                    PRODUCT_ID = 16
 
-                    print('Connected devices:')
-                    #     The fields of dict are:
-                    #
-                    #      - 'path'
-                    #      - 'vendor_id'
-                    #      - 'product_id'
-                    #      - 'serial_number'
-                    #      - 'release_number'
-                    #      - 'manufacturer_string'
-                    #      - 'product_string'
-                    #      - 'usage_page'
-                    #      - 'usage'
-                    #      - 'interface_number'
-                    for d in hid.enumerate():
-                        print('    ADU: {} {} {} {}'.format(d['vendor_id'],
-                                                      d['product_id'],
-                                                      d['manufacturer_string'],
-                                                      d['interface_number'],
-                                                      ))
-                    print('')
+                    was_kernel_driver_active = False
 
-                    # https://www.ontrak.net/pythonhidapi.htm
-                    dev = hid.device()
-                    dev.open(idVendor, idProduct)
+                    if platform.system() == 'Windows':
+                        backend = None
+                        # required for Windows only
+                        # libusb DLLs from: https://sourcefore.net/projects/libusb/
+                        arch = platform.architecture()
+                        if arch[0] == '32bit':
+                            backend = usb.backend.libusb1.get_backend(find_library=lambda
+                                x: "libusb/x86/libusb-1.0.dll")  # 32-bit DLL, select the appropriate one based on your Python installation
+                        elif arch[0] == '64bit':
+                            backend = usb.backend.libusb1.get_backend(
+                                    find_library=lambda x: "libusb/x64/libusb-1.0.dll")  # 64-bit DLL
 
-                    # was it found?
-                    if dev is None:
-                        raise ValueError('Device not found')
+                        device = usb.core.find(backend=backend, idVendor=VENDOR_ID, idProduct=PRODUCT_ID)
+                    elif platform.system() == 'Linux':
+                        device = usb.core.find(idVendor=VENDOR_ID, idProduct=PRODUCT_ID)
+
+                        # if the OS kernel already claimed the device
+                        if device.is_kernel_driver_active(0) is True:
+                            # tell the kernel to detach
+                            device.detach_kernel_driver(0)
+                            was_kernel_driver_active = True
+                    else:
+                        device = usb.core.find(idVendor=VENDOR_ID, idProduct=PRODUCT_ID)
+
+                    if device is None:
+                        raise ValueError('Device not found. Please ensure it is connected.')
+
+                    # for cfg in device:
+                    #     print(f'cfg : {cfg.bConfigurationValue}')
+                    #     for i in cfg:
+                    #         print(f'interface number: {i.bInterfaceNumber}')
+                    #         for e in i:
+                    #             print(f'endpoint address: {e.bEndpointAddress}')
+
+                    # interface number: 0
+                        # endpoint address: 129
+                        # endpoint address: 1
+                    # interface number: 1
+                        # endpoint address: 130
+                        # endpoint address: 3
+                        # endpoint address: 131
+
+                    device.reset()
 
 
-                    # clear the read buffer of any unread values
-                    # this is important so that we don't read old values from previous requests sent to the device
-                    while True:
-                        if self.read_from_adu(dev, 200) is None:
-                            break
+                    # Set the active configuration to 1
+                    # 0 == USB Mass Storage
+                    # 1 == CDC Communication.
+                    device.set_configuration(1)
+                    trx_config = device.get_active_configuration()[(1, 0)]
 
-                    bytes_written = self.write_to_adu(dev, 'RPA')  # request the status of PORT A in binary format
+                    EP_OUT = usb.util.find_descriptor(trx_config,
+                                                      custom_match=lambda e: \
+                                                          usb.util.endpoint_direction(e.bEndpointAddress) == \
+                                                          usb.util.ENDPOINT_OUT)
+                    EP_IN = usb.util.find_descriptor(trx_config,
+                                                     custom_match=lambda e: \
+                                                         usb.util.endpoint_direction(e.bEndpointAddress) == \
+                                                         usb.util.ENDPOINT_IN)
 
-                    data = self.read_from_adu(dev, 200)  # read the response from above PA request
-                    if data:
-                        print('Received string: {}'.format(data))
-                    # data_int = int(data) # if you wish to work with the data in integer format
-                    # print( 'Received int: {}'.format(data_int))
 
-                    dev.close()
+
+                    # # Claim interface
+                    # usb.util.claim_interface(device, 0)
+
+                    # Write commands
+                    # message = chr(0x02) + 'A' + chr(0x03)
+                    message = 'A'
+                    chksum = sum(bytes(message, encoding='utf-8')) and 0xFF
+
+                    bytes_written = self.write_to_adu(device, EP_IN, message)  # send STX A ETX
+                    bytes_written = self.write_to_adu(device, EP_OUT, chksum)  # send SUM
+
+                    # Read data back
+                    data = self.read_from_adu(device, 200)  # read from device with a 200 millisecond timeout
+
+                    if data is not None:
+                        print("Received string: {}".format(data))
+                        print("Received data as int: {}".format(int(data)))
+
+                    # usb.util.release_interface(device, 1)
+
+                    # This applies to Linux only - reattach the kernel driver if we previously detached it
+                    if was_kernel_driver_active:
+                        device.attach_kernel_driver(0)
+
                 except Exception as e:
                     print(f'USB Exception {e}')
                 finally:

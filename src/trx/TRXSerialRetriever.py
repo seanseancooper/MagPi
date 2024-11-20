@@ -212,6 +212,7 @@ class TRXSerialRetriever(threading.Thread):
                         #     ser.read(bytesToRead)
                         ALL = STX + msgCode + msgData + ETX + bytes(SUM, 'utf_8')
                         ser.write(ALL)
+
                         print('start:')
                         for readline in ser:
                             # self.out = ser.readline()
