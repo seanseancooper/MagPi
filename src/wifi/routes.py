@@ -21,7 +21,7 @@ def index():
 
 
 @wifi_bp.route('/add/<bssid>', methods=['POST'], subdomain='wifi')
-def wifi_add(bssid):
+def add(bssid):
     if scanner.get_worker(bssid).add(bssid):
         return "OK", 200
     return "", 404
@@ -38,12 +38,12 @@ def wifi_ghosts():
 
 
 @wifi_bp.route('/mute/<bssid>', methods=['POST'], subdomain='wifi')
-def wifi_mute(bssid):
+def mute(bssid):
     return str(scanner.get_worker(bssid).mute()), 200
 
 
 @wifi_bp.route('/remove/<bssid>', methods=['POST'], subdomain='wifi')
-def wifi_remove(bssid):
+def remove(bssid):
     if scanner.get_worker(bssid).remove(bssid):
         return "OK", 200
     return "", 404
