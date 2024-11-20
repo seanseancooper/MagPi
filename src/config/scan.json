@@ -13,6 +13,9 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
+			"STATIC_URL_PATH": "static"
+		},
+		{
 			"DATE_FORMAT": "%Y-%m-%d"
 		},
 		{
