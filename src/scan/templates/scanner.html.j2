@@ -13,7 +13,7 @@
     <script>
         function setsHeaders(xhttp) {
             xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
-            xhttp.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST');
+            xhttp.setRequestHeader('Access-Control-Allow-Methods', 'POST');
             xhttp.setRequestHeader('Content-Type', 'text/html');
             xhttp.setRequestHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-*');
             xhttp.setRequestHeader('MODULE_TARGET', 'WIFI');
@@ -560,7 +560,6 @@
 
         columns:[
 
-            //
             {field:"tracked", width:102, formatter: function(cell, formatterParams) {
                 var data = cell.getRow().getData();
                 let trx_color = (function(){
