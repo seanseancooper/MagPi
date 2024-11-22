@@ -15,13 +15,13 @@
 			"TEST_FILE": "TEST_FILE.csv"
 		},
 		{
-			"TEST_FILE_TIME_MAX": 1
+			"TEST_FILE_TIME_MAX": 15
 		},
 		{
 			"MUTE_TIME": 30
 		},
 		{
-			"SIGNAL_CACHE_MAX": 150
+			"SIGNAL_CACHE_MAX": 1500
 		},
 		{
 			"DEVICE": "/dev/cu.URT1"
