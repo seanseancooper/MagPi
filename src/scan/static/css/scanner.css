@@ -143,14 +143,14 @@ button {
 }
 
 
-wifi_scanner_filters {
+scanner_filters {
     position:absolute;
     height:25px;
     left:0px;
     top:0px;
 }
 
-.wifi_scanner_buttons {
+.scanner_buttons {
     position:absolute;
     left:442px;
     top:8px;
@@ -192,7 +192,7 @@ wifi_scanner_filters {
     color:black;
 }
 
-.wifi_scanner_stats {
+.scanner_stats {
     position:relative;
     left:10px;
     top:1px;
@@ -203,6 +203,17 @@ wifi_scanner_filters {
     text-align:top;
 }
 
-#wifi_scanner_stats{
+#scanner_stats{
     color:green;
+}
+
+.bar {
+    height:1px;
+    border-radius:3px;
+    padding:2px;
+}
+
+.peak_bar {
+    height:5px;
+    border-radius:3px;
 }
