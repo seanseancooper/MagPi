@@ -8,7 +8,7 @@ import atexit
 from src.lib.rest_server import RESTServer
 import src.arx.ARXController as ARXController
 import src.gps.GPSController as GPSController
-import src.wifi.WifiController as WIFIController
+import src.wifi.WifiController as WifiController
 import src.cam.CAMController as CAMController
 
 import src.arx.routes as arx
@@ -67,14 +67,14 @@ def starts_apps():
     # RESTServer(GPSController.GPSController().create_app()).run()
     # threading.Thread(target=gps.gpsRet.run, daemon=True).start()
 
-    # RESTServer(WIFIController.WifiController.create_app()).run()
+    # RESTServer(WifiController.WifiController.create_app()).run()
     # threading.Thread(target=wifi.scanner.run, daemon=True).start()
 
-    # wifi_app = WIFIController.WifiController.create_app()
+    # wifi_app = WifiController.WifiController.create_app()
     # wifi_rest = RESTServer(wifi_app)
     # wifi_rest.run()
 
-    # wifi_app = WIFIController.WifiController.create_app()
+    # wifi_app = WifiController.WifiController.create_app()
     # threading.Thread(target=wifi_app.run, daemon=True).start()
 
     pass
@@ -84,8 +84,8 @@ if __name__ == '__main__':
 
 
     def stops_apps():
-        if wifi.scanner.is_alive():
-            wifi.scanner.stop()
+        if wifi.s.is_alive():
+            wifi.s.stop()
 
 
     atexit.register(stops_apps)
