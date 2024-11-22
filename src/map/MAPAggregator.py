@@ -45,7 +45,7 @@ class MAPAggregator(threading.Thread):
         configs.remove(os.path.join(CONFIG_PATH, config_file))
 
         for module_config in configs:
-            mod = os.path.basename(module_config).replace('.json', '').upper()
+            mod = os.path.basename(module_config).replace('.json', '')
             self.modules.append(mod)
             readConfig(module_config, self.configs[mod])
 
@@ -58,7 +58,7 @@ class MAPAggregator(threading.Thread):
 
         for mod in self.modules:
             try:
-                test = requests.get('http://' + mod.lower() + '.' + self.configs[mod]['SERVER_NAME'])
+                test = requests.get('http://' + mod + '.' + self.configs[mod]['SERVER_NAME'])
                 if test.ok:
                     self.live_modules.append(mod)
             except Exception:
@@ -67,7 +67,7 @@ class MAPAggregator(threading.Thread):
     def aggregate(self, mod):
         """ collect responses into aggregation """
         try:
-            resp = requests.get('http://' + mod.lower() + '.' + self.configs[mod]['SERVER_NAME'])
+            resp = requests.get('http://' + mod + '.' + self.configs[mod]['SERVER_NAME'])
             if resp.ok:
                 self.aggregated[mod] = resp.json()
         except Exception as e:
