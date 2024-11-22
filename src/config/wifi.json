@@ -31,6 +31,12 @@
 			"SIGNAL_CACHE_MAX": 162
 		},
 		{
+			"PRINT_SIGNALS": false
+		},
+		{
+			"SORT_SIGNALS": true
+		},
+		{
 			"MUTE_TIME": 999999
 		},
 		{
