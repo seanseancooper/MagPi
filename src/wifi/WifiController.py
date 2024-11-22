@@ -22,8 +22,8 @@ class WifiController(threading.Thread):
 
         with app.app_context():
             if __name__ == '__main__':
-                app.config['SERVER_NAME'] = routes.scanner.config['SERVER_NAME']
-                app.config['DEBUG'] = routes.scanner.config['DEBUG']
+                app.config['SERVER_NAME'] = routes.s.config['SERVER_NAME']
+                app.config['DEBUG'] = routes.s.config['DEBUG']
                 app.register_blueprint(routes.wifi_bp)
             return app
 
@@ -32,13 +32,13 @@ class WifiController(threading.Thread):
             import atexit
 
             def stop():
-                routes.scanner.stop()
+                routes.s.stop()
 
             atexit.register(stop)
 
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
-            routes.scanner.run()
+            routes.s.run()
         except KeyboardInterrupt:
             pass
 
