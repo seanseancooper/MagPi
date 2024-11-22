@@ -352,6 +352,7 @@ const map = new Map({
         new VectorLayer({
             source: new Vector({features:features}),
         }),
+        // vectorlayers per source; updates need to be atomic.
 //        new VectorLayer({
 //            source: heatMap,
 //        }),
@@ -408,6 +409,14 @@ new VectorLayer({
 
 function animate(coordinate) {
 
+    function colorUniqId(data, splt){
+           var parts = data.split(splt);
+           var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
+           var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
+           var B = (parseInt(parts[4], 16) + parseInt(parts[5], 16)) % 255;
+           return [R,G,B];
+    };
+
     const hdweCoords = fromLonLat(coordinate);
 
     var xhttp = new XMLHttpRequest();
@@ -421,28 +430,21 @@ function animate(coordinate) {
 
         if (xhttp.status == 200){
 
-            var tracked_signals = JSON.parse(resp);
+            var _signals = JSON.parse(resp);
 
             var source = v_layer.getSource();
             source.clear();
 
+            if (_signals.wifi) {
+                _signals.wifi.forEach(function(cell) {
 
-            if (tracked_signals.WIFI) {
-                tracked_signals.WIFI.forEach(function(cell) {
-
-                    if (!cell.is_mute){
-
-                        let _color = (function(){
-                               var parts = cell.BSSID.split(':');
-                               var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
-                               var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
-                               var B = (parseInt(parts[4], 16) + parseInt(parts[5], 16)) % 255;
-                               return [R,G,B];
-                        })(cell);
+                    if (!cell.is_mute && cell.tracked){
 
                         for (const s of cell.signal_cache) {
 
                             const sgnl = JSON.parse(s);
+
+                            var _color = colorUniqId(cell.BSSID, ':');
                             var lonlat = fromLonLat([sgnl.lon, sgnl.lat]);
                             var sgnlPt = [sgnl.lon, sgnl.lat];
                             var sgnlStrength = parseInt(sgnl.sgnl);
@@ -453,80 +455,66 @@ function animate(coordinate) {
                             console.log("SIGNALPOINT: [" + sgnl.id + "] " + cell.BSSID + " c_signal_color:" + c_signal_color + " sgnl.lon:" + sgnl.lon + " sgnl.lat:" +  sgnl.lat + " sgnl.sgnl:" +  sgnlStrength );
 
                             // choose the feature based on signal type and
-                            // pass one call SignalPoint(source, id, point, p_signal_color, style, c_signal_color, strength, cell)
+                            // pass one call
+                            // SignalPoint(source, id, point, p_signal_color, style, c_signal_color, strength, cell)
 
-                            // origin points
                             createPoint(source, sgnl.id, sgnlPt, p_signal_color, sgnlStrength, cell);
-
-                            // wifi SignalPoints
-                            // createCircle(source, lonlat, c_signal_color, sgnlStrength, cell);
+                            createCircle(source, lonlat, c_signal_color, sgnlStrength, cell);
 
                        }
                     }
                 });
             };
 
-            if (tracked_signals.TRX) {
-                tracked_signals.TRX.forEach(function(cell) {
-                    console.log('[TRX]' +
-                                ' id:' +  cell.id +
-                                ' ALPHATAG:' +  cell.attributes['ALPHATAG'] +
-                                ' lat:' +  cell.lat +
-                                ' lon:' +  cell.lon +
-                                ' SYSTEM:' +  cell.attributes['SYSTEM'] +
-                                ' FREQ1:' +  cell.attributes['FREQ1'] +
-                                ' FREQ2:' +  cell.attributes['FREQ2'] +
-                                ' SITE:' +  cell.attributes['SITE'] +
-                                ' TYPE:' +  cell.attributes['TYPE']
-                                );
-                    let trx_color = (function(){
-                        var parts = cell.id.substring(0,6).split('');
+            if (_signals.trx) {
+                _signals.trx.forEach(function(cell) {
+                    if (!cell.is_mute && cell.tracked) {
 
-                        var R = (parseInt(parts[0], 16) * parseInt(parts[1], 16)) % 255;
-                        var G = (parseInt(parts[2], 16) * parseInt(parts[3], 16)) % 255;
-                        var B = (parseInt(parts[4], 16) * parseInt(parts[5], 16)) % 255;
-                        return [R,G,B];
-                    })(cell);
+                        //  special processing to make string of hex look like a BSSID
+                        var uniqId = cell.id.replace('-','').substring(0,12).match(/.{1,2}/g).join(':');
 
-                    var lonlat = fromLonLat([cell.lon, cell.lat]);
-                    var sgnlStrength = -77; // get this from SDR??
+                        var _color = colorUniqId(uniqId, ':');
+                        var lonlat = fromLonLat([cell.lon, cell.lat]);
+                        var sgnlStrength = -77; // WHERE FROM???
+                        var numConcentrics = 10;
 
-                    var p_signal_color = 'rgba(' + trx_color + ', 1.0)';
+                        var p_signal_color = 'rgba(' + _color + ', 1.0)';
 
-                    // block for TRX (Concentric)
-                    // symbology for TRX SignalPoints
-                     createConcentric(source, lonlat, 10, p_signal_color, sgnlStrength, cell);
-                });
-            }
-            /*
-
-            if (tracked_signals.SDR) {
-                tracked_signals.SDR.forEach(function(cell) {
-                    console.log('SDR: ' +  cell);
-                    // block for SDR (Concentric)
-                            // symbology for SDR SignalPoints
-                            // createConcentric(source, lonlat, 10, p_signal_color, sgnlStrength, cell);
+                        // symbology for TRX SignalPoints
+                         createConcentric(source, lonlat, numConcentrics, p_signal_color, sgnlStrength, cell);
+                    }
                 });
             }
 
-            if (tracked_signals.CAM) {
-            tracked_signals.CAM.forEach(function(cell) {
-                    console.log('CAM: ' +  cell);
-                    // block for CAM (a point)
-                             // origin points
-                             // createPoint(source, sgnl.id, sgnlPt, p_signal_color, sgnlStrength, cell);
-               });
-            }
-
-            if (tracked_signals.ARX) {
-                tracked_signals.ARX.forEach(function(cell) {
-                    console.log('ARX: ' +  cell);
-                    // block for ARX (NEW SYMBOL; moving or static)
-                             // either an origin oor a path?
-                             // createPoint(source, sgnl.id, sgnlPt, p_signal_color, sgnlStrength, cell);
+            if (_signals.sdr) {
+                _signals.sdr.forEach(function(cell) {
+                    if (!cell.is_mute && cell.tracked) {
+                        console.log('SDR: ' +  cell);
+                        // symbology for SDR SignalPoints
+                        // createConcentric(source, lonlat, 10, p_signal_color, sgnlStrength, cell);
+                    }
                 });
             }
-            */
+
+            if (_signals.cam) {
+                _signals.cam.forEach(function(cell) {
+                    if (!cell.is_mute && cell.tracked) {
+                        console.log('CAM: ' +  cell);
+                        // origin points
+                        // createPoint(source, sgnl.id, sgnlPt, p_signal_color, sgnlStrength, cell);
+                    }
+                });
+            }
+
+            if (_signals.arx) {
+                _signals.arx.forEach(function(cell) {
+                    if (!cell.is_mute && cell.tracked) {
+                        console.log('ARX: ' +  cell);
+                        // (NEW SYMBOL; moving or static)
+                        // createPoint(source, sgnl.id, sgnlPt, p_signal_color, sgnlStrength, cell);
+                    }
+                });
+            }
 
             map.render();
             return true;
