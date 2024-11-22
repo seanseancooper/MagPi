@@ -10,14 +10,14 @@ from contextlib import contextmanager
 from src.config.__init__ import readConfig
 
 from src.lib.utils import get_location, format_time
-from src.wifi.lib.wifi_utils import write_to_scanlist
-from src.wifi.lib.iw_parse import print_table
+from src.wifi.lib.wifi_utils import write_to_scanlist, print_signals
 
 from src.wifi.lib.WifiSignalPoint import WifiSignalPoint
 from src.wifi.WifiWorker import WifiWorker
 
 import logging
 
+# TODO: events to flask subsystem; NET module
 wifi_signals = Namespace()
 wifi_started = wifi_signals.signal('WIFI START')
 wifi_updated = wifi_signals.signal('WIFI UPDATED')
@@ -26,9 +26,6 @@ wifi_stopped = wifi_signals.signal('WIFI STOP')
 
 logger_root = logging.getLogger('root')
 wifi_logger = logging.getLogger('wifi_logger')
-
-wifi_retrievers = {}
-
 
 
 class WifiScanner(threading.Thread):
@@ -42,47 +39,37 @@ class WifiScanner(threading.Thread):
         self.searchmap = {}
         self.stats = {}                         # new, not yet used.
 
-        self.parsed_signals = []                # signals represented as a list of dictionaries.
-        self.workers = []                       # units assigned to monitor a discrete signal
-        self.tracked_signals = {}               # parsed_signals is a list, this is a map?!
-        self.ghost_signals = []                 # ghost_signals
-        self.signal_cache = defaultdict(list)   # a mapping of lists of SignalPoint
+        self.parsed_signals = []
+        ''' all wifi signals represented as a list of dictionaries.  '''
 
-        self.blacklist = {}
-        self.sort_order = "Signal"
-        self.reverse = False
+        self.workers = []                       # list of workers assigned to monitor a discrete signal.
+        self.tracked_signals = {}               # parsed_signals is a list, this is a map. stinky.
+        self.ghost_signals = []                 # signals no longer received, but tracked -- 'ghost' signals
+        self.signal_cache = defaultdict(list)   # a mapping of lists of SignalPoint for all signals received.
+
+        self.blacklist = {}                     # ignored signals
+        self.sort_order = "Signal"              # sort order for printed output; consider not support printing.
+        self.reverse = False                    # reverse the sort...
 
         # TODO: timekeeping
         self.start_time = datetime.now()
-        self.elapsed = "00:00:00"
-        self.polling_count = 0
+        self.elapsed = "00:00:00"               # should be a timedelta.
+        self.polling_count = 0                  # iterations in this run.
 
-        self.latitude = 0.0
-        self.longitude = 0.0
+        self.latitude = 0.0                     # this lat; used in SignalPoint creation
+        self.longitude = 0.0                    # this lon; used in SignalPoint creation
 
         self._OUTFILE = None
-        self._OUTDIR = None
+        self.OUTDIR = None
         self.DEBUG = False
 
-    def config_worker(self, worker):
-        worker.scanner = self
-        worker.config = self.config
-        worker.created = datetime.now()
-        worker.DEBUG = self.config['DEBUG']
+    def compare_MFCC(self):
+        # TODO: just not here
+        pass
 
-    def get_worker(self, bssid):
-        worker = None
-        try:
-            worker = [worker for worker in self.workers if worker.bssid == bssid.upper()][0]
-            if worker:
-                return worker
-        except IndexError:
-            worker = WifiWorker(bssid)
-            self.config_worker(worker)
-            self.workers.append(worker)
-            worker.run()
-        finally:
-            return worker
+    def analyze_periodicity(self):
+        # TODO: just not here
+        pass
 
     @staticmethod
     def get_retriever(name):
@@ -106,34 +93,31 @@ class WifiScanner(threading.Thread):
         self.searchmap = self.config['SEARCHMAP']
         self.blacklist = self.config['BLACKLIST']
         self.DEBUG = self.config['DEBUG']
-        self._OUTDIR = self.config['OUTFILE_PATH']
+        self.OUTDIR = self.config['OUTFILE_PATH']
 
         # TODO: make the worker append itself when created.
         [self.workers.append(WifiWorker(BSSID)) for BSSID in self.searchmap.keys()]
         [self.config_worker(worker) for worker in self.workers]
 
-    def print_signals(self, sgnls, columns):
-        table = [columns]
+    def config_worker(self, worker):
+        worker.scanner = self
+        worker.config = self.config
+        worker.created = datetime.now()
+        worker.DEBUG = self.config['DEBUG']
 
-        def print_signal(sgnl):
-            sgnl_properties = []
-
-            def make_cols(column):
-                try:
-                    # make boolean a str to print (needs 'width').
-                    if isinstance(sgnl[column], bool):
-                        sgnl_properties.append(str(sgnl[column]))
-                    else:
-                        sgnl_properties.append(sgnl[column])
-                except KeyError as e:
-                    print(f"KeyError getting column for {e}")
-
-            [make_cols(column) for column in columns]
-            table.append(sgnl_properties)
-
-        [print_signal(sgnl) for sgnl in sgnls]
-        print_table(table)
-
+    def get_worker(self, bssid):
+        worker = None
+        try:
+            worker = [worker for worker in self.workers if worker.bssid == bssid.upper()][0]
+            if worker:
+                return worker
+        except IndexError:
+            worker = WifiWorker(bssid)
+            self.config_worker(worker)
+            self.workers.append(worker)
+            worker.run()
+        finally:
+            return worker
 
     def makeSignalPoint(self, bssid, signal):
         sgnlPt = WifiSignalPoint(bssid, self.longitude, self.latitude, signal)
@@ -147,16 +131,10 @@ class WifiScanner(threading.Thread):
 
         return sgnlPt
 
-    def compare_MFCC(self):
-        # TODO: just not here
-        pass
-
-    def analyze_periodicity(self):
-        # TODO: just not here
-        pass
-
     def update_signal(self, sgnl, worker, fmt):
-        ''' update a signal with data from it's worker '''
+        """ update a signal with data from it's worker """
+
+        # TODO: this is brittle, stinky code.
         sgnl['Vendor'] = worker.vendor
         sgnl['Channel'] = worker.channel
         sgnl['Frequency'] = worker.frequency
@@ -173,23 +151,29 @@ class WifiScanner(threading.Thread):
         sgnl['signal_cache'] = [json.dumps(sgnl.get()) for sgnl in self.signal_cache[worker.bssid]]
         sgnl['results'] = [json.dumps(result) for result in worker.test_results]
 
-    def parse_signals(self, readlines):
-
-        # this returns a list of dicts [{key: value},...] that key is a 'column' name.
-        # So, this class needs to deal with conflicting columns names dynamically!!
-        # vis å vis multiple scan sources (wifi, and bluetoooth, and sdr, and etc..)
-        # Also note that this is only a single retriever dealing with wifi!
-
-        self.parsed_signals = self.retriever.get_parsed_cells(readlines)
-
     def update(self, bssid, o):
         worker = self.get_worker(bssid)
         sgnl = {'BSSID': bssid, 'SSID': worker.ssid}
         self.update_signal(sgnl, worker, self.config.get('TIME_FORMAT', "%H:%M:%S"))
         o.append(sgnl)
 
-    def get_parsed_signals(self):  # rename me, easily confused w retriever impl (cells vs. signals)
-        ''' updates and returns ALL parsed_signals '''
+    def update_ghosts(self):
+        """ find, load and update ghosts """
+
+        # TODO: delete removes *entire* collection due to using frozenset.
+        #  this diff logic could be implemented in a method, may need do that
+        #  to have it work.
+        tracked = frozenset([key['BSSID'] for key in self.get_tracked_signals()])
+        parsed = frozenset([key['BSSID'] for key in self.parsed_signals.copy()])
+        self.ghost_signals = tracked.difference(parsed)
+
+        [self.makeSignalPoint(str(item), -99) for item in self.ghost_signals]
+
+    def parse_signals(self, readlines):
+        self.parsed_signals = self.retriever.get_parsed_cells(readlines)
+
+    def get_parsed_signals(self):
+        """ updates and returns ALL parsed SIGNALS """
         fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
         self.elapsed = format_time(datetime.strptime(str(datetime.now() - self.start_time), "%H:%M:%S.%f"), fmt)
         [self.update_signal(sgnl, self.get_worker(sgnl['BSSID']), fmt) for sgnl in self.parsed_signals]
@@ -197,13 +181,13 @@ class WifiScanner(threading.Thread):
         return self.parsed_signals
 
     def get_tracked_signals(self):
-        ''' update and return ONLY tracked signals '''
+        """ update and return ONLY tracked signals """
         o = []
         [self.update(bssid, o) for bssid in self.tracked_signals]
         return o
 
     def get_ghost_signals(self):
-        ''' tracked signals MISSING from parsed_signals; 'greyed' out... '''
+        """ update and return ghost signals """
         o = []
         [self.update(item, o) for item in self.ghost_signals]
         return o
@@ -211,7 +195,7 @@ class WifiScanner(threading.Thread):
     def stop(self):
         write_to_scanlist(self.config, self.tracked_signals)
         [worker.stop() for worker in self.workers]
-        self.parsed_signals.clear()  # ensure no data is available
+        self.parsed_signals.clear()
         wifi_stopped.send(self)
         wifi_logger.info(f"[{__name__}]: WifiScanner stopped. {self.polling_count} iterations.")
 
@@ -229,40 +213,32 @@ class WifiScanner(threading.Thread):
 
             if len(scanned) > 0:
                 self.parse_signals(scanned)
-
-                # find, load and update ghost_signals SignalPoints
-                # DBUG: delete removes *entire* collection due to using frozenset.
-                #  this diff logic could be implemented in a method, may need do that
-                #  to have it work.
-                tracked = frozenset([key['BSSID'] for key in self.get_tracked_signals()])
-                parsed = frozenset([key['BSSID'] for key in self.parsed_signals.copy()])
-                self.ghost_signals = tracked.difference(parsed)
-                [self.makeSignalPoint(str(item), -99) for item in self.ghost_signals]
-
+                self.update_ghosts()
                 get_location(self)
 
                 def blacklist(sgnl):
                     if sgnl['BSSID'] in self.blacklist.keys():
                         try:
                             self.parsed_signals.remove(sgnl)
-                        except Exception as e:
-                            pass
-
+                        except Exception: pass
                 [blacklist(sgnl) for sgnl in self.parsed_signals.copy()]
 
-                self.parsed_signals.sort(key=lambda el: el[self.sort_order], reverse=self.reverse)
-
-                try:
-                    self.print_signals(self.parsed_signals, list(self.parsed_signals[0].keys()))
-                except IndexError: pass
+                if self.config['PRINT_SIGNALS']:
+                    if self.config['SORT_SIGNALS']:
+                        self.parsed_signals.sort(key=lambda el: el[self.sort_order], reverse=self.reverse)
+                    try:
+                        print_signals(self.parsed_signals, list(self.parsed_signals[0].keys()))
+                    except IndexError: pass
 
                 [worker.run() for worker in self.workers]
 
-                self.polling_count += 1
                 self.elapsed = format_time(datetime.strptime(str(datetime.now() - self.start_time), "%H:%M:%S.%f"), self.config.get('TIME_FORMAT', "%H:%M:%S"))
                 wifi_updated.send(self)
 
+                print(f"WifiScanner [{self.polling_count}] {self.elapsed} {len(self.parsed_signals)} signals, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts")
+                self.polling_count += 1
                 time.sleep(self.config.get('SCAN_TIMEOUT', 5))
             else:
                 wifi_failed.send(self)
-                print(f"looking for data [{self.polling_count}] ...")
+                print(f"looking for data [{self.polling_count}]: is wifi available?")
+                time.sleep(.1)
