@@ -1,21 +1,24 @@
 import os
 import threading
 import time
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import flask
-from flask import Blueprint, redirect, render_template
+from flask import g, Blueprint, redirect, request, render_template, current_app
+import requests
 
 from src.config import CONFIG_PATH, readConfig
 
 
-class Scanner(threading.Thread):
+class Scanner(threading.Thread):  # rename me; I'm not a scanner...
 
     def __init__(self):
         super().__init__()
 
         self.polling_count = 0
         self.workers = []
+        self.created = datetime.now()
+        self.updated = datetime.now()
         self.elapsed = timedelta()
         self.config = {}
 
@@ -28,15 +31,22 @@ class Scanner(threading.Thread):
 
     def run(self):
         while True:
+            self.updated = datetime.now()
+            self.elapsed = datetime.now() - self.created
             time.sleep(1)
             pass
 
 
+def get_scanner():
+    with current_app.app_context():
+        if "scanner" not in g:
+            g.scanner = Scanner()
+        return g.scanner
+
+
 scanner = Scanner()
+# scanner = get_scanner()
 scanner.configure(os.path.join(CONFIG_PATH, 'scan.json'))
-
-app = flask.current_app
-
 scan_bp = Blueprint(
         'scan_bp', __name__, subdomain='scan',
         template_folder=scanner.config['TEMPLATE_FOLDER'],
@@ -58,64 +68,41 @@ def scan_scanner():
 @scan_bp.route('/add/<id>', methods=['POST'], subdomain='scan')
 def add(id):
 
-    MOD = 'WIFI'
-    # forward request to the correct module/app/bp
-    # examine the header/request?
-    # from flask import request
-    # MOD = request.headers.environ['MODULE_TARGET']
+    MOD = request.headers['TARGET']
+    resp = requests.get('http://map.localhost:5005/config/' + MOD)
+    config = resp.json()
 
-    # or match the the form of the id?
-    # 3A:FF:45:AC:DD:0E IS A BSSID
-    # 201326592 IS A FREQUENCY
-
-    # get config from the MAPAggregator?
-    # resp = requests.get('http://map.localhost:5005/aggregated/'+ MOD + '/config'"
-    # config  = json.parse(resp)
-    # SERVER_NAME  = config['SERVER_NAME']
-
-    SERVER_NAME = 'localhost:5006'
-
-    CONTEXT = 'add'  # this methodname, the request URI...
-
-    forward = f'http://{MOD}.{SERVER_NAME}/{CONTEXT}/{id}'
-    code = 307
-
-    # redirect as 307 to temp context
-    # redirect as 308 to correct context
-    return redirect(forward, code=code)
+    return redirect(f'http://{MOD}.{config["SERVER_NAME"]}/add/{id}', 307)
 
 
 @scan_bp.route('/mute/<id>', methods=['POST'], subdomain='scan')
 def mute(id):
 
-    MOD = 'WIFI'
-    SERVER_NAME = 'localhost:5006'
-    CONTEXT = 'mute'  # this methodname, the request URI...
-    forward = f'http://{MOD}.{SERVER_NAME}/{CONTEXT}/{id}'
-    code = 307
+    MOD = request.headers['TARGET']
+    resp = requests.get('http://map.localhost:5005/config/' + MOD)
+    config  = resp.json()
 
-    return redirect(forward, code=code)
+    return redirect(f'http://{MOD}.{config["SERVER_NAME"]}/mute/{id}', 307)
 
 
 @scan_bp.route('/remove/<id>', methods=['POST'], subdomain='scan')
 def remove(id):
 
-    MOD = 'WIFI'
-    SERVER_NAME = 'localhost:5006'
-    CONTEXT = 'remove'  # this methodname, the request URI...
-    forward = f'http://{MOD}.{SERVER_NAME}/{CONTEXT}/{id}'
-    code = 307
+    MOD = request.headers['TARGET']
+    resp = requests.get('http://map.localhost:5005/config/' + MOD)
+    config  = resp.json()
 
-    return redirect(forward, code=code)
+    return redirect(f'http://{MOD}.{config["SERVER_NAME"]}/remove/{id}', 307)
 
 
 @scan_bp.route('/write', methods=['POST'], subdomain='scan')
 def write():
-    from src.wifi.lib.wifi_utils import write_to_scanlist
-    tracked_signals = None
-    if write_to_scanlist(scanner.config, tracked_signals):
-        return "OK", 200
-    return "", 500
+
+    MOD = request.headers['TARGET']
+    resp = requests.get('http://map.localhost:5005/config/' + MOD)
+    config  = resp.json()
+
+    return redirect(f'http://{MOD}.{config["SERVER_NAME"]}/write', 307)
 
 
 @scan_bp.route('/stop', methods=['POST'], subdomain='scan')
