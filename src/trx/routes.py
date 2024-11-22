@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, redirect
+from flask import Blueprint, redirect, jsonify
 
 from src.trx.TRXSerialRetriever import TRXSerialRetriever
 from src.trx.TRXUSBRetriever import TRXUSBRetriever
@@ -23,36 +23,53 @@ def index():
 
 @trx_bp.route("/scan", methods=['GET'], subdomain="trx")
 def trx_scan():
-    return trxRet.get_scan()
+    """ returns most recent item scanned """
+    return jsonify(trxRet.get_scan())
 
 
 @trx_bp.route("/scanned", methods=['GET'], subdomain="trx")
 def trx_scanned():
-    return trxRet.get_scanned()
+    return jsonify(trxRet.get_scanned())
 
 
 @trx_bp.route("/tracked", methods=['GET'], subdomain="trx")
-def get_tracked():
-    return trxRet.get_tracked()
+def trx_tracked():
+    return jsonify(trxRet.get_tracked())
 
 
-@trx_bp.route('/mute/<sgnl>', methods=['GET', 'POST'], subdomain="trx")
-def trx_mute(sgnl):
-    if trxRet.mute(sgnl):
+@trx_bp.route('/add/<id>', methods=['GET', 'POST'], subdomain="trx")
+def add(id):
+    if trxRet.add(id):
         return "OK", 200
     return "", 404
 
 
-@trx_bp.route('/add/<freq>', methods=['GET', 'POST'], subdomain="trx")
-def trx_add(freq):
-    if trxRet.add(freq):
+@trx_bp.route('/mute/<id>', methods=['GET', 'POST'], subdomain="trx")
+def mute(id):
+    return str(trxRet.mute(id)), 200
+
+
+@trx_bp.route('/remove/<id>', methods=['GET', 'POST'], subdomain="trx")
+def remove(id):
+    if trxRet.remove(id):
         return "OK", 200
     return "", 404
 
 
-@trx_bp.route('/remove/<freq>', methods=['GET', 'POST'], subdomain="trx")
-def trx_remove(freq):
-    if trxRet.remove(freq):
-        return "OK", 200
-    return "", 404
+@trx_bp.route('/config', methods=['GET'], subdomain='wifi')
+def wifi_config():
+    return jsonify(trxRet.config)
 
+
+@trx_bp.route('/stop', methods=['POST'], subdomain='wifi')
+def trx_stop():
+    return trxRet.stop()
+
+
+@trx_bp.route('/write', methods=['POST'], subdomain='wifi')
+def trx_write():
+    # from lib.wifi_utils import write_to_scanlist
+    # if write_to_scanlist(scanner.config, scanner.tracked_signals):
+    #     return "OK", 200
+    # return "", 500
+    pass
