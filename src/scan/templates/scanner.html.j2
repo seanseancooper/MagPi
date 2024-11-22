@@ -5,10 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Scanner [ {{ scanner.polling_count }} ]</title>
     <link href="{{ url_for('scan_bp.static', filename='tabulator/css/tabulator_midnight.min.css') }}" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('scan_bp.static', filename='css/wifi_scan.css') }}">
+    <link rel="stylesheet" href="{{ url_for('scan_bp.static', filename='css/scanner.css') }}">
 
     <script type="text/javascript" src="{{ url_for('scan_bp.static', filename='tabulator/js/tabulator.min.js') }}"></script>
     <script src="{{ url_for('scan_bp.static', filename='js/peity-vanilla.js') }}"></script>
+    <script>
+        const SCAN_TIMEOUT = 60000
+
+        function make_deadline_bar() {
+            var iteration = 0;
+            let iter_timeout = 1000;
+            const bar = document.createElement('div');
+            bar.id = 'bar';
+
+            function update_meter() {
+
+                setTimeout(function() {
+                    bar.className = 'bar';
+
+                    var percentage = (iteration * iter_timeout)/SCAN_TIMEOUT * 100;
+
+                    document.getElementById('bar').style = "background-color:rgba(0,255,0,0.50);transition: all " + 1.5 +"s;";
+                    document.getElementById('bar').style.width = 100 - percentage + '%';
+
+                    update_meter();
+                    iteration++;
+                }, iter_timeout);
+            }
+            document.getElementById('meter').appendChild(bar);
+            update_meter();
+        }
+    </script>
 
     <script>
         function setsHeaders(xhttp) {
@@ -16,19 +43,43 @@
             xhttp.setRequestHeader('Access-Control-Allow-Methods', 'POST');
             xhttp.setRequestHeader('Content-Type', 'text/html');
             xhttp.setRequestHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-*');
-            xhttp.setRequestHeader('MODULE_TARGET', 'WIFI');
         }
 
-        function mute(uniqId){
+        function add(uniqId, trgt){
             var xhttp = new XMLHttpRequest();
-
-            xhttp.open("POST", "{{ url_for('.index')}}mute/" + uniqId, true);
+            xhttp.open("POST", "{{ url_for('.index')}}add/" + uniqId, true);
             setsHeaders(xhttp);
+            xhttp.setRequestHeader('TARGET', trgt);
             xhttp.send();
 
             xhttp.onload = function() {
                 const resp = xhttp.response;
-                var mButton = document.getElementById("wifi_mute_button_" + uniqId);
+                var aButton = document.getElementById("add_button_" + uniqId);
+                if (resp == "OK"){
+                    aButton.classList.value = "adding_button";
+                    aButton.innerHTML = "------";
+                    setTimeout(function() {
+                        aButton.classList.value = "add_btn added_button";
+                        aButton.innerHTML = "ADDED";
+                    }, 250);
+                } else {
+                    aButton.classList.value = "adding_failed_button";
+                    aButton.innerHTML = "FAILED!";
+                };
+            };
+        }
+
+        function mute(uniqId, trgt){
+            var xhttp = new XMLHttpRequest();
+
+            xhttp.open("POST", "{{ url_for('.index')}}mute/" + uniqId, true);
+            setsHeaders(xhttp);
+            xhttp.setRequestHeader('TARGET', trgt);
+            xhttp.send();
+
+            xhttp.onload = function() {
+                const resp = xhttp.response;
+                var mButton = document.getElementById("mute_button_" + uniqId);
 
                 if (resp == "False"){
                     mButton.classList.value = "muting_button";
@@ -50,45 +101,23 @@
             };
         }
 
-        function add(uniqId){
-            var xhttp = new XMLHttpRequest();
-            xhttp.open("POST", "{{ url_for('.index')}}add/" + uniqId, true);
-            setsHeaders(xhttp);
-            xhttp.send();
-
-            xhttp.onload = function() {
-                const resp = xhttp.response;
-                var aButton = document.getElementById("wifi_add_button_" + uniqId);
-                if (resp == "OK"){
-                    aButton.classList.value = "adding_button";
-                    aButton.innerHTML = "------";
-                    setTimeout(function() {
-                        aButton.classList.value = "add_btn added_button";
-                        aButton.innerHTML = "ADDED";
-                    }, 250);
-                } else {
-                    aButton.classList.value = "adding_failed_button";
-                    aButton.innerHTML = "FAILED!";
-                };
-            };
-        }
-
-        function remove(uniqId){
+        function remove(uniqId, trgt){
             var xhttp = new XMLHttpRequest();
             xhttp.open("POST", "{{ url_for('.index')}}remove/" + uniqId, true);
             setsHeaders(xhttp);
+            xhttp.setRequestHeader('TARGET', trgt);
             xhttp.send();
 
             xhttp.onload = function() {
                 const resp = xhttp.response;
-                rButton = document.getElementById("wifi_remove_button_" + uniqId);
+                rButton = document.getElementById("remove_button_" + uniqId);
                 if (resp == "OK"){
                     rButton.classList.value = "rem_button";
                     rButton.style = "color:white;";
                     rButton.innerHTML = "*";
                     setTimeout(function() {
-                        mButton = document.getElementById("wifi_mute_button_" + uniqId);
-                        uButton = document.getElementById("wifi_unmute_button_" + uniqId);
+                        mButton = document.getElementById("mute_button_" + uniqId);
+                        uButton = document.getElementById("unmute_button_" + uniqId);
 
                         if (mButton) {
                                 mButton.style = "display:none;"
@@ -110,12 +139,13 @@
             };
         }
 
-        function write_tracked(button){
+        function write_tracked(button, trgt){
 
             var xhttp = new XMLHttpRequest();
 
             xhttp.open('POST', "{{ url_for('.index')}}write/", true);
             setsHeaders(xhttp);
+            xhttp.setRequestHeader('TARGET', trgt);
             xhttp.send();
 
             xhttp.onload = function() {
@@ -125,11 +155,7 @@
 
         function loadTab(event, tabName){
 
-            // Declare all variables
             var i, tabcontent, tablinks;
-
-            // Get all elements with class="tabcontent" and hide them
-
             tabcontent = document.getElementsByClassName("tabcontent");
 
             for (i = 0; i < tabcontent.length; i++) {
@@ -149,16 +175,19 @@
         }
     </script>
 </head>
-<body onLoad="load_wifi();">
-    <span>
-        <div id="tabs" style="height:30px">
-            <button id="scanner_tab_scanned" class="tab_button" onclick="loadTab(event, 'wifi_scanner')">scanned</button>
-            <button id="scanner_tab_tracked" class="tab_button" onclick="loadTab(event, 'wifi_tracked')">tracked</button>
-            <button id="scanner_tab_ghosts" class="tab_button" onclick="loadTab(event, 'wifi_ghosts')">ghosts</button>
-            <button id="scanner_tab_trx" class="tab_button" onclick="loadTab(event, 'trx_scanner')">trx</button>
+<body onLoad="load();">
+    <div id="bar_container" style="padding-top:2px;padding-bottom:5px;" class="bar_container">
+        <div id="meter" style=""><script>make_deadline_bar()</script></div>
+    </div>
+
+    <div id="tabs" style="height:30px">
+            <button id="scanner_tab_scanned" class="tab_button" onclick="loadTab(event, 'scanner')">WIFI 00:00:00</button>
+            <button id="scanner_tab_tracked" class="tab_button" onclick="loadTab(event, 'tracked')">99 WIFI TRACKED</button>
+            <button id="scanner_tab_ghosts" class="tab_button" onclick="loadTab(event, 'ghosts')">99 WIFI GHOSTS</button>
+            <button id="scanner_tab_trx" class="tab_button" onclick="loadTab(event, 'trx_scanner')">TRX 00:00:00</button>
         </div>
-    </span>
-    <div id="wifi_scanner_filters" style="" class="wifi_scanner_filters">
+
+    <div id="scanner_filters" style="" class="scanner_filters">
         <select id="filter-field">
             <option></option>
             <option value="is_mute">Muted</option>
@@ -197,18 +226,18 @@
         <button id="write_button" class="write_button" value="" onClick="write_tracked();">
             <span id="write_button_text">WRITE</span>
         </button>
-        <button id="load_button" class="reload_button" value="" onClick="load_wifi_now();">
+        <button id="load_button" class="reload_button" value="" onClick="load_now();">
             <span id="load_button_text">RELOAD</span>
         </button>
-        <span id="wifi_scanner_stats" style="" class="wifi_scanner_stats">
+        <span id="scanner_stats" style="" class="scanner_stats">
             {{ scanner.workers|length }} SIGNALS | {{ scanner.elapsed }} ELAPSED
         </span>
 
     </div>
 
-    <div id="wifi_scanner" class="tabcontent"></div>
-    <div id="wifi_tracked" class="tabcontent" style="display:none;"></div>
-    <div id="wifi_ghosts" class="tabcontent" style="display:none;"></div>
+    <div id="scanner" class="tabcontent"></div>
+    <div id="tracked" class="tabcontent" style="display:none;"></div>
+    <div id="ghosts" class="tabcontent" style="display:none;"></div>
     <div id="trx_scanner" class="tabcontent" style="display:none;"></div>
 
     <script>
@@ -356,26 +385,24 @@
         },
     });
 
-    function colorUniqId(data){
-           var parts = data.BSSID.split(':');
+    function colorUniqId(data, splt){
+           var parts = data.split(splt);
            var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
            var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
            var B = (parseInt(parts[4], 16) + parseInt(parts[5], 16)) % 255;
            return [R,G,B];
     };
 
-    function colorAvg([R,G,B]){
+    function averageColor([R,G,B]){
            let avg = R+G+B/3;
            return (avg > 128)? "00,00,00": "255,255,255";
     };
 
-    var TARGET = 'WIFI';
-    var scanner = new Tabulator("#wifi_scanner", {
-        ajaxURL:"http://map.localhost:5005/aggregated/" + TARGET,   // request URI
-        ajaxConfig:"GET",                               // ajax config options go here
-        dataLoaderLoading:dataLoaderLoading,            // change "Loading" message to "&nbsp;"
-        index:"BSSID",                                  // use uniqId as index
-        // minHeight:435,                               // set height of *table* (in CSS or here)
+    var scanner = new Tabulator("#scanner", {
+        ajaxURL:"http://map.localhost:5005/aggregated/wifi",    // request URI
+        ajaxConfig:"GET",                                       // ajax config options go here
+        dataLoaderLoading:dataLoaderLoading,                    // change "Loading" message to "&nbsp;"
+        index:"BSSID",                                          // use uniqId as index
 
         rowFormatter:function(row){
             row.getElement().style = "height:24px";
@@ -395,21 +422,25 @@
         columns:[
             {field:"tracked", width:102, formatter: function(cell, formatterParams) {
                 const data = cell.getRow().getData();
+                const trgt = 'wifi';
 
-                var _color = colorUniqId(data);
+                var _color = colorUniqId(data.BSSID, ':');
                 var p_signal_color = 'rgba(' + _color + ', 1.0)';
-                var text_color = 'rgba(' + colorAvg(_color) + ', 1.0)';
+                var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
 
                 if (data.tracked == true) {
                     if (data.is_mute == false) {
-                        return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE'>MUTE</button>";
+                        return "<button id='remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE' data-trgt=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE' data-trgt=" + trgt + ">MUTE</button>";
                     } else {
-                        return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE'>UNMUTE</button>";
+                        return "<button id='remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE' data-trgt=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE' data-trgt=" + trgt + ">UNMUTE</button>";
                     }
                 } else {
-                    return "<button id='wifi_add_button_" + data.BSSID + "' style='width:96px;' class='trk_btn add_button button' value='"+data.BSSID+"' data-action='ADD'>ADD</button>";
+                    return "<button id='add_button_" + data.BSSID + "' style='width:96px;' class='trk_btn add_button button' value='"+data.BSSID+"' data-action='ADD' data-trgt=" + trgt + ">ADD</button>";
                 }
             }},
+
+
+
             {title:"SSID", field:"SSID", width:140, formatter:ssidFormatter, formatterParams:{
                 field:"Quality",
                 colors:["red", "orange", "yellow", "#008800", "#00FF00"]
@@ -420,15 +451,17 @@
                 field: "BSSID"
             }},
             */
-            {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, formatterParams:{
-                type:"line"}
-            },
-
+            {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, formatterParams:{type:"line"},
+                cellClick:function(e, cell){console.log(cell.getValue())}},
             {title:"db", field:"Signal", width:30},
             {title:"Ch.", field:"Channel", width:50},
             {title:"Freq.", field:"Frequency", width:70},
             {title:"Sec.", field:"Encryption", formatter: "tickCross", width:30},
             {title:"Vendor", field:"Vendor", width:100},
+
+
+
+
             {title:"Elapsed", field:"elapsed", width:75},
             {title:"Created", field:"created", width:75},
             {title:"Last", field:"updated", width:75},
@@ -436,12 +469,12 @@
         ],
     });
 
-    var tracked = new Tabulator("#wifi_tracked", {
-        ajaxURL:"http://wifi.localhost:5006/tracked", // request URI
-        ajaxConfig:"GET",                                // ajax config options go here
-        headerVisible:true,                              // show header
-        dataLoaderLoading:dataLoaderLoading,             // change "Loading" message to "&nbsp;"
-        index:"BSSID",                                   // use BSSID as index
+    var tracked = new Tabulator("#tracked", {
+        ajaxURL:"http://map.localhost:5005/aggregated/wifi/tracked",    // request URI
+        ajaxConfig:"GET",                                               // ajax config options go here
+        headerVisible:true,                                             // show header
+        dataLoaderLoading:dataLoaderLoading,                            // change "Loading" message to "&nbsp;"
+        index:"BSSID",                                                  // use BSSID as index
 
         rowFormatter:function(row){
             row.getElement().style = "height:24px";
@@ -453,16 +486,17 @@
         columns:[
             {field:"tracked", width:102, formatter: function(cell, formatterParams) {
                 var data = cell.getRow().getData();
+                const trgt = 'wifi';
 
-                var _color = colorUniqId(data);
+                var _color = colorUniqId(data.BSSID, ':');
                 var p_signal_color = 'rgba(' + _color + ', 1.0)';
-                var text_color = 'rgba(' + colorAvg(_color) + ', 1.0)';
+                var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
 
-                    if (data.is_mute == false) {
-                        return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE'>MUTE</button>";
-                    } else {
-                        return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE'>UNMUTE</button>";
-                    }
+                if (data.is_mute == false) {
+                    return "<button id='remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE' data-trgt=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE' data-trgt=" + trgt + ">MUTE</button>";
+                } else {
+                    return "<button id='remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE' data-trgt=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE' data-trgt=" + trgt + ">UNMUTE</button>";
+                }
             }},
             {title:"SSID", field:"SSID", formatter:ssidFormatter, formatterParams:{
                 field:"Quality",
@@ -487,12 +521,12 @@
         ],
     });
 
-    var ghosts = new Tabulator("#wifi_ghosts", {
-        ajaxURL:"http://wifi.localhost:5006/ghosts", // request URI
-        ajaxConfig:"GET",                               // ajax config options go here
-        headerVisible:true,                             // show header
-        dataLoaderLoading:dataLoaderLoading,            // change "Loading" message to "&nbsp;"
-        index:"BSSID",                                  // use BSSID as index
+    var ghosts = new Tabulator("#ghosts", {
+        ajaxURL:"http://map.localhost:5005/aggregated/wifi/ghosts",     // request URI
+        ajaxConfig:"GET",                                               // ajax config options go here
+        headerVisible:true,                                             // show header
+        dataLoaderLoading:dataLoaderLoading,                            // change "Loading" message to "&nbsp;"
+        index:"BSSID",                                                  // use BSSID as index
 
         rowFormatter:function(row){
             row.getElement().style = "height:24px";
@@ -502,15 +536,16 @@
         columns:[
             {field:"tracked", width:102, formatter: function(cell, formatterParams) {
                 var data = cell.getRow().getData();
+                const trgt = 'wifi';
 
-                var _color = colorUniqId(data);
+                var _color = colorUniqId(data.BSSID, ':');
                 var p_signal_color = 'rgba(' + _color + ', 1.0)';
-                var text_color = 'rgba(' + colorAvg(_color) + ', 1.0)';
+                var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
 
                 if (data.is_mute == false) {
-                    return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE'>MUTE</button>";
+                    return "<button id='remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE' data-trgt=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE' data-trgt=" + trgt + ">MUTE</button>";
                 } else {
-                    return "<button id='wifi_remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE'>UNMUTE</button>";
+                    return "<button id='remove_button_"+ data.BSSID + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.BSSID+"' data-action='REMOVE' data-trgt=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE' data-trgt=" + trgt + ">UNMUTE</button>";
                 }
             }},
             {title:"SSID", field:"SSID", formatter:ssidFormatter, formatterParams:{
@@ -537,11 +572,11 @@
     });
 
     var trx_scanner = new Tabulator("#trx_scanner", {
-        ajaxURL:"http://map.localhost:5005/aggregated/TRX",   // request URI
-        ajaxConfig:"GET",                               // ajax config options go here
-        dataLoaderLoading:dataLoaderLoading,            // change "Loading" message to "&nbsp;"
-        index:"id",                                     // use unique  id as index
-        // minHeight:435,                               // set height of *table* (in CSS or here)
+        ajaxURL:"http://map.localhost:5005/aggregated/trx", // request URI
+        ajaxConfig:"GET",                                   // ajax config options go here
+        dataLoaderLoading:dataLoaderLoading,                // change "Loading" message to "&nbsp;"
+        index:"id",                                         // use unique  id as index
+        // minHeight:435,                                   // set height of *table* (in CSS or here)
 
         rowFormatter:function(row){
             row.getElement().style = "height:24px";
@@ -553,7 +588,7 @@
             headerFilter: true,                     //persist header filters
             group: true,                            //persist row grouping
             page: true,                             //persist page
-            columns: false,                         //persist columns
+            columns: true,                          //persist columns
         },
 
         placeholder:"..." ,
@@ -562,59 +597,86 @@
 
             {field:"tracked", width:102, formatter: function(cell, formatterParams) {
                 var data = cell.getRow().getData();
-                let trx_color = (function(){
-                    var parts = data.id.substring(0,6).split('');
+                const trgt = 'trx';
 
-                    var R = (parseInt(parts[0], 16) * parseInt(parts[1], 16)) % 255;
-                    var G = (parseInt(parts[2], 16) * parseInt(parts[3], 16)) % 255;
-                    var B = (parseInt(parts[4], 16) * parseInt(parts[5], 16)) % 255;
-                    return [R,G,B];
-                })(data);
+                //  special processing to make string of hex look like a BSSID
+                var uniqId = data.id.replace('-','').substring(0,12).match(/.{1,2}/g).join(':');
 
-                var p_signal_color = 'rgba(' + trx_color + ', 1.0)';
-                var text_color = 'rgba(' + colorAvg(trx_color) + ', 1.0)';
+                var _color = colorUniqId(uniqId, ':');
+                var p_signal_color = 'rgba(' + _color + ', 1.0)';
+                var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
 
                 if (data.tracked == true) {
                     if (data.is_mute == false) {
-                        return "<button id='wifi_remove_button_"+ data.attributes.FREQ1 + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.attributes.FREQ1+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.attributes.FREQ1 + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.attributes.FREQ1 + "' data-action='MUTE'>MUTE</button>";
+                        return "<button id='remove_button_"+ data.id + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.id+"' data-action='REMOVE' data-trgt=" + trgt + ">x</button><button id='mute_button_" + data.id + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.id + "' data-action='MUTE' data-trgt=" + trgt + ">MUTE</button>";
                     } else {
-                        return "<button id='wifi_remove_button_"+ data.attributes.FREQ1 + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.attributes.FREQ1+"' data-action='REMOVE'>x</button><button id='wifi_mute_button_" + data.attributes.FREQ1 + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.attributes.FREQ1 + "' data-action='MUTE'>UNMUTE</button>";
+                        return "<button id='remove_button_"+ data.id + "' style=\"width:24px;\" class=\"trk_btn rem_button\" value='"+data.id+"' data-action='REMOVE' data-trgt=" + trgt + ">x</button><button id='mute_button_" + data.id + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.id + "' data-action='MUTE' data-trgt=" + trgt + ">UNMUTE</button>";
                     }
                 } else {
-                    return "<button id='wifi_add_button_" + data.attributes.FREQ1 + "' style='width:96px;' class='trk_btn add_button button' value='"+data.attributes.FREQ1+"' data-action='ADD'>ADD</button>";
+                    return "<button id='add_button_" + data.id + "' style='width:96px;' class='trk_btn add_button button' value='"+data.id+"' data-action='ADD' data-trgt=" + trgt + ">ADD</button>";
                 }
             }},
-            //
 
-            {title:"ID", field:"id", width:30},
-            
-            {title:"SYSTEM", field:"attributes.SYSTEM", width:110},
-            {title:"ALPHATAG", field:"attributes.ALPHATAG", width:150},
-            {title:"SITE", field:"attributes.SITE", width:110},
-            
-            {title:"TYPE", field:"attributes.TYPE", width:80},
+            /*
+            {title:"TYPE", field:"attributes.TYPE", cellClick:function(e, cell){
+                var data = cell.getRow().getData();
+                const trgt = 'trx';
+
+                function muteGroup(item, trgt) {
+                    var mutables = [];
+                    cellVal = data.attributes.TYPE;
+
+                    Object.entries(data.attributes).forEach(([key, value]) => {
+                        console.log(`${key} ${value}`);
+
+                        var column = cell.getColumn();
+                        var columnField = column.getField().replace('attributes.','');
+
+                        if (cellVal != null && key == columnField && value == cellVal){
+                            mutables.push(item);
+                        }
+
+                    });
+                    //  iterate  over all the data
+                    mutables.forEach(function(mutable){
+                        add(mutable, trgt);
+                        mute(mutable, trgt);
+                    }
+                )};
+
+
+                if (muteGroup(data.id, trgt)) {
+                    return "<div id='mute_button_" + data.id + "' style='background-color:#F00;' class='' value='" + data.id + "' data-action='MUTE' data-trgt=" + trgt + ">" +  data.attributes.TYPE + "</div>";
+                } else {
+                    return "<div id='mute_button_" + data.id + "' style='background-color:#FFF;' class='' value='" + data.id + "' data-action='MUTE' data-trgt=" + trgt + ">" +  data.attributes.TYPE + "</div>";
+                }
+            },  width:60},
+
+            */
+            {title:"TYPE", field:"attributes.TYPE", width:60},
+            /**/
             {title:"TSYS_TYPE", field:"attributes.TSYS_TYPE", width:40},
-            {title:"TSYS_ID", field:"attributes.TSYS_ID", width:40},
-            
+            {title:"TSYS_ID", field:"attributes.TSYS_ID", width:90},
+
+            {title:"SYSTEM", field:"attributes.SYSTEM", width:120},
+            {title:"SITE", field:"attributes.SITE", width:120},
+            {title:"ALPHATAG", field:"attributes.ALPHATAG", width:140},
+
+            {title:"TGID1", field:"attributes.TGID1", width:70},
+            {title:"TGID2", field:"attributes.TGID2", width:70},
+            {title:"RID1", field:"attributes.RID1", width:70},
+            {title:"RID2", field:"attributes.RID2", width:70},
+
             {title:"FREQ1", field:"attributes.FREQ1", width:80},
-            {title:"FREQ2", field:"attributes.FREQ2", width:90},
-            
-            {title:"TGID1", field:"attributes.TGID1", width:90},
-            {title:"TGID2", field:"attributes.TGID2", width:90},
-            {title:"RID1", field:"attributes.RID1", width:90},
-            {title:"RID2", field:"attributes.RID2", width:90},
-            
-            {title:"SCAN_DATE", field:"attributes.SCAN_DATE", width:120},
-            {title:"SCAN_TIME", field:"attributes.SCAN_TIME", width:120},
-            {title:"COMP_DATE", field:"attributes.COMP_DATE", width:120},
-            {title:"COMP_TIME", field:"attributes.COMP_TIME", width:120}
+            {title:"FREQ2", field:"attributes.FREQ2", width:80}
+
         ],
     });
 
     scanner_elements = [];
-    scanner_elements.push(document.getElementById('wifi_scanner'));
-    scanner_elements.push(document.getElementById('wifi_tracked'));
-    scanner_elements.push(document.getElementById('wifi_ghosts'));
+    scanner_elements.push(document.getElementById('scanner'));
+    scanner_elements.push(document.getElementById('tracked'));
+    scanner_elements.push(document.getElementById('ghosts'));
     scanner_elements.push(document.getElementById('trx_scanner'));
     scanner_elements.push(document.getElementById("all_button"));
     scanner_elements.push(document.getElementById("none_button"));
@@ -625,15 +687,15 @@
 
             if (event.target.classList.contains('trk_btn')) {
                 if (event.target.classList.contains('add_button')) {
-                    add(event.target.value);
+                    add(event.target.value, event.target.attributes['data-trgt'].value);
                 };
                 if (event.target.classList.contains('rem_button')) {
-                    remove(event.target.value)
+                    remove(event.target.value, event.target.attributes['data-trgt'].value)
                 };
             };
 
             if (event.target.classList.contains('mute_btn')) {
-                mute(event.target.value);
+                mute(event.target.value, event.target.attributes['data-trgt'].value);
             };
 
             if (event.target.classList.contains('all_button')) {
@@ -647,23 +709,23 @@
         });
     });
 
-    function load_wifi_now(){
-        document.location.reload()
+    function load_now(){
+        document.location.reload();
     }
 
-    function load_wifi(){
+    function load(){
         /*
-        for now, this reloads wifi scanner
+        for now, this reloads scanner
         a draggable progress bar would be nice to have!
         https://codepen.io/manishady/pen/xGYvEK
         https://codepen.io/GreenSock/pen/eRBdzM
         */
         setTimeout(function(){
-            load_wifi_now()
-        }, 60000);
+            load_now();
+        }, SCAN_TIMEOUT);
     }
 
-    load_wifi();
+    load();
     </script>
 </body>
 </html>
