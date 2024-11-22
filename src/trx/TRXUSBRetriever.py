@@ -16,6 +16,11 @@ from src.lib.utils import get_location
 from src.trx.lib.TRXSignalPoint import TRXSignalPoint
 os.environ['PYUSB_DEBUG'] = 'debug'  # uncomment for verbose pyusb output
 
+# notes
+#  see  https://kampi.gitbook.io/avr/lets-use-usb/a-brief-introduction-to-the-usb-protocol
+
+
+
 
 class TRXUSBRetriever(threading.Thread):
 
@@ -59,7 +64,7 @@ class TRXUSBRetriever(threading.Thread):
         return [sgnl.get() for sgnl in self.signal_cache]
 
     def get_tracked(self):
-        return [self.tracked_signals[sgnl].get() for sgnl in self.tracked_signals]
+        return [sgnl for sgnl in self.tracked_signals]
 
     @staticmethod
     def write_to_adu(dev, endpoint, msg_str):
@@ -78,9 +83,9 @@ class TRXUSBRetriever(threading.Thread):
         return num_bytes_written
 
     @staticmethod
-    def read_from_adu(dev, timeout):
+    def read_from_adu(dev, endpoint, timeout):
         try:
-            data = dev.read(0x83, 64, timeout)
+            data = dev.read(endpoint, 64, timeout)
         except usb.core.USBError as e:
             print("Error reading response: {}".format(e.args))
             return None
@@ -94,10 +99,15 @@ class TRXUSBRetriever(threading.Thread):
 
         return result_str
 
-    def mute(self, sgnl):
+    def mute(self, uniqId):
         from src.lib.utils import mute
+
+        def find(f):
+            return [sgnl for sgnl in self.signal_cache if str(sgnl._id) == f][0]
+
+        sgnl = find(uniqId)
         # SIGNAL: MUTE/UNMUTE
-        return mute(self.tracked_signals[sgnl])
+        return mute(sgnl)
 
     def auto_unmute(self, sgnl):
         ''' this is the polled function to UNMUTE signals AUTOMATICALLY after the MUTE_TIME. '''
@@ -106,26 +116,33 @@ class TRXUSBRetriever(threading.Thread):
                 sgnl.is_mute = False
                 # SIGNAL: AUTO UNMUTE
 
-    def add(self, freq):
+    def add(self, uniqId):
 
         try:
 
             def find(f):
+                return [sgnl for sgnl in self.signal_cache if str(sgnl._id) == f][0]
 
-                return [sgnl for sgnl in self.signal_cache if sgnl.attributes['FREQ1'] == f][0]
-
-            sgnl = find(freq)
-            self.tracked_signals.update({freq: sgnl})
+            sgnl = find(uniqId)
+            sgnl.tracked = True
+            self.tracked_signals.update({uniqId: sgnl})
 
             # SIGNAL: ADDED ITEM
             return True
         except IndexError:
             return False  # not in tracked_signals
 
-    def remove(self, freq):
+    def remove(self, uniqId):
         _copy = self.tracked_signals.copy()
         self.tracked_signals.clear()
-        [self.add(remaining) for remaining in _copy if remaining != freq]
+
+        def find(f):
+            return [sgnl for sgnl in self.signal_cache if str(sgnl._id) == f][0]
+
+        sgnl = find(uniqId)
+        sgnl.tracked = False
+
+        [self.add(remaining) for remaining in _copy if remaining != uniqId]
         # SIGNAL: REMOVED ITEM
         return True
 
@@ -241,11 +258,11 @@ class TRXUSBRetriever(threading.Thread):
                     message = 'A'
                     chksum = sum(bytes(message, encoding='utf-8')) and 0xFF
 
-                    bytes_written = self.write_to_adu(device, EP_IN, message)  # send STX A ETX
+                    bytes_written = self.write_to_adu(device, EP_OUT, message)  # send STX A ETX
                     bytes_written = self.write_to_adu(device, EP_OUT, chksum)  # send SUM
 
                     # Read data back
-                    data = self.read_from_adu(device, 200)  # read from device with a 200 millisecond timeout
+                    data = self.read_from_adu(device, EP_IN, 200)  # read from EP_IN device with a 200 millisecond timeout
 
                     if data is not None:
                         print("Received string: {}".format(data))
