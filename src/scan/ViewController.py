@@ -5,7 +5,7 @@ import routes
 from src.lib.rest_server import RESTServer as RESTServer
 
 
-class SCANController(threading.Thread):
+class ViewController(threading.Thread):
 
     def __init__(self):
         super().__init__()
@@ -22,9 +22,10 @@ class SCANController(threading.Thread):
 
         with app.app_context():
             if __name__ == '__main__':
-                app.config['SERVER_NAME'] = routes.scanner.config['SERVER_NAME']
-                app.config['DEBUG'] = routes.scanner.config['DEBUG']
-                app.register_blueprint(routes.scan_bp)
+                app.config['SERVER_NAME'] = routes.viewContainer.config['SERVER_NAME']
+                app.config['DEBUG'] = routes.viewContainer.config['DEBUG']
+                routes.viewContainer.scanner = routes.viewContainer.get_scanner(app)
+                app.register_blueprint(routes.vc_bp)
             return app
 
     def run(self) -> None:
@@ -32,16 +33,16 @@ class SCANController(threading.Thread):
             import atexit
 
             def stop():
-                routes.scanner.stop()
+                routes.viewContainer.stop()
 
             atexit.register(stop)
 
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
-            routes.scanner.run()
+            routes.viewContainer.run()
         except KeyboardInterrupt:
             pass
 
 
 if __name__ == '__main__':
-    SCANController().run()
+    ViewController().run()
