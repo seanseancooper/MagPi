@@ -190,18 +190,18 @@ class MacOSAirportWifiRetriever(threading.Thread):
 
                 SSID = item.get('SSID_STR', '*HIDDEN*').strip()
                 BSSID = clean_bssid(item.get('BSSID', '00:00:00:00:00:00').strip())
-                RSSI = str(item.get('RSSI', 0).strip())
-                CHANNEL = str(item.get('CHANNEL', '?').strip())
+                RSSI = int(item.get('RSSI', 0))
+                CHANNEL = int(item.get('CHANNEL', -1))
 
                 # convert to Ghz band
-                FREQUENCY = str(item.get('CAPABILITIES', '?').strip())
+                FREQUENCY = int(item.get('CAPABILITIES', -1))
 
                 try:
-                    QUALITY = str(abs(int(RSSI) + 100) or 0)
+                    QUALITY = abs(RSSI + 100) or 0
                 except Exception as e:
                     wifi_logger.debug(f"[{__name__}]:Exception: calculating quality {e}")
 
-                SECURITY = 'False'
+                SECURITY = False
 
                 # don't really care about details... is or is it not secured.
                 try:
@@ -210,15 +210,11 @@ class MacOSAirportWifiRetriever(threading.Thread):
                     IE_KEY_RSN_UCIPHERS = int(item.get('IE_KEY_RSN_UCIPHERS', 0).strip())
 
                     if IE_KEY_RSN_MCIPHER > 0 or IE_KEY_RSN_UCIPHERS > 0:
-                        SECURITY = 'True'
+                        SECURITY = True
                 except AttributeError:
                     pass
                 except UnboundLocalError:
                     pass
-
-                # wifi_logger.debug(f"[{__name__}]:(SECURITY:{SECURITY})")
-
-                IS_MUTE = False
 
                 try:
                     from src.wifi.lib.wifi_utils import vendors
