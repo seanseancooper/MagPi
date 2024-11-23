@@ -179,7 +179,7 @@ if __name__ == '__main__':
             root.root_bp.register_blueprint(gps.gps_bp)
 
             RESTServer(wifi.create_app()).run()
-            threading.Thread(target=wifi.scanner.run, daemon=True).start()
+            threading.Thread(target=wifi.s.run, daemon=True).start()
             root.root_bp.register_blueprint(wifi.wifi_bp)
 
             RESTServer(cam.create_app()).run()
