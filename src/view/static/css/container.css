@@ -143,14 +143,14 @@ button {
 }
 
 
-scanner_filters {
+container_filters {
     position:absolute;
     height:25px;
     left:0px;
     top:0px;
 }
 
-.scanner_buttons {
+.container_buttons {
     position:absolute;
     left:442px;
     top:8px;
@@ -192,7 +192,7 @@ scanner_filters {
     color:black;
 }
 
-.scanner_stats {
+.container_stats {
     position:relative;
     left:10px;
     top:1px;
@@ -203,7 +203,7 @@ scanner_filters {
     text-align:top;
 }
 
-#scanner_stats{
+#container_stats{
     color:green;
 }
 

@@ -10,7 +10,7 @@
     <script type="text/javascript" src="{{ url_for('vc_bp.static', filename='tabulator/js/tabulator.min.js') }}"></script>
     <script src="{{ url_for('vc_bp.static', filename='js/peity-vanilla.js') }}"></script>
     <script>
-        const SCAN_TIMEOUT = {{ container.config.get('SCAN_TIMEOUT') * 1000 }}  // make configurable
+        const SCAN_TIMEOUT = {{ container.config.get('VIEW_TIMEOUT') * 1000 }}  // make configurable
 
         function setsHeaders(xhttp) {
             xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
