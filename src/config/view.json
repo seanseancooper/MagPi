@@ -16,6 +16,9 @@
 			"STATIC_URL_PATH": "static"
 		},
 		{
+			"VIEW_TIMEOUT": 30
+		},
+		{
 			"DATE_FORMAT": "%Y-%m-%d"
 		},
 		{
