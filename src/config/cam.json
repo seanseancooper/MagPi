@@ -48,9 +48,8 @@
 			"OUTFILE_NAME": "cam_snap"
 		},
 		{
-			"PLUGINS":
-				{"blackview_test_vis": {
-					"capture_param_capture_width": 704,
+			"PLUGINS": [
+				{	"capture_param_capture_width": 704,
 					"capture_param_capture_height": 480,
 					"capture_output_show_time": false,
 					"capture_output_show_stats": false,
@@ -85,8 +84,27 @@
 						{"plugin_cascade_maxSize": "500, 500"},
 						{"plugin_cascade_flags": "cv.CASCADE_SCALE_IMAGE"}
 					]
+				},
+				{	"asset_classes": {},
+					"capture_is_image": false,
+					"capture_is_null": false,
+					"capture_output_log_stats": false,
+					"capture_output_show_stats": false,
+					"capture_param_capture_height": 480,
+					"capture_param_capture_width": 702,
+					"display_proc_stats": false,
+					"display_rect_stats": false,
+					"log_proc_stats": false,
+					"log_rect_stats": false,
+					"next_plugin_class": "",
+					"next_plugin_name": "",
+					"plugin_cv_color": "0, 0, 0",
+					"plugin_displays": false,
+					"plugin_process_copies": false,
+					"plugin_process_frames": false,
+					"write_mp4": false
 				}
-			}
+			]
 		}
 	]
 }

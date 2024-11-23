@@ -24,29 +24,6 @@ class CAMManager(threading.Thread):
         self.plugin_args_capture_width = None
         self.plugin_args_capture_height = None
 
-        #TODO 'snap' config needs to move to config
-        #TODO create/use a namespace for "plugins"; auto-discoover them.
-        self.plugin_config = {
-            "asset_classes"               : {},
-            "capture_is_image"            : False,
-            "capture_is_null"             : False,
-            "capture_output_log_stats"    : False,
-            "capture_output_show_stats"   : False,
-            "capture_param_capture_height": 480,
-            "capture_param_capture_width" : 702,
-            "display_proc_stats"          : False,
-            "display_rect_stats"          : False,
-            "log_proc_stats"              : False,
-            "log_rect_stats"              : False,
-            "next_plugin_class"           : "",
-            "next_plugin_name"            : "",
-            "plugin_cv_color"             : "0, 0, 0",
-            "plugin_displays"             : False,
-            "plugin_process_copies"       : False,
-            "plugin_process_frames"       : False,
-            "write_mp4"                   : False
-        }
-
         self.plugin = None
 
 

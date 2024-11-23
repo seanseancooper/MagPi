@@ -80,7 +80,7 @@ class ShowxatingPlugin(threading.Thread):
         temp = {}
 
         readConfig(os.path.join(CONFIG_PATH, 'cam.json'), temp)
-        self.plugin_config = temp['PLUGINS'][self.plugin_name]
+        self.plugin_config, _ = temp['PLUGINS']
 
         self.plugin_process_frames = self.plugin_config['plugin_process_frames']
 
