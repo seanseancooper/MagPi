@@ -15,7 +15,7 @@ def configure():
     readConfig(os.path.join(CONFIG_PATH, 'controller.json'), configuration)
 
 
-def return_app_ctx():
+def create_app():
 
     app = Flask(__name__, instance_relative_config=True)
     app.config['SERVER_NAME'] = configuration['SERVER_NAME']
@@ -32,5 +32,5 @@ def return_app_ctx():
 if __name__ == '__main__':
 
     configure()
-    webapp = return_app_ctx()
+    webapp = create_app()
     webapp.run()
