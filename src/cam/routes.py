@@ -45,8 +45,9 @@ def cam_multibutton(mode):
 
 @cam_bp.route("/plugin/<field>/<value>", methods=['POST'], subdomain='cam')
 def cam_plugin(field, value):
-    camMgr.cam_plugin(field, value)
-    return "OK"
+    if camMgr.cam_twiddle(field, value):
+        return "OK"
+    return "FAIL"
 
 
 @cam_bp.route("/move/<command>")
