@@ -13,16 +13,16 @@ import src.cam.CAMController as CAMController
 import src.gps.GPSController as GPSController
 import src.map.MAPController as MAPController
 import src.trx.TRXController as TRXController
-import src.scan.ViewController as SCANController
+import src.view.ViewController as ViewController
 
 
-from arx import routes as arx
-from cam import routes as cam
-from gps import routes as gps
-from map import routes as map
-from trx import routes as trx
-from wifi import routes as wifi  # can't get retriever! not in path
-from scan import routes as scan
+# from arx import routes as arx
+# from cam import routes as cam
+# from gps import routes as gps
+# from map import routes as map
+# from trx import routes as trx
+# from wifi import routes as wifi  # can't get retriever! not in path
+from view import routes as view
 
 import routes as root
 configuration = {}
@@ -48,17 +48,17 @@ def create_app():
     app = Flask(__name__, instance_relative_config=True)
     app.config['SERVER_NAME'] = configuration['SERVER_NAME']
 
-    root.root_bp.register_blueprint(gps.gps_bp)
-    root.root_bp.register_blueprint(wifi.wifi_bp)
+    # root.root_bp.register_blueprint(gps.gps_bp)
+    # root.root_bp.register_blueprint(wifi.wifi_bp)
+    #
+    # root.root_bp.register_blueprint(trx.trx_bp)
+    # root.root_bp.register_blueprint(arx.arx_bp)
+    # root.root_bp.register_blueprint(cam.cam_bp)
 
-    root.root_bp.register_blueprint(trx.trx_bp)
-    root.root_bp.register_blueprint(arx.arx_bp)
-    root.root_bp.register_blueprint(cam.cam_bp)
+    # root.root_bp.register_blueprint(map.map_bp)
 
-    root.root_bp.register_blueprint(map.map_bp)
-
-    scan.viewContainer = scan.get_scanner(app)
-    root.root_bp.register_blueprint(scan.vc_bp)
+    view.viewContainer.viewcontainer = view.viewContainer.get_view_container(app)
+    root.root_bp.register_blueprint(view.vc_bp)
 
     app.register_blueprint(root.root_bp)
 
@@ -86,27 +86,27 @@ def starts_apps():
             #  MOTController [5010]
             #  EBSController [5003]
 
-    RESTServer(GPSController.GPSController().create_app()).run()
-    threading.Thread(target=gps.gpsRet.run, daemon=True).start()
+    # RESTServer(GPSController.GPSController().create_app()).run()
+    # threading.Thread(target=gps.gpsRet.run, daemon=True).start()
+    #
+    # import wifi.__init__ as wifirunner
+    # RESTServer(wifirunner.w.create_app()).run()
+    # wifirunner.w.run()
+    #
+    # RESTServer(TRXController.TRXController.create_app()).run()
+    # threading.Thread(target=trx.trxRet.run, daemon=True).start()
+    #
+    # RESTServer(ARXController.ARXController().create_app()).run()
+    # threading.Thread(target=arx.arxRec.run, daemon=True).start()
+    #
+    # RESTServer(CAMController.CAMController().create_app()).run()
+    # threading.Thread(target=cam.camMgr.run, daemon=True).start()
+    #
+    # RESTServer(MAPController.MAPController.create_app()).run()
+    # threading.Thread(target=map.mapAgg.run, daemon=True).start()
 
-    import wifi.__init__ as wifirunner
-    RESTServer(wifirunner.w.create_app()).run()
-    wifirunner.w.run()
-
-    RESTServer(TRXController.TRXController.create_app()).run()
-    threading.Thread(target=trx.trxRet.run, daemon=True).start()
-
-    RESTServer(ARXController.ARXController().create_app()).run()
-    threading.Thread(target=arx.arxRec.run, daemon=True).start()
-
-    RESTServer(CAMController.CAMController().create_app()).run()
-    threading.Thread(target=cam.camMgr.run, daemon=True).start()
-
-    RESTServer(MAPController.MAPController.create_app()).run()
-    threading.Thread(target=map.mapAgg.run, daemon=True).start()
-
-    RESTServer(SCANController.ViewController.create_app()).run()
-    threading.Thread(target=scan.viewContainer.run, daemon=True).start()
+    RESTServer(ViewController.ViewController.create_app()).run()
+    threading.Thread(target=view.viewContainer.run, daemon=True).start()
 
 
 if __name__ == '__main__':
