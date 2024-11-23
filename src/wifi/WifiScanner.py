@@ -140,6 +140,7 @@ class WifiScanner(threading.Thread):
         sgnl['Frequency'] = worker.frequency
         sgnl['Quality'] = worker.quality
         sgnl['Encryption'] = worker.is_encrypted
+        sgnl['Signal'] = worker.signal
 
         sgnl['created'] = format_time(worker.created, fmt)
         sgnl['updated'] = format_time(worker.updated, fmt)
@@ -160,14 +161,18 @@ class WifiScanner(threading.Thread):
     def update_ghosts(self):
         """ find, load and update ghosts """
 
-        # TODO: delete removes *entire* collection due to using frozenset.
-        #  this diff logic could be implemented in a method, may need do that
-        #  to have it work.
+        # TODO: removval from either tracked or parsed removes *entire*
+        #  collection of ghosts due to using frozenset.
         tracked = frozenset([key['BSSID'] for key in self.get_tracked_signals()])
         parsed = frozenset([key['BSSID'] for key in self.parsed_signals.copy()])
         self.ghost_signals = tracked.difference(parsed)
 
-        [self.makeSignalPoint(str(item), -99) for item in self.ghost_signals]
+        def update_ghost(item):
+            self.get_worker(item).signal = -99
+            self.get_worker(item).updated = datetime.now()
+            self.makeSignalPoint(str(item), self.get_worker(item).signal)
+
+        [update_ghost(item) for item in self.ghost_signals]
 
     def parse_signals(self, readlines):
         self.parsed_signals = self.retriever.get_parsed_cells(readlines)
@@ -235,7 +240,7 @@ class WifiScanner(threading.Thread):
                 self.elapsed = format_time(datetime.strptime(str(datetime.now() - self.start_time), "%H:%M:%S.%f"), self.config.get('TIME_FORMAT', "%H:%M:%S"))
                 wifi_updated.send(self)
 
-                print(f"WifiScanner [{self.polling_count}] {self.elapsed} {len(self.parsed_signals)} signals, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts")
+                print(f"WifiScanner [{self.polling_count} {format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))}] {self.elapsed} {len(self.parsed_signals)} signals, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts")
                 self.polling_count += 1
                 time.sleep(self.config.get('SCAN_TIMEOUT', 5))
             else:
