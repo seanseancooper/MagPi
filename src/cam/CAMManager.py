@@ -2,7 +2,7 @@ import threading
 import logging
 from flask import json
 
-from src.cam.Showxating.lib.ImageWriter import ImageWriter
+
 from src.cam.Showxating.ShowxatingBlackviewPlugin import ShowxatingBlackviewPlugin
 from src.config.__init__ import readConfig
 
@@ -127,23 +127,6 @@ class CAMManager(threading.Thread):
             self.plugin.has_symbology = True
             self.plugin.has_analysis = True
 
-    def cam_snap(self):
-
-        # IDEA: Move to plugin. It may be more efficient to
-        #  write frames via delegation than by force ('we've got that "B" roll!').
-
-        #TODO: write to imagecache, or create a vector that can later be compared.
-
-        def _snap(frame):
-            if frame is not None:
-                writer = ImageWriter("CAMManager")
-                writer.write("CAM_SNAP", frame)
-
-        # NOFIX: throttle me; I can be overloaded by requests
-        #  and crash the capture! [this is for stills, not movies. Not fixing it.]
-        for frame in self.plugin.plugin_capture.run():
-            _snap(frame)
-            break
 
     def cam_plugin(self, field, value):
         # TODO: FIX BRITTLE CODE!

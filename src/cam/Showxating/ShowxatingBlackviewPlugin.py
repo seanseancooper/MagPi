@@ -4,6 +4,7 @@ import cv2 as cv
 import numpy as np
 
 from src.cam.Showxating.plugin import ShowxatingPlugin
+from src.cam.Showxating.lib.ImageWriter import ImageWriter
 from src.cam.Showxating.lib.FrameObjektTracker import FrameObjektTracker
 from src.cam.Showxating.lib.StreamService import StreamService, StreamingHandler, highlight
 import logging
@@ -317,6 +318,24 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self.streamservice = StreamService(('localhost', self.plugin_config['streaming_port']),
                                            self.plugin_config['streaming_path'], handler)
         self.streamservice.stream()
+
+    def cam_snap(self):
+
+        # IDEA: It may be more efficient to
+        #  write frames via delegation than by force ('we've got that "B" roll!').
+
+        #TODO: write to imagecache, or create a vector that can later be compared.
+
+        def _snap(frame):
+            if frame is not None:
+                writer = ImageWriter("CAMManager")
+                writer.write("CAM_SNAP", frame)
+
+        # NOFIX: throttle me; I can be overloaded by requests
+        #  and crash the capture! [this is for stills, not movies. Not fixing it.]
+        for frame in self.plugin_capture.run():
+            _snap(frame)
+            break
 
     def getMaxHeight(self):
         return self.max_height
