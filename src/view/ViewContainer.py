@@ -24,13 +24,13 @@ class ViewContainer(threading.Thread):
         readConfig(config_file, self.config)
 
     @staticmethod
-    def get_scanner(app):
+    def get_view_container(app):
 
         with app.app_context():
             from flask import g
-            if "scanner" not in g:
-                g.scanner = ViewContainer()
-            return g.scanner
+            if "viewcontainer" not in g:
+                g.viewcontainer = ViewContainer()
+            return g.viewcontainer
 
     def run(self):
         while True:
