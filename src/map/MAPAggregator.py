@@ -41,7 +41,6 @@ class MAPAggregator(threading.Thread):
         # read ALL configs except controller
         configs = glob.glob(CONFIG_PATH + "/*.json")
         configs.remove(os.path.join(CONFIG_PATH, 'controller.json'))
-        configs.remove(os.path.join(CONFIG_PATH, 'scan.json'))
         configs.remove(os.path.join(CONFIG_PATH, config_file))
 
         for module_config in configs:
