@@ -20,6 +20,7 @@ class WifiWorker:
         self.channel = ''
         self.frequency = ''
         self.quality = ''
+        self.signal = ''
         self.is_encrypted = ''
 
         self.created = datetime.now()   # when signal was found
@@ -45,6 +46,7 @@ class WifiWorker:
                 "vendor"        : self.vendor,
                 "channel"       : self.channel,
                 "frequency"     : self.frequency,
+                "signal"        : self.signal,
                 "quality"       : self.quality,
                 "encryption"    : self.is_encrypted,
                 "is_mute"       : self.is_mute,
@@ -68,6 +70,7 @@ class WifiWorker:
         self.frequency = cell['Frequency']
         self.quality = cell['Quality']
         self.is_encrypted = cell['Encryption']
+        self.signal = cell['Signal']
         self.update(cell)
 
         def test(cell):
