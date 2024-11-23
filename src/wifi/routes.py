@@ -73,7 +73,6 @@ def wifi_config():
     return jsonify(s.config)
 
 
-
 @wifi_bp.route('/stop', methods=['POST'], subdomain='wifi')
 def wifi_stop():
     return s.stop()
