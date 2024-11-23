@@ -21,7 +21,7 @@ class WifiWorker:
         self.frequency = ''
         self.quality = ''
         self.signal = ''
-        self.is_encrypted = ''
+        self.is_encrypted = False
 
         self.created = datetime.now()   # when signal was found
         self.updated = datetime.now()   # when signal was last reported
