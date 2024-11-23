@@ -21,7 +21,7 @@
 			"MUTE_TIME": 30
 		},
 		{
-			"SIGNAL_CACHE_MAX": 1500
+			"SIGNAL_CACHE_MAX": 300
 		},
 		{
 			"DEVICE": "/dev/cu.URT1"

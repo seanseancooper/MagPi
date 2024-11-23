@@ -19,7 +19,7 @@
 			"INTERFACE": "wlan0"
 		},
 		{
-			"SCAN_TIMEOUT": 2
+			"SCAN_TIMEOUT": 0.5
 		},
 		{
 			"GPS_ENDPOINT": "http://gps.localhost:5004/position"
