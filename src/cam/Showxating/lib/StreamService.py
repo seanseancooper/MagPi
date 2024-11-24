@@ -27,7 +27,6 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
 
         # Class attributes
         self.src = None
-        self.capture = None  # deprecate this?
         self.config_path = None
 
         cam_logger.debug(f"{threading.current_thread().name} created StreamingHandler for request.")
