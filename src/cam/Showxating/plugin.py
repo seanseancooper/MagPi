@@ -111,7 +111,7 @@ class ShowxatingPlugin(threading.Thread):
     def stream(self, frame):
         if self.plugin_config['streams'] is True:
             if self.streamservice is not None:
-                self.streamservice.requesthandler.src = frame
+                self.streamservice.handler.src = frame
 
     def process_frame(self, frame):
         return frame
