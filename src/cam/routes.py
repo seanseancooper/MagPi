@@ -49,6 +49,12 @@ def cam_plugin(field, value):
         return "OK"
     return "FAIL"
 
+@cam_bp.route("/tracker/<field>/<value>", methods=['POST'], subdomain='cam')
+def cam_tracker(field, value):
+    if camMgr.tracker_twiddle(field, value):
+        return "OK"
+    return "FAIL"
+
 
 @cam_bp.route("/move/<command>")
 def cam_move(command):
