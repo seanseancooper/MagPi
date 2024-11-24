@@ -1,7 +1,6 @@
 import threading
 import logging
 from flask import json
-import atexit
 
 from src.cam.Showxating.ShowxatingBlackviewPlugin import ShowxatingBlackviewPlugin
 from src.config.__init__ import readConfig
@@ -39,9 +38,9 @@ class CAMManager(threading.Thread):
             "ALL": self.config['MULTIBUTTON_ALL']
         }
 
-    def init_plugin(self, direction):
+    def init_plugin(self, plugin, direction):
 
-        self.plugin = ShowxatingBlackviewPlugin()
+        self.plugin = plugin()
 
         # configure ShowxatingPlugin
         self.plugin.plugin_name = self.config['PLUGIN_NAME']
@@ -117,46 +116,10 @@ class CAMManager(threading.Thread):
     def tracker_twiddle(self, field, value):
         pass
 
-    def ircam_move(self, command):
-        # NOFIX:  deprecated, also brittle! [removing. 'moving a camera'
-        # is not a "focus" for this project. Instead, use a 'plugin']
-
-        def makeRequest(url):
-            import os
-            import socket
-            import requests
-
-            try:
-                headers = {'user-agent': socket.gethostname() + os.path.basename(__file__).replace('.py', '')}
-                response = requests.get(url, headers)
-                return response
-            except Exception as e:
-                cam_logger.error(f"[{__name__}]:Error sending request: {str(e)}")
-
-        resp = makeRequest(f"{self.config['CAM']['IRCAM_HOST']}/cgi-bin/ptzBase.cgi" \
-              f"?action=moveDirectly" \
-              f"&channel=0" \
-              f"&startPoint[0]={command['S_0']}" \
-              f"&startPoint[1]={command['S_1']}" \
-              f"&endPoint[0]={command['E_0']}" \
-              f"&endPoint[1]={command['E_1']}"
-        )
-
-        if resp:
-            return resp
-        else:
-            return "IRCAM ircam_move error []"
-
     def stop(self):
         pass
 
     def run(self):
-
-        def plugin_stops():
-            cam_logger.info(f"{self.plugin.plugin_name} plugin stopped")
-
-        atexit.register(plugin_stops)
-
-        self.init_plugin("FORE")
+        self.init_plugin(ShowxatingBlackviewPlugin, "FORE")
         self.plugin.run()
 
