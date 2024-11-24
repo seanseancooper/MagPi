@@ -2,7 +2,7 @@ import os.path
 import threading
 import cv2 as cv
 import numpy as np
-from FrameObjekt import FrameObjekt
+from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
 from src.cam.Showxating.lib.utils import getLargestRect, getLargestArea
 from sklearn.metrics.pairwise import euclidean_distances, paired_distances
 from src.config import CONFIG_PATH, readConfig
@@ -41,8 +41,8 @@ class FrameObjektTracker(threading.Thread):
         self.frame_delta = self.config['TRACKER']['frame_delta']
         self.frm_delta_pcnt = self.config['TRACKER']['frm_delta_pcnt']
 
-    def set_frame_delta(self, item, wall, wall_rectangleList):
-        wx, wy, ww, wh = getLargestRect(wall_rectangleList)
+    def set_frame_delta(self, item, wall, rectangleList):
+        wx, wy, ww, wh = getLargestRect(rectangleList)
         self.frame_deltas = [float(o.fd) for o in self.data]
 
         try:
@@ -87,7 +87,7 @@ class FrameObjektTracker(threading.Thread):
                 # cam_logger.debug(f"a:{o.ml} to b:{p_ml[j]} distance:{o.distances[-1]} tag:{o.tags[j]}")
 
                 try:
-                    if len(o.distances) > 0:
+                    if len(o.distances):
                         idx = np.argmin([x for x in o.distances])
                         o.prev_tag = o.tags[idx]
                         o.prev_dist = o.distances[idx][0][0]
@@ -98,7 +98,7 @@ class FrameObjektTracker(threading.Thread):
 
         # IDEA: 'compress' located_o; remove duplicated tags
 
-        if len(located_o) > 0:
+        if len(located_o):
 
             # TODO list comprehension
             for o in located_o:
@@ -116,7 +116,6 @@ class FrameObjektTracker(threading.Thread):
                     o.isNew = True
 
                 cam_logger.debug(f"mean of distances for {o.tag}: {dist_mean}")
-
         else:
             # TRANSIENT
             if o.tag is None:
@@ -130,7 +129,7 @@ class FrameObjektTracker(threading.Thread):
 
     def preen_cache(self, f_id, frame_limit):
 
-        aged_o = [o for o in self.o_cache_map if self.o_cache_map.get(o).frame_id < (int(f_id) - frame_limit)]
+        aged_o = [o for o in self.o_cache_map if self.o_cache_map.get(o).frame_id < (f_id - frame_limit)]
         [self.o_cache_map.pop(o) for o in aged_o]
 
         # delete TRANSIENT (skip = True)
@@ -143,14 +142,6 @@ class FrameObjektTracker(threading.Thread):
         Not all moving things should be tracked; this is very sensitive to minute changes in light, and not all movement is relevant.
         Not all tracked things move; Consider flashing lights or any localized, repetitive change. Tracking seizes!
         Objects can suddenly appear or appear to change *size* if the frame drags due to network latency. Back referencing frames needs a cache.
-
-        :param f_id:
-        :param contours:
-        :param hierarchy:
-        :param wall:
-        :param rectangleList:
-        :param areaList:
-        :return:
         """
 
         self.f_id = f_id
@@ -166,7 +157,7 @@ class FrameObjektTracker(threading.Thread):
 
         self.get_mean_locations(contours, c_cache_map)
 
-        if len(items) > 0:
+        if len(items):
 
             for o in self.label_frame_objekts(contours, c_cache_map, aw):
 
@@ -186,12 +177,14 @@ class FrameObjektTracker(threading.Thread):
                     o.fd = self.frame_delta
 
                     # the mean of all the previous frame deltas
-                    d_mean = int(np.mean(self.frame_deltas[-self.f_limit:]))
+                    d_mean = float(np.mean(self.frame_deltas[-self.f_limit:]))
 
                     # allowed percentage of changed pixels: width * height * depth / 100 * n
-                    d_range = int(((((ry + rh) * (rx + rw)) * mode_wall.shape[2]) / 100) * self.frm_delta_pcnt)
+                    d_range = float(((((ry + rh) * (rx + rw)) * mode_wall.shape[2]) / 100) * self.frm_delta_pcnt)
+                    lwr = d_mean - d_range
+                    upp = d_mean + d_range
 
-                    if int(self.frame_delta) not in np.arange(d_mean - d_range, d_mean + d_range):
+                    if not min(lwr, upp) < float(self.frame_delta) < max(lwr, upp):
                         # IDEA: perhaps try a different previous 'o' here?
                         #  read tags & distances from 'o' internally.
 
