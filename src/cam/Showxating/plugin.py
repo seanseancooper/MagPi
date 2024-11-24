@@ -4,6 +4,7 @@ import cv2 as cv
 
 import logging.handlers
 from src.cam.Showxating.capture import ShowxatingCapture
+from src.cam.Showxating.lib.StreamService import StreamService, StreamingHandler
 
 #TODO: put in config
 os.environ[
@@ -53,6 +54,8 @@ class ShowxatingPlugin(threading.Thread):
         self.frame_delta = None
         self.frame_id = None
 
+        self.streamservice = None
+
         # magic highlight color
         self.majic_color = None
 
@@ -93,6 +96,22 @@ class ShowxatingPlugin(threading.Thread):
     def render(self, frame):
         if self.plugin_config['plugin_displays']:
             self.display(frame)
+
+    def start_streamservice(self, processed):
+
+        if self.streamservice is not None:
+            self.streamservice.shutdown()
+            self.streamservice = None
+        handler = StreamingHandler
+        handler.src = processed
+        self.streamservice = StreamService(('localhost', self.plugin_config['streaming_port']),
+                                           self.plugin_config['streaming_path'], handler)
+        self.streamservice.stream()
+
+    def stream(self, frame):
+        if self.plugin_config['streams'] is True:
+            if self.streamservice is not None:
+                self.streamservice.requesthandler.src = frame
 
     def process_frame(self, frame):
         return frame
