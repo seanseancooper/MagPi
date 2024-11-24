@@ -26,6 +26,10 @@ class FrameObjekt:
         self.ml = None         # mean x, y location of *this* contour
         self.wall = None       # image of processed area in this frame
 
+    @staticmethod
+    def create(f_id):
+        return FrameObjekt(f_id)
+
     def __str__(self):
         return {'f_id' : self.frame_id,
                 'timestamp': self.timestamp,

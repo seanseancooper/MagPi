@@ -68,7 +68,7 @@ class FrameObjektTracker(threading.Thread):
 
         for i in np.arange(len(contours)):
 
-            o = FrameObjekt(self.f_id)
+            o = FrameObjekt.create(self.f_id)
             o.contours = contours
             o.ml = self.c_ml[i]  # mean location of *this* contour
             o.tags = list(cache_map.keys())
