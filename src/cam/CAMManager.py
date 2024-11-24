@@ -1,6 +1,7 @@
 import threading
 import logging
 from flask import json
+import atexit
 
 from src.cam.Showxating.ShowxatingBlackviewPlugin import ShowxatingBlackviewPlugin
 from src.config.__init__ import readConfig
@@ -14,18 +15,16 @@ class CAMManager(threading.Thread):
         super().__init__()
         self.config = {}
 
-        self.plugin_capture = None
-        self.statistics = {}
+        self.plugin = None
 
-        self.plugin_name = None
         self.plugin_args_capture_src = None
         self.plugin_args_capture_frame_rate = None
         self.plugin_args_capture_width = None
         self.plugin_args_capture_height = None
 
-        self.plugin = None
-
+        self.streamservice = None
         self.multibutton = {}
+        self.statistics = {}                    # not used!
 
     def __str__(self):
         return {"CAMManager": str(self.config)}
@@ -33,7 +32,6 @@ class CAMManager(threading.Thread):
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
-        # configure the multibutton
         self.multibutton = {
             "OFF": self.config['MULTIBUTTON_OFF'],
             "SYM": self.config['MULTIBUTTON_SYM'],
@@ -41,58 +39,51 @@ class CAMManager(threading.Thread):
             "ALL": self.config['MULTIBUTTON_ALL']
         }
 
-    def init_camera(self, direction):
+    def init_plugin(self, direction):
 
-        # import atexit
-        #
-        # def plugin_stops():
-        #     cam_logger.info(f"{self.plugin_name} plugin stopped")
-        #
-        # atexit.register(plugin_stops)
         self.plugin = ShowxatingBlackviewPlugin()
+
+        # configure ShowxatingPlugin
         self.plugin.plugin_name = self.config['PLUGIN_NAME']
-
         self.plugin.plugin_args_capture_src = self.cam_direction(direction)
-        # TODO: For webcams and many other connected cameras,
-        #  you have to calculate the frames per second manually.
-        #  You can read a certain number of frames from the video and see how much
-        #  time has elapsed to calculate frames per second. I do this in the capture!
-
-        self.plugin.plugin_args_capture_frame_rate = 10
-        self.plugin.plugin_args_capture_width = 702
-        self.plugin.plugin_args_capture_height = 480
+        self.plugin.get_config()
+        self.plugin.config_tracker()
 
     def cam_direction(self, direction):
         return self.config.get('FORWARD_TEST_URL', [direction.upper() + '_VIDEO_URL'])
 
     def cam_reload(self, direction):
 
-        URL = self.cam_direction(direction)
-
-        def noop(f):
-            return f
-
-        # TODO: which? this is complicated.
-        self.plugin.plugin_args_capture_src = URL
-        self.plugin.plugin_capture.capture_param_capture_src = URL
-        self.plugin.streamservice.requesthandler.src = URL
+        self.plugin.plugin_args_capture_src = self.cam_direction(direction)
 
         for frame in self.plugin.plugin_capture.run():
             self.plugin.tracker.flush_cache()
+
+            def noop(f):
+                return f
+
             noop(frame)
             break
 
-        self.plugin.streamservice.reload(URL)
+        self.plugin.streamservice.reload(self.cam_direction(direction))
 
     def cam_multibutton(self, mode):
         """ set mode of ShowxatingBlackviewPlugin """
         try:
-            self.plugin._has_symbols, self.plugin._has_analysis = self.multibutton[mode]
+            self.plugin.has_symbols, self.plugin.has_analysis = self.multibutton[mode]
         except KeyError:
             pass
 
     def cam_twiddle(self, field, value):
         # TODO: FIX BRITTLE CODE!
+
+        plugin_value_types = {
+            "self.plugin.krnl"          : "int",
+            "self.plugin.threshold"     : "float",
+            "self.plugin.threshold_hold": "bool",
+            "self.plugin.mediapipe"     : "bool",
+        }
+
         if field == 'crop':
             json_value = json.loads(value)
             self.plugin._max_height = slice(int(json_value['y']), int(json_value['h']), None)
@@ -107,16 +98,10 @@ class CAMManager(threading.Thread):
             self.plugin.show_threshold = True
 
         if field == 'threshold_hold':
-            if value == "True":
-                self.plugin.sets_threshold_hold(True)
-            else:
-                self.plugin.sets_threshold_hold(False)
+            self.plugin.threshold_hold = (value == 'true')
 
         if field == 'mediapipe':
-            if value == "True":
-                self.plugin.sets_mediapipe(True)
-            else:
-                self.plugin.sets_mediapipe(False)
+            self.plugin.mediapipe = (value == 'true')
 
         if field == 'f_limit':
             self.plugin.tracker.f_limit = int(value)
@@ -128,6 +113,9 @@ class CAMManager(threading.Thread):
             self.plugin.tracker.frm_delta_pcnt = float(value)
 
         return True
+
+    def tracker_twiddle(self, field, value):
+        pass
 
     def ircam_move(self, command):
         # NOFIX:  deprecated, also brittle! [removing. 'moving a camera'
@@ -163,5 +151,12 @@ class CAMManager(threading.Thread):
         pass
 
     def run(self):
-        self.init_camera("FORE")
+
+        def plugin_stops():
+            cam_logger.info(f"{self.plugin.plugin_name} plugin stopped")
+
+        atexit.register(plugin_stops)
+
+        self.init_plugin("FORE")
         self.plugin.run()
+
