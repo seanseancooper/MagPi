@@ -134,7 +134,7 @@
                     slider_value = parseFloat(slider.value); // downcast later
                     isSlider = true;
                 } else if (checks.includes(slider_id)) {
-                    slider_value = (slider.checked)? "True": "False";
+                    slider_value = slider.checked;
                 } else if (crops.includes(slider_id)) {
                     console.log(slider.value);
                     slider_value = slider.value;  // this could pass as xhttp.setRequestHeader('Content-Type', 'application/json')
