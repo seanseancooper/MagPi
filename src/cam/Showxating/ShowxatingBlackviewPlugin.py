@@ -81,17 +81,13 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self._pose = None
         self._result_T = None  # medipipe result
 
-        self.tracker = None
+        self.tracker = FrameObjektTracker()
         self.tracked = {}
 
         self.processed = None
 
     def config_tracker(self):
-        self.tracker = FrameObjektTracker()
-        self.tracker.config(self.plugin_config['f_limit'],
-                            self.plugin_config['frame_delta'],
-                            self.plugin_config['frm_delta_pcnt']
-                            )
+        self.tracker.configure()
 
     def cam_snap(self):
 

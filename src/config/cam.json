@@ -60,6 +60,13 @@
 			"OUTFILE_NAME": "cam_snap"
 		},
 		{
+			"TRACKER": {
+				"f_limit": 1,
+				"frame_delta": 20.0,
+				"frm_delta_pcnt": 100.0
+			}
+		},
+		{
 			"PLUGINS": [
 				{	"capture_param_capture_width": 704,
 					"capture_param_capture_height": 480,
@@ -82,9 +89,6 @@
 					"interval": 60,
 					"debug": false,
 					"fifo_path": "/+broadcast.pipe",
-					"f_limit": 1,
-					"frame_delta": 20.0,
-					"frm_delta_pcnt": 100.0,
 					"asset_classes": [
 						{"cascade": "plugin_cascade_xml" }
 					],

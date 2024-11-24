@@ -1,12 +1,14 @@
+import os.path
 import threading
 from datetime import datetime
 
 import cv2 as cv
 import numpy as np
 from sklearn.metrics.pairwise import euclidean_distances, paired_distances
+from src.config import CONFIG_PATH, readConfig
+
 import logging
 
-from src.lib.instrumentation import timer
 
 cam_logger = logging.getLogger('cam_logger')
 
@@ -16,6 +18,8 @@ class FrameObjektTracker(threading.Thread):
     def __init__(self):
         super().__init__()
         self.f_id = 0               # current frame id
+
+        self.config ={}
 
         # hyper parameters
         self.f_limit = 8            # max age of frames in o_cache_map.
@@ -30,10 +34,12 @@ class FrameObjektTracker(threading.Thread):
         self.c_ml = []              # list of (x,y) location of contour in contours
         self.frame_deltas = []      # list of previous distances over last f_limit frames
 
-    def config(self, f_limit, frame_delta, frm_delta_pcnt):
-        self.f_limit = f_limit
-        self.frame_delta = frame_delta
-        self.frm_delta_pcnt = frm_delta_pcnt
+    def configure(self):
+        readConfig(os.path.join(CONFIG_PATH, 'cam.json'), self.config)
+
+        self.f_limit = self.config['TRACKER']['f_limit']
+        self.frame_delta = self.config['TRACKER']['frame_delta']
+        self.frm_delta_pcnt = self.config['TRACKER']['frm_delta_pcnt']
 
     @staticmethod
     def diff_areas(a, b):
