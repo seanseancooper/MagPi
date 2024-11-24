@@ -1,9 +1,9 @@
 import os.path
 import threading
-from datetime import datetime
-
 import cv2 as cv
 import numpy as np
+from FrameObjekt import FrameObjekt
+from src.cam.Showxating.lib.utils import getLargestRect, getLargestArea
 from sklearn.metrics.pairwise import euclidean_distances, paired_distances
 from src.config import CONFIG_PATH, readConfig
 
@@ -41,40 +41,8 @@ class FrameObjektTracker(threading.Thread):
         self.frame_delta = self.config['TRACKER']['frame_delta']
         self.frm_delta_pcnt = self.config['TRACKER']['frm_delta_pcnt']
 
-    @staticmethod
-    def diff_areas(a, b):
-        return a - b
-
-    @staticmethod
-    def getLargestRect(rectangleList):
-        """ the region of interest """
-
-        def largest_rect(rectangles):
-            xs = []
-            ys = []
-            ws = []
-            hs = []
-            [(xs.append(d[0]), ys.append(d[1]), ws.append(d[2]), hs.append(d[3])) for d in [r for r in rectangles]]
-            return np.min(xs), np.min(ys), np.max(xs) + ws[xs.index(np.max(xs))], np.max(ys) + hs[ys.index(np.max(ys))]
-
-        return largest_rect(rectangleList)
-
-    @staticmethod
-    def getLargestArea(areasList):
-        """ the *actual* area of what is being analyzed """
-
-        def largest_area(areas):
-            # TODO numpy arrays
-            ws = []
-            hs = []
-            ds = []
-            [(ws.append(a[0]), hs.append(a[1]), ds.append(a[2])) for a in areas]
-            return np.max(ws), np.max(hs), np.max(ds)
-
-        return largest_area(areasList)
-
     def set_frame_delta(self, item, wall, wall_rectangleList):
-        wx, wy, ww, wh = self.getLargestRect(wall_rectangleList)
+        wx, wy, ww, wh = getLargestRect(wall_rectangleList)
         self.frame_deltas = [float(o.fd) for o in self.data]
 
         try:
@@ -190,10 +158,10 @@ class FrameObjektTracker(threading.Thread):
         c_cache_map = self.o_cache_map.copy()
         items = list(c_cache_map.keys())
 
-        rx, ry, rw, rh = self.getLargestRect(rectangleList)
+        rx, ry, rw, rh = getLargestRect(rectangleList)
         ra = rw * rh
 
-        (aw, ah, ad) = self.getLargestArea(areaList)
+        (aw, ah, ad) = getLargestArea(areaList)
         aa = aw * ah
 
         self.get_mean_locations(contours, c_cache_map)
@@ -260,42 +228,3 @@ class FrameObjektTracker(threading.Thread):
 
         return self.o_cache_map
 
-
-class FrameObjekt:
-
-    def __init__(self, f_id):
-
-        # metadata
-        self.frame_id = f_id
-        self.timestamp = datetime.now()  # not used yet
-        self.tag = None
-        self.isNew = False
-        self.skip = False
-
-        # frame data: features
-        self.contours = None   # ALL contours in this frame
-        self.hierarchy = None  # ordering of the contours in this frame
-        self.prev_tag = None   # tag of nearest FrameObjekt from the previous frame
-        self.prev_dist = 0.0   # euclidean_distance wrt previous mean x, y location
-        self.tags = []         # list of previous tags wrt distances
-        self.distances = []    # list of previous euclidean_distance wrt previous mean x, y locations.
-        self.fd = 0.0          # euclidean_distance wrt previous frame analysis area
-        self.aa = 0.0          # analysis area of this frame
-        self.ra = 0.0          # largest rectangle area in this frame
-        self.rs = None         # bounding rects of contours in this frame
-        self.ml = None         # mean x, y location of *this* contour
-        self.wall = None       # image of processed area in this frame
-
-    def __str__(self):
-        return {'f_id' : self.frame_id,
-                'timestamp': self.timestamp,
-                'tag'      : self.tag,
-                'isNew'    : self.isNew,
-                'skip'     : self.skip,
-                }
-
-    @staticmethod
-    def create_tag(f_id):
-        import uuid
-        tag = f"{f_id}_{str(uuid.uuid4())}"
-        return tag

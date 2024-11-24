@@ -180,3 +180,35 @@ def write_imagecache(self, o, frame):
     if np.all(o.hierarchy == np.array([[[-1, -1, -1, -1]]])):
         cv.imwrite(os.path.join(self.imagecache, o.tag + '.jpeg'), o.wall)
 
+
+def diff_areas(a, b):
+    return a - b
+
+
+def getLargestRect(rectangleList):
+    """ the region of interest """
+
+    def largest_rect(rectangles):
+        xs = []
+        ys = []
+        ws = []
+        hs = []
+        [(xs.append(d[0]), ys.append(d[1]), ws.append(d[2]), hs.append(d[3])) for d in [r for r in rectangles]]
+        return np.min(xs), np.min(ys), np.max(xs) + ws[xs.index(np.max(xs))], np.max(ys) + hs[ys.index(np.max(ys))]
+
+    return largest_rect(rectangleList)
+
+
+def getLargestArea(areasList):
+    """ the *actual* area of what is being analyzed """
+
+    def largest_area(areas):
+        # TODO numpy arrays
+        ws = []
+        hs = []
+        ds = []
+        [(ws.append(a[0]), hs.append(a[1]), ds.append(a[2])) for a in areas]
+        return np.max(ws), np.max(hs), np.max(ds)
+
+    return largest_area(areasList)
+
