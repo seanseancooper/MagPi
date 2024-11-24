@@ -8,12 +8,13 @@ class ImageWriter:
 
     def __init__(self, writer_name: str):
         self.writer_name = writer_name
-        self.IMAGE_OUT = "_out"
+        self.IMAGE_OUT = None
         self.OUTFILE_NAME = None
         self.config = {}
 
     def write(self, writer_name: str, frame):
         readConfig(os.path.join(CONFIG_PATH, 'cam.json'), self.config)
+        self.IMAGE_OUT = self.config['OUTFILE_PATH']
         if writer_name:
             PATH = os.path.join(os.getcwd(), self.IMAGE_OUT, self.writer_name)
             if not os.path.exists(PATH):
