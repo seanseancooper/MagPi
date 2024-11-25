@@ -35,27 +35,16 @@
 
             xhttp.open('POST', 'http://cam.localhost:5002/view/' + button.value);
             setsHeaders(xhttp);
-            xhttp.send();
+            xhttp.send(); // no response to this
 
-            /* wait until the stream is CONSTRUCTED, then load video & update UI*/
-            xhttp.onload = function() {
-                const resp = xhttp.response;
+            button.value = (button.value == "FORE")? "AFT": "FORE";
+            document.getElementById("fore_aft_button").innerHTML = button.value.split('')[0];
+            document.getElementById("fore_aft_button").classList.value = "fore_aft_button";
 
-                var _video = document.getElementById('_video');
-                _video.src = '';
+            setTimeout(function() {
+                load_video();
+            }, 10);
 
-                if (resp == "OK"){
-
-                    // flip that button value to it's opposite
-                    button.value = (button.value == "FORE")? "AFT": "FORE";
-                    document.getElementById("fore_aft_button").innerHTML = button.value.split('')[0];
-                    document.getElementById("fore_aft_button").classList.value = "fore_aft_button";
-
-                    setTimeout(function() {
-                        load_video();
-                    }, 500);
-                }
-            };
         }
 
         function cam_multibutton(button){

@@ -1,5 +1,7 @@
 import threading
 import logging
+
+import numpy as np
 from flask import json
 
 from src.cam.Showxating.ShowxatingBlackviewPlugin import ShowxatingBlackviewPlugin
@@ -13,13 +15,7 @@ class CAMManager(threading.Thread):
     def __init__(self):
         super().__init__()
         self.config = {}
-
         self.plugin = None
-
-        self.plugin_args_capture_src = None
-        self.plugin_args_capture_frame_rate = None
-        self.plugin_args_capture_width = None
-        self.plugin_args_capture_height = None
 
         self.multibutton = {}
         self.statistics = {}                    # not used!
@@ -41,7 +37,7 @@ class CAMManager(threading.Thread):
 
         self.plugin = plugin()
 
-        # configure ShowxatingPlugin
+        # configure the plugin
         self.plugin.plugin_name = self.config['PLUGIN_NAME']
         self.plugin.plugin_args_capture_src = self.cam_direction(direction)
         self.plugin.get_config()
@@ -53,19 +49,13 @@ class CAMManager(threading.Thread):
         return self.config['FORWARD_TEST_URL']
 
     def cam_reload(self, direction):
+        self.plugin.streamservice.force_stop()
+        self.plugin.streamservice = None
+        self.plugin = None
 
-        self.plugin.plugin_args_capture_src = self.cam_direction(direction)
+        self.init_plugin(ShowxatingBlackviewPlugin, direction)
+        self.plugin.run()
 
-        for frame in self.plugin.plugin_capture.run():
-            self.plugin.tracker.flush_cache()
-
-            def noop(f):
-                return f
-
-            noop(frame)
-            break
-
-        self.plugin.streamservice.reload(self.cam_direction(direction))
 
     def cam_multibutton(self, mode):
         """ set mode of ShowxatingBlackviewPlugin """

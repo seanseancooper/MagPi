@@ -71,7 +71,6 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
 
                     process_frame(self, self.src)
 
-
         else:
             self.send_error(404)
             self.end_headers()
@@ -80,37 +79,34 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
 
 class StreamService(server.ThreadingHTTPServer):
 
-    def __init__(self, address, config_path, handler):
-        super(StreamService, self).__init__(address, handler)
+    def __init__(self, a, c, h):
+        super(StreamService, self).__init__(a, h)
+        self.config_path = c
+        self.RequestHandlerClass.config_path = c
+        self.is_stopped = False
 
-        self.allow_reuse_address = True     # will server will allow the reuse of an address
-        self.daemon_threads = True          # True not wait until threads complete.
+        self.allow_reuse_address = True
 
-        self.address = address
-        self.config_path = config_path
-        self.handler = handler
+    # def server_bind(self):
+    #     import socket
+    #     self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    #     self.socket.bind(self.server_address)
 
-        self.src = None
+    def serve_forever(self, poll_interval: float = ...) -> None:
+        while not self.is_stopped:
+            self.handle_request()
 
-    def reload(self, new_src):
-
-        # handler = StreamingHandler  # make a NEW instance of handler.
-        # handler.src = new_src  # set the handlers' 'source' to the new_src.
-        # self.handler = handler
-
-        self.src = new_src
-        print(f"{threading.current_thread().name} StreamService set new src {new_src} and reloaded!")
-        # self.stream() <-- no.
+    def force_stop(self):
+        self.server_close()
+        self.is_stopped = True
 
     def stream(self):
 
-        self.handler.config_path = self.config_path
-
         try:
-            threading.Thread(target=self.serve_forever, name="streamservice").start()
-            cam_logger.info(f"{threading.current_thread().name} streaming on http://{self.address[0]}:{self.address[1]}{self.config_path}")
+            threading.Thread(target=self.serve_forever).start()
+            cam_logger.info(f"{threading.current_thread().name} streaming on http://{self.server_address[0]}:{self.server_address[1]}{self.config_path}")
         except Exception as e:
-            cam_logger.error(f"streaming error on http://{self.address[0]}:{self.address[1]}{self.config_path}! " + str(e))
+            cam_logger.error(f"streaming error on http://{self.server_address[0]}:{self.server_address[1]} {self.config_path}! " + str(e))
 
 
 if __name__ == "__main__":

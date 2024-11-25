@@ -96,14 +96,14 @@ class ShowxatingPlugin(threading.Thread):
             self.streamservice = None
         handler = StreamingHandler
         handler.src = processed
-        self.streamservice = StreamService(('localhost', self.plugin_config['streaming_port']),
+        self.streamservice = StreamService((self.plugin_config['streaming_host'], self.plugin_config['streaming_port']),
                                            self.plugin_config['streaming_path'], handler)
         self.streamservice.stream()
 
     def stream(self, frame):
         if self.plugin_config['streams'] is True:
             if self.streamservice is not None:
-                self.streamservice.handler.src = frame
+                self.streamservice.RequestHandlerClass.src = frame
 
     def process_frame(self, frame):
         return frame

@@ -12,13 +12,13 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
-			"FORE_VIDEO_URL" : "http://10.99.77.1/blackvue_live.cgi"
+			"FORE_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPi/src/cam/IMG_1956_small.mp4"
 		},
 		{
-			"AFT_VIDEO_URL" : "http://10.99.77.1/blackvue_live.cgi?direction=R"
+			"AFT_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPi/src/cam/IMG_1956_small.mp4"
 		},
 		{
-			"FORWARD_TEST_URL" : "/Users/scooper/PycharmProjects/MagPi/src/cam/IMG_1956_small.mp4"
+			"FORWARD_TEST_URL" : ""
 		},
 		{
 			"PLUGIN_NAME" : "blackview_test_vis"
@@ -75,12 +75,13 @@
 					"capture_output_log_stats": false,
 					"plugin_process_frames": true,
 					"plugin_process_copies": false,
-					"plugin_displays": true,
+					"plugin_displays": false,
 					"display_proc_stats": false,
 					"log_proc_stats": false,
 					"display_rect_stats": false,
 					"log_rect_stats": false,
 					"streams": true,
+					"streaming_host": "localhost",
 					"streaming_port": 6100,
 					"streaming_path": "/stream",
 					"write_mp4": false,

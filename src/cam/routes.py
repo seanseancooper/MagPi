@@ -28,13 +28,11 @@ def cam_controller():
 @cam_bp.route("/snap", methods=['POST'], subdomain='cam')
 def cam_snap():
     camMgr.plugin.cam_snap()
-    return "OK"
 
 
 @cam_bp.route("/view/<direction>", methods=['GET', 'POST'], subdomain='cam')
 def cam_direction(direction):
     camMgr.cam_reload(direction)
-    return "OK"
 
 
 @cam_bp.route("/multibutton/<mode>", methods=['POST'], subdomain='cam')
