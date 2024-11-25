@@ -59,14 +59,6 @@ class ShowxatingPlugin(threading.Thread):
         # magic highlight color
         self.majic_color = None
 
-        # cascade specific impls
-        self.plugin_cascade = None
-        self.plugin_cv_color = None
-        self.plugin_output_processing_time = 0.0
-
-        # configured?
-        self.plugin_configured = False
-
     def set_capture(self):
         self.plugin_capture = ShowxatingCapture(self.plugin_name,
                                                 self.plugin_args_capture_src,

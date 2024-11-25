@@ -21,7 +21,6 @@ class CAMManager(threading.Thread):
         self.plugin_args_capture_width = None
         self.plugin_args_capture_height = None
 
-        self.streamservice = None
         self.multibutton = {}
         self.statistics = {}                    # not used!
 
@@ -49,7 +48,9 @@ class CAMManager(threading.Thread):
         self.plugin.config_tracker()
 
     def cam_direction(self, direction):
-        return self.config.get('FORWARD_TEST_URL', [direction.upper() + '_VIDEO_URL'])
+        if not self.config['FORWARD_TEST_URL'] > "":
+            return self.config[direction.upper() + '_VIDEO_URL']
+        return self.config['FORWARD_TEST_URL']
 
     def cam_reload(self, direction):
 

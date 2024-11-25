@@ -26,7 +26,7 @@ class ShowxatingCapture:
 
         self.capture_name = name
         self.capture = None
-        self.capture_cv_color = (255, 255, 255)
+        self.capture_cv_color = (255, 255, 255)   #TODO: put in config
 
         self.capture_param_capture_src = src
         self.capture_param_capture_frame_rate = fps
@@ -35,18 +35,12 @@ class ShowxatingCapture:
 
         self.capture_frame_rate = 0.0
 
-        # passed on to display
         self.capture_output_show_stats = False
         self.capture_output_log_stats = False
-
         self.write_mp4 = False
 
-        self.elapsed_frames = 0
-
-        # passed via plugin.
+        self.f_id = 0
         self.statistics = {}
-
-        self.RECORD_PATH = "_out"  # self.plugin_config['RECORD_PATH']
 
     def init_capture(self):
 
@@ -56,32 +50,23 @@ class ShowxatingCapture:
             self.capture.set(cv.CAP_PROP_FRAME_WIDTH, self.capture_param_capture_width)
             self.capture.set(cv.CAP_PROP_FRAME_HEIGHT, self.capture_param_capture_height)
 
-            cam_logger.debug(f"{self.capture_name} initialized video capture "
-                             f"src:{self.capture_param_capture_src} "
-                             f"fps:{self.capture_param_capture_frame_rate} "
-                             f"{self.capture_param_capture_width}x{self.capture_param_capture_height} "
-                             f"flags:{os.environ['OPENCV_FFMPEG_CAPTURE_OPTIONS']}")
-
         if self.capture:
             initialize()
-        else: # TODO can this be removed?
+        else:
             while self.capture is None:
-                # local camera capture (0)
+                # camera capture (0)
                 if isinstance(self.capture_param_capture_src, int):
                     initialize()
-                # test video /test_vids/IMG1999.mp4
+                # test mp4
                 elif 'http' not in self.capture_param_capture_src:
                     initialize()
-                # wifi connected camera (http://...)
+                # wifi connected camera over http
                 elif 'http' in self.capture_param_capture_src:
                     try:
                         elements = str(self.capture_param_capture_src).lstrip("http://").split("/")
-                        HOST = elements[0]
-                        PORT = 80
-                        CTX = "/" + elements[1]
                         try:
-                            conn = http.client.HTTPConnection(HOST, PORT)
-                            conn.request("GET", CTX)
+                            conn = http.client.HTTPConnection(elements[0])
+                            conn.request("GET", "/" + elements[1])
                             r1 = conn.getresponse()
                             if r1.status == 200:
                                 initialize()
@@ -99,12 +84,6 @@ class ShowxatingCapture:
 
     def run(self):
 
-        # cam_logger.debug(f"{self.capture_name} configured:\n"
-        #                  f"{os.environ['OPENCV_FFMPEG_CAPTURE_OPTIONS']}\n"
-        #                  f"{json.dumps(self.plugin_config, sort_keys=True, indent=4)}")
-        #
-        # cam_logger.debug(f"{self.capture_name} capture ENV: ")
-
         self.init_capture()
 
         if not self.capture.isOpened():
@@ -117,17 +96,16 @@ class ShowxatingCapture:
         while self.capture.isOpened():
 
             proc_start = time.monotonic()
-
             ref, frame = self.capture.read()
 
             if ref:
 
-                self.capture_frame_rate = round(self.elapsed_frames / (time.monotonic() - frame_start), 2)
+                self.capture_frame_rate = round(self.f_id / (time.monotonic() - frame_start), 2)
 
                 self.statistics['capture_start_time'] = start_time
                 self.statistics['capture_frame_rate'] = self.capture_frame_rate
                 self.statistics['capture_frame_period'] = round(time.monotonic() - proc_start, 4)
-                self.statistics['capture_frame_id'] = self.elapsed_frames
+                self.statistics['capture_frame_id'] = self.f_id
                 self.statistics['capture_majic_color'] = highlight(frame, 10, 110)  #TODO configure capture_majic_color location!
 
                 self.statistics['CAP_PROP_FPS'] = 'INOP'  # DBUG: can this work?
@@ -145,8 +123,7 @@ class ShowxatingCapture:
                 if self.plugin_config['capture_output_log_stats']:
                     logger_root.debug(stats)
 
-                self.elapsed_frames += 1
-
+                self.f_id += 1
                 yield frame
 
             else:
