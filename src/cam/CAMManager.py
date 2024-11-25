@@ -49,13 +49,13 @@ class CAMManager(threading.Thread):
         return self.config['FORWARD_TEST_URL']
 
     def cam_reload(self, direction):
+        self.plugin.streamservice.is_stopped = True
         self.plugin.streamservice.force_stop()
         self.plugin.streamservice = None
-        self.plugin = None
+        plugin = ShowxatingBlackviewPlugin
 
-        self.init_plugin(ShowxatingBlackviewPlugin, direction)
+        self.init_plugin(plugin, direction)
         self.plugin.run()
-
 
     def cam_multibutton(self, mode):
         """ set mode of ShowxatingBlackviewPlugin """

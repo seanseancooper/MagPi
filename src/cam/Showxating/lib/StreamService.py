@@ -1,4 +1,5 @@
 import socketserver
+import sys
 import threading
 from http import server
 from typing import Tuple
@@ -70,6 +71,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                             pass
 
                     process_frame(self, self.src)
+                    self.finish()
 
         else:
             self.send_error(404)
@@ -79,10 +81,10 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
 
 class StreamService(server.ThreadingHTTPServer):
 
-    def __init__(self, a, c, h):
-        super(StreamService, self).__init__(a, h)
-        self.config_path = c
-        self.RequestHandlerClass.config_path = c
+    def __init__(self, addr, ctx, hndlr):
+        super().__init__(addr, hndlr)
+        self.config_path = ctx
+        self.RequestHandlerClass.config_path = ctx
         self.is_stopped = False
 
         self.allow_reuse_address = True
