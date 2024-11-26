@@ -13,7 +13,7 @@ import logging
 cam_logger = logging.getLogger('cam_logger')
 
 
-class FrameObjektTracker(threading.Thread):
+class FrameObjektTracker:
 
     def __init__(self):
         super().__init__()
