@@ -75,7 +75,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
         self.show_krnl_grid = False
         self.show_threshold = False
-        self.threshold_hold = False
+        self.hold_threshold = False
 
         self.mediapipe = False  # slow!
         self._pose = None
@@ -100,30 +100,31 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             _snap(frame)
             break
 
-    def pre_mediapipe(self, frame):
+    def pre_mediapipe(self, f):
 
         if self.mediapipe:
             import mediapipe as mp  # only load if needed. slow...
 
             mp_pose = mp.solutions.pose
             self._pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
-            BGR_T = cv.cvtColor(frame[self._max_height, self._max_width], cv.COLOR_RGB2BGR)
+            BGR_T = cv.cvtColor(f[self._max_height, self._max_width], cv.COLOR_RGB2BGR)
             self._result_T = self._pose.process(BGR_T)
 
-    def draw_mediapipe(self, f):
+    def post_mediapipe(self, f):
         if self.mediapipe:
             import mediapipe as mp  # already loaded, only here for refs
             mp_pose = mp.solutions.pose
 
-            def draw_pose(fragment, result):
-                if result.pose_landmarks is not None:
-                    mp_drawing = mp.solutions.drawing_utils
-                    mp_drawing_styles = mp.solutions.drawing_styles
-                    mp_drawing.draw_landmarks(fragment, result.pose_landmarks, mp_pose.POSE_CONNECTIONS,
-                                              landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
-
         if self._result_T is not None:
             if self._result_T.pose_landmarks is not None:
+
+                def draw_pose(fragment, result):
+                    if result.pose_landmarks is not None:
+                        mp_drawing = mp.solutions.drawing_utils
+                        mp_drawing_styles = mp.solutions.drawing_styles
+                        mp_drawing.draw_landmarks(fragment, result.pose_landmarks, mp_pose.POSE_CONNECTIONS,
+                                                  landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+
                 draw_pose(f, self._result_T)
 
     def process_contours(self, f, conts, hier):
@@ -142,7 +143,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             print_analytics(self.has_analysis, f, conts, hier, rects)
             print_symbology(self.has_symbols, f, conts, self.has_motion, self.majic_color)
 
-            self.draw_mediapipe(f)
+            self.post_mediapipe(f)
 
     def process_frame(self, frame):
 
@@ -172,7 +173,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                 conts, hier = cv.findContours(THRESHOLD, cv.RETR_TREE, cv.CHAIN_APPROX_NONE,
                                               offset=[self._max_width.start, self._max_height.start])
 
-                if self.show_threshold or self.threshold_hold:
+                if self.show_threshold or self.hold_threshold:
                     frame[self._max_height, self._max_width] = cv.cvtColor(THRESHOLD, cv.COLOR_GRAY2BGR)
 
                 self.process_contours(frame, conts, hier)
