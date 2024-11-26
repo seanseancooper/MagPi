@@ -33,9 +33,9 @@ class CAMManager(threading.Thread):
             "ALL": self.config['MULTIBUTTON_ALL']
         }
 
-    def init_plugin(self, plugin, direction):
+    def init_plugin(self, pluginClass, direction):
 
-        self.plugin = plugin()
+        self.plugin = pluginClass()
 
         # configure the plugin
         self.plugin.plugin_name = self.config['PLUGIN_NAME']
@@ -52,6 +52,7 @@ class CAMManager(threading.Thread):
         self.plugin.streamservice.is_stopped = True
         self.plugin.streamservice.force_stop()
         self.plugin.streamservice = None
+
         self.init_plugin(ShowxatingBlackviewPlugin, direction)
         self.plugin.run()
 
@@ -80,11 +81,11 @@ class CAMManager(threading.Thread):
 
         if field == 'krnl':
             self.plugin.krnl = int(value)
-            self.plugin.show_krnl_grid = True
+            # self.plugin.show_krnl_grid = True
 
         if field == 'threshold':
+            self.plugin.show_threshold = (self.plugin.threshold != float(value))
             self.plugin.threshold = float(value)
-            self.plugin.show_threshold = True
 
         if field == 'threshold_hold':
             self.plugin.threshold_hold = (value == 'true')
@@ -107,9 +108,13 @@ class CAMManager(threading.Thread):
         pass
 
     def stop(self):
+        # self.plugin.stop()
+        # stop the previous plugin; it has no stop method
+        # stop the streamservice the plugin implementation started in the interface [self.plugin.streamservice.t]
         pass
 
     def run(self):
         self.init_plugin(ShowxatingBlackviewPlugin, "FORE")
-        self.plugin.run()
+        self.plugin.parent_thread = threading.Thread(target=self.plugin.run, daemon=False)
+        self.plugin.parent_thread.start()
 
