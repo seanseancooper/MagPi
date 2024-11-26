@@ -50,41 +50,15 @@
         function cam_multibutton(button){
             // set the symbology & analysis views
             const xhttp = new XMLHttpRequest();
-
-            /* change views */
-            if (button.value == "OFF") {
-                // NO SYMBOLOGY.
-                let URL = "http://cam.localhost:5002/multibutton/OFF";
-                xhttp.open('POST', URL);
-                button.value = "SYM";
-            } else if (button.value == "SYM") {
-                // Motion sensing symbology
-                let URL = "http://cam.localhost:5002/multibutton/SYM";
-                xhttp.open('POST', URL);
-                button.value = "ANA";
-            } else if (button.value == "ANA") {
-                // Motion systems analysis, contours, etc ...
-                let URL = "http://cam.localhost:5002/multibutton/ANA";
-                xhttp.open('POST', URL);
-                button.value = "ALL";
-            } else if (button.value == "ALL") {
-                // BOTH
-                let URL = "http://cam.localhost:5002/multibutton/ALL";
-                xhttp.open('POST', URL);
-                button.value = "OFF";
-            } else if (button.value == "") {
-                // handle loaded default.
-                let URL = "http://cam.localhost:5002/multibutton/OFF";
-                xhttp.open('POST', URL);
-                button.value = "SYM";
-            }
+            xhttp.open('POST', "http://cam.localhost:5002/multibutton/" + button.value);
 
             setsHeaders(xhttp);
             xhttp.send();
-
-            document.getElementById("multi_button").value = button.value;
-            document.getElementById("multi_button_text").innerHTML = button.value;
-
+            xhttp.onload = function() {
+                const resp = xhttp.response;
+                document.getElementById("multi_button").value = resp;
+                document.getElementById("multi_button_text").innerHTML = resp;
+            }
         }
 
         function load_video(){
@@ -232,7 +206,7 @@
        <button id="fore_aft_button" class="button" value="AFT" onClick="fore_aft(this);">
             <div id="fore_aft_button_text" style="">A</div>
         </button>
-        <button id="multi_button" style="position:relative;top:-3px;" class="button" value="" onClick="cam_multibutton(this);">
+        <button id="multi_button" style="position:relative;top:-3px;" class="button" value="OFF" onClick="cam_multibutton(this);">
             <div id="multi_button_text" style="font-size:12px;color:#333;position:relative;left:-2px;top:1px;" class="multi_button_text">OFF</div>
         </button>
         <button id="snap_button" style="position:relative;top:-1px;" class="button"  value="SNAP" onClick="cam_snap();">

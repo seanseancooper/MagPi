@@ -33,16 +33,16 @@
 			"MOTION_IMAGES_DIR": "/tmp/motion"
 		},
 		{
-			"MULTIBUTTON_OFF": [false, false]
+			"MULTIBUTTON_OFF": [false, false, "SYM"]
 		},
 		{
-			"MULTIBUTTON_SYM": [true, false]
+			"MULTIBUTTON_SYM": [true, false, "ANA"]
 		},
 		{
-			"MULTIBUTTON_ANA": [false, true]
+			"MULTIBUTTON_ANA": [false, true, "ALL"]
 		},
 		{
-			"MULTIBUTTON_ALL": [true, true]
+			"MULTIBUTTON_ALL": [true, true, "OFF"]
 		},
 		{
 			"DATETIME_FORMAT": "%Y%m%d_%H%M%S"

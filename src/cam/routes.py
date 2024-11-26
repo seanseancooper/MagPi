@@ -37,8 +37,7 @@ def cam_direction(direction):
 
 @cam_bp.route("/multibutton/<mode>", methods=['POST'], subdomain='cam')
 def cam_multibutton(mode):
-    camMgr.cam_multibutton(mode)
-    return "OK"
+    return camMgr.cam_multibutton(mode)
 
 
 @cam_bp.route("/plugin/<field>/<value>", methods=['POST'], subdomain='cam')
