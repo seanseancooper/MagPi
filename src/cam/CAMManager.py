@@ -58,7 +58,8 @@ class CAMManager(threading.Thread):
     def cam_multibutton(self, mode):
         """ set mode of ShowxatingBlackviewPlugin """
         try:
-            self.plugin.has_symbols, self.plugin.has_analysis = self.multibutton[mode]
+            self.plugin.has_symbols, self.plugin.has_analysis, label = self.multibutton[mode]
+            return label
         except KeyError:
             pass
 
