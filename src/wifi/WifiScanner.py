@@ -240,10 +240,10 @@ class WifiScanner(threading.Thread):
                 self.elapsed = format_time(datetime.strptime(str(datetime.now() - self.start_time), "%H:%M:%S.%f"), self.config.get('TIME_FORMAT', "%H:%M:%S"))
                 wifi_updated.send(self)
 
-                print(f"WifiScanner [{self.polling_count} {format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))}] {self.elapsed} {len(self.parsed_signals)} signals, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts")
+                print(f"WifiScanner [{self.polling_count}] {format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))} {self.elapsed} {len(self.parsed_signals)} signals, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts")
                 self.polling_count += 1
                 time.sleep(self.config.get('SCAN_TIMEOUT', 5))
             else:
                 wifi_failed.send(self)
-                print(f"looking for data [{self.polling_count}]: is wifi available?")
-                time.sleep(.1)
+                print(f"looking for data [{self.polling_count}] {format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))}... is wifi available?")
+                time.sleep(1)
