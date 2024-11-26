@@ -1,10 +1,8 @@
 import socketserver
-import sys
 import threading
 from http import server
 from typing import Tuple
 
-import cv2 as cv
 import numpy as np
 import logging
 
@@ -54,6 +52,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                             return  # a new URL
 
                         try:
+                            import cv2 as cv
                             params = (cv.IMWRITE_JPEG_QUALITY, 100)
                             img_str = cv.imencode('.jpeg', f, params)[1].tobytes()
 
@@ -86,6 +85,7 @@ class StreamService(server.ThreadingHTTPServer):
         self.config_path = ctx
         self.RequestHandlerClass.config_path = ctx
         self.is_stopped = False
+        self.t = None
 
         self.allow_reuse_address = True
 
@@ -101,12 +101,16 @@ class StreamService(server.ThreadingHTTPServer):
     def force_stop(self):
         self.server_close()
         self.is_stopped = True
+        self.t.join(1)
+        self.t = None
 
     def stream(self):
 
         try:
-            threading.Thread(target=self.serve_forever).start()
-            cam_logger.info(f"{threading.current_thread().name} streaming on http://{self.server_address[0]}:{self.server_address[1]}{self.config_path}")
+            self.t = threading.Thread(target=self.serve_forever)
+            self.t.start()
+            cam_logger.info(f"NEW {self.t.name} streaming on http://{self.server_address[0]}:{self.server_address[1]}{self.config_path}")
+
         except Exception as e:
             cam_logger.error(f"streaming error on http://{self.server_address[0]}:{self.server_address[1]} {self.config_path}! " + str(e))
 

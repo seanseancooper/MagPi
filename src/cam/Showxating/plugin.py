@@ -55,6 +55,8 @@ class ShowxatingPlugin(threading.Thread):
         self.frame_id = None
 
         self.streamservice = None
+        self.streamservice_thread = None
+        self.parent_thread = None
 
         # magic highlight color
         self.majic_color = None
@@ -83,24 +85,28 @@ class ShowxatingPlugin(threading.Thread):
         if frame is not None:
             cv.imshow(self.plugin_name, frame)
         else:
-            cam_logger.warning("DISPLAY GOT NO FRAME!!!")
+            cam_logger.warning("display got no frame!!!")
 
     def render(self, frame):
         if self.plugin_config['plugin_displays']:
             self.display(frame)
 
     def start_streamservice(self, processed):
-
-        if self.streamservice is not None:
-            self.streamservice.shutdown()
-            self.streamservice = None
         handler = StreamingHandler
         handler.src = processed
         self.streamservice = StreamService((self.plugin_config['streaming_host'], self.plugin_config['streaming_port']),
                                            self.plugin_config['streaming_path'], handler)
         self.streamservice.stream()
 
+        self.parent_thread = threading.current_thread()
+        self.streamservice_thread = self.streamservice.t
+        print(f'parent {self.parent_thread} started streamservice {self.streamservice.t.name}')
+
     def stream(self, frame):
+        # I am a SBVP
+        # [11] self.parent_thread = threading.current_thread()
+        # [12] self.plugin_streamservice_thread = self.streamservice.t
+        # streamservice
         if self.plugin_config['streams'] is True:
             if self.streamservice is not None:
                 self.streamservice.RequestHandlerClass.src = frame
@@ -108,8 +114,15 @@ class ShowxatingPlugin(threading.Thread):
     def process_frame(self, frame):
         return frame
 
+    def stop(self):
+        if self.streamservice_thread:
+            self.streamservice.force_stop()
+            self.parent_thread = None
+
     def run(self):
         """ event loop for generic plugin """
+        self.parent_thread = threading.current_thread()
+
         try:
 
             self.get_config()
@@ -143,5 +156,4 @@ if __name__ == "__main__":
 
     import atexit
     atexit.register(plugin_stops)
-
     plugin.run()
