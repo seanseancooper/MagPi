@@ -451,9 +451,17 @@
                     return "<button id='add_button_" + data.BSSID + "' style='width:96px;' class='trk_btn add_button button' value='"+data.BSSID+"' data-action='ADD' data-trgt=" + trgt + ">ADD</button>";
                 }
             }},
+            {field:"tracked", width:102, formatter: function(cell, formatterParams) {
+                const data = cell.getRow().getData();
+                const trgt = 'wifi';
 
-
-
+                var _color = colorUniqId(data.BSSID, ':');
+                var p_signal_color = 'rgba(' + _color + ', 1.0)';
+                var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
+                if (true) {
+                    return "<button id='ACTION_button_" + data.BSSID + "' style='width:96px;' class='trk_btn ACTION_button button' value='"+data.BSSID+"' data-action='ACTION' data-trgt=" + trgt + ">ACTION</button>";
+                }
+            }},
             {title:"SSID", field:"SSID", width:140, formatter:ssidFormatter, formatterParams:{
                 field:"Quality",
                 colors:["red", "orange", "yellow", "#008800", "#00FF00"]
