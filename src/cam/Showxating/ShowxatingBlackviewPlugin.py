@@ -19,7 +19,7 @@ def print_symbology(has_symbols, f, contours, m, c):
         cv.line(f, (0, 125), (704, 125), c, 1)
         cv.line(f, (0, 345), (704, 345), c, 1)
 
-        if m:
+        if m:    # TODO: make this JSON on an endpoint.
             cv.putText(f, "MOTION DETECTED!", (5, 110), cv.FONT_HERSHEY_PLAIN, 1.0, c, 2)
 
         # yellow contour rect: items that are moving
@@ -50,7 +50,7 @@ def print_tracked(has_analysis, has_symbols, f, t):
     if has_analysis:
         for w, _ in enumerate([x for x in t][:5], 1):
             o = t.get(_)
-            try:
+            try:    # TODO: make this JSON on an endpoint.
                 cv.putText(f, o.tag, (385, 345 + (w * 20)), cv.FONT_HERSHEY_PLAIN, .75, (255, 255, 255), 1)
             except AttributeError as a:
                 pass
@@ -148,7 +148,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
     def process_frame(self, frame):
 
         if self.plugin_process_frames:
-
             # IDEA: can the timing of this be adjusted? Async code to 'grab()' might
             #  be possible.
             if self.plugin_capture.capture.grab():
