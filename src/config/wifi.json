@@ -100,22 +100,27 @@
 		{
 			"XML_PARSEDCELL_DEBUG": false
 		},
-
-		{"SEARCHMAP": {}},
-		{"BLACKLIST":
+		{"SEARCHMAP":
 			{
 				"5C:5B:35:78:8B:64": {
 					"ssid": "HEATKTE",
-					"tests": {},
+					"tests": {
+						"Signal": ">-30",
+						"Quality": ">90"
+					},
 					"return_all": true
 				},
 				"5C:5B:35:78:8B:66": {
 					"ssid": "HEATKTE2",
-					"tests": {},
+					"tests": {
+						"Signal": ">-30",
+						"Quality": ">90"
+					},
 					"return_all": true
 				}
 			}
 		},
+		{"BLACKLIST": {}},
 		{
 			"SIGNAL_CACHE_LOG_MAX": -5
 		},
