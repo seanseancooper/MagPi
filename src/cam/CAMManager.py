@@ -115,6 +115,9 @@ class CAMManager(threading.Thread):
 
     def run(self):
         self.init_plugin(ShowxatingBlackviewPlugin, "FORE")
-        self.plugin.parent_thread = threading.Thread(target=self.plugin.run, daemon=False)
-        self.plugin.parent_thread.start()
+        self.plugin.run()
+
+        # NO. This causes issues w the capture.
+        # self.plugin.parent_thread = threading.Thread(target=self.plugin.run, daemon=False)
+        # self.plugin.parent_thread.start()
 
