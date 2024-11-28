@@ -107,6 +107,7 @@ class ShowxatingCapture:
                 self.statistics['capture_frame_period'] = round(time.monotonic() - proc_start, 4)
                 self.statistics['capture_frame_id'] = self.f_id
                 self.statistics['capture_majic_color'] = highlight(frame, 10, 110)  #TODO configure capture_majic_color location!
+                self.statistics['capture_frame_shape'] = frame.shape
 
                 self.statistics['CAP_PROP_FPS'] = 'INOP'  # DBUG: can this work?
 
