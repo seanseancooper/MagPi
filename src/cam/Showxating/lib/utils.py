@@ -5,12 +5,8 @@ import numpy as np
 def getRectsFromContours(contours):
     rects = np.empty(shape=(1, 4), dtype=np.int32)
 
-    def make_rect(cnt):
-        cnt_x, cnt_y, cnt_w, cnt_h = cv.boundingRect(cnt)
-        return [cnt_x, cnt_y, cnt_w + cnt_x, cnt_h + cnt_y]  # note modifications
-
     if contours:
-        rects = np.append(rects, [np.array(make_rect(cnt), dtype=np.int32) for cnt in contours], axis=0)
+        rects = np.append(rects, [np.array(cv.boundingRect(cnt), dtype=np.int32) for cnt in contours], axis=0)
         return rects
 
 
@@ -23,7 +19,7 @@ def getLargestRect(rectangleList):
         ws = []
         hs = []
         [(xs.append(d[0]), ys.append(d[1]), ws.append(d[2]), hs.append(d[3])) for d in [r for r in rectangles]]
-        return np.min(xs), np.min(ys), np.max(xs) + ws[xs.index(np.max(xs))], np.max(ys) + hs[ys.index(np.max(ys))]
+        return np.min(xs), np.min(ys), np.max(ws), np.max(hs)
 
     return largest_rect(rectangleList)
 
@@ -32,7 +28,6 @@ def getLargestArea(areasList):
     """ the *actual* area of what is being analyzed """
 
     def largest_area(areas):
-        # TODO numpy arrays
         ws = []
         hs = []
         ds = []
