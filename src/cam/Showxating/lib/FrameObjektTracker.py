@@ -35,14 +35,6 @@ class FrameObjektTracker:
         self._frame_delta = self.config['TRACKER']['frame_delta']
         self.frm_delta_pcnt = self.config['TRACKER']['frm_delta_pcnt']
 
-        self.initialize(None, None, None, None, self._ml, None)
-
-    def initialize(self, contours, hierarchy, ra, rectangle, c_ml, wall):
-        o = FrameObjekt(0)
-        o.initial(contours, hierarchy, ra, rectangle, c_ml, wall)
-        o.tag = o.create_tag(self.f_id)
-        self.tracked[o.tag] = o
-
     def set_frame_delta(self, item, wall, rectangle):
         ''' set the allowable difference between frames *fragments_* to the
         average of the paired euclidean distances between the previous 'item'
@@ -149,9 +141,8 @@ class FrameObjektTracker:
         for o in self.label_locations(self.tracked):
 
             o.wall = wall
-            # o.ra = rw * rh                            # how large is it
             o.hierarchy = hierarchy
-            o.rs = rectangle
+            o.rect = rectangle
 
             if o.prev_tag:
 
@@ -175,7 +166,7 @@ class FrameObjektTracker:
                 o.tag = o.create_tag(self.f_id)         # NEW TAG FOR A NEW THING IN A NEW PLACE
 
             self.tracked[o.tag] = o  # SAVE
-            print(f"TAGGED: {o.tag} close: {o.close} [{o.prev_dist}]:{o.fd}:{o.ml}:{o.rs}")
+            print(f"TAGGED: {o.tag} close: {o.close} [{o.prev_dist}]:{o.fd}:{o.ml}:{o.rect}")
 
         self.preen_cache()
 
