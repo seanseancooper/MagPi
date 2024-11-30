@@ -1,9 +1,7 @@
 import os.path
-import threading
 import cv2 as cv
 import numpy as np
 from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
-from src.cam.Showxating.lib.utils import getLargestRect, getLargestArea
 from sklearn.metrics.pairwise import euclidean_distances, paired_distances
 from src.config import CONFIG_PATH, readConfig
 
@@ -18,125 +16,125 @@ class FrameObjektTracker:
     def __init__(self):
         super().__init__()
         self.f_id = 0               # current frame id
-
-        self.config ={}
+        self.config = {}
 
         # hyper parameters
-        self.f_limit = 8            # max age of frames in o_cache_map.
-        self.frame_delta = 0.0      # euclidean distance between the current and previous frames
-        self.frm_delta_pcnt = 1.0   # percentage of delta between the current and previous frames over all pixels in frame
+        self.f_limit = 2            # hyperparameter: max age of frames in o_cache_map.
+        self.frm_delta_pcnt = 0.95  # hyperparameter: percentage of delta between the current and previous frames over all pixels in frame
 
-        self.o_cache_map = {}       # map of FrameObjekts data over last f_limit frames.
+        self.tracked = {}           # mapping of FrameObjekts over last 'f_limit' frames.
 
-        #  todo numpy arrays here
-        self.tags = []              # previous processed tags
-        self.data = []              # FrameObjekt data for tags
-        self.c_ml = []              # list of (x,y) location of contour in contours
-        self.frame_deltas = []      # list of previous distances over last f_limit frames
+        self._ml = []               # DO NOT CHANGE: list of (x,y) location of contour in contours
+        self._frame_delta = 0.0     # DO NOT CHANGE: euclidean distance between the current and previous frames
+        self._frame_deltas = []     # DO NOT CHANGE: list of previous distances over last f_limit frames
 
     def configure(self):
         readConfig(os.path.join(CONFIG_PATH, 'cam.json'), self.config)
 
         self.f_limit = self.config['TRACKER']['f_limit']
-        self.frame_delta = self.config['TRACKER']['frame_delta']
+        self._frame_delta = self.config['TRACKER']['frame_delta']
         self.frm_delta_pcnt = self.config['TRACKER']['frm_delta_pcnt']
 
-    def set_frame_delta(self, item, wall, rectangleList):
-        wx, wy, ww, wh = getLargestRect(rectangleList)
-        self.frame_deltas = [float(o.fd) for o in self.data]
+        self.initialize(None, None, None, None, self._ml, None)
+
+    def initialize(self, contours, hierarchy, ra, rectangle, c_ml, wall):
+        o = FrameObjekt(0)
+        o.initial(contours, hierarchy, ra, rectangle, c_ml, wall)
+        o.tag = o.create_tag(self.f_id)
+        self.tracked[o.tag] = o
+
+    def set_frame_delta(self, item, wall, rectangle):
+        ''' set the allowable difference between frames *fragments_* to the
+        average of the paired euclidean distances between the previous 'item'
+        and the current frame 'wall'
+        '''
+
+        # TODO: try this with a histogram instead of paired distancce of the raw array (far less data, same idea)
+        wx, wy, ww, wh = rectangle
 
         try:
+            # TODO: try out metric = "euclidean", "manhattan", or "cosine"
             distances = paired_distances(cv.cvtColor(wall[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY), cv.cvtColor(item[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY))
-            self.frame_delta = np.mean(distances)
+            self._frame_delta = np.mean(distances)
+            self._frame_deltas.append(self._frame_delta)
         except Exception as e:
             cam_logger.error(f"Problem setting frame delta: {e}")
-        cam_logger.debug(f"frame_delta [fd]: {self.frame_delta}")
 
-    def get_mean_locations(self, contours, cache_map):
+    def get_mean_location(self, contours):
+        ''' aka 'basically where it is' get the average location of all the contours in the frame '''
 
-        self.tags = [t for t in cache_map.keys()]
-        self.data = [d for d in cache_map.values()]
+        # break the contours into 'nearest neighbors'
+        # so we can process each group separately as
+        # independent things.
 
-        mean_locs = [c for c in [np.mean(pt, axis=0, dtype=int) for pt in [cnt for cnt in contours]]]
-        self.c_ml = [(int(x), int(y)) for [x, y] in [t for [t] in mean_locs]]
+        x = []
+        y = []
 
+        for cnt in contours:
+            [(x.append(a), y.append(b)) for [[a, b]] in cnt]
 
-    def label_frame_objekts(self, contours, cache_map, aw):
-        """ find closest elements 'tag' by location"""
+        # this will become a list of [x, y]!!!
+        return np.mean(np.array([x, y]), axis=1, dtype=int)
 
-        located_o = []
+        # res = np.mean([np.array(cnt).mean(axis=0) for cnt in np.array(contours, dtype=object)], axis=0)
+        # res2 = np.mean([np.mean([[np.mean(pt, axis=0, dtype=int)] for pt in cnt], axis=0).reshape(-1, 1) for cnt in np.array(contours, dtype=object)], axis=0)
+        # not_c_ml = np.mean([np.mean([np.mean([np.mean([pt], axis=0, dtype=int) for [pt] in pt], axis=0) for pt in cnt], axis=0) for cnt in [np.array(contours, dtype=object)]], axis=0)
 
-        for i in np.arange(len(contours)):
+    def label_locations(self, located):
+        """ find elements 'tag' by euclidean distance """
+
+        labeled = []
+        distances = []  # this will be a mapping... need to id the contour 'group'
+
+        p_ml = [located.get(o_key).ml for o_key in list(located.keys())]  # get the previous (self.f_limit) detected and located mean_location from the cache_map
+
+        if len(p_ml) > 1:
 
             o = FrameObjekt.create(self.f_id)
-            o.contours = contours
-            o.ml = self.c_ml[i]  # mean location of *this* contour
-            o.tags = list(cache_map.keys())
-            p_ml = [cache_map.get(o_key).ml for o_key in o.tags]
+            o.ml = self._ml # will be a list...
+            # compare this NEW o location to previous mean locations
+            # for j in np.arange(len(p_ml)):
+            #     distances.append(euclidean_distances(np.array([o.ml], dtype=int),
+            #                                            np.array([p_ml[j]], dtype=int).reshape(1, -1)))
+            #     print(f"a:{o.ml} to b:{p_ml[j]} distance:{distances[-1]}")
+            [distances.append(euclidean_distances(np.array([self._ml], dtype=int), np.array([p_ml[j]], dtype=int).reshape(1, -1))) for j in np.arange(len(p_ml)) if p_ml[j] is not None]
 
-            if len(p_ml) > 1:
-                # compare to other mean locations
+            o.distances = distances
+            idx = np.argmin(distances)                      # which one is closer to the current location? first or second?
+            o.prev_tag = str(list(located.keys())[idx])     # tag closest to the current location
+            o.prev_dist = np.float64(distances[idx])        # the distance from the current location
 
-                # for j in np.arange(len(p_ml)):
-                #     if p_ml[j] is not None:
-                #         o.distances.append(euclidean_distances(np.array([o.ml], dtype=int),
-                #                                                np.array([p_ml[j]], dtype=int).reshape(1, -1)))
-                #         cam_logger.debug(f"a:{o.ml} to b:{p_ml[j]} distance:{o.distances[-1]} tag:{o.tags[j]}")
-                # as list comprehension
-                [o.distances.append(euclidean_distances(np.array([o.ml], dtype=int), np.array([p_ml[j]], dtype=int).reshape(1, -1))) for j in np.arange(len(p_ml)) if p_ml[j] is not None]
-                # cam_logger.debug(f"a:{o.ml} to b:{p_ml[j]} distance:{o.distances[-1]} tag:{o.tags[j]}")
+            if o.prev_dist <= np.mean(distances) or o.prev_dist == 0.0:     # if the lower of the 2 distances is less than the mean...
+                o.tag = f"{self.f_id}_{o.prev_tag.split('_')[1]}"           # close enough to be the same thing, use the previous tag.
+                o.close = True
+            else:
+                o.isNew = True
+                o.close = False
 
-                try:
-                    if len(o.distances):
-                        idx = np.argmin([x for x in o.distances])
-                        o.prev_tag = o.tags[idx]
-                        o.prev_dist = o.distances[idx][0][0]
-                        cam_logger.debug(f"mean location: {o.ml} aw: {aw} dist: {o.prev_dist} found tag: {o.prev_tag}")
-                        located_o.append(o)
-                except ValueError: pass
-                except AttributeError: pass
+            labeled.append(o)
 
-        # IDEA: 'compress' located_o; remove duplicated tags
+        if not labeled:
+            print(f'NEW THING: {"-"*80}')
+            o = FrameObjekt.create(self.f_id)
+            o.ml = self._ml
+            o.skip = True
+            labeled.append(o)
 
-        if len(located_o):
+        return labeled
 
-            # TODO list comprehension
-            for o in located_o:
+    def preen_cache(self):
 
-                # Comparing distance to width: 'aw' uses
-                # gravity & the fixed lens to it's advantage.
+        aged_o = [o for o in self.tracked if self.tracked.get(o).frame_id < (self.f_id - self.f_limit)]
+        [self.tracked.pop(o) for o in aged_o]
 
-                # Mean Squared Error -- already have 'deltas':
-                dist_mean = np.mean(o.distances)
+    def in_range(self, val, initial, offset):
+        # use below and in 'histogram' delta comparisons
+        lwr = initial - offset
+        upp = initial + offset
 
-                if o.prev_dist < dist_mean:
-                    o.tag = f"{self.f_id}_{o.prev_tag.split('_')[1]}"
-                else:
-                    o.tag = o.create_tag(self.f_id)
-                    o.isNew = True
+        return lwr < val < upp
 
-                cam_logger.debug(f"mean of distances for {o.tag}: {dist_mean}")
-        else:
-            # TRANSIENT
-            if o.tag is None:
-                o.skip = True
-                located_o.append(o)
-
-        return located_o
-
-    def flush_cache(self):
-        self.o_cache_map.clear()
-
-    def preen_cache(self, f_id, frame_limit):
-
-        aged_o = [o for o in self.o_cache_map if self.o_cache_map.get(o).frame_id < (f_id - frame_limit)]
-        [self.o_cache_map.pop(o) for o in aged_o]
-
-        # delete TRANSIENT (skip = True)
-        skips = [o for o in self.o_cache_map if self.o_cache_map.get(o).skip is True]
-        [self.o_cache_map.pop(o) for o in skips]
-
-    def track_objects(self, f_id, contours, hierarchy, wall, rectangleList, areaList):
+    def track_objects(self, f_id, contours, hierarchy, wall, rectangle):
         """
         LEARNINGS:
         Not all moving things should be tracked; this is very sensitive to minute changes in light, and not all movement is relevant.
@@ -145,79 +143,41 @@ class FrameObjektTracker:
         """
 
         self.f_id = f_id
-        # current, as of this iteration, view!
-        c_cache_map = self.o_cache_map.copy()
-        items = list(c_cache_map.keys())
+        self._ml = self.get_mean_location(contours)
+        rx, ry, rw, rh = rectangle                      # where the action is
 
-        rx, ry, rw, rh = getLargestRect(rectangleList)
-        ra = rw * rh
+        for o in self.label_locations(self.tracked):
 
-        (aw, ah, ad) = getLargestArea(areaList)
-        aa = aw * ah
+            o.wall = wall
+            # o.ra = rw * rh                            # how large is it
+            o.hierarchy = hierarchy
+            o.rs = rectangle
 
-        self.get_mean_locations(contours, c_cache_map)
+            if o.prev_tag:
 
-        if len(items):
+                prev_wall = self.tracked.get(o.prev_tag).wall
 
-            for o in self.label_frame_objekts(contours, c_cache_map, aw):
+                self.set_frame_delta(prev_wall, wall, rectangle)
+                o.fd = self._frame_delta                                # delta of walls
 
-                o.wall = wall
-                o.ra = ra
-                o.aa = aa
-                o.hierarchy = hierarchy
-                o.rs = rectangleList
+                # is the current delta outside the ALLOWED mean of all the previous frame deltas?
+                # how different is this wrt that which preceded it?
 
-                if o.prev_tag is not None:
+                fd_mean = np.mean(self._frame_deltas[:-self.f_limit])    # a float,
+                d_range = self.frm_delta_pcnt * fd_mean                 # percentage of px difference
+                lwr = fd_mean - d_range
+                upp = fd_mean + d_range
 
-                    mode_wall = c_cache_map.get(o.prev_tag).wall
-                    # cv.imshow(f"mode_wall", mode_wall)
-                    # cv.putText(wall, o.tag, o.ml, cv.FONT_HERSHEY_DUPLEX, .45, (255, 255, 255), stroke)
+                if lwr < self._frame_delta < upp:
+                    o.isNew = False                     # keep the tag; SAME THING IN THE SAME PLACE
 
-                    self.set_frame_delta(mode_wall, wall, rectangleList)
-                    o.fd = self.frame_delta
+            else:
+                o.tag = o.create_tag(self.f_id)         # NEW TAG FOR A NEW THING IN A NEW PLACE
 
-                    # the mean of all the previous frame deltas
-                    d_mean = float(np.mean(self.frame_deltas[-self.f_limit:]))
+            self.tracked[o.tag] = o  # SAVE
+            print(f"TAGGED: {o.tag} close: {o.close} [{o.prev_dist}]:{o.fd}:{o.ml}:{o.rs}")
 
-                    # allowed percentage of changed pixels: width * height * depth / 100 * n
-                    d_range = float(((((ry + rh) * (rx + rw)) * mode_wall.shape[2]) / 100) * self.frm_delta_pcnt)
-                    lwr = d_mean - d_range
-                    upp = d_mean + d_range
+        self.preen_cache()
 
-                    if not min(lwr, upp) < float(self.frame_delta) < max(lwr, upp):
-                        # IDEA: perhaps try a different previous 'o' here?
-                        #  read tags & distances from 'o' internally.
-
-                        # [cam_logger.info(f"o: {o} {c_cache_map.get(o).ml}") for o in c_cache_map.keys()]
-
-                        o.tag = o.create_tag(self.f_id)
-                        cam_logger.info(f"{o.prev_tag} FAILED: {self.frame_delta} rng:{d_range} tag: {o.tag}")
-
-                else:
-                    o.tag = o.create_tag(self.f_id)  # NEW
-
-                self.o_cache_map[o.tag] = o
-                # cam_logger.info(f"TAGGED: {o.tag} NEW: {o.isNew} SKIP: {o.skip} prev: {o.prev_tag} [{o.prev_dist}]:{o.fd}")
-
-        else:
-            # initial entries
-            # TODO list comp
-            for i in np.arange(len(contours)):
-                o = FrameObjekt(self.f_id)
-                o.isNew = True
-                o.contours = contours
-                o.hierarchy = hierarchy
-                o.fd = self.frame_delta
-                o.aa = aa
-                o.ra = ra
-                o.rs = rectangleList
-                o.ml = self.c_ml[i]
-                o.wall = wall
-
-                o.tag = o.create_tag(self.f_id)
-                self.o_cache_map[o.tag] = o
-
-        self.preen_cache(self.f_id, self.f_limit)
-
-        return self.o_cache_map
+        return self.tracked
 

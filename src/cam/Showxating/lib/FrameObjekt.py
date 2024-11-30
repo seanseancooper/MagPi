@@ -9,7 +9,7 @@ class FrameObjekt:
         self.frame_id = f_id
         self.timestamp = datetime.now()  # not used yet
         self.tag = None
-        self.isNew = False
+        self.isNew = True
         self.skip = False
 
         # frame data: features
@@ -20,15 +20,23 @@ class FrameObjekt:
         self.tags = []         # list of previous tags wrt distances
         self.distances = []    # list of previous euclidean_distance wrt previous mean x, y locations.
         self.fd = 0.0          # euclidean_distance wrt previous frame analysis area
-        self.aa = 0.0          # analysis area of this frame
         self.ra = 0.0          # largest rectangle area in this frame
         self.rs = None         # bounding rects of contours in this frame
         self.ml = None         # mean x, y location of *this* contour
         self.wall = None       # image of processed area in this frame
+        self.close = False
 
     @staticmethod
     def create(f_id):
         return FrameObjekt(f_id)
+
+    def initial(self, conts, heir, ra, rect, ml, wall):
+        self.contours = conts
+        self.hierarchy = heir
+        self.ra = ra
+        self.rs = rect
+        self.ml = ml
+        self.wall = wall
 
     def __str__(self):
         return {'f_id' : self.frame_id,

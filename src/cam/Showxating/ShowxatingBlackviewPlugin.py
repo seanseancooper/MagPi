@@ -4,38 +4,34 @@ import numpy as np
 from src.cam.Showxating.plugin import ShowxatingPlugin
 from src.cam.Showxating.lib.ImageWriter import ImageWriter
 from src.cam.Showxating.lib.FrameObjektTracker import FrameObjektTracker
-from src.cam.Showxating.lib.utils import getRectsFromContours, draw_rects, draw_contours, draw_centroid, \
-    getLargestRect, wall_images, draw_grid
+from src.cam.Showxating.lib.utils import draw_rects, draw_contours, draw_centroid, wall_images, \
+    draw_grid, sortedContours
 
 import logging
 
 cam_logger = logging.getLogger('cam_logger')
 
 
-def print_symbology(has_symbols, f, contours, m, c):
+def print_symbology(has_symbols, f, rect, m, c):
+
+    # delimit the work area
+    cv.line(f, (0, 125), (704, 125), c, 1)
+    cv.line(f, (0, 345), (704, 345), c, 1)
+
     if has_symbols:
-
-        # delimit the work area
-        cv.line(f, (0, 125), (704, 125), c, 1)
-        cv.line(f, (0, 345), (704, 345), c, 1)
-
-        if m:    # TODO: make this JSON on an endpoint.
-            cv.putText(f, "MOTION DETECTED!", (5, 110), cv.FONT_HERSHEY_PLAIN, 1.0, c, 2)
+        # if m:    # TODO: make this JSON on an endpoint.
+        #     cv.putText(f, "MOTION DETECTED!", (5, 110), cv.FONT_HERSHEY_PLAIN, 1.0, c, 2)
 
         # yellow contour rect: items that are moving
         try:
-            draw_rects(f, [getRectsFromContours(contours)[1]], (0, 255, 255), 2)
+            draw_rects(f, [rect], (0, 255, 255), 1)
         except TypeError:
             pass  # 'NoneType' object is not subscriptable
 
 
-def print_analytics(has_analysis, f, contours, hierarchy, rectangles):
+def print_analytics(has_analysis, f, contours, hierarchy):
     if has_analysis:
-        mean = np.mean([[rx, ry, rx + rw, ry + rh] for [rx, ry, rw, rh] in rectangles], axis=0, dtype=int)
-
-        draw_rects(f, [mean], (255, 0, 0), 1)  # 'blue meany' (average) rect
         draw_contours(f, contours, hierarchy, (64, 255, 64), 1)  # green contours
-        draw_rects(f, [getLargestRect(rectangles)], (255, 255, 255), 2)  # white bounding rect
         draw_centroid(f, contours, 5, (127, 0, 255), 1)  # purple centroid
 
 
@@ -45,10 +41,12 @@ def print_tracked(has_analysis, has_symbols, f, t):
         # green dot: items being tracked
         for _ in t:
             o = t.get(_)
-            cv.rectangle(f, o.ml, (o.ml[0] - 5, o.ml[1] - 5), (0, 255, 0), -1)
+            x = o.ml[0]
+            y = o.ml[1]
+            cv.rectangle(f, (x,y), (x+5, y+5), (0, 255, 0), -1)
 
     if has_analysis:
-        for w, _ in enumerate([x for x in t][:5], 1):
+        for w, _ in enumerate([x for x in t][:1], 1):
             o = t.get(_)
             try:    # TODO: make this JSON on an endpoint.
                 cv.putText(f, o.tag, (385, 345 + (w * 20)), cv.FONT_HERSHEY_PLAIN, .75, (255, 255, 255), 1)
@@ -65,7 +63,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self._max_width = slice(0, 704)  # view width, not 'step'
 
         self.has_symbols = True
-        self.has_analysis = False
+        self.has_analysis = True
         self.has_motion = False
 
         # hyper parameters
@@ -133,15 +131,15 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             # TODO: change this to filter for 'volume' of contour
             self.has_motion = True
 
-            wall, rects, areas = wall_images(f, conts)
+            wall, rect = wall_images(f, sortedContours(conts))
 
             if self.has_analysis or self.has_symbols:
-                self.tracked = self.tracker.track_objects(self.frame_id, conts, hier, wall, rects, areas)
+                self.tracked = self.tracker.track_objects(self.frame_id, conts, hier, wall, rect)
                 if self.tracked:
                     print_tracked(self.has_analysis, self.has_symbols, f, self.tracked)
 
-            print_analytics(self.has_analysis, f, conts, hier, rects)
-            print_symbology(self.has_symbols, f, conts, self.has_motion, self.majic_color)
+            print_analytics(self.has_analysis, f, conts, hier)
+            print_symbology(self.has_symbols, f, rect, self.has_motion, self.majic_color)
 
             self.post_mediapipe(f)
 
@@ -159,6 +157,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
                 self.pre_mediapipe(frame)
 
+
+
                 cropped_frame = frame[self._max_height, self._max_width]
                 cropped_reference = reference[self._max_height, self._max_width]
 
@@ -169,13 +169,22 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                 BLURRED = cv.GaussianBlur(DELTA, (int(self.krnl), int(self.krnl)), 0)
                 _, THRESHOLD = cv.threshold(BLURRED, int(np.mean(BLURRED)) + self.threshold, 255, cv.THRESH_BINARY)
 
+
+
                 conts, hier = cv.findContours(THRESHOLD, cv.RETR_TREE, cv.CHAIN_APPROX_NONE,
                                               offset=[self._max_width.start, self._max_height.start])
 
                 if self.show_threshold or self.hold_threshold:
                     frame[self._max_height, self._max_width] = cv.cvtColor(THRESHOLD, cv.COLOR_GRAY2BGR)
 
+
+
+
                 self.process_contours(frame, conts, hier)
+
+
+
+
 
                 # TODO: do this in javascript instead.
                 if self.show_krnl_grid:
