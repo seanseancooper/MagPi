@@ -97,7 +97,7 @@ class CAMManager(threading.Thread):
             self.plugin.tracker.f_limit = int(value)
 
         if field == 'frame_delta':
-            self.plugin.tracker.frame_delta = float(value)
+            self.plugin.tracker._frame_delta = float(value)
 
         if field == 'frm_delta_pcnt':
             self.plugin.tracker.frm_delta_pcnt = float(value)
