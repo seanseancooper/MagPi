@@ -32,7 +32,6 @@ class FrameObjektTracker:
         readConfig(os.path.join(CONFIG_PATH, 'cam.json'), self.config)
 
         self.f_limit = self.config['TRACKER']['f_limit']
-        self._frame_delta = self.config['TRACKER']['frame_delta']
         self.frm_delta_pcnt = self.config['TRACKER']['frm_delta_pcnt']
 
     def set_frame_delta(self, item, wall, rectangle):
