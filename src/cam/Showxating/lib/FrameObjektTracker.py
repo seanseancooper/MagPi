@@ -3,6 +3,8 @@ import cv2 as cv
 import numpy as np
 from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
 from sklearn.metrics.pairwise import euclidean_distances, paired_distances
+
+from src.cam.Showxating.lib.utils import in_range
 from src.config import CONFIG_PATH, readConfig
 
 import logging
@@ -128,7 +130,6 @@ class FrameObjektTracker:
 
         self.f_id = f_id
         self._ml = self.get_mean_location(contours)
-        rx, ry, rw, rh = rectangle                      # where the action is
 
         for o in self.label_locations(self.tracked):
 
@@ -148,10 +149,8 @@ class FrameObjektTracker:
 
                 fd_mean = np.mean(self._frame_deltas[:-self.f_limit])    # a float,
                 d_range = self.frm_delta_pcnt * fd_mean                 # percentage of px difference
-                lwr = fd_mean - d_range
-                upp = fd_mean + d_range
 
-                if lwr < self._frame_delta < upp:
+                if in_range(self._frame_delta, fd_mean, d_range):
                     o.isNew = False                     # keep the tag; SAME THING IN THE SAME PLACE
 
             else:
