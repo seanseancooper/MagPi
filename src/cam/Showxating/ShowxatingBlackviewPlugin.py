@@ -89,6 +89,12 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
     def config_tracker(self):
         self.tracker.configure()
 
+    def sets_binary(self, field, value):
+        if field == 'threshold_hold':
+            self.hold_threshold = value
+        if field == 'mediapipe':
+            self.mediapipe = value
+
     def cam_snap(self):
 
         def _snap(frame):
