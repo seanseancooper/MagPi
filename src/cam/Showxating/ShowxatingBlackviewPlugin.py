@@ -44,7 +44,7 @@ def print_tracked(has_analysis, has_symbols, f, t, rect):
             x = o.ml[0]
             y = o.ml[1]
             pt = x, y
-            if is_inside(pt, rect):
+            if rect and is_inside(pt, rect):
                 # yellow dot: items being tracked
                 cv.rectangle(f, (x,y), (x+5, y+5), (0, 255, 255), -1)
             else:
