@@ -131,7 +131,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             # TODO: change this to filter for 'volume' of contour
             self.has_motion = True
 
-            wall, rect = wall_images(f, sortedContours(conts))
+            wall, rect, dists = wall_images(f, sortedContours(conts), False)
 
             if self.has_analysis or self.has_symbols:
                 self.tracked = self.tracker.track_objects(self.frame_id, conts, hier, wall, rect)

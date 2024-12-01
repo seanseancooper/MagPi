@@ -1,6 +1,8 @@
 import cv2 as cv
 import numpy as np
 
+from src.cam.Showxating.ShowxatingHistogramPlugin import ShowxatingHistogramPlugin
+
 
 def getRectsFromContours(contours):
     rects = np.empty(shape=(1, 4), dtype=np.int32)
@@ -74,10 +76,11 @@ def draw_grid(f, grid_shape, color, thickness):
     return f
 
 
-def wall_images(frame, conts):
+def wall_images(frame, conts, getDists):
     canvas = np.zeros(frame.shape, np.uint8)
     wall = np.zeros(frame.shape, np.uint8)
     rectangle = None
+    dists = []
 
     # https://stackoverflow.com/questions/48979219/opencv-composting-2-images-of-differing-size
     def combine_images(image1, image2, anchor_y, anchor_x):
@@ -114,7 +117,17 @@ def wall_images(frame, conts):
         wall = combine_images(cnt_img, canvas, br_y, br_x)
         rectangle = br_x, br_y, br_w, br_h
 
-    return wall, rectangle
+        if getDists:
+            p = ShowxatingHistogramPlugin()
+            p.plugin_name = 'ShowxatingHistogramPlugin'
+            p.get_config()
+            p.library = 'cv'  # add to configurable
+
+            f_hist = p.make_histogram(frame, rectangle)
+            w_hist = p.make_histogram(wall, rectangle)
+            dists = p.compare_hist(f_hist, w_hist)
+
+    return wall, rectangle, dists
 
 
 # def write_imagecache(self, o, frame):
