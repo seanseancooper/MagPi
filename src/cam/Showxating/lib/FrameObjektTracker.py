@@ -42,7 +42,6 @@ class FrameObjektTracker:
         and the current frame 'wall'
         '''
 
-        # TODO: try this with a histogram instead of paired distancce of the raw array (far less data, same idea)
         wx, wy, ww, wh = rectangle
 
         try:
@@ -73,18 +72,18 @@ class FrameObjektTracker:
         # res2 = np.mean([np.mean([[np.mean(pt, axis=0, dtype=int)] for pt in cnt], axis=0).reshape(-1, 1) for cnt in np.array(contours, dtype=object)], axis=0)
         # not_c_ml = np.mean([np.mean([np.mean([np.mean([pt], axis=0, dtype=int) for [pt] in pt], axis=0) for pt in cnt], axis=0) for cnt in [np.array(contours, dtype=object)]], axis=0)
 
-    def label_locations(self, located):
+    def label_locations(self):
         """ find elements 'tag' by euclidean distance """
 
         labeled = []
         distances = []  # this will be a mapping... need to id the contour 'group'
 
-        p_ml = [located.get(o_key).ml for o_key in list(located.keys())]  # get the previous (self.f_limit) detected and located mean_location from the cache_map
+        p_ml = [self.tracked.get(o_key).ml for o_key in list(self.tracked.keys())]  # get the previous (self.f_limit) detected and located mean_location from the cache_map
 
         if len(p_ml) > 1:
 
             o = FrameObjekt.create(self.f_id)
-            o.ml = self._ml # will be a list...
+            o.ml = self._ml  # will be a list...
             # compare this NEW o location to previous mean locations
             # for j in np.arange(len(p_ml)):
             #     distances.append(euclidean_distances(np.array([o.ml], dtype=int),
@@ -94,9 +93,10 @@ class FrameObjektTracker:
 
             o.distances = distances
             idx = np.argmin(distances)                      # which one is closer to the current location? first or second?
-            o.prev_tag = str(list(located.keys())[idx])     # tag closest to the current location
+            o.prev_tag = str(list(self.tracked.keys())[idx])     # tag closest to the current location
             o.prev_dist = np.float64(distances[idx])        # the distance from the current location
 
+            # if in_range(o.prev_dist, np.mean(distances), .10 * np.mean(distances)):
             if o.prev_dist <= np.mean(distances) or o.prev_dist == 0.0:     # if the lower of the 2 distances is less than the mean...
                 o.tag = f"{self.f_id}_{o.prev_tag.split('_')[1]}"           # close enough to be the same thing, use the previous tag.
                 o.close = True
@@ -131,7 +131,7 @@ class FrameObjektTracker:
         self.f_id = f_id
         self._ml = self.get_mean_location(contours)
 
-        for o in self.label_locations(self.tracked):
+        for o in self.label_locations():
 
             o.wall = wall
             o.hierarchy = hierarchy
