@@ -61,9 +61,8 @@
 		},
 		{
 			"TRACKER": {
-				"f_limit": 1,
-				"frame_delta": 20.0,
-				"frm_delta_pcnt": 100.0
+				"f_limit": 2,
+				"frm_delta_pcnt": 0.95
 			}
 		},
 		{
