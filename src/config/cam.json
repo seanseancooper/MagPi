@@ -74,7 +74,7 @@
 					"capture_output_log_stats": false,
 					"plugin_process_frames": true,
 					"plugin_process_copies": false,
-					"plugin_displays": false,
+					"plugin_displays": true,
 					"display_proc_stats": false,
 					"log_proc_stats": false,
 					"display_rect_stats": false,
