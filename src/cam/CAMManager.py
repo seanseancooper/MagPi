@@ -1,7 +1,6 @@
 import threading
 import logging
 
-import numpy as np
 from flask import json
 
 from src.cam.Showxating.ShowxatingBlackviewPlugin import ShowxatingBlackviewPlugin
@@ -66,14 +65,6 @@ class CAMManager(threading.Thread):
 
     def cam_twiddle(self, field, value):
         # TODO: FIX BRITTLE CODE!
-
-        plugin_value_types = {
-            "self.plugin.krnl"          : "int",
-            "self.plugin.threshold"     : "float",
-            "self.plugin.threshold_hold": "bool",
-            "self.plugin.mediapipe"     : "bool",
-        }
-
         if field == 'crop':
             json_value = json.loads(value)
             self.plugin._max_height = slice(int(json_value['y']), int(json_value['h']), None)
@@ -81,23 +72,20 @@ class CAMManager(threading.Thread):
 
         if field == 'krnl':
             self.plugin.krnl = int(value)
-            # self.plugin.show_krnl_grid = True
+            self.plugin.show_krnl_grid = True
 
         if field == 'threshold':
             self.plugin.show_threshold = (self.plugin.threshold != float(value))
             self.plugin.threshold = float(value)
 
         if field == 'threshold_hold':
-            self.plugin.threshold_hold = (value == 'true')
+            self.plugin.sets_binary(field, (value == 'true'))
 
         if field == 'mediapipe':
-            self.plugin.mediapipe = (value == 'true')
+            self.plugin.sets_binary(field, (value == 'true'))
 
         if field == 'f_limit':
             self.plugin.tracker.f_limit = int(value)
-
-        if field == 'frame_delta':
-            self.plugin.tracker._frame_delta = float(value)
 
         if field == 'frm_delta_pcnt':
             self.plugin.tracker.frm_delta_pcnt = float(value)
