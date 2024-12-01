@@ -5,7 +5,7 @@ from src.cam.Showxating.plugin import ShowxatingPlugin
 from src.cam.Showxating.lib.ImageWriter import ImageWriter
 from src.cam.Showxating.lib.FrameObjektTracker import FrameObjektTracker
 from src.cam.Showxating.lib.utils import draw_rects, draw_contours, draw_centroid, wall_images, \
-    draw_grid, sortedContours
+    draw_grid, sortedContours, is_inside
 
 import logging
 
@@ -35,15 +35,21 @@ def print_analytics(has_analysis, f, contours, hierarchy):
         draw_centroid(f, contours, 5, (127, 0, 255), 1)  # purple centroid
 
 
-def print_tracked(has_analysis, has_symbols, f, t):
+def print_tracked(has_analysis, has_symbols, f, t, rect):
 
     if has_symbols:
-        # green dot: items being tracked
+
         for _ in t:
             o = t.get(_)
             x = o.ml[0]
             y = o.ml[1]
-            cv.rectangle(f, (x,y), (x+5, y+5), (0, 255, 0), -1)
+            pt = x, y
+            if is_inside(pt, rect):
+                # yellow dot: items being tracked
+                cv.rectangle(f, (x,y), (x+5, y+5), (0, 255, 255), -1)
+            else:
+                # red dot: mean location fails...
+                cv.rectangle(f, (x, y), (x + 5, y + 5), (0, 0, 255), -1)
 
     if has_analysis:
         for w, _ in enumerate([x for x in t][:1], 1):
@@ -136,7 +142,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             if self.has_analysis or self.has_symbols:
                 self.tracked = self.tracker.track_objects(self.frame_id, conts, hier, wall, rect)
                 if self.tracked:
-                    print_tracked(self.has_analysis, self.has_symbols, f, self.tracked)
+                    print_tracked(self.has_analysis, self.has_symbols, f, self.tracked, rect)
 
             print_analytics(self.has_analysis, f, conts, hier)
             print_symbology(self.has_symbols, f, rect, self.has_motion, self.majic_color)
