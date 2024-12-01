@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import numpy as np
 
 class FrameObjekt:
 
@@ -17,9 +17,9 @@ class FrameObjekt:
         self.hierarchy = None  # ordering of the contours in this frame
         self.prev_tag = None   # tag of nearest FrameObjekt from the previous frame
         self.prev_dist = 0.0   # euclidean_distance wrt previous mean x, y location
-        self.distances = []    # list of previous euclidean_distance wrt previous mean x, y locations.
+        self.distances = np.array([], dtype=np.float64)    # list of previous euclidean_distance wrt previous mean x, y locations.
         self.fd = 0.0          # euclidean_distance wrt previous frame analysis area
-        self.rect = None         # bounding rects of contours in this frame
+        self.rect = None       # bounding rects of contours in this frame
         self.ml = None         # mean x, y location of *this* contour
         self.wall = None       # image of processed area in this frame
         self.close = False
