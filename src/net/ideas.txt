@@ -14,4 +14,6 @@ publish/subscribe to internal module events:
     TRX: scanner updated. signal detected.
     WIFI: scanner updated. signal detected, lost. test passed/failed.
 
-
+Find a remote instance on a public network by pinging all devices on
+  a specified port, recording responses, issuing a challenge and if
+  properly authenticated -- authorize use of the service.
