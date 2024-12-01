@@ -33,7 +33,7 @@
             /* changes fore/aft camera view */
             var xhttp = new XMLHttpRequest();
 
-            xhttp.open('POST', 'http://cam.localhost:5002/view/' + button.value);
+            xhttp.open('POST', '{{ url_for('.index')}}view/' + button.value);
             setsHeaders(xhttp);
             xhttp.send(); // no response to this
 
@@ -50,7 +50,7 @@
         function cam_multibutton(button){
             // set the symbology & analysis views
             const xhttp = new XMLHttpRequest();
-            xhttp.open('POST', "http://cam.localhost:5002/multibutton/" + button.value);
+            xhttp.open('POST', "{{ url_for('.index')}}multibutton/" + button.value);
 
             setsHeaders(xhttp);
             xhttp.send();
@@ -86,7 +86,6 @@
                 const sliders = ["cam_slider_krnl",
                                  "cam_slider_threshold",
                                  "cam_slider_f_limit",
-                                 "cam_slider_frame_delta",
                                  "cam_slider_frm_delta_pcnt"];
                 const crops  = ["cam_slider_crop"];
                 const checks = ["cam_slider_mediapipe",
@@ -109,7 +108,7 @@
 
                 // pass the value to the plugin via REST...
                 const xhttp = new XMLHttpRequest();
-                xhttp.open('POST', 'http://cam.localhost:5002/plugin/' + slider.id.replace('cam_slider_', '').replace('_input', '') + "/" + slider_value);
+                xhttp.open('POST', '{{ url_for('.index')}}plugin/' + slider.id.replace('cam_slider_', '').replace('_input', '') + "/" + slider_value);
 
                 setsHeaders(xhttp);
                 xhttp.send();
@@ -140,7 +139,7 @@
             const xhttp = new XMLHttpRequest();
 
             // POST to the CAMManager URL to snap.
-            xhttp.open('POST', 'http://cam.localhost:5002/snap');
+            xhttp.open('POST', '{{ url_for('.index')}}snap/');
             setsHeaders(xhttp);
             xhttp.send();
 
@@ -225,7 +224,6 @@
                 ⊞:&nbsp;<span id="cam_slider_krnl_output">{{ plugin.krnl }}</span>
             <br>
                 ƒL:&nbsp;<span id="cam_slider_f_limit_output">{{ plugin.tracker.f_limit }}</span>
-                ƒ∆:&nbsp;<span id="cam_slider_frame_delta_output">{{ "{:.2f}".format(plugin.tracker.frame_delta) }}</span>
                 ƒ%:&nbsp;<span id="cam_slider_frm_delta_pcnt_output">{{ "{:.2f}".format(plugin.tracker.frm_delta_pcnt) }}</span>
             <br>
                 <span id="cam_slider_crop_output" class="cam_slider_crop_stats">x:0 y:0 w:0 h:0</span>
@@ -243,9 +241,6 @@
         </div>
         <div id="cam_slider_f_limit" style="position:absolute;top:0px;left:50px;">
             ƒL<br><input id="cam_slider_f_limit_input" style="" class="cam_slider" orient="vertical" type="range" min="1" max="60" step="1" value="{{ plugin.tracker.f_limit }}" onChange="handleSlider(this);"/>
-        </div>
-        <div id="cam_slider_frame_delta" style="position:absolute;top:0px;left:75px;">
-            ƒ∆<br><input id="cam_slider_frame_delta_input" style="" class="cam_slider" orient="vertical" type="range" min="0.0" max="20.0" step="0.1" value="{{ plugin.tracker.frame_delta | float }}" onChange="handleSlider(this);"/>
         </div>
         <div id="cam_slider_frm_delta_pcnt" style="position:absolute;top:0px;left:100px;">
             ƒ%<br><input id="cam_slider_frm_delta_pcnt_input" style="" class="cam_slider" orient="vertical" type="range" min="0.00" max="100.00" step="0.01" value="{{ plugin.tracker.frm_delta_pcnt | float }}" onChange="handleSlider(this);"/>
