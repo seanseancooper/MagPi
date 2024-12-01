@@ -118,13 +118,6 @@ class FrameObjektTracker:
         aged_o = [o for o in self.tracked if self.tracked.get(o).frame_id < (self.f_id - self.f_limit)]
         [self.tracked.pop(o) for o in aged_o]
 
-    def in_range(self, val, initial, offset):
-        # use below and in 'histogram' delta comparisons
-        lwr = initial - offset
-        upp = initial + offset
-
-        return lwr < val < upp
-
     def track_objects(self, f_id, contours, hierarchy, wall, rectangle):
         """
         LEARNINGS:
