@@ -116,7 +116,6 @@ class FrameObjektTracker:
         return labeled
 
     def preen_cache(self):
-
         aged_o = [o for o in self.tracked if self.tracked.get(o).frame_id < (self.f_id - self.f_limit)]
         [self.tracked.pop(o) for o in aged_o]
 
