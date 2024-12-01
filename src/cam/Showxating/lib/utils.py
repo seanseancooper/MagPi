@@ -43,6 +43,12 @@ def draw_rects(frag, rects, clr, fill):
         [cv.rectangle(frag, (x, y), (x+w, y+h), clr, fill) for x, y, w, h in rects]
 
 
+def is_inside(pt, rect):
+    x, y = pt
+    rx, ry, rw, rh = rect
+    return rx < x < rx+rw and ry < y < ry+rh
+
+
 def draw_contours(frag, conts, hier, clr, strk):
     [cv.drawContours(frag, conts, contour_idx, clr, strk, cv.LINE_8, hier, 0) for contour_idx in range(len(conts))]
 
