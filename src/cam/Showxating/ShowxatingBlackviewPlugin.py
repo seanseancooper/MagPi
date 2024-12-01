@@ -14,17 +14,13 @@ cam_logger = logging.getLogger('cam_logger')
 
 def print_symbology(has_symbols, f, rect, m, c):
 
-    # delimit the work area
-    cv.line(f, (0, 125), (704, 125), c, 1)
-    cv.line(f, (0, 345), (704, 345), c, 1)
-
     if has_symbols:
-        # if m:    # TODO: make this JSON on an endpoint.
-        #     cv.putText(f, "MOTION DETECTED!", (5, 110), cv.FONT_HERSHEY_PLAIN, 1.0, c, 2)
+        if m:    # TODO: make this JSON on an endpoint.
+            cv.putText(f, "MOTION DETECTED!", (5, 110), cv.FONT_HERSHEY_PLAIN, 1.0, c, 2)
 
-        # yellow contour rect: items that are moving
+        # yellow rect: items that are moving
         try:
-            draw_rects(f, [rect], (0, 255, 255), 1)
+            draw_rects(f, [rect], (0, 255, 255), 2)
         except TypeError:
             pass  # 'NoneType' object is not subscriptable
 
@@ -131,21 +127,34 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
                 draw_pose(f, self._result_T)
 
+    def threshold_ops(self, f, THRESHOLD):
+        if self.show_threshold or self.hold_threshold:
+            f[self._max_height, self._max_width] = cv.cvtColor(THRESHOLD, cv.COLOR_GRAY2BGR)
+
+    def grid_ops(self, f):
+        # TODO: do this in javascript instead.
+        if self.show_krnl_grid:
+            draw_grid(f, (int(self.krnl), int(self.krnl)), self.majic_color, 1)
+
     def process_contours(self, f, conts, hier):
 
-        if len(conts):
+        # delimit the work area
+        cv.line(f, (0, 125), (704, 125), self.majic_color, 1)
+        cv.line(f, (0, 345), (704, 345), self.majic_color, 1)
+
+        if conts:
+            wall, rect, dists = wall_images(f, sortedContours(conts), False)
+
             # TODO: change this to filter for 'volume' of contour
             self.has_motion = True
 
-            wall, rect, dists = wall_images(f, sortedContours(conts), False)
+            print_analytics(self.has_analysis, f, conts, hier)
+            print_symbology(self.has_symbols, f, rect, self.has_motion, self.majic_color)
 
             if self.has_analysis or self.has_symbols:
                 self.tracked = self.tracker.track_objects(self.frame_id, conts, hier, wall, rect)
                 if self.tracked:
                     print_tracked(self.has_analysis, self.has_symbols, f, self.tracked, rect)
-
-            print_analytics(self.has_analysis, f, conts, hier)
-            print_symbology(self.has_symbols, f, rect, self.has_motion, self.majic_color)
 
             self.post_mediapipe(f)
 
@@ -163,8 +172,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
                 self.pre_mediapipe(frame)
 
-
-
                 cropped_frame = frame[self._max_height, self._max_width]
                 cropped_reference = reference[self._max_height, self._max_width]
 
@@ -174,27 +181,12 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                 DELTA = cv.absdiff(greyscale_frame, greyscale_refer)
                 BLURRED = cv.GaussianBlur(DELTA, (int(self.krnl), int(self.krnl)), 0)
                 _, THRESHOLD = cv.threshold(BLURRED, int(np.mean(BLURRED)) + self.threshold, 255, cv.THRESH_BINARY)
-
-
-
                 conts, hier = cv.findContours(THRESHOLD, cv.RETR_TREE, cv.CHAIN_APPROX_NONE,
                                               offset=[self._max_width.start, self._max_height.start])
 
-                if self.show_threshold or self.hold_threshold:
-                    frame[self._max_height, self._max_width] = cv.cvtColor(THRESHOLD, cv.COLOR_GRAY2BGR)
-
-
-
-
+                self.threshold_ops(frame, THRESHOLD)
                 self.process_contours(frame, conts, hier)
-
-
-
-
-
-                # TODO: do this in javascript instead.
-                if self.show_krnl_grid:
-                    draw_grid(frame, (int(self.krnl), int(self.krnl)), self.majic_color, 1)
+                self.grid_ops(frame)
 
             self.processed = frame
 
