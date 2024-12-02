@@ -18,7 +18,7 @@ class FrameObjekt:
         self.contours = None                            # [tuple of ndarray(n, 1, 2): object tracking] ALL contours in this frame
         self.hierarchy = None                           # [ndarray  1, n, 4: unused] ordering of the contours in this frame  (UNUSED)
         self.prev_tag = ''                              # [string: object tracking] tag of nearest FrameObjekt from the previous frame
-        self.prev_dist = float()                        # [float64: object tracking] euclidean_distance wrt previous mean x, y location
+        self.curr_dist = float()                        # [float64: object tracking] euclidean_distance wrt previous mean x, y location
         self.distances = np.ndarray(shape=[1, 1], dtype=np.float64)  # [list([1,1]): object location] of previous euclidean_distances wrt previous mean x, y locations.
         self.fd = float()                               # [float: reporting] euclidean_distance wrt previous frame analysis area
         self.rect = None                                # [tuple {x, y, w, h}: object segmentation] bounding rects of contours in this frame
