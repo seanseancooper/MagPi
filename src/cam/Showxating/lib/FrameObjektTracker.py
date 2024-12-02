@@ -4,7 +4,7 @@ import numpy as np
 from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
 from sklearn.metrics.pairwise import euclidean_distances, paired_distances
 
-from src.cam.Showxating.lib.utils import in_range
+from src.cam.Showxating.lib.utils import in_range, is_inside
 from src.config import CONFIG_PATH, readConfig
 
 import logging
@@ -107,7 +107,6 @@ class FrameObjektTracker:
             labeled.append(o)
 
         if not labeled:
-            print(f'NEW THING: {"-"*80}')
             o = FrameObjekt.create(self.f_id)
             o.ml = self._ml
             o.skip = True
@@ -116,7 +115,7 @@ class FrameObjektTracker:
         return labeled
 
     def preen_cache(self):
-        aged_o = [o for o in self.tracked if self.tracked.get(o).frame_id < (self.f_id - self.f_limit)]
+        aged_o = [o for o in self.tracked if self.tracked.get(o).f_id < (self.f_id - self.f_limit)]
         [self.tracked.pop(o) for o in aged_o]
 
     def track_objects(self, f_id, contours, hierarchy, wall, rectangle):
@@ -133,30 +132,31 @@ class FrameObjektTracker:
         for o in self.label_locations():
 
             o.wall = wall
+            o.contours = contours
             o.hierarchy = hierarchy
             o.rect = rectangle
+            o.is_inside = is_inside(o.ml, o.rect)
 
             if o.prev_tag:
-
                 prev_wall = self.tracked.get(o.prev_tag).wall
-
                 self.set_frame_delta(prev_wall, wall, rectangle)
                 o.fd = self._frame_delta                                # delta of walls
-
+            else:
                 # is the current delta outside the ALLOWED mean of all the previous frame deltas?
                 # how different is this wrt that which preceded it?
+                if not o.is_inside:
+                    fd_mean = np.mean(self._frame_deltas[:-self.f_limit])   # a float,
+                    d_range = self.frm_delta_pcnt * fd_mean                 # percentage of px difference
 
-                fd_mean = np.mean(self._frame_deltas[:-self.f_limit])    # a float,
-                d_range = self.frm_delta_pcnt * fd_mean                 # percentage of px difference
+                    if in_range(self._frame_delta, fd_mean, d_range):
+                        o.tag = self.tracked[list(self.tracked)[0]].tag     # not -- > f'{self.f_id}_{tag.split("_")[1]}'
+                        o.isNew = False                                     # use the previous tag; SAME THING IN THE SAME PLACE
+                else:
+                    o.tag = o.create_tag(self.f_id)         # NEW TAG FOR A NEW THING IN A NEW PLACE
+                    print(f"{self.f_id} NEW: {o.tag}\t{o.is_inside}\t[{o.prev_dist.__format__('.4f')}]\tml: {o.ml}:{o.rect}")
 
-                if in_range(self._frame_delta, fd_mean, d_range):
-                    o.isNew = False                     # keep the tag; SAME THING IN THE SAME PLACE
-
-            else:
-                o.tag = o.create_tag(self.f_id)         # NEW TAG FOR A NEW THING IN A NEW PLACE
-
-            self.tracked[o.tag] = o  # SAVE
-            print(f"TAGGED: {o.tag} close: {o.close} [{o.prev_dist}]:{o.fd}:{o.ml}:{o.rect}")
+            self.tracked[o.tag] = o
+            print(f"{self.f_id}      {o.tag}\t{o.is_inside}\t[{o.prev_dist.__format__('.4f')}]\tml: {o.ml}:{o.rect}")
 
         self.preen_cache()
 
