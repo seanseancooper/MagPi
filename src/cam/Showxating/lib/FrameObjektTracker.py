@@ -38,6 +38,10 @@ class FrameObjektTracker:
         self.f_limit = self.config['TRACKER']['f_limit']
         self.frm_delta_pcnt = self.config['TRACKER']['frm_delta_pcnt']
 
+    def preen_cache(self):
+        aged_o = [o for o in self.tracked if self.tracked.get(o).f_id < (self.f_id - self.f_limit)]
+        [self.tracked.pop(o) for o in aged_o]
+
     def set_frame_delta(self, item, wall, rectangle):
         ''' set the allowable difference between frames *fragments_* to the
         average of the paired euclidean distances between the previous 'item'
@@ -126,10 +130,6 @@ class FrameObjektTracker:
             labeled.append(o)
 
         return labeled
-
-    def preen_cache(self):
-        aged_o = [o for o in self.tracked if self.tracked.get(o).f_id < (self.f_id - self.f_limit)]
-        [self.tracked.pop(o) for o in aged_o]
 
     def track_objects(self, f_id, contours, hierarchy, wall, rectangle):
         """

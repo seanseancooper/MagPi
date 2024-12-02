@@ -20,17 +20,17 @@ def getLargestRect(rects):
     return np.sort(rects, axis=1)
 
 
-def getAggregatedRect(rects):
-    """ the region of interest """
-    xs = []
-    ys = []
-    ws = []
-    hs = []
-
-    [(xs.append(d[0]), ys.append(d[1]), ws.append(d[2]), hs.append(d[3])) for d in [r for r in rects]]
-    aggregated = np.min(xs), np.min(ys), np.max(ws), np.max(hs)
-
-    return aggregated
+# def getAggregatedRect(rects):
+#     """ the region of interest """
+#     xs = []
+#     ys = []
+#     ws = []
+#     hs = []
+#
+#     [(xs.append(d[0]), ys.append(d[1]), ws.append(d[2]), hs.append(d[3])) for d in [r for r in rects]]
+#     aggregated = np.min(xs), np.min(ys), np.max(ws), np.max(hs)
+#
+#     return aggregated
 
 
 def draw_circle(frag, x, y, rad, clr, fill):
@@ -88,6 +88,19 @@ def draw_grid(f, grid_shape, color, thickness):
         cv.line(f, (0, y), (w, y), color=color, thickness=thickness)
 
     return f
+
+
+def getAggregatedRect(rects):
+    """ the region of interest """
+    xs = []
+    ys = []
+    ws = []
+    hs = []
+
+    [(xs.append(d[0]), ys.append(d[1]), ws.append(d[2]), hs.append(d[3])) for d in [r for r in rects]]
+    aggregated = np.min(xs), np.min(ys), np.max(ws), np.max(hs)
+
+    return aggregated
 
 
 def wall_images(frame, conts, getDists):
