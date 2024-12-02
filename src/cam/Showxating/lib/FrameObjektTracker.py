@@ -142,7 +142,7 @@ class FrameObjektTracker:
         self.f_id = f_id
         self._ml = self.get_mean_location(contours)     # contourGroups  2,n,2 [[],[],...]
 
-        for o in self.label_locations():  # enumerate this
+        for o in self.label_locations():                # enumerate this
 
             o.wall = wall
             o.contours = contours                       # will be i of an enumeration
