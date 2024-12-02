@@ -31,7 +31,7 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
     @staticmethod
     def compare_hist(a, b):
 
-        if True: # TODO: use config!
+        if True:  # TODO: use config!
             distances = [euclidean_distances(a[i], b[i]) for i in ['b', 'g', 'r']]
         else:
             distances = [paired_distances(a[i], b[i]) for i in ['b', 'g', 'r']]
