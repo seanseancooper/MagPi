@@ -2,7 +2,7 @@ import os.path
 import cv2 as cv
 import numpy as np
 from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
-from sklearn.metrics.pairwise import euclidean_distances, paired_distances
+from sklearn.metrics.pairwise import euclidean_distances, paired_distances, pairwise_distances
 
 from src.cam.Showxating.lib.utils import in_range, is_inside
 from src.config import CONFIG_PATH, readConfig
@@ -51,9 +51,10 @@ class FrameObjektTracker:
         wx, wy, ww, wh = rectangle
 
         try:
-            # TODO: try out metric = "euclidean", "manhattan", or "cosine"
+            # TODO: see metriccs of pairwise_distances
+            # returns the distances between the row vectors of X and the row vectors of Y
             #  AM I DOING THE RIGHT COMPARISON WITH THESE DIFFERENCES?
-            self._frame_delta = np.mean(paired_distances(cv.cvtColor(item[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY), cv.cvtColor(wall[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)))
+            self._frame_delta = np.mean(pairwise_distances(cv.cvtColor(item[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY), cv.cvtColor(wall[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)))
             self._frame_deltas.append(self._frame_delta)
         except Exception as e:
             cam_logger.error(f"Problem setting frame delta: {e}")
