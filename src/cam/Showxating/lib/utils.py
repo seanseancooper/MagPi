@@ -56,6 +56,7 @@ def in_range(val, initial, offset):
 
     return lwr < val < upp
 
+
 def draw_contours(frag, conts, hier, clr, strk):
     [cv.drawContours(frag, conts, contour_idx, clr, strk, cv.LINE_8, hier, 0) for contour_idx in range(len(conts))]
 
