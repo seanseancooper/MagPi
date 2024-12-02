@@ -29,9 +29,9 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
         return self.out_data
 
     @staticmethod
-    def compare_hist(self, a, b):
+    def compare_hist(a, b):
 
-        if self.library == 'cv':
+        if True: # TODO: use config!
             distances = [euclidean_distances(a[i], b[i]) for i in ['b', 'g', 'r']]
         else:
             distances = [paired_distances(a[i], b[i]) for i in ['b', 'g', 'r']]
