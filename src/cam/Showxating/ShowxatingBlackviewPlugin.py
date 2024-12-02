@@ -28,7 +28,7 @@ def print_symbology(has_symbols, f, rect, m, c):
 def print_analytics(has_analysis, f, contours, hierarchy):
     if has_analysis:
         draw_contours(f, contours, hierarchy, (64, 255, 64), 1)  # green contours
-        draw_centroid(f, contours, 5, (127, 0, 255), 1)  # purple centroid
+        # draw_centroid(f, contours, 5, (127, 0, 255), 1)  # purple centroid
 
 
 def print_tracked(has_analysis, has_symbols, f, t, rect):
@@ -149,6 +149,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         cv.line(f, (0, 345), (704, 345), self.majic_color, 1)
 
         if conts:
+            # note: histograms are for every frame and is slow.
             wall, rect, dists = wall_images(f, sortedContours(conts), False)
 
             # TODO: change this to filter for 'volume' of contour
