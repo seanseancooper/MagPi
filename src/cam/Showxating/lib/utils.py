@@ -124,6 +124,7 @@ def wall_images(frame, conts, getDists):
 
     if conts:  # sorted
 
+        # this will be a 'contourGroup', get 'bounds' of members
         br_x, br_y, br_w, br_h = cv.boundingRect(conts[0])
 
         cnt_img = frame[br_y:br_y + br_h, br_x:br_x + br_w]  # as numpy rows, cols...
@@ -140,6 +141,7 @@ def wall_images(frame, conts, getDists):
             w_hist = p.make_histogram(wall, rectangle)
             dists = p.compare_hist(f_hist, w_hist)
 
+    # rectangle is bounds of contourGroup
     return wall, rectangle, dists
 
 
