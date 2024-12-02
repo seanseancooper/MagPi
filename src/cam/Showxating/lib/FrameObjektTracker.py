@@ -17,7 +17,7 @@ class FrameObjektTracker:
 
     def __init__(self):
         super().__init__()
-        self.f_id = 0               # current frame id
+        self.f_id = 0                       # current frame id
         self.config = {}
 
         self.f_limit = 2                    # hyperparameter: max age of frames in o_cache_map.
