@@ -1,6 +1,4 @@
 import os.path
-import uuid
-from collections import defaultdict
 
 import cv2 as cv
 import numpy as np
