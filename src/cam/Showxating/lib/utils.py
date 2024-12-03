@@ -1,3 +1,5 @@
+import uuid
+
 import cv2 as cv
 import numpy as np
 
@@ -13,24 +15,30 @@ def getRectsFromContours(contours):
 
 
 def sortedContours(contours):
-    return sorted(contours, key=cv.contourArea, reverse=True)
+    # key=cv.isContourConvex, reverse=True)
+    # key=cv.boundingRect, reverse=True)
+    # key=cv.fitEllipse, reverse=True)
+    a = sorted(contours, key=cv.contourArea, reverse=True)
+    # a = sorted(contours, key=cv.minAreaRect, reverse=True)
+    # a = sorted(contours, key=cv.minEnclosingCircle, reverse=True)
+    return a
 
 
 def getLargestRect(rects):
     return np.sort(rects, axis=1)
 
 
-# def getAggregatedRect(rects):
-#     """ the region of interest """
-#     xs = []
-#     ys = []
-#     ws = []
-#     hs = []
-#
-#     [(xs.append(d[0]), ys.append(d[1]), ws.append(d[2]), hs.append(d[3])) for d in [r for r in rects]]
-#     aggregated = np.min(xs), np.min(ys), np.max(ws), np.max(hs)
-#
-#     return aggregated
+def getAggregatedRect(rects):
+    """ the region of interest """
+    xs = []
+    ys = []
+    ws = []
+    hs = []
+
+    [(xs.append(d[0]), ys.append(d[1]), ws.append(d[2]), hs.append(d[3])) for d in [r for r in rects]]
+    aggregated = np.min(xs), np.min(ys), np.max(ws), np.max(hs)
+
+    return aggregated
 
 
 def draw_circle(frag, x, y, rad, clr, fill):
@@ -90,7 +98,23 @@ def draw_grid(f, grid_shape, color, thickness):
     return f
 
 
-def getAggregatedRect(rects):
+def get_mean_locations(contours):  # contours are sorted.
+    _locs = []
+    _cnts = []
+    for cnt in contours:
+        _x = []
+        _y = []
+        [(_x.append(a), _y.append(b)) for [[a, b]] in cnt]
+
+        _cnts.append({id: uuid.uuid4()})
+        _locs.append({id: np.mean(np.array([_x, _y]), axis=1, dtype=int)})
+
+    return _locs, _cnts
+
+# c_grps_locs, c_grps_cnts = get_mean_locations(contours)  # contourGroups
+
+
+def getAggregatedRects(rects):
     """ the region of interest """
     xs = []
     ys = []
@@ -98,7 +122,7 @@ def getAggregatedRect(rects):
     hs = []
 
     [(xs.append(d[0]), ys.append(d[1]), ws.append(d[2]), hs.append(d[3])) for d in [r for r in rects]]
-    aggregated = np.min(xs), np.min(ys), np.max(ws), np.max(hs)
+    aggregated = [np.min(xs), np.min(ys), np.max(ws), np.max(hs)]
 
     return aggregated
 
@@ -111,12 +135,12 @@ def wall_images(frame, conts, getDists):
 
     # https://stackoverflow.com/questions/48979219/opencv-composting-2-images-of-differing-size
     def combine_images(image1, image2, anchor_y, anchor_x):
-        fg, wall = image1.copy(), image2.copy()  # no refs
+        fg, w = image1, image2  # no refs
 
         # Check if the foreground is inbound with the new coordinates
         # and raise an error if out of bounds
-        bg_height = wall.shape[0]
-        bg_width = wall.shape[1]
+        bg_height = w.shape[0]
+        bg_width = w.shape[1]
         fg_height = fg.shape[0]
         fg_width = fg.shape[1]
 
@@ -127,19 +151,19 @@ def wall_images(frame, conts, getDists):
         anchor_x_end = anchor_x + fg_width
 
         alpha = 1.0
-        wall[anchor_y:anchor_y_end, anchor_x:anchor_x_end, :] = cv.addWeighted(fg,
+        w[anchor_y:anchor_y_end, anchor_x:anchor_x_end, :] = cv.addWeighted(fg,
                  alpha,
-                 wall[anchor_y:anchor_y + fg_height, anchor_x:anchor_x + fg_width:],
+                 w[anchor_y:anchor_y + fg_height, anchor_x:anchor_x + fg_width:],
                  1-alpha,
                  0,
-                 wall)
+                 w)
 
-        return wall
+        return w
 
-    if conts:  # sorted
+    if conts.any() or conts:
 
         # this will be a 'contourGroup', get 'bounds' of members
-        br_x, br_y, br_w, br_h = cv.boundingRect(conts[0])
+        br_x, br_y, br_w, br_h = cv.boundingRect(conts)
 
         cnt_img = frame[br_y:br_y + br_h, br_x:br_x + br_w]  # as numpy rows, cols...
         wall = combine_images(cnt_img, canvas, br_y, br_x)
