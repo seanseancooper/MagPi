@@ -4,8 +4,7 @@ import numpy as np
 from src.cam.Showxating.plugin import ShowxatingPlugin
 from src.cam.Showxating.lib.ImageWriter import ImageWriter
 from src.cam.Showxating.lib.FrameObjektTracker import FrameObjektTracker
-from src.cam.Showxating.lib.utils import draw_rects, draw_contours, draw_centroid, wall_images, \
-    draw_grid, sortedContours, is_inside
+from src.cam.Showxating.lib.utils import draw_rects, draw_contours, wall_images, draw_grid, sortedContours, is_inside
 
 import logging
 
@@ -142,26 +141,41 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         if self.show_krnl_grid:
             draw_grid(f, (int(self.krnl), int(self.krnl)), self.majic_color, 1)
 
-    def process_contours(self, f, conts, hier):
+    def process_contours(self, f, contours, hier):
 
         # delimit the work area
         cv.line(f, (0, 125), (704, 125), self.majic_color, 1)
         cv.line(f, (0, 345), (704, 345), self.majic_color, 1)
 
-        if conts:
-            # note: histograms are for every frame and is slow.
-            wall, rect, dists = wall_images(f, sortedContours(conts), False)
+        if contours:
 
-            # TODO: change this to filter for 'volume' of contour
             self.has_motion = True
+            conts = sortedContours(contours)
+
+            for cnt in conts[:1]:
+                # note: histograms for every frame is slow. That's why it's set False.
+
+                wall, rect, dists = wall_images(f.copy(), cnt, False)
+
+                if self.has_analysis or self.has_symbols:
+
+                    self.tracked = self.tracker.track_objects(self.frame_id, cnt, hier, wall, rect)
+                    if self.tracked:
+                        print_tracked(self.has_analysis, self.has_symbols, f, self.tracked, rect)
+                        print_symbology(self.has_symbols, f, rect, self.has_motion, self.majic_color)
 
             print_analytics(self.has_analysis, f, conts, hier)
-            print_symbology(self.has_symbols, f, rect, self.has_motion, self.majic_color)
 
-            if self.has_analysis or self.has_symbols:
-                self.tracked = self.tracker.track_objects(self.frame_id, conts, hier, wall, rect)
-                if self.tracked:
-                    print_tracked(self.has_analysis, self.has_symbols, f, self.tracked, rect)
+            # # note: histograms are for every frame and is slow. That's why it's False.
+            # wall, rect, dists = wall_images(f, conts, False)
+            #
+            # if self.has_analysis or self.has_symbols:
+            #     self.tracked = self.tracker.track_objects(self.frame_id, conts, hier, wall, rect)
+            #     if self.tracked:
+            #         print_tracked(self.has_analysis, self.has_symbols, f, self.tracked, rect)
+
+            # print_analytics(self.has_analysis, f, conts, hier)
+            # print_symbology(self.has_symbols, f, rect, self.has_motion, self.majic_color)
 
             self.post_mediapipe(f)
 
@@ -188,11 +202,11 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                 DELTA = cv.absdiff(greyscale_frame, greyscale_refer)
                 BLURRED = cv.GaussianBlur(DELTA, (int(self.krnl), int(self.krnl)), 0)
                 _, THRESHOLD = cv.threshold(BLURRED, int(np.mean(BLURRED)) + self.threshold, 255, cv.THRESH_BINARY)
-                conts, hier = cv.findContours(THRESHOLD, cv.RETR_TREE, cv.CHAIN_APPROX_NONE,
+                contours, hier = cv.findContours(THRESHOLD, cv.RETR_TREE, cv.CHAIN_APPROX_NONE,
                                               offset=[self._max_width.start, self._max_height.start])
 
                 self.threshold_ops(frame, THRESHOLD)
-                self.process_contours(frame, conts, hier)
+                self.process_contours(frame, contours, hier)
                 self.grid_ops(frame)
 
             self.processed = frame
