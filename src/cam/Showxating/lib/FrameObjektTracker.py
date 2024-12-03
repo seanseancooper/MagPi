@@ -1,10 +1,13 @@
 import os.path
+import uuid
+from collections import defaultdict
+
 import cv2 as cv
 import numpy as np
 from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
 from sklearn.metrics.pairwise import euclidean_distances, paired_distances, pairwise_distances
 
-from src.cam.Showxating.lib.utils import in_range, is_inside
+from src.cam.Showxating.lib.utils import in_range, is_inside, getAggregatedRect, getRectsFromContours
 from src.config import CONFIG_PATH, readConfig
 
 import logging
@@ -23,9 +26,10 @@ class FrameObjektTracker:
         self.f_limit = 2                    # hyperparameter: max age of frames in o_cache_map.
         self.frm_delta_pcnt = 0.95          # hyperparameter: percentage of delta between the current and previous frames over all pixels in frame
 
+        self.contours = None                # ????
         self.tracked = {}                   # mapping of FrameObjekts over last 'f_limit' frames.
 
-        self._ml = []                       # DO NOT CHANGE: list of (x,y) location of contour in contours
+        self._ml = []                       # DO NOT CHANGE: list of (x,y) location of contour in self.contours
         self._frame_delta = float()         # DO NOT CHANGE: euclidean distance between the current and previous frames
         self._frame_deltas = []             # DO NOT CHANGE: list of previous distances over last f_limit frames
 
@@ -51,10 +55,11 @@ class FrameObjektTracker:
         wx, wy, ww, wh = rectangle
 
         try:
-            # TODO: see metriccs of pairwise_distances
-            # returns the distances between the row vectors of X and the row vectors of Y
-            #  AM I DOING THE RIGHT COMPARISON WITH THESE DIFFERENCES?
-            self._frame_delta = np.mean(pairwise_distances(cv.cvtColor(item[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY), cv.cvtColor(wall[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)))
+            # TODO: see metrics of pairwise_distances
+            # return the distances between the row vectors of X and Y
+            X = cv.cvtColor(item[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)
+            Y = cv.cvtColor(wall[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)
+            self._frame_delta = np.mean(pairwise_distances(X, Y))
             self._frame_deltas.append(self._frame_delta)
         except Exception as e:
             cam_logger.error(f"Problem setting frame delta: {e}")
@@ -62,22 +67,15 @@ class FrameObjektTracker:
     def get_mean_location(self, contours):
         ''' aka 'basically where it is' get the average location of all the contours in the frame '''
 
-        x = []
-        y = []
-
-        # contours 'nearest neighbors'
-        contourGroup = [[x, y]]
-
-        # for contourGroup in contourGroups:
-        for cnt in contours:
-            [(x.append(a), y.append(b)) for [[a, b]] in cnt]
-
-        # return contourGroups    # a list of 2,n,2 [[],[],...]
-        return np.mean(np.array([x, y]), axis=1, dtype=int)
-
         # res = np.mean([np.array(cnt).mean(axis=0) for cnt in np.array(contours, dtype=object)], axis=0)
         # res2 = np.mean([np.mean([[np.mean(pt, axis=0, dtype=int)] for pt in cnt], axis=0).reshape(-1, 1) for cnt in np.array(contours, dtype=object)], axis=0)
         # not_c_ml = np.mean([np.mean([np.mean([np.mean([pt], axis=0, dtype=int) for [pt] in pt], axis=0) for pt in cnt], axis=0) for cnt in [np.array(contours, dtype=object)]], axis=0)
+
+        x = []
+        y = []
+
+        [(x.append(a), y.append(b)) for [[a, b]] in contours]
+        return np.mean(np.array([x, y]), axis=1, dtype=int)
 
     def label_locations(self):
         """ find elements 'tag' by euclidean distance """
@@ -89,7 +87,7 @@ class FrameObjektTracker:
         if len(p_ml) > 1:
 
             o = FrameObjekt.create(self.f_id)
-            o.ml = self._ml  # will be a list...
+            o.ml = self._ml                                                         # will be a list...
             # compare this NEW o location to previous mean locations
             # for j in np.arange(len(p_ml)):
             #     distances.append(euclidean_distances(np.array([o.ml], dtype=int),
@@ -139,15 +137,16 @@ class FrameObjektTracker:
         Not all tracked things move; Consider flashing lights or any localized, repetitive change. Tracking seizes!
         Objects can suddenly appear or appear to change *size* if the frame drags due to network latency. Back referencing frames needs a cache.
         """
-
         self.f_id = f_id
-        self._ml = self.get_mean_location(contours)     # contourGroups  2,n,2 [[],[],...]
+        self.contours = contours
 
-        for o in self.label_locations():                # enumerate this
+        self._ml = self.get_mean_location(self.contours)  # = c_grps_locs[grp_ident]
+
+        for o in self.label_locations():
 
             o.wall = wall
-            o.contours = contours                       # will be i of an enumeration
-            o.hierarchy = hierarchy                     # will be i of an enumeration
+            o.contours = self.contours                  # = c_grps_cnts[id]
+            o.hierarchy = hierarchy                     # unused, will be i of an enumeration
             o.rect = rectangle
             o.is_inside = is_inside(o.ml, o.rect)
 
