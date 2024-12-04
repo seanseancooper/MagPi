@@ -31,35 +31,51 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
     @staticmethod
     def compare_hist(a, b):
 
-        if True:  # TODO: use config!
-            distances = [euclidean_distances(a[i], b[i]) for i in ['b', 'g', 'r']]
-        else:
-            distances = [paired_distances(a[i], b[i]) for i in ['b', 'g', 'r']]
+        return None
 
-        return distances
+        # if True:  # TODO: use config!
+        #     distances = [euclidean_distances(a[i], b[i]) for i in ['b', 'g', 'r']]
+        # else:
+        #     distances = [paired_distances(a[i], b[i]) for i in ['b', 'g', 'r']]
+        #
+        # return distances
 
-    def process_frame(self, frame):
+    def process_frame(self, f):
         """This method takes as frame, analyzes it and returns the analyzed frame"""
+        cv.imshow('f', f)
 
         if self.plugin_process_frames:
 
-            # https://docs.opencv.org/4.x/d1/db7/tutorial_py_histogram_begins.html
+            if self.plugin_config['color_histograms']:
 
-            color = ('b', 'g', 'r')
+                # https://docs.opencv.org/4.x/d1/db7/tutorial_py_histogram_begins.html
 
-            for i, col in enumerate(color):
-                # 2 different ways to do it....
+                color = ('b', 'g', 'r')
 
+                for i, col in enumerate(color):
+                    # 2 different ways to do it....
+
+                    if self.library == 'cv':
+                        # images, channels, mask, histSize, ranges[, hist[, accumulate]]
+                        hist = cv.calcHist([f], [i], None, [32], [0, 256], accumulate=False)
+                    else:
+                        hist = exposure.histogram(f, channel_axis=i)
+
+                    self.out_data[col] = hist
+                    print("color: {}, hist: {}".format(col, ",".join(str(x) for x in self.out_data[col])))
+
+            else:
+                greyscale_f = cv.cvtColor(f, cv.COLOR_BGR2GRAY)
                 if self.library == 'cv':
                     # images, channels, mask, histSize, ranges[, hist[, accumulate]]
-                    hist = cv.calcHist([frame], [i], None,  [256], [0, 256], accumulate=False)
+                    hist = cv.calcHist([greyscale_f], [0], None, [32], [0, 256], accumulate=False)
                 else:
-                    hist = exposure.histogram(frame, channel_axis=i)
+                    hist = exposure.histogram(greyscale_f, channel_axis=0)
 
-                self.out_data[col] = hist
-                print("color: {}, hist: {}".format(col, ",".join(str(x) for x in self.out_data[col])))
+                self.out_data['greyscale'] = hist
+                print(f"hist: {hist}")
 
-        return frame
+        return f
 
 
 if __name__ == "__main__":

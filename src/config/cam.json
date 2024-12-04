@@ -73,6 +73,7 @@
 					"capture_output_show_time": false,
 					"capture_output_show_stats": false,
 					"capture_output_log_stats": false,
+					"color_histograms": false,
 					"plugin_process_frames": true,
 					"plugin_process_copies": false,
 					"plugin_displays": true,
