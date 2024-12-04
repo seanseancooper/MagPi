@@ -10,8 +10,6 @@ from src.cam.Showxating.lib.utils import in_range, is_inside, getAggregatedRect,
 from src.config import CONFIG_PATH, readConfig
 
 import logging
-
-
 cam_logger = logging.getLogger('cam_logger')
 
 
@@ -22,9 +20,9 @@ class FrameObjektTracker:
         self.f_id = 0                       # current frame id
         self.config = {}
 
-        self.f_limit = 0                    # hyperparameter: max age of frames in o_cache_map.
+        self.f_limit = 2                    # hyperparameter: max age of frames in o_cache_map.
         self.frm_delta_pcnt = 1.00          # hyperparameter: percentage of delta between the current and previous frames over all pixels in frame
-
+        self.contour_limit = None           # number of contours evaluated by plugin in each pass
         self.contours = None                # ????
         self.tracked = {}                   # mapping of FrameObjekts over last 'f_limit' frames.
 
@@ -43,8 +41,23 @@ class FrameObjektTracker:
     def configure(self):
         readConfig(os.path.join(CONFIG_PATH, 'cam.json'), self.config)
 
-        self.f_limit = self.config['TRACKER']['f_limit']
-        self.frm_delta_pcnt = self.config['TRACKER']['frm_delta_pcnt']
+        try:
+            self.f_limit = int(self.config['TRACKER'].get('f_limit', 1))
+            if self.f_limit < 1:
+                self.f_limit = 1
+
+            self.contour_limit = int(self.config['TRACKER'].get('contour_limit', None))
+            if self.contour_limit == 0:
+                print(f'contour_limit warning: (contour_limit should be > 0 or "None" for all contours)')
+
+            self.frm_delta_pcnt = float(self.config['TRACKER']['frm_delta_pcnt'])
+            if self.frm_delta_pcnt > 1.0:
+                print(f'bad frm_delta_pcnt: (should be <= 1.0)')
+                exit(1)
+
+        except ValueError:
+            print(f'bad value: (should be numeric)')
+            exit(1)
 
     def preen_cache(self):
         aged_o = [o for o in self.tracked if self.tracked.get(o).f_id < (self.f_id - self.f_limit)]
@@ -105,11 +118,6 @@ class FrameObjektTracker:
 
     def get_mean_location(self, contours):
         ''' aka 'basically where it is' get the average location of all the contours in the frame '''
-
-        # res = np.mean([np.array(cnt).mean(axis=0) for cnt in np.array(contours, dtype=object)], axis=0)
-        # res2 = np.mean([np.mean([[np.mean(pt, axis=0, dtype=int)] for pt in cnt], axis=0).reshape(-1, 1) for cnt in np.array(contours, dtype=object)], axis=0)
-        # not_c_ml = np.mean([np.mean([np.mean([np.mean([pt], axis=0, dtype=int) for [pt] in pt], axis=0) for pt in cnt], axis=0) for cnt in [np.array(contours, dtype=object)]], axis=0)
-
         x = []
         y = []
 
@@ -126,17 +134,18 @@ class FrameObjektTracker:
         if len(p_ml) == 1:
             # NEW THING
             o1 = FrameObjekt.create(self.f_id)
-            o1.tag = o1.create_tag(self.f_id)  # NEW TAG
+
             o1.ml = self._ml
             o1.isNew = True
             o1.distances = euclidean_distances(np.array([self._ml], dtype=int), np.array([p_ml[0]], dtype=int).reshape(1, -1))
-            o1.md = np.mean(o1.distances) # before
+            o1.md = np.mean(o1.distances)
             o1.prev_tag = str(list(self.tracked.keys())[0])
             o1.curr_dist = int(o1.distances[0])
 
             o1.rect = self.tracked.get(o1.prev_tag).rect
+            o1.is_inside = is_inside(o1.ml, o1.rect)    # *SHOULD* BE TRUE
             # o1.close = None                           # WILL BE FALSE...
-            o1.is_inside = is_inside(o1.ml, o1.rect)  # *SHOULD* BE TRUE
+            o1.tag = o1.create_tag(self.f_id)  # NEW TAG
 
             self.print_frame(o1, "N1:")
 
@@ -144,37 +153,19 @@ class FrameObjektTracker:
 
         if len(p_ml) > 1:
             o = FrameObjekt.create(self.f_id)
-            o.ml = self._ml                                                         # will be a list...
-
+            o.ml = self._ml
+            o.isNew = False  # could be reset!
             # compare this NEW o location to previous mean locations
-            # for j in np.arange(len(p_ml)):
-            #     distances.append(euclidean_distances(np.array([o.ml], dtype=int),
-            #                                            np.array([p_ml[j]], dtype=int).reshape(1, -1)))
-            #     print(f"a:{o.ml} to b:{p_ml[j]} distance:{distances[-1]}")
             o.distances = [euclidean_distances(np.array([self._ml], dtype=int), np.array([p_ml[j]], dtype=int).reshape(1, -1)) for j in np.arange(len(p_ml)) if p_ml[j] is not None]
             o.md = np.mean(o.distances)
-
-            # not differentiating the contours as distinct to the movement in question
-            # is a problem; selecting the contour closest to the current mean location
-            # doesn't discount entirely foreign objects moving at random in the mean
-            # location calculation.
-
-            # need to find the k-nearest neighbors and label them.
+            off = 0.10 * o.md
 
             idx = np.argmin(o.distances)                              # minimum euclidean distance
             o.prev_tag = str(list(self.tracked.keys())[idx])          # tag closest to current location
             o.curr_dist = float(o.distances[idx])                     # distance from current location
 
+            o.close = in_range(o.curr_dist, o.md, off)
             o.tag = f"{self.f_id}_{o.prev_tag.split('_')[1]}"
-
-            # off = 0.10 * o.md
-            # o.close = in_range(o.curr_dist, o.md, off)
-            # if o.close or o.curr_dist == 0:
-            #     o.tag = f"{self.f_id}_{o.prev_tag.split('_')[1]}"   # close enough, use the previous tag.
-            # else:
-            #     o.tag = o.create_tag(self.f_id)                      # distant, NEW tag (is this the place to create it?)
-            #     # o.tag = f"{self.f_id}_{o.prev_tag.split('_')[1]}"  # close enough, use the previous tag.
-            #     o.isNew = True
 
             self.print_frame(o, "   ")
             labeled.append(o)
@@ -185,7 +176,6 @@ class FrameObjektTracker:
             o.tag = o.create_tag(self.f_id)
             o.ml = self._ml
             o.skip = True
-            # o.close = None
             self.print_frame(o, "N0:")
             labeled.append(o)
 
@@ -220,21 +210,6 @@ class FrameObjektTracker:
                 self.fd_mean = np.mean(self._frame_deltas)                  # a float,
                 self.d_range = self.frm_delta_pcnt * self.fd_mean           # percentage of px difference
             else:
-                # area = cv.contourArea(self.contours)
-                # if area < 500:
-                #     continue
-
-                # is the current delta outside the ALLOWED mean of all the previous frame deltas?
-                # how different is this wrt that which preceded it?
-                # don't compute this if you don't have to?
-
-                # if not o.is_inside:
-                #     if in_range(self._frame_delta, self.fd_mean, self.d_range):     # THIS IS THE PREVIOUS FRAME DELTA, MEAN & RANGE NOW!!! WE MAY NOT HAVE THIS!!
-                #         # o.tag = self.tracked[list(self.tracked)[0]].tag     # not -- > f'{self.f_id}_{some_tag.split("_")[1]}'
-                #         o.tag = o.create_tag(self.f_id)                       # not -- > self.tracked[list(self.tracked)[0]].tag
-                #         o.isNew = True  # False                               #
-                #     else:
-                #         pass  # not inside, out of range?? after every iteration
                 o.tag = o.create_tag(self.f_id)
 
             self.tracked[o.tag] = o

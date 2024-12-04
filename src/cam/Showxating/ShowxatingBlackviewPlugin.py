@@ -7,7 +7,6 @@ from src.cam.Showxating.lib.FrameObjektTracker import FrameObjektTracker
 from src.cam.Showxating.lib.utils import draw_rects, draw_contours, wall_images, draw_grid, sortedContours, is_inside
 
 import logging
-
 cam_logger = logging.getLogger('cam_logger')
 
 
@@ -23,12 +22,10 @@ def print_symbology(has_symbols, f, rect, m, c):
         except TypeError:
             pass  # 'NoneType' object is not subscriptable
 
-
 def print_analytics(has_analysis, f, contours, hierarchy):
     if has_analysis:
         draw_contours(f, contours, hierarchy, (64, 255, 64), 1)  # green contours
         # draw_centroid(f, contours, 5, (127, 0, 255), 1)  # purple centroid
-
 
 def print_tracked(has_analysis, has_symbols, f, t, rect):
 
@@ -152,34 +149,16 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             self.has_motion = True
             conts = sortedContours(contours)
 
-            for cnt in conts[:1]:
-                # note: histograms for every frame is slow. That's why it's set False.
-
-                # if cv.contourArea(cnt) < 25:
-                #     print(cv.contourArea(cnt))
-                #     continue
-
+            for cnt in conts[:self.tracker.contour_limit]:
                 wall, rect, dists = wall_images(f.copy(), cnt, False)
 
                 if self.has_analysis or self.has_symbols:
-
                     self.tracked = self.tracker.track_objects(self.frame_id, cnt, hier, wall, rect)
                     if self.tracked:
                         print_tracked(self.has_analysis, self.has_symbols, f, self.tracked, rect)
                         print_symbology(self.has_symbols, f, rect, self.has_motion, self.majic_color)
 
             print_analytics(self.has_analysis, f, conts, hier)
-
-            # # note: histograms are for every frame and is slow. That's why it's False.
-            # wall, rect, dists = wall_images(f, conts, False)
-            #
-            # if self.has_analysis or self.has_symbols:
-            #     self.tracked = self.tracker.track_objects(self.frame_id, conts, hier, wall, rect)
-            #     if self.tracked:
-            #         print_tracked(self.has_analysis, self.has_symbols, f, self.tracked, rect)
-
-            # print_analytics(self.has_analysis, f, conts, hier)
-            # print_symbology(self.has_symbols, f, rect, self.has_motion, self.majic_color)
 
             self.post_mediapipe(f)
 
