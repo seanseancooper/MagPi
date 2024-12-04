@@ -101,11 +101,6 @@ class FrameObjektTracker:
             pass
 
     def print_frame(self, o, origin):
-        # foo = 0.0
-        # try:
-        #     foo = o1.curr_dist/o1.md
-        # except Exception: pass
-        # except RuntimeWarning: pass
         print(f"{str(self.f_id)}\t{origin}{str(o.tag[-12:])}\t"
               f"INSIDE: {str(o.is_inside).ljust(2, ' ')}\t"
               # f"CLOSE: {str(o1.close).rjust(1, ' ')}\t"
