@@ -62,7 +62,7 @@ def in_range(val, initial, offset):
     lwr = initial - offset
     upp = initial + offset
 
-    return lwr < val < upp
+    return bool(lwr < val < upp)
 
 
 def draw_contours(frag, conts, hier, clr, strk):
