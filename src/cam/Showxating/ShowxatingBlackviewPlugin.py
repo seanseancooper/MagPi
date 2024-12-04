@@ -155,6 +155,10 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             for cnt in conts[:1]:
                 # note: histograms for every frame is slow. That's why it's set False.
 
+                # if cv.contourArea(cnt) < 25:
+                #     print(cv.contourArea(cnt))
+                #     continue
+
                 wall, rect, dists = wall_images(f.copy(), cnt, False)
 
                 if self.has_analysis or self.has_symbols:
