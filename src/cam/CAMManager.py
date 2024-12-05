@@ -40,10 +40,9 @@ class CAMManager(threading.Thread):
         self.plugin.plugin_name = self.config['PLUGIN_NAME']
         self.plugin.plugin_args_capture_src = self.cam_direction(direction)
         self.plugin.get_config()
-        self.plugin.config_tracker()
 
     def cam_direction(self, direction):
-        if not self.config['FORWARD_TEST_URL'] > "":
+        if not str(self.config['FORWARD_TEST_URL']) > '':
             return self.config[direction.upper() + '_VIDEO_URL']
         return self.config['FORWARD_TEST_URL']
 
