@@ -64,32 +64,7 @@ class CAMManager(threading.Thread):
             pass
 
     def cam_twiddle(self, field, value):
-        # TODO: FIX BRITTLE CODE!
-        if field == 'crop':
-            json_value = json.loads(value)
-            self.plugin._max_height = slice(int(json_value['y']), int(json_value['h']), None)
-            self.plugin._max_width = slice(int(json_value['x']), int(json_value['w']), None)
-
-        if field == 'krnl':
-            self.plugin.krnl = int(value)
-            self.plugin.show_krnl_grid = True
-
-        if field == 'threshold':
-            self.plugin.show_threshold = (self.plugin.threshold != float(value))
-            self.plugin.threshold = float(value)
-
-        if field == 'threshold_hold':
-            self.plugin.sets_binary(field, (value == 'true'))
-
-        if field == 'mediapipe':
-            self.plugin.sets_binary(field, (value == 'true'))
-
-        if field == 'f_limit':
-            self.plugin.tracker.f_limit = int(value)
-
-        if field == 'frm_delta_pcnt':
-            self.plugin.tracker.frm_delta_pcnt = float(value)
-
+        self.plugin.set_field(field, value)
         return True
 
     def tracker_twiddle(self, field, value):
