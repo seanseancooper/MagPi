@@ -29,9 +29,6 @@ class ShowxatingCapture:
         self.capture_cv_color = (255, 255, 255)   #TODO: put in config
 
         self.capture_param_capture_src = src
-        # self.capture_param_capture_frame_rate = fps
-        # self.capture_param_capture_width = width
-        # self.capture_param_capture_height = height
 
         self.capture_frame_rate = 0.0
 
@@ -46,9 +43,6 @@ class ShowxatingCapture:
 
         def initialize():
             self.capture = cv.VideoCapture(self.capture_param_capture_src)
-            # self.capture.set(cv.CAP_PROP_FPS, self.capture_param_capture_frame_rate)
-            # self.capture.set(cv.CAP_PROP_FRAME_WIDTH, self.capture_param_capture_width)
-            # self.capture.set(cv.CAP_PROP_FRAME_HEIGHT, self.capture_param_capture_height)
 
         if self.capture:
             initialize()
@@ -111,8 +105,6 @@ class ShowxatingCapture:
 
                 self.statistics['CAP_PROP_FPS'] = 'INOP'  # DBUG: can this work?
 
-                # stats = f'{self.capture_name} {self.capture_param_capture_width}x{self.capture_param_capture_height}' \
-                #         f' | IN: {self.capture_param_capture_frame_rate} fps' \
                 stats = f'{self.capture_name} | OUT: {self.capture_frame_rate:.2f} fps {datetime.now().strftime("%b %d, %Y %X")} '
 
                 if self.plugin_config['capture_output_show_stats']:
