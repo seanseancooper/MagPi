@@ -89,7 +89,7 @@
                                  "cam_slider_frm_delta_pcnt"];
                 const crops  = ["cam_slider_crop"];
                 const checks = ["cam_slider_mediapipe",
-                                "cam_slider_threshold_hold"];
+                                "cam_slider_hold_threshold"];
 
                 if (sliders.includes(slider_id)) {
                     slider_value = parseFloat(slider.value); // downcast later
@@ -220,7 +220,7 @@
     <div id="info_box" style="" class="info_box">
         <div id="cam_slider_outputs" style="" class="cam_slider_outputs highlight">
                 ∑:&nbsp;<span id="cam_slider_threshold_output">{{ plugin.threshold | int }}</span>
-                ∞:&nbsp;<span id="cam_slider_threshold_hold_output">OFF</span>
+                ∞:&nbsp;<span id="cam_slider_hold_threshold_output">OFF</span>
                 ⊞:&nbsp;<span id="cam_slider_krnl_output">{{ plugin.krnl }}</span>
             <br>
                 ƒL:&nbsp;<span id="cam_slider_f_limit_output">{{ plugin.tracker.f_limit }}</span>
@@ -234,7 +234,7 @@
     <span id="cam_sliders" style="" class="cam_sliders highlight">
         <div id="cam_slider_threshold" style="position:absolute;left:0px;">
             ∑<br><input id="cam_slider_threshold_input" style="height:100px;" class="cam_slider" orient="vertical" type="range" min="-100" max="100" step="1" value="{{ plugin.threshold | int }}" onChange="handleSlider(this);"/>
-            <input id="cam_slider_threshold_hold_input" style="position:absolute;left:-20px;top:98px;" type="checkbox" {{ "checked" if plugin.threshold_hold is true }} onChange="handleSlider(this);"/>
+            <input id="cam_slider_hold_threshold_input" style="position:absolute;left:-20px;top:98px;" type="checkbox" {{ "checked" if plugin.hold_threshold is true }} onChange="handleSlider(this);"/>
         </div>
         <div id="cam_slider_krnl" style="position:absolute;top:0px;left:25px;">
             ⊞<br><input id="cam_slider_krnl_input" style="" class="cam_slider" orient="vertical" type="range" min="1" max="128" step="2" value="{{ plugin.krnl }}" onChange="handleSlider(this);"/>

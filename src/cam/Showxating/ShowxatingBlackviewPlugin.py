@@ -72,7 +72,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
         self.show_krnl_grid = False
         self.show_threshold = False
-        self.hold_threshold = False
+        self.hold_threshold = 0
 
         self.mediapipe = False  # slow!
         self._pose = None
@@ -86,19 +86,23 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
     def config_tracker(self):
         self.tracker.configure()
 
+    def sets_hold_threshold(self, value):
+        if value is True:
+            self.hold_threshold = 100
+        elif value is False:
+            self.hold_threshold = 0
+
     def set_field(self, field, value):
-        if field == 'threshold_hold':
-            self.hold_threshold = value
+        if field == 'hold_threshold':
+            self.show_threshold = (value == 'true')
         if field == 'mediapipe':
             self.mediapipe = value
         if field == 'krnl':
             self.krnl = value
             self.show_krnl_grid = True
         if field == 'threshold':
+            self.sets_hold_threshold(True)
             self.threshold = float(value)
-            self.show_threshold = True
-        if field == 'threshold_hold':
-            self.hold_threshold = (value == 'true')
         if field == 'frm_delta_pcnt':
             self.tracker.frm_delta_pcnt = float(value)
         # if field == 'f_limit':
@@ -107,6 +111,17 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             json_value = json.loads(value)
             self._max_height = slice(int(json_value['y']), int(json_value['h']), None)
             self._max_width = slice(int(json_value['x']), int(json_value['w']), None)
+
+    def threshold_ops(self, f, THRESHOLD):
+        # show the THRESHOLD when self.threshold is changing or threshold_hold ('∞') is enabled
+        if self.show_threshold or self.hold_threshold > 0:
+            f[self._max_height, self._max_width] = cv.cvtColor(THRESHOLD, cv.COLOR_GRAY2BGR)
+            self.hold_threshold -= 1
+
+    def grid_ops(self, f):
+        # TODO: do this in javascript instead.
+        if self.show_krnl_grid:
+            draw_grid(f, (int(self.krnl), int(self.krnl)), self.majic_color, 1)
 
     def cam_snap(self):
 
@@ -145,16 +160,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                                                   landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
 
                 draw_pose(f, self._result_T)
-
-    def threshold_ops(self, f, THRESHOLD):
-        self.show_threshold = False
-        if self.show_threshold or self.hold_threshold:
-            f[self._max_height, self._max_width] = cv.cvtColor(THRESHOLD, cv.COLOR_GRAY2BGR)
-
-    def grid_ops(self, f):
-        # TODO: do this in javascript instead.
-        if self.show_krnl_grid:
-            draw_grid(f, (int(self.krnl), int(self.krnl)), self.majic_color, 1)
 
     def process_contours(self, f, contours, hier):
 
@@ -205,7 +210,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                 _, THRESHOLD = cv.threshold(BLURRED, int(np.mean(BLURRED)) + self.threshold, 255, cv.THRESH_BINARY)
                 contours, hier = cv.findContours(THRESHOLD, cv.RETR_TREE, cv.CHAIN_APPROX_NONE,
                                               offset=[self._max_width.start, self._max_height.start])
-
                 self.threshold_ops(frame, THRESHOLD)
                 self.process_contours(frame, contours, hier)
                 self.grid_ops(frame)

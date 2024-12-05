@@ -76,7 +76,7 @@
 					"color_histograms": false,
 					"plugin_process_frames": true,
 					"plugin_process_copies": false,
-					"plugin_displays": true,
+					"plugin_displays": false,
 					"display_proc_stats": false,
 					"log_proc_stats": false,
 					"display_rect_stats": false,
