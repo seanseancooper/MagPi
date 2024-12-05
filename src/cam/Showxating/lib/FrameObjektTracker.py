@@ -103,7 +103,7 @@ class FrameObjektTracker:
     def print_frame(self, o, origin):
         print(f"{str(self.f_id)}\t{origin}{str(o.tag[-12:])}\t"
               f"INSIDE: {str(o.is_inside).ljust(2, ' ')}\t"
-              # f"CLOSE: {str(o1.close).rjust(1, ' ')}\t"
+              f"CLOSE: {str(o.close).ljust(1, ' ')}\t"
               f"dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}\t"
               f"md: {str(o.md.__format__('.4f')).ljust(3, ' ')}\t"
               # f"foo: {str(foo.__format__('.4f')).ljust(3, ' ')}\t"
@@ -134,35 +134,37 @@ class FrameObjektTracker:
             o1.isNew = True
             o1.distances = euclidean_distances(np.array([self._ml], dtype=int), np.array([p_ml[0]], dtype=int).reshape(1, -1))
             o1.md = np.mean(o1.distances)
+
             o1.prev_tag = str(list(self.tracked.keys())[0])
             o1.curr_dist = int(o1.distances[0])
 
             o1.rect = self.tracked.get(o1.prev_tag).rect
-            o1.is_inside = is_inside(o1.ml, o1.rect)    # *SHOULD* ALWAYS BE TRUE
-            # o1.close = None                           # WILL BE FALSE...
+            o1.is_inside = is_inside(o1.ml, o1.rect)                        # *SHOULD* ALWAYS BE TRUE
+            off = 0.50 * o1.md
+            o1.close = in_range(o1.curr_dist, o1.md, off)                   # WILL BE FALSE...
+
             o1.tag = o1.create_tag(self.f_id)  # NEW TAG
 
             self.print_frame(o1, "N1:")
-
             labeled.append(o1)
 
         if len(p_ml) > 1:
             o = FrameObjekt.create(self.f_id)
+
             o.ml = self._ml
             o.isNew = False  # could be reset!
-            # compare this NEW o location to previous mean locations
             o.distances = [euclidean_distances(np.array([self._ml], dtype=int), np.array([p_ml[j]], dtype=int).reshape(1, -1)) for j in np.arange(len(p_ml)) if p_ml[j] is not None]
             o.md = np.mean(o.distances)
-            off = 0.10 * o.md
 
             idx = np.argmin(o.distances)                              # minimum euclidean distance
             o.prev_tag = str(list(self.tracked.keys())[idx])          # tag closest to current location
             o.curr_dist = float(o.distances[idx])                     # distance from current location
 
             o.rect = self.tracked.get(o.prev_tag).rect
-            o.is_inside = is_inside(o.ml, o.rect)                     # inside the PREVIOUS rect? *MIGHT* BE TRUE
-
+            o.is_inside = is_inside(o.ml, o.rect)                     # *MIGHT* BE TRUE
+            off = 0.50 * o.md
             o.close = in_range(o.curr_dist, o.md, off)
+
             o.tag = f"{self.f_id}_{o.prev_tag.split('_')[1]}"
 
             self.print_frame(o, "   ")
