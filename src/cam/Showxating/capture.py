@@ -19,7 +19,7 @@ logger_root = logging.getLogger('root')
 
 class ShowxatingCapture:
 
-    def __init__(self, name, src, fps, width, height, config):
+    def __init__(self, name, src, config):
         super().__init__()
 
         self.plugin_config = config
@@ -29,9 +29,9 @@ class ShowxatingCapture:
         self.capture_cv_color = (255, 255, 255)   #TODO: put in config
 
         self.capture_param_capture_src = src
-        self.capture_param_capture_frame_rate = fps
-        self.capture_param_capture_width = width
-        self.capture_param_capture_height = height
+        # self.capture_param_capture_frame_rate = fps
+        # self.capture_param_capture_width = width
+        # self.capture_param_capture_height = height
 
         self.capture_frame_rate = 0.0
 
@@ -46,9 +46,9 @@ class ShowxatingCapture:
 
         def initialize():
             self.capture = cv.VideoCapture(self.capture_param_capture_src)
-            self.capture.set(cv.CAP_PROP_FPS, self.capture_param_capture_frame_rate)
-            self.capture.set(cv.CAP_PROP_FRAME_WIDTH, self.capture_param_capture_width)
-            self.capture.set(cv.CAP_PROP_FRAME_HEIGHT, self.capture_param_capture_height)
+            # self.capture.set(cv.CAP_PROP_FPS, self.capture_param_capture_frame_rate)
+            # self.capture.set(cv.CAP_PROP_FRAME_WIDTH, self.capture_param_capture_width)
+            # self.capture.set(cv.CAP_PROP_FRAME_HEIGHT, self.capture_param_capture_height)
 
         if self.capture:
             initialize()
@@ -111,10 +111,9 @@ class ShowxatingCapture:
 
                 self.statistics['CAP_PROP_FPS'] = 'INOP'  # DBUG: can this work?
 
-                stats = f'{self.capture_name} {self.capture_param_capture_width}x{self.capture_param_capture_height}' \
-                        f' | IN: {self.capture_param_capture_frame_rate} fps' \
-                        f' | OUT: {self.capture_frame_rate:.2f} fps' \
-                        f' {datetime.now().strftime("%b %d, %Y %X")} '
+                # stats = f'{self.capture_name} {self.capture_param_capture_width}x{self.capture_param_capture_height}' \
+                #         f' | IN: {self.capture_param_capture_frame_rate} fps' \
+                stats = f'{self.capture_name} | OUT: {self.capture_frame_rate:.2f} fps {datetime.now().strftime("%b %d, %Y %X")} '
 
                 if self.plugin_config['capture_output_show_stats']:
                     cv.putText(frame, stats, (35, 445), cv.FONT_HERSHEY_DUPLEX, .50, self.statistics['capture_majic_color'], 1)
@@ -130,4 +129,5 @@ class ShowxatingCapture:
             else:
                 cam_logger.warning(f"{self.capture_name} capture returned NO REF!")
                 time.sleep(1)
+                self.capture.release()
                 self.run()
