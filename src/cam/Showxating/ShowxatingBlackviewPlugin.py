@@ -83,7 +83,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
         self.processed = None
 
-    def config_tracker(self):
+    def get_config(self):
+        super().get_config()
         self.tracker.configure()
 
     def sets_hold_threshold(self, value):
@@ -96,7 +97,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         if field == 'hold_threshold':
             self.show_threshold = (value == 'true')
         if field == 'mediapipe':
-            self.mediapipe = value
+            self.mediapipe = (value == 'true')
         if field == 'krnl':
             self.krnl = value
             self.show_krnl_grid = True
@@ -105,8 +106,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             self.threshold = float(value)
         if field == 'frm_delta_pcnt':
             self.tracker.frm_delta_pcnt = float(value)
-        # if field == 'f_limit':
-        #     self.tracker.f_limit = int(value)
+        if field == 'f_limit':
+            self.tracker.f_limit = int(value)
         if field == 'crop':
             json_value = json.loads(value)
             self._max_height = slice(int(json_value['y']), int(json_value['h']), None)
