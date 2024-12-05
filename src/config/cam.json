@@ -18,7 +18,7 @@
 			"AFT_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPiExternal/rsrc/cam/training_data/test_movies/cam.mp4"
 		},
 		{
-			"FORWARD_TEST_URL" : 0
+			"FORWARD_TEST_URL" : ""
 		},
 		{
 			"PLUGIN_NAME" : "blackview_test_vis"
@@ -81,7 +81,7 @@
 					"log_proc_stats": false,
 					"display_rect_stats": false,
 					"log_rect_stats": false,
-					"streams": false,
+					"streams": true,
 					"streaming_host": "localhost",
 					"streaming_port": 6100,
 					"streaming_path": "/stream",
