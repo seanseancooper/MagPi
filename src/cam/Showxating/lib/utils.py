@@ -183,7 +183,6 @@ def wall_images(frame, conts, getDists):
     return wall, rectangle, dists
 
 
-
 def calculate_contour_distance(contour1, contour2):
     x1, y1, w1, h1 = cv.boundingRect(contour1)
     c_x1 = x1 + w1/2

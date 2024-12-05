@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+from flask import json
 
 from src.cam.Showxating.plugin import ShowxatingPlugin
 from src.cam.Showxating.lib.ImageWriter import ImageWriter
@@ -85,11 +86,27 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
     def config_tracker(self):
         self.tracker.configure()
 
-    def sets_binary(self, field, value):
+    def set_field(self, field, value):
         if field == 'threshold_hold':
             self.hold_threshold = value
         if field == 'mediapipe':
             self.mediapipe = value
+        if field == 'krnl':
+            self.krnl = value
+            self.show_krnl_grid = True
+        if field == 'threshold':
+            self.threshold = float(value)
+            self.show_threshold = True
+        if field == 'threshold_hold':
+            self.hold_threshold = (value == 'true')
+        if field == 'frm_delta_pcnt':
+            self.tracker.frm_delta_pcnt = float(value)
+        # if field == 'f_limit':
+        #     self.tracker.f_limit = int(value)
+        if field == 'crop':
+            json_value = json.loads(value)
+            self._max_height = slice(int(json_value['y']), int(json_value['h']), None)
+            self._max_width = slice(int(json_value['x']), int(json_value['w']), None)
 
     def cam_snap(self):
 
@@ -130,6 +147,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                 draw_pose(f, self._result_T)
 
     def threshold_ops(self, f, THRESHOLD):
+        self.show_threshold = False
         if self.show_threshold or self.hold_threshold:
             f[self._max_height, self._max_width] = cv.cvtColor(THRESHOLD, cv.COLOR_GRAY2BGR)
 
