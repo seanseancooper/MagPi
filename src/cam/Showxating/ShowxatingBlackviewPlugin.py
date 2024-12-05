@@ -113,10 +113,10 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             self._max_height = slice(int(json_value['y']), int(json_value['h']), None)
             self._max_width = slice(int(json_value['x']), int(json_value['w']), None)
 
-    def threshold_ops(self, f, THRESHOLD):
-        # show the THRESHOLD when self.threshold is changing or threshold_hold ('∞') is enabled
+    def threshold_ops(self, f, t):
+        # displayed when self.threshold is changing or threshold_hold is enabled
         if self.show_threshold or self.hold_threshold > 0:
-            f[self._max_height, self._max_width] = cv.cvtColor(THRESHOLD, cv.COLOR_GRAY2BGR)
+            f[self._max_height, self._max_width] = cv.cvtColor(t, cv.COLOR_GRAY2BGR)
             self.hold_threshold -= 1
 
     def grid_ops(self, f):
@@ -182,7 +182,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                         print_tracked(self.has_analysis, self.has_symbols, f, self.tracked, rect)
                         print_symbology(self.has_symbols, f, rect, self.has_motion, self.majic_color)
 
-            print_analytics(self.has_analysis, f, conts, hier)
+                    print_analytics(self.has_analysis, f, cnt, hier)
 
             self.post_mediapipe(f)
 
