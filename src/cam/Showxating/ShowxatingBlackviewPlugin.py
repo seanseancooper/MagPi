@@ -198,7 +198,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
             if ret:
                 if self.plugin_capture.capture_param_capture_src == 0:
-                    frame = cv.resize(frame, (self.plugin_config.get['capture_param_capture_width', 640], self.plugin_config.get['capture_param_capture_height', 480]))
+                    frame = cv.resize(frame, (self.plugin_config.get('capture_param_capture_width', 640), self.plugin_config.get('capture_param_capture_height', 480)))
                 self.pre_mediapipe(frame)
 
                 cropped_frame = frame[self._max_height, self._max_width]
