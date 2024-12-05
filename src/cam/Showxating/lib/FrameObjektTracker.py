@@ -138,7 +138,7 @@ class FrameObjektTracker:
             o1.curr_dist = int(o1.distances[0])
 
             o1.rect = self.tracked.get(o1.prev_tag).rect
-            o1.is_inside = is_inside(o1.ml, o1.rect)    # *SHOULD* BE TRUE
+            o1.is_inside = is_inside(o1.ml, o1.rect)    # *SHOULD* ALWAYS BE TRUE
             # o1.close = None                           # WILL BE FALSE...
             o1.tag = o1.create_tag(self.f_id)  # NEW TAG
 
@@ -158,6 +158,9 @@ class FrameObjektTracker:
             idx = np.argmin(o.distances)                              # minimum euclidean distance
             o.prev_tag = str(list(self.tracked.keys())[idx])          # tag closest to current location
             o.curr_dist = float(o.distances[idx])                     # distance from current location
+
+            o.rect = self.tracked.get(o.prev_tag).rect
+            o.is_inside = is_inside(o.ml, o.rect)                     # inside the PREVIOUS rect? *MIGHT* BE TRUE
 
             o.close = in_range(o.curr_dist, o.md, off)
             o.tag = f"{self.f_id}_{o.prev_tag.split('_')[1]}"
