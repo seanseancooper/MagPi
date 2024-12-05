@@ -93,13 +93,15 @@ input[type="range"]:focus::-moz-range-thumb{
     position:absolute;
     left:0px;
     top:0px;
-    width:708px;
-    height:485px;
+    width:704px;
+    height:480px;
 }
 
 .target {
     width:704px;
     height:480px;
+    left:-1px;
+    top:-1px;
 }
 
 .jcrop-stage {
