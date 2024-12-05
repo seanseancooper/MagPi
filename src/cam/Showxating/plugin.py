@@ -38,9 +38,9 @@ class ShowxatingPlugin(threading.Thread):
 
         # args on the cli
         self.plugin_args_capture_src = None
-        self.plugin_args_capture_frame_rate = None
-        self.plugin_args_capture_width = None
-        self.plugin_args_capture_height = None
+        # self.plugin_args_capture_frame_rate = None
+        # self.plugin_args_capture_width = None
+        # self.plugin_args_capture_height = None
 
         # process_frames? The point is to be able to...
         self.plugin_process_frames = False
@@ -64,13 +64,14 @@ class ShowxatingPlugin(threading.Thread):
     def set_capture(self):
         self.plugin_capture = ShowxatingCapture(self.plugin_name,
                                                 self.plugin_args_capture_src,
-                                                self.plugin_args_capture_frame_rate,
-                                                self.plugin_args_capture_width,
-                                                self.plugin_args_capture_height,
+                                                # self.plugin_args_capture_frame_rate,
+                                                # self.plugin_args_capture_width,
+                                                # self.plugin_args_capture_height,
                                                 self.plugin_config)
         cam_logger.debug(f"{self.plugin_name} initialized plugin capture: src:{self.plugin_args_capture_src}"
-                            f" fps:{self.plugin_args_capture_frame_rate} "
-                            f"{self.plugin_args_capture_width}x{self.plugin_args_capture_width}")
+                            # f" fps:{self.plugin_args_capture_frame_rate} "
+                            # f"{self.plugin_args_capture_width}x{self.plugin_args_capture_width}"
+                         )
 
     def get_config(self):
         from src.config import CONFIG_PATH, readConfig
