@@ -16,10 +16,6 @@ gps_logger = logging.getLogger('gps_logger')
 retrievers = {}
 
 
-def format_time(_, fmt):
-    return f'{_.strftime(fmt)}'
-
-
 class GPSRetriever(threading.Thread):
 
     def __init__(self):
@@ -113,7 +109,7 @@ class GPSRetriever(threading.Thread):
                                "altitude": result.get('GPS''altitude', 0.0),
                                "climb": result.get('GPS''climb', 0.0),
 
-                               "time": datetime.now().__format__("%Y-%m-%d %H:%M:%S")}
+                               "time": self.time}
                 print(self.result)
                 time.sleep(self.config.get('DUMMYRETRIEVER_TIMEOUT', 1))
 
@@ -131,10 +127,10 @@ class GPSRetriever(threading.Thread):
                 gps_logger.error(f"JavaScriptGPSRetriever: {e}")  # unable to connect to Blackview
 
     def gps_time(self):
-        return str(self.time)  # needs a format
+        return str(self.time)  # needs a format self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f')
 
     def gps_position(self):
-        return self.result
+        return self.result      # when is this made JSON??
 
     def gps_location(self):
         return {"lat": self.result['lat'], "lon": self.result['lon']}
