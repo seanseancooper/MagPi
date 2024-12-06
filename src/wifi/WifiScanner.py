@@ -180,6 +180,7 @@ class WifiScanner(threading.Thread):
     def get_parsed_signals(self):
         """ updates and returns ALL parsed SIGNALS """
         fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
+        #  wait... what??  str(self.time).__format__(self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f'))
         self.elapsed = format_time(datetime.strptime(str(datetime.now() - self.start_time), "%H:%M:%S.%f"), fmt)
         [self.update_signal(sgnl, self.get_worker(sgnl['BSSID']), fmt) for sgnl in self.parsed_signals]
 
@@ -237,6 +238,7 @@ class WifiScanner(threading.Thread):
 
                 [worker.run() for worker in self.workers]
 
+                # wtf?! this is much needless arm twisting. simplify.
                 self.elapsed = format_time(datetime.strptime(str(datetime.now() - self.start_time), "%H:%M:%S.%f"), self.config.get('TIME_FORMAT', "%H:%M:%S"))
                 wifi_updated.send(self)
 
