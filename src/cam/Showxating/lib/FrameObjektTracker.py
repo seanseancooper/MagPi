@@ -24,6 +24,7 @@ class FrameObjektTracker:
         self.frm_delta_pcnt = 1.00          # hyperparameter: percentage of delta between the current and previous frames over all pixels in frame
         self.contour_limit = None           # number of contours evaluated by plugin in each pass
         self.contours = None                # ????
+        self.contour_id = None              # ????
         self.tracked = {}                   # mapping of FrameObjekts over last 'f_limit' frames.
 
         self._ml = []                       # DO NOT CHANGE: list of (x,y) location of contour in self.contours
@@ -101,7 +102,7 @@ class FrameObjektTracker:
             pass
 
     def print_frame(self, o, origin):
-        print(f"{str(self.f_id)}\t{origin}{str(o.tag[-12:])}\t"
+        print(f"{str(self.f_id)}\t{origin}{o.contour_id}-{str(o.tag[-12:])}\t"
               f"INSIDE: {str(o.is_inside).ljust(2, ' ')}\t"
               f"CLOSE: {str(o.close).ljust(1, ' ')}\t"
               f"dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}\t"
@@ -142,7 +143,7 @@ class FrameObjektTracker:
             o1.is_inside = is_inside(o1.ml, o1.rect)                        # *SHOULD* ALWAYS BE TRUE
             off = 0.50 * o1.md
             o1.close = in_range(o1.curr_dist, o1.md, off)                   # WILL BE FALSE...
-
+            o1.contour_id = self.contour_id
             o1.tag = o1.create_tag(self.f_id)  # NEW TAG
 
             self.print_frame(o1, "N1:")
@@ -164,7 +165,7 @@ class FrameObjektTracker:
             o.is_inside = is_inside(o.ml, o.rect)                     # *MIGHT* BE TRUE
             off = 0.50 * o.md
             o.close = in_range(o.curr_dist, o.md, off)
-
+            o.contour_id = self.contour_id
             o.tag = f"{self.f_id}_{o.prev_tag.split('_')[1]}"
 
             self.print_frame(o, "   ")
@@ -181,7 +182,7 @@ class FrameObjektTracker:
 
         return labeled
 
-    def track_objects(self, f_id, contour, contour_id, hierarchy, wall, rectangle):
+    def track_objects(self, f_id, contour, hierarchy, wall, rectangle):
         """
         LEARNINGS:
         Not all moving things should be tracked; this is very sensitive to minute changes in light, and not all movement is relevant.
@@ -190,6 +191,7 @@ class FrameObjektTracker:
         """
         self.f_id = f_id
         self.contours = contour
+        self.contour_id = str(uuid.uuid4()).split('-')[0]
 
         self._ml = self.get_mean_location(self.contours)  # = c_grps_locs[grp_ident]
 
