@@ -185,7 +185,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             conts = sortedContours(contours)
 
             for cnt in conts[:self.tracker.contour_limit]:
-                cnt_id = uuid.uuid4()
+                cnt_id = str(uuid.uuid4()).split('-')[0]
                 wall, rect, dists = wall_images(f.copy(), cnt, False)
 
                 if self.has_analysis or self.has_symbols:
