@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import logging
 from src.wifi.lib.wifi_utils import append_to_outfile
+from src.lib.utils import format_time, format_delta
 
 logger_root = logging.getLogger('root')
 wifi_logger = logging.getLogger('wifi_logger')
@@ -40,9 +41,9 @@ class WifiWorker:
         cache_max = max(int(self.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -(self.config.get('SIGNAL_CACHE_MAX')))
         return {"SSID"          : self.ssid,
                 "BSSID"         : self.bssid,
-                "created"       : str(self.created),
-                "updated"       : str(self.updated),
-                "elapsed"       : str(self.elapsed),
+                "created"       : format_time(self.created, "%H:%M:%S"),
+                "updated"       : format_time(self.updated, "%H:%M:%S"),
+                "elapsed"       : format_delta(self.elapsed, "%H:%M:%S"),
                 "vendor"        : self.vendor,
                 "channel"       : self.channel,
                 "frequency"     : self.frequency,

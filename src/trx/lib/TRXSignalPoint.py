@@ -1,6 +1,7 @@
 import uuid
 from collections import defaultdict
 from datetime import datetime, timedelta
+from src.lib.utils import format_time, format_delta
 
 
 class TRXSignalPoint:
@@ -67,9 +68,9 @@ class TRXSignalPoint:
             "id": str(self._id),
             "lon": self._lon,
             "lat": self._lat,
-            "created": str(self.created),
-            "updated": str(self.updated),
-            "elapsed": str(self.elapsed),
+            "created": format_time(self.created, "%H:%M:%S"),
+            "updated": format_time(self.updated, "%H:%M:%S"),
+            "elapsed": format_delta(self.elapsed, "%H:%M:%S"),
             "is_mute": self.is_mute,
             "tracked": self.tracked,
             "attributes": self.attributes
