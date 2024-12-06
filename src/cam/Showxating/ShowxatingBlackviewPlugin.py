@@ -81,7 +81,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self._kz = (int(self.krnl), int(self.krnl))
         self.threshold = 15.0                           # pixels additional to the mean during thresholding
 
-        self.show_krnl_grid = False
         self.show_threshold = False
         self.hold_threshold = 0
 
@@ -111,7 +110,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             self.mediapipe = (value == 'true')
         if field == 'krnl':
             self.krnl = value
-            self.show_krnl_grid = True
         if field == 'threshold':
             self.sets_hold_threshold(True)
             self.threshold = float(value)
@@ -129,11 +127,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         if self.show_threshold or self.hold_threshold > 0:
             f[self._max_height, self._max_width] = cv.cvtColor(t, cv.COLOR_GRAY2BGR)
             self.hold_threshold -= 1
-
-    def grid_ops(self, f):
-        # TODO: do this in javascript instead.
-        if self.show_krnl_grid:
-            draw_grid(f, (int(self.krnl), int(self.krnl)), self.majic_color, 1)
 
     def cam_snap(self):
 
@@ -226,7 +219,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                                               offset=[self._max_width.start, self._max_height.start])
                 self.threshold_ops(frame, THRESHOLD)
                 self.process_contours(frame, contours, hier)
-                self.grid_ops(frame)
 
             self.processed = frame
 
