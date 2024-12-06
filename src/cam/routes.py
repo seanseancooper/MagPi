@@ -42,29 +42,8 @@ def cam_multibutton(mode):
 
 @cam_bp.route("/plugin/<field>/<value>", methods=['POST'], subdomain='cam')
 def cam_plugin(field, value):
-    if camMgr.cam_twiddle(field, value):
+    if camMgr.set_plugin_field(field, value):
         return "OK"
     return "FAIL"
-
-
-@cam_bp.route("/tracker/<field>/<value>", methods=['POST'], subdomain='cam')
-def cam_tracker(field, value):
-    if camMgr.tracker_twiddle(field, value):
-        return "OK"
-    return "FAIL"
-
-
-@cam_bp.route("/move/<command>")
-def cam_move(command):
-    part = command.split("&")
-    command = {
-        "S_0": part[0].replace("S_0=", ""),
-        "S_1": part[1].replace("S_1=", ""),
-        "E_0": part[2].replace("E_0=", ""),
-        "E_1": part[3].replace("E_1=", "")
-    }
-
-    return camMgr.ircam_move(command)
-
 
 

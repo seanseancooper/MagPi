@@ -33,10 +33,7 @@ class CAMManager(threading.Thread):
         }
 
     def init_plugin(self, pluginClass, direction):
-
         self.plugin = pluginClass()
-
-        # configure the plugin
         self.plugin.plugin_name = self.config['PLUGIN_NAME']
         self.plugin.plugin_args_capture_src = self.cam_direction(direction)
         self.plugin.get_config()
@@ -47,10 +44,8 @@ class CAMManager(threading.Thread):
         return self.config['FORWARD_TEST_URL']
 
     def cam_reload(self, direction):
-        self.plugin.streamservice.is_stopped = True
         self.plugin.streamservice.force_stop()
         self.plugin.streamservice = None
-
         self.init_plugin(ShowxatingBlackviewPlugin, direction)
         self.plugin.run()
 
@@ -62,12 +57,9 @@ class CAMManager(threading.Thread):
         except KeyError:
             pass
 
-    def cam_twiddle(self, field, value):
+    def set_plugin_field(self, field, value):
         self.plugin.set_field(field, value)
         return True
-
-    def tracker_twiddle(self, field, value):
-        pass
 
     def stop(self):
         # self.plugin.stop()
@@ -78,8 +70,4 @@ class CAMManager(threading.Thread):
     def run(self):
         self.init_plugin(ShowxatingBlackviewPlugin, "FORE")
         self.plugin.run()
-
-        # NO. This causes issues w the capture.
-        # self.plugin.parent_thread = threading.Thread(target=self.plugin.run, daemon=False)
-        # self.plugin.parent_thread.start()
 
