@@ -2,6 +2,7 @@ import os
 import shutil
 import subprocess
 from datetime import datetime
+from string import Template
 import logging
 
 logger_root = logging.getLogger('root')
@@ -27,7 +28,22 @@ def format_time(_, fmt):
 
 
 def format_delta(_, fmt):
-    return f'{_.strptime(fmt)}'
+    # https://stackoverflow.com/questions/8906926/formatting-timedelta-objects
+
+    class DeltaTemplate(Template):
+        delimiter = "%"
+
+        def formats_delta(tdelta, fmt):
+            d = {"D": tdelta.days}
+            hours, rem = divmod(tdelta.seconds, 3600)
+            minutes, seconds = divmod(rem, 60)
+            d["H"] = '{:02d}'.format(hours)
+            d["M"] = '{:02d}'.format(minutes)
+            d["S"] = '{:02d}'.format(seconds)
+            t = DeltaTemplate(fmt)
+            return t.substitute(**d)
+
+    return DeltaTemplate.formats_delta(_, fmt)
 
 
 def make_path(outdir):
@@ -48,7 +64,6 @@ def read_file(path, filename, mode):
 
 
 def runOSCommand(command: list):
-
     try:
         command[0] = shutil.which(command[0])
         ps = subprocess.Popen(command)

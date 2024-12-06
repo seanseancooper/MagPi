@@ -1,7 +1,7 @@
 import threading
 import time
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import defaultdict
 
 from flask.signals import Namespace
@@ -9,7 +9,7 @@ from contextlib import contextmanager
 
 from src.config.__init__ import readConfig
 
-from src.lib.utils import get_location, format_time
+from src.lib.utils import get_location, format_time, format_delta
 from src.wifi.lib.wifi_utils import write_to_scanlist, print_signals
 
 from src.wifi.lib.WifiSignalPoint import WifiSignalPoint
@@ -53,7 +53,7 @@ class WifiScanner(threading.Thread):
 
         # TODO: timekeeping
         self.start_time = datetime.now()
-        self.elapsed = "00:00:00"               # should be a timedelta.
+        self.elapsed = timedelta()               # should be a timedelta.
         self.polling_count = 0                  # iterations in this run.
 
         self.latitude = 0.0                     # this lat; used in SignalPoint creation
@@ -144,7 +144,7 @@ class WifiScanner(threading.Thread):
 
         sgnl['created'] = format_time(worker.created, fmt)
         sgnl['updated'] = format_time(worker.updated, fmt)
-        sgnl['elapsed'] = format_time(datetime.strptime(str(worker.elapsed), "%H:%M:%S.%f"), fmt)
+        sgnl['elapsed'] = format_delta(worker.elapsed, fmt)
 
         sgnl['is_mute'] = worker.is_mute
         sgnl['tracked'] = worker.tracked
@@ -155,7 +155,7 @@ class WifiScanner(threading.Thread):
     def update(self, bssid, o):
         worker = self.get_worker(bssid)
         sgnl = {'BSSID': bssid, 'SSID': worker.ssid}
-        self.update_signal(sgnl, worker, self.config.get('TIME_FORMAT', "%H:%M:%S"))
+        self.update_signal(sgnl, worker, self.config.get('TIMER_FORMAT', "%H:%M:%S"))
         o.append(sgnl)
 
     def update_ghosts(self):
@@ -180,8 +180,7 @@ class WifiScanner(threading.Thread):
     def get_parsed_signals(self):
         """ updates and returns ALL parsed SIGNALS """
         fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
-        #  wait... what??  str(self.time).__format__(self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f'))
-        self.elapsed = format_time(datetime.strptime(str(datetime.now() - self.start_time), "%H:%M:%S.%f"), fmt)
+        self.elapsed = datetime.now() - self.start_time
         [self.update_signal(sgnl, self.get_worker(sgnl['BSSID']), fmt) for sgnl in self.parsed_signals]
 
         return self.parsed_signals
@@ -238,11 +237,15 @@ class WifiScanner(threading.Thread):
 
                 [worker.run() for worker in self.workers]
 
-                # wtf?! this is much needless arm twisting. simplify.
-                self.elapsed = format_time(datetime.strptime(str(datetime.now() - self.start_time), "%H:%M:%S.%f"), self.config.get('TIME_FORMAT', "%H:%M:%S"))
+                self.elapsed = datetime.now() - self.start_time
                 wifi_updated.send(self)
 
-                print(f"WifiScanner [{self.polling_count}] {format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))} {self.elapsed} {len(self.parsed_signals)} signals, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts")
+                print(f"WifiScanner [{self.polling_count}] "
+                      f"{format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
+                      f"{format_delta(self.elapsed, self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
+                      f"{len(self.parsed_signals)} signals, "
+                      f"{len(self.tracked_signals)} tracked, "
+                      f"{len(self.ghost_signals)} ghosts")
                 self.polling_count += 1
                 time.sleep(self.config.get('SCAN_TIMEOUT', 5))
             else:
