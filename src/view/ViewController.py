@@ -24,6 +24,7 @@ class ViewController(threading.Thread):
             if __name__ == '__main__':
                 app.config['SERVER_NAME'] = view.viewContainer.config['SERVER_NAME']
                 app.config['DEBUG'] = view.viewContainer.config['DEBUG']
+                #  get g viewcontainer
                 view.viewContainer.viewcontainer = view.viewContainer.get_view_container(app)
                 app.register_blueprint(view.vc_bp)
             return app
