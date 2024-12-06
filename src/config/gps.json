@@ -45,7 +45,7 @@
 			"TIME_FORMAT": "%H:%M:%S.%f"
 		},
 		{
-			"DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S"
+			"DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S.%f"
 		},
 		{
 			"OUT_PATH": "gps.out"

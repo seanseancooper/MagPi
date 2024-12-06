@@ -20,21 +20,22 @@ def index():
     return redirect("/position", code=302)
 
 
-@gps_bp.route("/time", methods=['GET'], subdomain="gps")
-def gps_time():
-    """ return unformatted time [2024-11-10 23:43:3] """
-    return gpsRet.gps_time()
-
-
 @gps_bp.route("/position", methods=['GET'], subdomain="gps")
 def gps_position():
     """  return entire result """
-    return gpsRet.gps_position()
+    return gpsRet.gps_result()
+
 
 @gps_bp.route("/location", methods=['GET'], subdomain="gps")
 def gps_location():
     """ return lat, lon """
     return gpsRet.gps_location()
+
+
+@gps_bp.route("/time", methods=['GET'], subdomain="gps")
+def gps_time():
+    """ return formatted time 2024-12-06 12:27:50.185321 """
+    return gpsRet.gps_time()
 
 
 @gps_bp.route("/altitude", methods=['GET'], subdomain="gps")
@@ -47,9 +48,14 @@ def gps_speed():
     return gpsRet.gps_speed()
 
 
+@gps_bp.route("/track", methods=['GET'], subdomain="gps")
+def gps_track():
+    return gpsRet.gps_track()
+
+
 @gps_bp.route("/heading", methods=['GET'], subdomain="gps")
 def gps_heading():
-    return gpsRet.gps_track()
+    return gpsRet.gps_heading()
 
 
 @gps_bp.route("/climb", methods=['GET'], subdomain="gps")

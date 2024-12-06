@@ -22,15 +22,6 @@ class GPSRetriever(threading.Thread):
         super().__init__()
         self.DEBUG = False
         self.config = {}
-        self.lat = None
-        self.lon = None
-        self.time = None
-        self.heading = None
-        self.track = None
-        self.speed = None
-        self.altitude = None
-        self.climb = None
-
         self.retriever_method = None
         self.retrieving = False
         self.thread = None
@@ -101,15 +92,13 @@ class GPSRetriever(threading.Thread):
                 result = lines[i]
                 self.result = {"lat": result['GPS']['lat'],
                                "lon": result['GPS']['lon'],
-
-                               # these are truly fake...
-                               "heading": result.get('GPS''heading', 0.0),
-                               "track": result.get('GPS''track', 0.0),
-                               "speed": result.get('GPS''speed', 0.0),
-                               "altitude": result.get('GPS''altitude', 0.0),
-                               "climb": result.get('GPS''climb', 0.0),
-
-                               "time": self.time}
+                               "heading": 0.0,
+                               "track": 0.0,
+                               "speed": 0.0,
+                               "altitude": 0.0,
+                               "climb": 0.0,
+                               "time":  datetime.now().__format__(self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f'))
+                               }
                 print(self.result)
                 time.sleep(self.config.get('DUMMYRETRIEVER_TIMEOUT', 1))
 
@@ -126,14 +115,14 @@ class GPSRetriever(threading.Thread):
             except Exception as e:
                 gps_logger.error(f"JavaScriptGPSRetriever: {e}")  # unable to connect to Blackview
 
-    def gps_time(self):
-        return str(self.time)  # needs a format self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f')
-
-    def gps_position(self):
-        return self.result      # when is this made JSON??
+    def gps_result(self):
+        return self.result
 
     def gps_location(self):
         return {"lat": self.result['lat'], "lon": self.result['lon']}
+
+    def gps_time(self):
+        return self.result.get('time', datetime.now().strftime(self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f')))
 
     def gps_altitude(self):
         return {"altitude": self.result['altitude']}
@@ -142,6 +131,9 @@ class GPSRetriever(threading.Thread):
         return {"speed": self.result['speed']}
 
     def gps_track(self):
+        return {"track": self.result['heading']}
+
+    def gps_heading(self):
         return {"heading": self.result['heading']}
 
     def gps_climb(self):
