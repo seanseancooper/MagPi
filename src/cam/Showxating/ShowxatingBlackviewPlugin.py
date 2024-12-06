@@ -44,7 +44,7 @@ def print_tracked(has_analysis, has_symbols, f, t, rect):
             o = t.get(_)
             x = o.ml[0]
             y = o.ml[1]
-            item = f'{o.tag[-12:]} [{x},{y}]'
+            item = f'{o.contour_id}-{o.tag[-12:]} [{x},{y}]'
             pt = x, y
             if rect and is_inside(pt, rect):
                 # yellow dot: items being tracked
@@ -185,11 +185,11 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             conts = sortedContours(contours)
 
             for cnt in conts[:self.tracker.contour_limit]:
-                cnt_id = str(uuid.uuid4()).split('-')[0]
+
                 wall, rect, dists = wall_images(f.copy(), cnt, False)
 
                 if self.has_analysis or self.has_symbols:
-                    self.tracked = self.tracker.track_objects(self.frame_id, cnt, cnt_id, hier, wall, rect)
+                    self.tracked = self.tracker.track_objects(self.frame_id, cnt, hier, wall, rect)
                     if self.tracked:
                         print_tracked(self.has_analysis, self.has_symbols, f, self.tracked, rect)
                         print_symbology(self.has_symbols, f, rect, self.has_motion, self.majic_color)
