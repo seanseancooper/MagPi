@@ -93,13 +93,31 @@
             updateCropper();
         }
 
+        function draw_grid(grid_shape, color, thickness){
+            # do this in javascript
+            h, w = target.size()
+            var rows, cols = grid_shape[0], grid_shape[1]
+
+            # draw vertical lines
+            for x in range(start=0, stop=w, step=cols){
+                x = Math.parseInt(Math.round(x));
+                line((x, 125), (x, 345), color, thickness);
+            }
+
+            # draw horizontal lines
+            for y in range(start=125, stop=345, step=rows){
+                y = Math.parseInt(Math.round(y));
+                // line((0, y), (w, y), color, thickness);
+            }
+        }
+
         function handleSlider(slider) {
             // handle continous
             const slider_output = document.getElementById(slider.id.replace('_input', '_output'));
 
             function updateSlider() {
                 var component = slider.id.replace('_input', '');
-
+                draw_grid([slider.value, slider.value], '#00F', 1);
                 const xhttp = new XMLHttpRequest();
                 xhttp.open('POST', '{{ url_for('.index')}}plugin/' + slider.id.replace('cam_slider_', '').replace('_input', '') + "/" + parseFloat(slider.value));
                 setsHeaders(xhttp);
