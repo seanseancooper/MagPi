@@ -62,8 +62,7 @@ class ShowxatingPlugin(threading.Thread):
         self.plugin_capture = ShowxatingCapture(self.plugin_name,
                                                 self.plugin_args_capture_src,
                                                 self.plugin_config)
-        cam_logger.debug(f"{self.plugin_name} initialized plugin capture: src:{self.plugin_args_capture_src}"
-                         )
+        cam_logger.debug(f"{self.plugin_name} initialized capture. src:{self.plugin_args_capture_src}")
 
     def get_config(self):
         from src.config import CONFIG_PATH, readConfig
