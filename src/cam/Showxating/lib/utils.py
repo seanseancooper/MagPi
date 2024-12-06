@@ -79,25 +79,6 @@ def draw_centroid(f, conts, rad, clr, fill):
     except IndexError: pass
     except ZeroDivisionError: pass
 
-
-def draw_grid(f, grid_shape, color, thickness):
-    # do this in javascript
-    h, w, _ = f.shape
-    rows, cols = grid_shape
-
-    # draw vertical lines
-    for x in np.arange(start=0, stop=w, step=cols):
-        x = int(round(x))
-        cv.line(f, (x, 125), (x, 345), color=color, thickness=thickness)
-
-    # draw horizontal lines
-    for y in np.arange(start=125, stop=345, step=rows):
-        y = int(round(y))
-        cv.line(f, (0, y), (w, y), color=color, thickness=thickness)
-
-    return f
-
-
 def get_mean_locations(contours):  # contours are sorted.
     _locs = []
     _cnts = []
