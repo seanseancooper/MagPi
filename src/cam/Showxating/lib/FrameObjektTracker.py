@@ -181,7 +181,7 @@ class FrameObjektTracker:
 
         return labeled
 
-    def track_objects(self, f_id, contour, hierarchy, wall, rectangle):
+    def track_objects(self, f_id, contour, contour_id, hierarchy, wall, rectangle):
         """
         LEARNINGS:
         Not all moving things should be tracked; this is very sensitive to minute changes in light, and not all movement is relevant.

@@ -1,3 +1,5 @@
+import uuid
+
 import cv2 as cv
 import numpy as np
 from flask import json
@@ -19,9 +21,15 @@ def print_symbology(has_symbols, f, rect, m, c):
 
         # yellow rect: items that are moving
         try:
-            draw_rects(f, [rect], (0, 255, 255), 2)
-        except TypeError:
-            pass  # 'NoneType' object is not subscriptable
+            def print_rect(r):
+                x, y, w, h = r
+                item = f'({x},{y})'
+                cv.putText(f, item, (x - 15, y - 10), cv.FONT_HERSHEY_PLAIN, .75, (0, 255, 255), 1)
+                cv.rectangle(f, (x, y), (x + w, y + h), (0, 255, 255), 2)
+            if np.any(rect):
+                print_rect(rect)
+
+        except TypeError: pass  # 'NoneType' object is not subscriptable
 
 def print_analytics(has_analysis, f, contours, hierarchy):
     if has_analysis:
@@ -32,17 +40,20 @@ def print_tracked(has_analysis, has_symbols, f, t, rect):
 
     if has_symbols:
 
-        for _ in t:
+        for i, _ in enumerate(t):
             o = t.get(_)
             x = o.ml[0]
             y = o.ml[1]
+            item = f'{o.tag[-12:]} [{x},{y}]'
             pt = x, y
             if rect and is_inside(pt, rect):
                 # yellow dot: items being tracked
-                cv.rectangle(f, (x,y), (x+5, y+5), (0, 255, 255), -1)
+                cv.putText(f, item, (x, (y + (i * 10))), cv.FONT_HERSHEY_PLAIN, .75, (0, 255, 255), 1)
+                cv.rectangle(f, (x, y), (x+5, y+5), (0, 255, 255), -1)
             else:
                 # red dot: mean location fails...
-                cv.rectangle(f, (x, y), (x + 5, y + 5), (0, 0, 255), -1)
+                cv.putText(f, item, (x, (y + (i * 10))), cv.FONT_HERSHEY_PLAIN, .75, (0, 0, 255), 1)
+                cv.rectangle(f, (x, y), (x+5, y+5), (0, 0, 255), -1)
 
     if has_analysis:
         for w, _ in enumerate([x for x in t][:1], 1):
@@ -174,10 +185,11 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             conts = sortedContours(contours)
 
             for cnt in conts[:self.tracker.contour_limit]:
+                cnt_id = uuid.uuid4()
                 wall, rect, dists = wall_images(f.copy(), cnt, False)
 
                 if self.has_analysis or self.has_symbols:
-                    self.tracked = self.tracker.track_objects(self.frame_id, cnt, hier, wall, rect)
+                    self.tracked = self.tracker.track_objects(self.frame_id, cnt, cnt_id, hier, wall, rect)
                     if self.tracked:
                         print_tracked(self.has_analysis, self.has_symbols, f, self.tracked, rect)
                         print_symbology(self.has_symbols, f, rect, self.has_motion, self.majic_color)
