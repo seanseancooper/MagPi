@@ -35,7 +35,7 @@ def wifi_scan_bssid(bssid):
 
 @wifi_bp.route('/scanner', methods=['GET'], subdomain='wifi')
 def wifi_scanner():
-    """ WIFI scanner UI """
+    """ WIFI scanner UI pre viewcontainer. deprecated. """
     return render_template("wifi_scan.html.j2", scanner=s)
 
 
