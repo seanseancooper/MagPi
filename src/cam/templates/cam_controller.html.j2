@@ -29,13 +29,20 @@
             xhttp.setRequestHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-*, majic-color');
         }
 
-        function fore_aft(button){
-            /* changes fore/aft camera view */
-            var xhttp = new XMLHttpRequest();
+        function load_video(){
+            var _video = document.getElementById("_video");
 
+            while (_video.src != "http://localhost:6100/stream") {
+                _video.src = "http://localhost:6100/stream";
+            }
+        }
+
+        function fore_aft(button){
+            // changes fore/aft view
+            var xhttp = new XMLHttpRequest();
             xhttp.open('POST', '{{ url_for('.index')}}view/' + button.value);
             setsHeaders(xhttp);
-            xhttp.send(); // no response to this
+            xhttp.send(); // no response
 
             button.value = (button.value == "FORE")? "AFT": "FORE";
             document.getElementById("fore_aft_button").innerHTML = button.value.split('')[0];
@@ -44,86 +51,38 @@
             setTimeout(function() {
                 load_video();
             }, 10);
-
         }
 
         function cam_multibutton(button){
-            // set the symbology & analysis views
+            // set symbology & analysis
             const xhttp = new XMLHttpRequest();
             xhttp.open('POST', "{{ url_for('.index')}}multibutton/" + button.value);
-
             setsHeaders(xhttp);
             xhttp.send();
+
             xhttp.onload = function() {
                 const resp = xhttp.response;
                 document.getElementById("multi_button").value = resp;
-                document.getElementById("multi_button_text").innerHTML = resp;
+                document.getElementById("multi_button_text").innerHTML = resp.txt;
             }
         }
 
-        function load_video(){
-            /* loads element source */
-            var _video = document.getElementById("_video");
+        function handleCropper(cropper) {
+            // send crop
+            const cropper_output = document.getElementById(cropper.id.replace('_input', '_output'));
 
-            while (_video.src != "http://localhost:6100/stream") {
-                _video.src = "http://localhost:6100/stream";
-            }
-        }
+            function updateCropper() {
+                var component = cropper.id.replace('_input', '');
 
-        // joystick stays where it is for now.
-
-        function handleSlider(slider) {
-
-            const slider_output = document.getElementById(slider.id.replace('_input', '_output'));
-            var isSlider = false;
-
-            function update() {
-
-                var slider_value;
-                var slider_id = slider.id.replace('_input', '');
-
-                // namd the sliders output, we'll use that to identify it
-                const sliders = ["cam_slider_krnl",
-                                 "cam_slider_threshold",
-                                 "cam_slider_f_limit",
-                                 "cam_slider_frm_delta_pcnt"];
-                const crops  = ["cam_slider_crop"];
-                const checks = ["cam_slider_mediapipe",
-                                "cam_slider_hold_threshold"];
-
-                if (sliders.includes(slider_id)) {
-                    slider_value = parseFloat(slider.value); // downcast later
-                    isSlider = true;
-                } else if (checks.includes(slider_id)) {
-                    slider_value = slider.checked;
-                } else if (crops.includes(slider_id)) {
-                    console.log(slider.value);
-                    slider_value = slider.value;  // this could pass as xhttp.setRequestHeader('Content-Type', 'application/json')
-
-                    //var widget = document.getElementById('jcrop-widget');
-                    //widget.innerHTML = slider.value;
-                } else {
-                    console.error('no slider named: ' + slider_id);
-                };
-
-                // pass the value to the plugin via REST...
                 const xhttp = new XMLHttpRequest();
-                xhttp.open('POST', '{{ url_for('.index')}}plugin/' + slider.id.replace('cam_slider_', '').replace('_input', '') + "/" + slider_value);
-
+                xhttp.open('POST', '{{ url_for('.index')}}plugin/' + component + "/" + cropper.value);
                 setsHeaders(xhttp);
                 xhttp.send();
 
                 xhttp.onload = function() {
-                    const resp = xhttp.response;
-                    if (resp == "OK" && sliders.includes(slider_id)) {
-                        slider_output.innerText = slider.value;
-                        // slider.thumb.innerHTML = 'ß:' + slider.value;
-                        slider.addEventListener('input', update);
-                    } else if (resp == "OK" && checks.includes(slider_id)) {
-                        slider_output.innerText = (slider.checked)? "ON": "OFF";
-                    } else if (resp == "OK" && crops.includes(slider_id)){
-                        var j = JSON.parse(slider.value);
-                        slider_output.innerText = "x:" + j['x'] +
+                    if (xhttp.response == "OK"){
+                        var j = JSON.parse(cropper.value);
+                        cropper_output.innerText = "x:" + j['x'] +
                                                   " y:" + j['y'] +
                                                   " w:" + j['w'] +
                                                   " h:" + j['h'];
@@ -131,18 +90,60 @@
                 };
             }
 
-            update();
+            updateCropper();
+        }
+
+        function handleSlider(slider) {
+            // handle continous
+            const slider_output = document.getElementById(slider.id.replace('_input', '_output'));
+
+            function updateSlider() {
+                var component = slider.id.replace('_input', '');
+
+                const xhttp = new XMLHttpRequest();
+                xhttp.open('POST', '{{ url_for('.index')}}plugin/' + slider.id.replace('cam_slider_', '').replace('_input', '') + "/" + parseFloat(slider.value));
+                setsHeaders(xhttp);
+                xhttp.send();
+
+                xhttp.onload = function() {
+                    if (xhttp.response == "OK") {
+                        slider_output.innerText = slider.value;
+                        slider.addEventListener('input', update);
+                    }
+                };
+            }
+
+            updateSlider();
+        }
+
+        function handleCheckBox(checkbox) {
+            // handle binary
+            const cb_output = document.getElementById(checkbox.id.replace('_input', '_output'));
+
+            function updateCheckBox() {
+                var component = checkbox.id.replace('_input', '');
+
+                const xhttp = new XMLHttpRequest();
+                xhttp.open('POST', '{{ url_for('.index')}}plugin/' + checkbox.id.replace('cam_checkbox_', '').replace('_input', '') + "/" + checkbox.checked);
+                setsHeaders(xhttp);
+                xhttp.send();
+
+                xhttp.onload = function() {
+                    if (xhttp.response == "OK") {
+                        cb_output.innerText = (checkbox.checked)? "ON": "OFF";
+                    }
+                };
+            }
+
+            updateCheckBox();
         }
 
         function cam_snap(){
             //  creates still image of current view
             const xhttp = new XMLHttpRequest();
-
-            // POST to the CAMManager URL to snap.
             xhttp.open('POST', '{{ url_for('.index')}}snap/');
             setsHeaders(xhttp);
             xhttp.send();
-
 
             // on response, run the videobutton animation
             xhttp.onload = function() {
@@ -150,12 +151,10 @@
                 var _video = document.getElementById('_video');
 
                 if (resp == "OK"){
-                    // snapped that pic!
                     // document.getElementById("_video").classList.append = "videobutton";
                 }
             };
         };
-
     </script>
 </head>
 <body>
@@ -166,40 +165,23 @@
     </div>
     <img id="target" style="" class="target" src="{{ url_for('cam_bp.static', filename='images/transgraphic.gif') }}">
     <script>
-            var jcp = Jcrop.attach('target');
-
-            // const p1 = [10,10], p2 = [110,110];
-            // const rect = Jcrop.Rect.fromPoint(p1,100,100,'br');
-            // const rect = Jcrop.Rect.fromPoints(p1,p2);
-            // const rect = Jcrop.Rect.sizeOf(jcp.el);
-
-            // const widget = jcp.newWidget(rect);
-
-            const widget = Jcrop.Widget.create();
-            jcp.addWidget(widget);
-
-            // jcp.newCropper(Rect.from(jcp.el));
-
-            jcp.setOptions({
-                shade: false,
-                multi: false
-            });
-
-            // be a slider, call thy endpoint...
-            jcp.listen('crop.change',(widget,e) => {
-
-              var slider = Object();
-              slider.id = 'cam_slider_crop_input';
-
-              widget.pos.w += widget.pos.x;
-              widget.pos.h += widget.pos.y;
-
-              slider.value = JSON.stringify(widget.pos);
-              handleSlider(slider);
-            });
-
-            jcp.focus();
-
+        // interpret crop
+        const j = Jcrop.attach('target');
+        const w = Jcrop.Widget.create();
+        j.addWidget(w);
+        j.setOptions({
+            shade: false,
+            multi: true
+        });
+        j.listen('crop.change',(w,e) => {
+          var c = Object();
+          c.id = 'crop_input';
+          w.pos.w += w.pos.x;
+          w.pos.h += w.pos.y;
+          c.value = JSON.stringify(w.pos);
+          handleCropper(c);
+        });
+        j.focus();
     </script>
     <div id="top_buttons" style="" class="top_buttons highlight">
        <button id="fore_aft_button" class="button" value="AFT" onClick="fore_aft(this);">
@@ -220,13 +202,13 @@
     <div id="info_box" style="" class="info_box">
         <div id="cam_slider_outputs" style="" class="cam_slider_outputs highlight">
                 ∑:&nbsp;<span id="cam_slider_threshold_output">{{ plugin.threshold | int }}</span>
-                ∞:&nbsp;<span id="cam_slider_hold_threshold_output">OFF</span>
+                ∞:&nbsp;<span id="cam_checkbox_hold_threshold_output">OFF</span>
                 ⊞:&nbsp;<span id="cam_slider_krnl_output">{{ plugin.krnl }}</span>
             <br>
                 ƒL:&nbsp;<span id="cam_slider_f_limit_output">{{ plugin.tracker.f_limit }}</span>
                 ƒ%:&nbsp;<span id="cam_slider_frm_delta_pcnt_output">{{ "{:.2f}".format(plugin.tracker.frm_delta_pcnt) }}</span>
             <br>
-                <span id="cam_slider_crop_output" class="cam_slider_crop_stats">x:0 y:0 w:0 h:0</span>
+                <span id="crop_output" class="cam_slider_crop_stats">x:0 y:0 w:0 h:0</span>
                 <span id="majic_color_span" class="cam_slider_crop_stats">{{ plugin.majic_color }}</span>
         </div>
     </div>
@@ -234,7 +216,7 @@
     <span id="cam_sliders" style="" class="cam_sliders highlight">
         <div id="cam_slider_threshold" style="position:absolute;left:0px;">
             ∑<br><input id="cam_slider_threshold_input" style="height:100px;" class="cam_slider" orient="vertical" type="range" min="-100" max="100" step="1" value="{{ plugin.threshold | int }}" onChange="handleSlider(this);"/>
-            <input id="cam_slider_hold_threshold_input" style="position:absolute;left:-20px;top:98px;" type="checkbox" {{ "checked" if plugin.hold_threshold is true }} onChange="handleSlider(this);"/>
+            <input id="cam_checkbox_hold_threshold_input" style="position:absolute;left:-20px;top:98px;" type="checkbox" {{ "checked" if plugin.hold_threshold is true }} onChange="handleCheckBox(this);"/>
         </div>
         <div id="cam_slider_krnl" style="position:absolute;top:0px;left:25px;">
             ⊞<br><input id="cam_slider_krnl_input" style="" class="cam_slider" orient="vertical" type="range" min="1" max="128" step="2" value="{{ plugin.krnl }}" onChange="handleSlider(this);"/>
@@ -246,26 +228,6 @@
             ƒ%<br><input id="cam_slider_frm_delta_pcnt_input" style="" class="cam_slider" orient="vertical" type="range" min="0.00" max="100.00" step="0.01" value="{{ plugin.tracker.frm_delta_pcnt | float }}" onChange="handleSlider(this);"/>
         </div>
     </span>
-
-    <div id="wifi_joy" style="position:absolute;left:580px;top:355px;display:none;" class="wifi_joy">
-        <img src="{{ url_for('cam_bp.static', filename='images/joystick/joystick-base.png') }}"/>
-        <div id="stick1" style="position: absolute; left:32px; top:32px;">
-            <img src="{{ url_for('cam_bp.static', filename='images/joystick/joystick-blue.png') }}"/>
-        </div>
-    </div>
-    <div id="wifi_joy_status" style="position:absolute;left:430px;top:540px;display:none">
-        <span>
-            <div id="joy_status" style="">Joystick</div>
-            <span id="x_mapped" style="">X</span>
-            <span id="y_mapped" style="">Y</span>
-        </span>
-        <br>
-        <span>
-            <span id="last_x_mapped" style="">lastX</span>
-            <span id="last_y_mapped" style="">lastY</span>
-        </span>
-    </div>
 </div>
-<!--<script src="{# url_for('cam_bp.static', filename='js/cam_joystick.js') #}"></script>-->
 </body>
 </html>
