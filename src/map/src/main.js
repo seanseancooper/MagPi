@@ -12,10 +12,11 @@ import {OSM, Vector} from 'ol/source.js';
 import VectorSource from 'ol/source/Vector.js';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
 import {toStringHDMS, toStringXY, degreesToStringHDMS} from 'ol/coordinate.js';
-import {transform as xform, fromLonLat} from 'ol/proj.js';
+import {transform as xform, fromLonLat, toLonLat} from 'ol/proj.js';
 import {Heatmap as HeatmapLayer} from 'ol/layer.js';
 //import {JSONFeature as JSONFeature} from 'ol/format/JSONFeature.js'; <-- abstract, doesn't import. read direct from response
 
+var useHardware = false;
 var click = 0;
 var tmpCoord;
 var features = [];
@@ -129,31 +130,38 @@ const view = new View({
 });
 
 const geolocation = new Geolocation({
+    // enableHighAccuracy must be set to true to have the heading value.
     trackingOptions: {
         enableHighAccuracy: true,
-    }
+    },
+    projection: view.getProjection(),
 });
 
 geolocation.setTracking(true);
 
 geolocation.on('change', function (evt) {
 
-    var xhttp = new XMLHttpRequest();
-    var block = true;
-    xhttp.open("GET", 'http://gps.localhost:5004/position', block);
-
-    setHeaders(xhttp, 'gps.localhost:5004');
-
-    xhttp.onload = function(){
-        const resp = xhttp.response;
-        let json = JSON.parse(resp);
-        var hdweCoords = [json['lon'], json['lat']]
+    if (useHardware) {
+        var xhttp = new XMLHttpRequest();
+        var block = true;
+        xhttp.open("GET", 'http://gps.localhost:5004/position', block);
+        setHeaders(xhttp, 'gps.localhost:5004');
+        xhttp.onload = function(){
+            const resp = xhttp.response;
+            let json = JSON.parse(resp);
+            var hdweCoords = [json['lon'], json['lat']]
+            console.log(hdweCoords)
+            animate(hdweCoords);
+            update(hdweCoords);
+        };
+        xhttp.send();
+    } else {
+        const coordJS = geolocation.getPosition();
+        var hdweCoords = toLonLat(coordJS)
+        console.log(hdweCoords)
         animate(hdweCoords);
         update(hdweCoords);
-    };
-
-    xhttp.send();
-
+    }
 });
 
 geolocation.on('error', function (error) {
