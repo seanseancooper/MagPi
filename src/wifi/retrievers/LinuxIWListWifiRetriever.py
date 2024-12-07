@@ -1,4 +1,3 @@
-import os
 import subprocess
 import threading
 
@@ -7,7 +6,7 @@ from src.wifi.lib.wifi_utils import get_vendor, get_timing
 from src.wifi.lib.iw_parse import get_parsed_cells, get_name, get_quality, get_channel, get_frequency, \
     get_encryption, get_address, get_signal_level, get_noise_level, get_bit_rates, get_mode
 
-from src.config.__init__ import CONFIG_PATH, readConfig
+from src.config.__init__ import readConfig
 import logging
 
 logger_root = logging.getLogger('root')
@@ -41,7 +40,7 @@ class LinuxIWListWifiRetriever(threading.Thread):
             wifi_logger.error(f"[{__name__}]: Exception: {e}")
 
     def configure(self, config_file):
-        readConfig(os.path.join(CONFIG_PATH, config_file), self.config)
+        readConfig(config_file, self.config)
         self.DEBUG = self.config.get('DEBUG')
 
     def parse_signals(self, readlines):

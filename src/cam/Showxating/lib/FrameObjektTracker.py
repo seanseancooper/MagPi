@@ -1,4 +1,3 @@
-import os.path
 import uuid
 
 import cv2 as cv
@@ -8,7 +7,7 @@ from sklearn.metrics import euclidean_distances, pairwise_distances
 from sklearn.metrics.pairwise import paired_distances
 
 from src.cam.Showxating.lib.utils import in_range, is_inside, getAggregatedRect, getRectsFromContours
-from src.config import CONFIG_PATH, readConfig
+from src.config import readConfig
 
 import logging
 cam_logger = logging.getLogger('cam_logger')
@@ -41,7 +40,7 @@ class FrameObjektTracker:
         self.d_range = float()              # offset +/- allowed difference; frm_delta_pcnt * fd_mean
 
     def configure(self):
-        readConfig(os.path.join(CONFIG_PATH, 'cam.json'), self.config)
+        readConfig('cam.json', self.config)
 
         try:
             self.f_limit = int(self.config['TRACKER'].get('f_limit', 1))

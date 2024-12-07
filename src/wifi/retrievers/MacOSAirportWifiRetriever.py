@@ -1,4 +1,3 @@
-import os
 import subprocess
 import threading
 
@@ -9,7 +8,7 @@ from xml.parsers.expat import ExpatError
 
 from src.wifi.lib.iw_parse import matching_line
 
-from src.config.__init__ import readConfig, CONFIG_PATH
+from src.config.__init__ import readConfig
 import logging
 
 logger_root = logging.getLogger('root')
@@ -53,7 +52,7 @@ class MacOSAirportWifiRetriever(threading.Thread):
             wifi_logger.error(f"[{__name__}]: Exception: {e}")
 
     def configure(self, config_file):
-        readConfig(os.path.join(CONFIG_PATH, config_file), self.config)
+        readConfig(config_file, self.config)
 
         self.SIGNAL_DEBUG = self.config.get('XML_SIGNAL_DEBUG')
         self.DATA_DEBUG = self.config.get('XML_DATA_DEBUG')

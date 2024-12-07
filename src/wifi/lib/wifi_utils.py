@@ -13,7 +13,7 @@ import logging
 json_logger = logging.getLogger('json_logger')
 
 config = {}
-readConfig(os.path.join(CONFIG_PATH, 'wifi.json'), config)
+readConfig('wifi.json', config)
 
 vendors = {}
 vendorsMacs_XML = ET.parse(os.path.join(CONFIG_PATH, config['VENDORMACS_FILE']))

@@ -1,8 +1,7 @@
-import os
 import threading
 import logging.handlers
 
-from src.config import CONFIG_PATH, readConfig
+from src.config import readConfig
 
 logger_root = logging.getLogger('root')
 
@@ -16,7 +15,7 @@ class RESTServer(threading.Thread):
         self.configuration = {}
 
     def configure(self):
-        readConfig(os.path.join(CONFIG_PATH, f'{self.app.name}.json'), self.configuration)
+        readConfig(f'{self.app.name}.json', self.configuration)
 
     def run(self):
 

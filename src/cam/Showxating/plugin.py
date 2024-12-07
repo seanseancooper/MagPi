@@ -5,6 +5,7 @@ import cv2 as cv
 import logging.handlers
 from src.cam.Showxating.capture import ShowxatingCapture
 from src.cam.Showxating.lib.StreamService import StreamService, StreamingHandler
+from src.config import readConfig
 
 #TODO: put in config
 os.environ[
@@ -65,10 +66,9 @@ class ShowxatingPlugin(threading.Thread):
         cam_logger.debug(f"{self.plugin_name} initialized capture. src:{self.plugin_args_capture_src}")
 
     def get_config(self):
-        from src.config import CONFIG_PATH, readConfig
         temp = {}
 
-        readConfig(os.path.join(CONFIG_PATH, 'cam.json'), temp)
+        readConfig('cam.json', temp)
         self.plugin_config, _ = temp['PLUGINS']
 
         self.plugin_process_frames = self.plugin_config['plugin_process_frames']

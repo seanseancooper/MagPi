@@ -10,7 +10,7 @@ import usb.backend.libusb1
 import time
 from datetime import datetime, timedelta
 
-from src.config import CONFIG_PATH, readConfig
+from src.config import readConfig
 
 from src.lib.utils import get_location
 from src.trx.lib.TRXSignalPoint import TRXSignalPoint
@@ -153,7 +153,7 @@ class TRXUSBRetriever(threading.Thread):
 
     def run(self):
 
-        self.configure(os.path.join(CONFIG_PATH, 'trx.json'))
+        self.configure('trx.json')
 
         try:
             if self.config['TEST_FILE']:

@@ -1,11 +1,10 @@
 import math
-import os
 from datetime import datetime, timedelta
 
 from scipy.optimize import minimize
 
 from src.lib.utils import format_time, format_delta
-from src.config import CONFIG_PATH, readConfig
+from src.config import readConfig
 
 class Trilaterator():
     # based on
@@ -35,7 +34,7 @@ class Trilaterator():
         }
 
     def configure(self, config_file):
-        readConfig(os.path.join(CONFIG_PATH, config_file), self.config)
+        readConfig(config_file, self.config)
 
     def mse(self, x, locations, distances):
         # Mean Square Error
