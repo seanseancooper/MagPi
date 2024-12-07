@@ -14,18 +14,9 @@ logging.config.fileConfig(CONFIG_PATH + "/logging.conf",
                           disable_existing_loggers=False)
 
 
-# def readConfig(config_file, config, non_config_files=None):
 def readConfig(config_file, config):
 
-    # if non_config_files is None:
-    #     non_config_files = []
-
     if isinstance(config, dict):
-
-        # # read ALL configs except... configurable as DEFAULT_NON_CONFIG_FILES
-        # non_config_files.extend([os.path.basename(config_file), 'view.json', 'controller.json'])
-        # configs = glob.glob(CONFIG_PATH + "/*.json")
-        # [configs.remove(CONFIG_PATH + '/' + non_config) for non_config in non_config_files]
 
         with open(CONFIG_PATH + '/' + config_file, "r") as f:
             data = json.load(f)

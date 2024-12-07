@@ -15,7 +15,7 @@ class RESTServer(threading.Thread):
         self.configuration = {}
 
     def configure(self):
-        readConfig(f'{self.app.name}.json', self.configuration)
+        readConfig(f'{self.app.name.lower()}.json', self.configuration)
 
     def run(self):
 
