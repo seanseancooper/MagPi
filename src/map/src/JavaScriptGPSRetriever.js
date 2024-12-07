@@ -29,18 +29,17 @@ geolocation.on('change', function () {
 const http = require('node:http');
 
 const server = http.createServer({ keepAliveTimeout: 60000 }, (req, res) => {
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({
-    console.log('server on port 5400 called update()');
-    data: update(),
-  }));
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+        data: update(),
+    }));
 });
 
 server.listen(5183);
 // Close the server after 10 seconds
 setTimeout(() => {
- server.close(() => {
-   console.log('server on port 5400 closed successfully');
- });
+    server.close(() => {
+        console.log('server on port 5400 closed successfully');
+    });
 }, 10000);
 
