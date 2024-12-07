@@ -204,11 +204,11 @@
     </div>
 
     <div id="tabs" style="height:30px">
-            <button id="container_tab_container" class="tab_button" onclick="loadTab(event, 'container')">WIFI 00:00:00</button>
-            <button id="container_tab_tracked" class="tab_button" onclick="loadTab(event, 'container_tracked')">99 WIFI TRACKED</button>
-            <button id="container_tab_ghosts" class="tab_button" onclick="loadTab(event, 'container_ghosts')">99 WIFI GHOSTS</button>
-            <button id="container_tab_trx" class="tab_button" onclick="loadTab(event, 'trx_container')">TRX 00:00:00</button>
-        </div>
+        <button id="container_tab_container" class="tab_button" onclick="loadTab(event, 'container')">WIFI 00:00:00</button>
+        <button id="container_tab_tracked" class="tab_button" onclick="loadTab(event, 'container_tracked')">99 WIFI TRACKED</button>
+        <button id="container_tab_ghosts" class="tab_button" onclick="loadTab(event, 'container_ghosts')">99 WIFI GHOSTS</button>
+        <button id="container_tab_trx" class="tab_button" onclick="loadTab(event, 'trx_container')">TRX 00:00:00</button>
+    </div>
 
     <div id="container_filters" style="" class="container_filters">
         <select id="filter-field">
@@ -255,7 +255,6 @@
         <span id="container_stats" style="" class="container_stats">
             {{ container.workers|length }} SIGNALS | {{ container.elapsed }} ELAPSED
         </span>
-
     </div>
 
     <div id="container" class="tabcontent"></div>
@@ -277,23 +276,23 @@
 
     // Trigger setFilter function with correct parameters
     function updateFilter(){
-      var filterVal = fieldEl.options[fieldEl.selectedIndex].value;
-      var typeVal = typeEl.options[typeEl.selectedIndex].value;
+        var filterVal = fieldEl.options[fieldEl.selectedIndex].value;
+        var typeVal = typeEl.options[typeEl.selectedIndex].value;
 
-      // enable filter
-      var filter = filterVal == "function" ? customFilter : filterVal;
+        // enable filter
+        var filter = filterVal == "function" ? customFilter : filterVal;
 
-      if(filterVal == "function" ){
-        typeEl.disabled = true;
-        valueEl.disabled = true;
-      } else {
-        typeEl.disabled = false;
-        valueEl.disabled = false;
-      }
+        if(filterVal == "function" ){
+            typeEl.disabled = true;
+            valueEl.disabled = true;
+        } else {
+            typeEl.disabled = false;
+            valueEl.disabled = false;
+        }
 
-      if(filterVal){
-        container.setFilter(filter,typeVal, valueEl.value);
-      }
+        if(filterVal){
+            container.setFilter(filter,typeVal, valueEl.value);
+        }
     }
 
     fieldEl.addEventListener("change", updateFilter);
@@ -301,11 +300,11 @@
     valueEl.addEventListener("keyup", updateFilter);
 
     document.getElementById("filter-clear").addEventListener("click", function(){
-      fieldEl.value = "";
-      typeEl.value = "=";
-      valueEl.value = "";
+        fieldEl.value = "";
+        typeEl.value = "=";
+        valueEl.value = "";
 
-      container.clearFilter();
+        container.clearFilter();
     });
 
     // Formatter to generate peity charts
@@ -397,16 +396,16 @@
     };
 
     function colorUniqId(data, splt){
-           var parts = data.split(splt);
-           var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
-           var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
-           var B = (parseInt(parts[4], 16) + parseInt(parts[5], 16)) % 255;
-           return [R,G,B];
+        var parts = data.split(splt);
+        var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
+        var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
+        var B = (parseInt(parts[4], 16) + parseInt(parts[5], 16)) % 255;
+        return [R,G,B];
     };
 
     function averageColor([R,G,B]){
-           let avg = R+G+B/3;
-           return (avg > 128)? "00,00,00": "255,255,255";
+        let avg = R+G+B/3;
+        return (avg > 128)? "00,00,00": "255,255,255";
     };
 
     const dataLoaderLoading = "&nbsp;";
