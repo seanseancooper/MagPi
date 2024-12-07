@@ -40,7 +40,7 @@ class MAPController(threading.Thread):
 
             import os
             os.chdir('src/')
-            if routes.config['NODE_BUILD'] is True:
+            if routes.mapAgg.config['NODE_BUILD'] is True:
                 routes.node.build()
             else:
                 routes.node.run()
