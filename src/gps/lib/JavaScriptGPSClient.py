@@ -9,8 +9,8 @@ from typing import Union, Iterable, Dict, Any
 class JavaScriptGPSClient:
     def __init__(
             self,
-            host: str = "http://gps.localhost:5004/location",
-            port: Union[str, int] = "5004",
+            host: str = "http://localhost:5173",
+            port: Union[str, int] = "5173",
             timeout: Union[float, int, None] = 1,
     ):
         self.host = host
@@ -22,7 +22,8 @@ class JavaScriptGPSClient:
     def javascript_lines(self):
         import requests
         # TODO: don't hardcode the URL
-        self.resp = requests.get("http://localhost:5173/JavaScriptGPSRetriever.jsx")
+        self.resp = requests.get("http://localhost:5173/JavaScriptGPSRetriever.js")
+        # self.resp = requests.get("http://localhost:5183/JavaScriptGPSRetriever.js")
         return self.resp
 
     def json_stream(self):
