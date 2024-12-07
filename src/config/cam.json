@@ -63,7 +63,7 @@
 			"TRACKER": {
 				"f_limit": 2,
 				"frm_delta_pcnt": 1.0,
-				"contour_limit": 1
+				"contour_limit": 2
 			}
 		},
 		{
