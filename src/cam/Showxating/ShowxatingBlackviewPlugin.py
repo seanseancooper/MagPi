@@ -7,7 +7,7 @@ from flask import json
 from src.cam.Showxating.plugin import ShowxatingPlugin
 from src.cam.Showxating.lib.ImageWriter import ImageWriter
 from src.cam.Showxating.lib.FrameObjektTracker import FrameObjektTracker
-from src.cam.Showxating.lib.utils import draw_rects, draw_contours, wall_images, draw_grid, sortedContours, is_inside
+from src.cam.Showxating.lib.utils import draw_rects, draw_contours, wall_images, sortedContours, is_inside
 
 import logging
 cam_logger = logging.getLogger('cam_logger')
