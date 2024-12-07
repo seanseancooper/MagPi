@@ -1,11 +1,9 @@
-import os
 from flask import Blueprint, render_template, redirect
 
 from src.cam.CAMManager import CAMManager
-from src.config import CONFIG_PATH
 
 camMgr = CAMManager()
-camMgr.configure(os.path.join(CONFIG_PATH, 'cam.json'))
+camMgr.configure('cam.json')
 
 cam_bp = Blueprint(
         'cam_bp', __name__, subdomain='cam',
@@ -17,7 +15,8 @@ cam_bp = Blueprint(
 
 @cam_bp.route('/')
 def index():
-    return redirect("/ctrl", code=302)
+    # TODO: what observed 'data' can be exposed? tracking?
+    return camMgr.config
 
 
 @cam_bp.route("/ctrl", methods=['GET'], subdomain='cam')

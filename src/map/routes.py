@@ -1,25 +1,21 @@
-import os
 from flask import Blueprint, redirect, render_template
-from src.config import CONFIG_PATH, readConfig
-
-config = {}
-readConfig(os.path.join(CONFIG_PATH, 'map.json'), config)
 
 from src.map.MAPAggregator import MAPAggregator
 
 mapAgg = MAPAggregator()
-mapAgg.configure(os.path.join(CONFIG_PATH, 'map.json'))
+non_config_files = ['arx.json', 'cam.json', 'ebs.json', 'mot.json']  # configurable as NON_CONFIG_FILES
+mapAgg.configure('map.json', non_config_files=non_config_files)
 
 from src.map.lib.NodeRunner import NodeRunner
 
 node = NodeRunner()
-node.configure(os.path.join(CONFIG_PATH, 'map.json'))
+node.configure('map.json')
 
 map_bp = Blueprint(
         'map_bp', __name__, subdomain='map',
-        template_folder=config['TEMPLATE_FOLDER'],
-        static_folder=config['STATIC_FOLDER'],
-        static_url_path=config['STATIC_FOLDER']
+        template_folder=mapAgg.config['TEMPLATE_FOLDER'],
+        static_folder=mapAgg.config['STATIC_FOLDER'],
+        static_url_path=mapAgg.config['STATIC_FOLDER']
 )
 
 
@@ -30,7 +26,7 @@ def index():
 
 @map_bp.route("/map", methods=['GET'], subdomain='map')
 def map():
-    return render_template(config['MAP_TEMPLATE'])
+    return render_template(mapAgg.config['MAP_TEMPLATE'])
 
 
 @map_bp.route("/aggregated", methods=['GET'], subdomain='map')

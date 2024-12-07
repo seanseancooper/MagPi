@@ -1,11 +1,9 @@
-import os
 from flask import Blueprint, redirect
 
 from src.mot.MOTManager import MOTManager
-from src.config import CONFIG_PATH
 
 motMgr = MOTManager()
-motMgr.configure(os.path.join(CONFIG_PATH, 'mot.json'))
+motMgr.configure('mot.json')
 
 mot_bp = Blueprint(
         'mot_bp', __name__, subdomain='mot',

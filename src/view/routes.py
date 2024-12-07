@@ -1,15 +1,12 @@
-import os
-
 from flask import Blueprint, redirect, request, render_template
 import requests
 
-from src.config import CONFIG_PATH
 from src.view.ViewContainer import ViewContainer
 
 
 viewContainer = ViewContainer()
 
-viewContainer.configure(os.path.join(CONFIG_PATH, 'view.json'))
+viewContainer.configure('view.json')
 vc_bp = Blueprint(
         'vc_bp', __name__, subdomain='view',
         template_folder=viewContainer.config['TEMPLATE_FOLDER'],

@@ -1,11 +1,9 @@
-import os
 from flask import Blueprint
 
 from src.ebs.EBSManager import EBSManager
-from src.config import CONFIG_PATH
 
 ebsMgr = EBSManager()
-ebsMgr.configure(os.path.join(CONFIG_PATH, 'ebs.json'))
+ebsMgr.configure('ebs.json')
 
 ebs_bp = Blueprint(
         'ebs_bp', __name__, subdomain='ebs',

@@ -1,11 +1,9 @@
-import os
 from flask import Blueprint, render_template, redirect, jsonify
 
 from src.arx.ARXRecorder import ARXRecorder
-from src.config import CONFIG_PATH
 
 arxRec = ARXRecorder()
-arxRec.configure(os.path.join(CONFIG_PATH, 'arx.json'))
+arxRec.configure('arx.json')
 
 arx_bp = Blueprint(
         'arx_bp', __name__, subdomain='arx',

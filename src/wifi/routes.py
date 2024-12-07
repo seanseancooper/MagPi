@@ -1,11 +1,9 @@
-import os
 from flask import Blueprint, redirect, render_template, jsonify
 
 from src.wifi.WifiScanner import WifiScanner
-from src.config import CONFIG_PATH
 
 s = WifiScanner()
-s.configure(os.path.join(CONFIG_PATH, 'wifi.json'))
+s.configure('wifi.json')
 
 wifi_bp = Blueprint(
         'wifi_bp', __name__, subdomain='wifi',

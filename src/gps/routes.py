@@ -1,11 +1,9 @@
-import os
 from flask import Blueprint, redirect
 
 from src.gps.GPSRetriever import GPSRetriever
-from src.config import CONFIG_PATH
 
 gpsRet = GPSRetriever()
-gpsRet.configure(os.path.join(CONFIG_PATH, 'gps.json'))
+gpsRet.configure('gps.json')
 
 gps_bp = Blueprint(
         'gps_bp', __name__, subdomain='gps',

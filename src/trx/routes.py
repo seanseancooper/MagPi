@@ -1,12 +1,9 @@
-import os
 from flask import Blueprint, redirect, jsonify
 
-from src.trx.TRXSerialRetriever import TRXSerialRetriever
 from src.trx.TRXUSBRetriever import TRXUSBRetriever
-from src.config import CONFIG_PATH
 
 trxRet = TRXUSBRetriever()
-trxRet.configure(os.path.join(CONFIG_PATH, 'trx.json'))
+trxRet.configure('trx.json')
 
 trx_bp = Blueprint(
         'trx_bp', __name__, subdomain='trx',
