@@ -37,22 +37,26 @@ class MAPAggregator(threading.Thread):
     def __str__(self):
         return {f"MAPAggregator: {self.aggregated}"}
 
-    def configure(self, config_file):
-        # read ALL configs except controller
+    def configure(self, config_file, **kwargs):
+        non_config_files = kwargs.get('non_config_files')
+        # no need now for 'view' and 'controller'
+        non_config_files.extend([os.path.basename(config_file), 'view.json', 'controller.json'])
         configs = glob.glob(CONFIG_PATH + "/*.json")
-        configs.remove(os.path.join(CONFIG_PATH, 'view.json'))
-        configs.remove(os.path.join(CONFIG_PATH, 'controller.json'))
-        configs.remove(os.path.join(CONFIG_PATH, config_file))
+        [configs.remove(CONFIG_PATH + '/' + non_config) for non_config in non_config_files]
 
         for module_config in configs:
             mod = os.path.basename(module_config).replace('.json', '')
             self.modules.append(mod)
-            readConfig(module_config, self.configs[mod])
+            readConfig(os.path.basename(module_config), self.configs[mod])
 
-        readConfig(os.path.join(CONFIG_PATH, config_file), self.config)
+        readConfig(config_file, self.config)
+
+    def start_module(self, mod):
+        ''' start module in modules '''
+        print(f'started module: {mod}')
 
     def register_modules(self):
-        """ Register 'live' module REST contexts """
+        """ discover 'live' module REST contexts """
         self.live_modules.clear()
         self.dead_modules.clear()
 

@@ -3,7 +3,7 @@ from flask import Blueprint, redirect, render_template
 from src.map.MAPAggregator import MAPAggregator
 
 mapAgg = MAPAggregator()
-non_config_files = ['arx.json', 'cam.json', 'ebs.json', 'mot.json']  # configurable as NON_CONFIG_FILES
+non_config_files = ['arx.json', 'cam.json', 'ebs.json', 'mot.json']  # these don't produce data... yet.
 mapAgg.configure('map.json', non_config_files=non_config_files)
 
 from src.map.lib.NodeRunner import NodeRunner
