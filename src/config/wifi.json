@@ -22,6 +22,9 @@
 			"SCAN_TIMEOUT": 0.5
 		},
 		{
+			"VIEW_TIMEOUT": 30
+		},
+		{
 			"GPS_ENDPOINT": "http://gps.localhost:5004/position"
 		},
 		{
