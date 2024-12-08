@@ -110,7 +110,16 @@ class GPSRetriever(threading.Thread):
                     for result in client.dict_stream():
                         if not result:
                             break
-                        self.result = result
+                        result = json.loads(result)
+                        self.result = {"lat": result['GPS']['lat'],
+                                       "lon": result['GPS']['lon'],
+                                       "heading": 0.0,
+                                       "track": 0.0,
+                                       "speed": 0.0,
+                                       "altitude": 0.0,
+                                       "climb": 0.0,
+                                       "time":  datetime.now().__format__(self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f'))
+                                       }
 
             except Exception as e:
                 gps_logger.error(f"JavaScriptGPSRetriever: {e}")  # unable to connect to Blackview

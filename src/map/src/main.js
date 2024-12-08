@@ -20,7 +20,7 @@ import {Heatmap as HeatmapLayer} from 'ol/layer.js';
 docs @ https://openlayers.org/en/latest/apidoc/
 */
 
-const enable_hardware = false;
+const enable_hardware = true;
 var fix;
 var click = 0;
 var features = [];
@@ -170,20 +170,51 @@ function getLocation(){
         const resp = xhttp.response;
         let json = JSON.parse(resp);
         var hdweCoords = [json['lon'], json['lat']]
-        coordinate = hdweCoords;
-        animate_and_update();
+        //coordinate = hdweCoords;
+        //output.innerHTML = coordinate;
+//        animate_and_update(coordinate);
+console.log(hdweCoords);
+        animate(hdweCoords);
+        update(hdweCoords);
+
+
     };
     xhttp.send();
 }
 
 if (enable_hardware) {
-    var  what = setInterval(function() {
+    //setInterval(function() {
         getLocation();
-        map.reload();
-    }, 500);
+        // map.render();
+    //}, 10000);
 };
 
 function publish(hdweCoords){
+
+//
+//    const http = require('http');
+//
+//    const requestListener = (req, res)=>{
+//      console.log("Request Incoming");
+//
+//      const responseData = {
+//        GPS:{
+//            lat: 0.0,
+//            lon: 0.0
+//        }
+//      }
+//
+//      const jsonContent = JSON.stringify(responseData);
+//      res.end(jsonContent);
+//    };
+//
+//    const server = http.createServer(requestListener);
+//
+//    server.listen(5183,'localhost', function(){
+//        console.log("Server is Listening at Port 5183!");
+//    });
+
+
     console.log(hdweCoords);
 }
 
@@ -569,7 +600,7 @@ function animate(coordinate) {
 };
 
 function update(coordinate) {
-    coordinate = coordinate;
+
 
     var source = v_layer.getSource();
     var featuresList = document.getElementById("featuresList");
