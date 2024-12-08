@@ -49,6 +49,6 @@ class NodeRunner(threading.Thread):
 if __name__ == '__main__':
 
     node = NodeRunner()
-    node.configure(os.path.join(CONFIG_PATH, 'gps.json'))
+    node.configure('gps.json')
     node.run()
 
