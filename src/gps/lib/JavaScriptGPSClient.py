@@ -1,6 +1,7 @@
 """
 A simple and lightweight JavaScript client based on GPSD client.
 """
+import requests
 import json
 from datetime import datetime
 from typing import Union, Iterable, Dict, Any
@@ -20,9 +21,8 @@ class JavaScriptGPSClient:
         self.resp = None
 
     def javascript_lines(self):
-        import requests
         # TODO: don't hardcode the URL
-        # self.resp = requests.get("http://localhost:5183/JavaScriptGPSRetriever.js")
+        self.resp = requests.get("http://localhost:5183/JavaScriptGPSRetriever.js")
         return self.resp
 
     def json_stream(self):
