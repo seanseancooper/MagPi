@@ -20,10 +20,11 @@ import {Heatmap as HeatmapLayer} from 'ol/layer.js';
 docs @ https://openlayers.org/en/latest/apidoc/
 */
 
-const enable_hardware = true;
+const enable_hardware = false;
 var fix;
 var click = 0;
 var features = [];
+var coordinate;
 const tracking_ind = document.getElementById('tracking_ind');
 const output = document.getElementById('output');
 
@@ -55,7 +56,6 @@ class RotateNorthControl extends Control {
 function handleTrackingButton() {
 
     tracking_ind.innerHTML = "<div id='tracking_ind' class='ol-unselectable' style='' width='6' height='22'>&nbsp;</div>";
-
 
     if (enable_hardware){
         if (fix == true) {
@@ -154,30 +154,47 @@ const geolocation = new Geolocation({
 
 geolocation.setTracking(true);
 
-geolocation.on('change', function (evt) {
-    /* will not fire if js is off (no geolocation change event) */
-    if (enable_hardware) {
-        var xhttp = new XMLHttpRequest();
-        var block = true;
-        xhttp.open("GET", 'http://gps.localhost:5004/position', block);
-        setHeaders(xhttp, 'gps.localhost:5004');
+function animate_and_update(){
+    console.log('coordinate: '  + coordinate);
+    animate(coordinate);
+    update(coordinate);
+}
 
-        xhttp.onload = function(){
-            const resp = xhttp.response;
-            let json = JSON.parse(resp);
-            var hdweCoords = [json['lon'], json['lat']]
-            fix = true;
-            animate(hdweCoords);
-            update(hdweCoords);
-        };
-        xhttp.send();
-    } else {
+function getLocation(){
+    var xhttp = new XMLHttpRequest();
+    var block = true;
+    xhttp.open("GET", 'http://gps.localhost:5004/position', block);
+    setHeaders(xhttp, 'gps.localhost:5004');
+
+    xhttp.onload = function(){
+        const resp = xhttp.response;
+        let json = JSON.parse(resp);
+        var hdweCoords = [json['lon'], json['lat']]
+        coordinate = hdweCoords;
+        animate_and_update();
+    };
+    xhttp.send();
+}
+
+if (enable_hardware) {
+    var  what = setInterval(function() {
+        getLocation();
+        map.reload();
+    }, 500);
+};
+
+function publish(hdweCoords){
+    console.log(hdweCoords);
+}
+
+geolocation.on('change', function (evt) {
+    if (!enable_hardware) {
         const coordJS = geolocation.getPosition();
         var hdweCoords = toLonLat(coordJS)
         animate(hdweCoords);
         update(hdweCoords);
+        publish(hdweCoords);
     }
-
 });
 
 geolocation.on('error', function (error) {
@@ -552,6 +569,7 @@ function animate(coordinate) {
 };
 
 function update(coordinate) {
+    coordinate = coordinate;
 
     var source = v_layer.getSource();
     var featuresList = document.getElementById("featuresList");
