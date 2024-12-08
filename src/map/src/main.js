@@ -16,17 +16,16 @@ import {transform as xform, fromLonLat, toLonLat} from 'ol/proj.js';
 import {Heatmap as HeatmapLayer} from 'ol/layer.js';
 //import {JSONFeature as JSONFeature} from 'ol/format/JSONFeature.js'; <-- abstract, doesn't import. read direct from response
 
-var useHardware = true;
-var click = 0;
-var tmpCoord;
-var features = [];
-var selMarker;
-const tracking_ind = document.getElementById('tracking_ind');
-const output = document.getElementById('output');
-
 /*
 docs @ https://openlayers.org/en/latest/apidoc/
 */
+
+const enable_hardware = true;
+var fix;
+var click = 0;
+var features = [];
+const tracking_ind = document.getElementById('tracking_ind');
+const output = document.getElementById('output');
 
 class RotateNorthControl extends Control {
 
@@ -53,8 +52,42 @@ class RotateNorthControl extends Control {
     }
 }
 
+function handleTrackingButton() {
+
+    tracking_ind.innerHTML = "<div id='tracking_ind' class='ol-unselectable' style='' width='6' height='22'>&nbsp;</div>";
+
+
+    if (enable_hardware){
+        if (fix == true) {
+            tracking_ind.style='background:purple'; // online w/fix
+        } else {
+            tracking_ind.style='background:orange'; // offline
+        }
+    } else {
+        if (geolocation){
+
+            geolocation.setTracking = !geolocation.getTracking();
+            if (geolocation.getTracking() == false){
+                tracking_ind.style='background:yellow'; // warning
+            } else {
+                tracking_ind.style='background:red';    // offline
+            }
+
+            const coordJS = geolocation.getPosition();
+            if (coordJS) {
+                positionFeature.setGeometry(new Point(coordJS));
+                view.setCenter(coordJS);
+                output.innerHTML = '';
+                tracking_ind.style='background:green';  // online
+            }
+
+        } else {
+            tracking_ind.style='background:red';
+        }
+    }
+}
+
 class TrackingControl extends Control {
-    /* REQUIRES JAVASCRIPT AND GEOLOCATION */
     constructor(opt_options) {
 
         const options = opt_options || {};
@@ -73,34 +106,7 @@ class TrackingControl extends Control {
         });
 
         const t_button_hi = document.getElementById('track');
-        t_button.addEventListener('click', this.handleTrackingButton.bind(this), false);
-    }
-
-    handleTrackingButton() {
-
-        if (geolocation){
-            geolocation.setTracking(!geolocation.getTracking());
-
-            if (geolocation.getTracking() == true){
-                tracking_ind.innerHTML = "<div id='tracking_ind' class='ol-unselectable' style='background:green' width='6' height='22'>&nbsp;</div>";
-                tracking_ind.style.display = "";
-                const coordJS = geolocation.getPosition();
-                positionFeature.setGeometry(new Point(coordJS));
-                view.setCenter(coordJS);
-            } else {
-                tracking_ind.innerHTML = "<div id='tracking_ind' class='ol-unselectable' style='background:yellow' width='6' height='22'>&nbsp;</div>";
-                tracking_ind.style.display = "";
-            }
-
-        } else {
-            if (useHardware){
-                tracking_ind.innerHTML = "<div id='tracking_ind' class='ol-unselectable' style='background:purple' width='6' height='22'>&nbsp;</div>";
-                tracking_ind.style.display = "";
-            } else {
-                tracking_ind.innerHTML = "<div id='tracking_ind' class='ol-unselectable' style='background:red' width='6' height='22'>&nbsp;</div>";
-                tracking_ind.style.display = "";
-            }
-        }
+        t_button.addEventListener('click', handleTrackingButton.bind(this), false);
     }
 }
 
@@ -113,6 +119,7 @@ function setHeaders(xhttp, host){
 
 const positionFeature = new Feature();
 const accuracyFeature = new Feature();
+const currentWebMercator = fromLonLat([-105.0437, 39.9168]);
 
 positionFeature.setStyle(
     new Style({
@@ -128,9 +135,6 @@ positionFeature.setStyle(
         }),
     })
 );
-
-// a default value to get us started.
-const currentWebMercator = fromLonLat([-105.0437, 39.9168]);
 
 const view = new View({
     center: currentWebMercator,
@@ -151,17 +155,18 @@ const geolocation = new Geolocation({
 geolocation.setTracking(true);
 
 geolocation.on('change', function (evt) {
-
-    if (useHardware) {
+    /* will not fire if js is off (no geolocation change event) */
+    if (enable_hardware) {
         var xhttp = new XMLHttpRequest();
         var block = true;
         xhttp.open("GET", 'http://gps.localhost:5004/position', block);
         setHeaders(xhttp, 'gps.localhost:5004');
+
         xhttp.onload = function(){
             const resp = xhttp.response;
             let json = JSON.parse(resp);
             var hdweCoords = [json['lon'], json['lat']]
-            console.log(hdweCoords)
+            fix = true;
             animate(hdweCoords);
             update(hdweCoords);
         };
@@ -169,24 +174,18 @@ geolocation.on('change', function (evt) {
     } else {
         const coordJS = geolocation.getPosition();
         var hdweCoords = toLonLat(coordJS)
-        console.log(hdweCoords)
         animate(hdweCoords);
         update(hdweCoords);
     }
 
-//    output.innerHTML = null;
-//    output.style.display = "";
-//    tracking_ind.innerHTML = "<div id='tracking_ind' class='ol-unselectable' style='background:green' width='6' height='22'>&nbsp;</div>";
-//    tracking_ind.style.display = "";
-
 });
 
 geolocation.on('error', function (error) {
-    output.innerHTML = error.message;
-    output.style.display = "";
-    tracking_ind.innerHTML = "<div id='tracking_ind' class='ol-unselectable' style='background:red' width='6' height='22'>&nbsp;</div>";
-    tracking_ind.style.display = "";
-
+    if  (!enable_hardware) {
+        output.innerHTML = error.message;
+        output.style.display = '';
+    }
+    handleTrackingButton();
 });
 
 function el(id) {
@@ -565,4 +564,5 @@ function update(coordinate) {
     positionFeature.set('LINE2', '', true);
 
     view.setCenter(fromLonLat(coordinate));
+    handleTrackingButton();
 };
