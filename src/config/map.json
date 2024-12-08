@@ -15,7 +15,7 @@
 			"MAP_TEMPLATE": "map.html.j2"
 		},
 		{
-			"TEMPLATE_FOLDER": "src"
+			"TEMPLATE_FOLDER": "templates"
 		},
 		{
 			"STATIC_FOLDER": "/static"
@@ -24,7 +24,7 @@
 			"NODE_START_COMMAND": ["npm", "start"]
 		},
 		{
-			"NODE_BUILD": false
+			"NODE_BUILD": true
 		},
 		{
 			"NODE_BUILD_COMMAND": ["npm", "run", "build"]
