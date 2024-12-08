@@ -42,9 +42,8 @@ class MAPController(threading.Thread):
             os.chdir('src/')
             if routes.mapAgg.config['NODE_BUILD'] is True:
                 routes.node.build()
-            else:
-                routes.node.run()
 
+            routes.node.run()
             routes.mapAgg.run()
 
         except KeyboardInterrupt:
