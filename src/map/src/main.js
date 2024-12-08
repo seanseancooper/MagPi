@@ -16,11 +16,13 @@ import {transform as xform, fromLonLat, toLonLat} from 'ol/proj.js';
 import {Heatmap as HeatmapLayer} from 'ol/layer.js';
 //import {JSONFeature as JSONFeature} from 'ol/format/JSONFeature.js'; <-- abstract, doesn't import. read direct from response
 
-var useHardware = false;
+var useHardware = true;
 var click = 0;
 var tmpCoord;
 var features = [];
 var selMarker;
+const tracking_ind = document.getElementById('tracking_ind');
+const output = document.getElementById('output');
 
 /*
 docs @ https://openlayers.org/en/latest/apidoc/
@@ -78,17 +80,26 @@ class TrackingControl extends Control {
 
         if (geolocation){
             geolocation.setTracking(!geolocation.getTracking());
-        }
 
-        if (geolocation.getTracking() == true){
-            info.innerHTML = "<div id=\"tracking_ind\" class=\"ol-unselectable\" style=\"background:green\" width=\"6\" height=\"22\">&nbsp;</div>";
-            info.style.display = '';
-            const coordJS = geolocation.getPosition();
-            positionFeature.setGeometry(new Point(coordJS));
-            view.setCenter(coordJS);
+            if (geolocation.getTracking() == true){
+                tracking_ind.innerHTML = "<div id='tracking_ind' class='ol-unselectable' style='background:green' width='6' height='22'>&nbsp;</div>";
+                tracking_ind.style.display = "";
+                const coordJS = geolocation.getPosition();
+                positionFeature.setGeometry(new Point(coordJS));
+                view.setCenter(coordJS);
+            } else {
+                tracking_ind.innerHTML = "<div id='tracking_ind' class='ol-unselectable' style='background:yellow' width='6' height='22'>&nbsp;</div>";
+                tracking_ind.style.display = "";
+            }
+
         } else {
-            info.innerHTML = "<div id=\"tracking_ind\" class=\"ol-unselectable\" style=\"background:red\" width=\"6\" height=\"22\">&nbsp;</div>";
-            info.style.display = '';
+            if (useHardware){
+                tracking_ind.innerHTML = "<div id='tracking_ind' class='ol-unselectable' style='background:purple' width='6' height='22'>&nbsp;</div>";
+                tracking_ind.style.display = "";
+            } else {
+                tracking_ind.innerHTML = "<div id='tracking_ind' class='ol-unselectable' style='background:red' width='6' height='22'>&nbsp;</div>";
+                tracking_ind.style.display = "";
+            }
         }
     }
 }
@@ -162,12 +173,20 @@ geolocation.on('change', function (evt) {
         animate(hdweCoords);
         update(hdweCoords);
     }
+
+//    output.innerHTML = null;
+//    output.style.display = "";
+//    tracking_ind.innerHTML = "<div id='tracking_ind' class='ol-unselectable' style='background:green' width='6' height='22'>&nbsp;</div>";
+//    tracking_ind.style.display = "";
+
 });
 
 geolocation.on('error', function (error) {
-    const info = document.getElementById('info');
-    info.innerHTML = error.message;
-    info.style.display = '';
+    output.innerHTML = error.message;
+    output.style.display = "";
+    tracking_ind.innerHTML = "<div id='tracking_ind' class='ol-unselectable' style='background:red' width='6' height='22'>&nbsp;</div>";
+    tracking_ind.style.display = "";
+
 });
 
 function el(id) {
