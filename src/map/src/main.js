@@ -15,6 +15,8 @@ import {toStringHDMS, toStringXY, degreesToStringHDMS} from 'ol/coordinate.js';
 import {transform as xform, fromLonLat, toLonLat} from 'ol/proj.js';
 import {Heatmap as HeatmapLayer} from 'ol/layer.js';
 //import {JSONFeature as JSONFeature} from 'ol/format/JSONFeature.js'; <-- abstract, doesn't import. read direct from response
+import publisher from 'js_gps_ret/index.js'
+
 
 /*
 docs @ https://openlayers.org/en/latest/apidoc/
@@ -119,7 +121,7 @@ function setHeaders(xhttp, host){
 
 const positionFeature = new Feature();
 const accuracyFeature = new Feature();
-const currentWebMercator = fromLonLat([-105.0437, 39.9168]);
+const currentWebMercator = fromLonLat([-105.068617, 39.916905]);
 
 positionFeature.setStyle(
     new Style({
@@ -154,11 +156,7 @@ const geolocation = new Geolocation({
 
 geolocation.setTracking(true);
 
-function animate_and_update(){
-    console.log('coordinate: '  + coordinate);
-    animate(coordinate);
-    update(coordinate);
-}
+//publisher(currentWebMercator);
 
 function getLocation(){
     var xhttp = new XMLHttpRequest();
@@ -170,61 +168,28 @@ function getLocation(){
         const resp = xhttp.response;
         let json = JSON.parse(resp);
         var hdweCoords = [json['lon'], json['lat']]
-        //coordinate = hdweCoords;
-        //output.innerHTML = coordinate;
-//        animate_and_update(coordinate);
-console.log(hdweCoords);
-        animate(hdweCoords);
-        update(hdweCoords);
-
-
+        coordinate = hdweCoords;
     };
     xhttp.send();
 }
 
 if (enable_hardware) {
-    //setInterval(function() {
+    coordinate = currentWebMercator;
+    setInterval(function() {
         getLocation();
-        // map.render();
-    //}, 10000);
+        animate(coordinate);
+        update(coordinate);
+        console.log('enable_hardware: ' + coordinate);
+    }, 1000);
 };
-
-function publish(hdweCoords){
-
-//
-//    const http = require('http');
-//
-//    const requestListener = (req, res)=>{
-//      console.log("Request Incoming");
-//
-//      const responseData = {
-//        GPS:{
-//            lat: 0.0,
-//            lon: 0.0
-//        }
-//      }
-//
-//      const jsonContent = JSON.stringify(responseData);
-//      res.end(jsonContent);
-//    };
-//
-//    const server = http.createServer(requestListener);
-//
-//    server.listen(5183,'localhost', function(){
-//        console.log("Server is Listening at Port 5183!");
-//    });
-
-
-    console.log(hdweCoords);
-}
 
 geolocation.on('change', function (evt) {
     if (!enable_hardware) {
         const coordJS = geolocation.getPosition();
-        var hdweCoords = toLonLat(coordJS)
+        var hdweCoords = toLonLat(coordJS);
+        coordinate = hdweCoords;
         animate(hdweCoords);
         update(hdweCoords);
-        publish(hdweCoords);
     }
 });
 
@@ -483,6 +448,8 @@ new VectorLayer({
 
 function animate(coordinate) {
 
+    console.log('animate coordinate: ' + coordinate);
+
     function colorUniqId(data, splt){
            var parts = data.split(splt);
            var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
@@ -526,7 +493,7 @@ function animate(coordinate) {
                             var c_signal_color = 'rgba(' + _color + ',' + parseFloat( ((sgnlStrength + 100)/100).toFixed(2) ) + ')';
                             var p_signal_color = 'rgba(' + _color + ', 1.0)';
 
-                            console.log("SIGNALPOINT: [" + sgnl.id + "] " + cell.BSSID + " c_signal_color:" + c_signal_color + " sgnl.lon:" + sgnl.lon + " sgnl.lat:" +  sgnl.lat + " sgnl.sgnl:" +  sgnlStrength );
+                            //console.log("SIGNALPOINT: [" + sgnl.id + "] " + cell.BSSID + " c_signal_color:" + c_signal_color + " sgnl.lon:" + sgnl.lon + " sgnl.lat:" +  sgnl.lat + " sgnl.sgnl:" +  sgnlStrength );
 
                             // choose the feature based on signal type and
                             // pass one call
@@ -601,7 +568,7 @@ function animate(coordinate) {
 
 function update(coordinate) {
 
-
+    console.log('update coordinate: ' + coordinate);
     var source = v_layer.getSource();
     var featuresList = document.getElementById("featuresList");
     featuresList.innerHTML = "Features: " + source.getFeatures().length;

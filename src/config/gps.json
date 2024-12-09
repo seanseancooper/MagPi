@@ -18,7 +18,7 @@
 			"DUMMYRETRIEVER_TIMEOUT": 1
 		},
 		{
-			"RETRIEVER_METHOD": "JavaScriptGPSRetriever"
+			"RETRIEVER_METHOD": "DummyGPSRetriever"
 		},
 		{
 			"BLACKVIEWGPSRETRIEVER_TIMEOUT": 0.1

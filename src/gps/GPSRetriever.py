@@ -120,7 +120,8 @@ class GPSRetriever(threading.Thread):
                                        "climb": 0.0,
                                        "time":  datetime.now().__format__(self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f'))
                                        }
-
+                        print(self.result)
+                        time.sleep(self.config.get('DUMMYRETRIEVER_TIMEOUT', 1))
             except Exception as e:
                 gps_logger.error(f"JavaScriptGPSRetriever: {e}")  # unable to connect to Blackview
 
