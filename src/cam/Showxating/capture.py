@@ -7,12 +7,6 @@ from .lib.StreamService import highlight
 import logging
 import http.client
 
-#TODO: put in config
-os.environ[
-    "OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "flags;low_delay;live|probesize;32|analyzeduration;0|sync;ext|sn|hide_banner|rtsp_transport;tcp|loglevel;debug "
-os.environ[
-    "OPENCV_FFMPEG_WRITER_OPTIONS"] = "loglevel;debug"
-
 cam_logger = logging.getLogger('cam_logger')
 logger_root = logging.getLogger('root')
 

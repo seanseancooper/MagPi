@@ -7,12 +7,6 @@ from src.cam.Showxating.capture import ShowxatingCapture
 from src.cam.Showxating.lib.StreamService import StreamService, StreamingHandler
 from src.config import readConfig
 
-#TODO: put in config
-os.environ[
-    "OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "flags;low_delay;live;framedrop|probesize;32|analyzeduration;0|sync;ext|sn" \
-                                       "|hide_banner|rtsp_transport;tcp|loglevel;debug "
-os.environ[
-    "OPENCV_FFMPEG_WRITER_OPTIONS"] = "loglevel;debug"
 
 cam_logger = logging.getLogger('cam_logger')
 logger_root = logging.getLogger('root')
@@ -66,11 +60,14 @@ class ShowxatingPlugin(threading.Thread):
         cam_logger.debug(f"{self.plugin_name} initialized capture. src:{self.plugin_args_capture_src}")
 
     def get_config(self):
-        temp = {}
+        global_config = {}
 
-        readConfig('cam.json', temp)
-        self.plugin_config, _ = temp['PLUGINS']
+        readConfig('cam.json', global_config)
 
+        os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = global_config.get('OPENCV_FFMPEG_CAPTURE_OPTIONS', '')
+        os.environ["OPENCV_FFMPEG_WRITER_OPTIONS"] = global_config.get('OPENCV_FFMPEG_WRITER_OPTIONS', '')
+
+        self.plugin_config, _ = global_config['PLUGINS']
         self.plugin_process_frames = self.plugin_config['plugin_process_frames']
 
     def display(self, frame):

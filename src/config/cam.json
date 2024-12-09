@@ -24,6 +24,15 @@
 			"PLUGIN_NAME" : "blackview_test_vis"
 		},
 		{
+			"OPENCV_FFMPEG_CAPTURE_OPTIONS" : "flags;low_delay;live;framedrop|probesize;32|analyzeduration;0|sync;ext|sn|hide_banner|rtsp_transport;tcp|loglevel;debug "
+		},
+		{
+			"OPENCV_FFMPEG_WRITER_OPTIONS" : "loglevel;debug"
+		},
+		{
+			"MOTION_CPANEL_URL" : "http://192.168.1.4:8080"
+		},
+		{
 			"MOTION_CPANEL_URL" : "http://192.168.1.4:8080"
 		},
 		{
@@ -58,13 +67,6 @@
 		},
 		{
 			"OUTFILE_NAME": "cam_snap"
-		},
-		{
-			"TRACKER": {
-				"f_limit": 2,
-				"frm_delta_pcnt": 1.0,
-				"contour_limit": 2
-			}
 		},
 		{
 			"PLUGINS": [
@@ -123,6 +125,13 @@
 					"write_mp4": false
 				}
 			]
+		},
+		{
+			"TRACKER": {
+				"f_limit": 2,
+				"frm_delta_pcnt": 1.0,
+				"contour_limit": 2
+			}
 		}
 	]
 }
