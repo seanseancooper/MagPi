@@ -111,7 +111,7 @@ def getAggregatedRects(rects):
     return aggregated
 
 
-def wall_images(frame, conts, getDists):
+def wall_images(frame, conts, getDists, metric):
     canvas = np.zeros(frame.shape, np.uint8)
     wall = np.zeros(frame.shape, np.uint8)
     rectangle = None
@@ -161,7 +161,7 @@ def wall_images(frame, conts, getDists):
 
             f_hist = p.make_histogram(frame, rectangle)
             w_hist = p.make_histogram(wall, rectangle)
-            dists = p.compare_hist(f_hist, w_hist)
+            dists = p.compare_hist(f_hist, w_hist, metric=metric)
 
     # rectangle is bounds of contourGroup
     return wall, rectangle, dists

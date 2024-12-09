@@ -29,16 +29,13 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
         return self.out_data
 
     @staticmethod
-    def compare_hist(a, b):
-
-        return None
-
-        # if True:  # TODO: use config!
-        #     distances = [euclidean_distances(a[i], b[i]) for i in ['b', 'g', 'r']]
-        # else:
-        #     distances = [paired_distances(a[i], b[i]) for i in ['b', 'g', 'r']]
-        #
-        # return distances
+    def compare_hist(a, b, metric):
+        distances = []
+        if metric is 'euclidean':
+            distances = [euclidean_distances(a[i], b[i]) for i in ['b', 'g', 'r']]
+        elif metric is 'paired':
+            distances = [paired_distances(a[i], b[i]) for i in ['b', 'g', 'r']]
+        return distances
 
     def process_frame(self, f):
         """This method takes as frame, analyzes it and returns the analyzed frame"""

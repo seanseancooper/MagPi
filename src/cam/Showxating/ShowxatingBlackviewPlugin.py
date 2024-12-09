@@ -179,7 +179,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
             for cnt in conts[:self.tracker.contour_limit]:
 
-                wall, rect, dists = wall_images(f.copy(), cnt, False)
+                wall, rect, dists = wall_images(f.copy(), cnt, False, 'paired')  #TODO: add to config
 
                 if self.has_analysis or self.has_symbols:
                     self.tracked = self.tracker.track_objects(self.frame_id, cnt, hier, wall, rect)
