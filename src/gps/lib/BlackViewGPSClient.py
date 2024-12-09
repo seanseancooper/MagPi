@@ -5,6 +5,8 @@ import json
 from datetime import datetime
 from typing import Union, Iterable, Dict, Any
 
+from src.config import readConfig
+
 
 class BlackViewGPSClient:
     def __init__(
@@ -16,30 +18,29 @@ class BlackViewGPSClient:
         self.host = host
         self.port = port
         self.timeout = timeout
+        self.config = {}
         self.conn = None
         self.resp = None
 
     def blackview_lines(self):
         from http import client
 
-        self.conn = client.HTTPConnection(self.host)
+        self.conn = client.HTTPConnection(self.host)  #TODO: port?
         self.conn.set_debuglevel(1)
         self.conn.timeout = self.timeout
-        self.conn.request("GET", "http://" + self.host + "/blackvue_livedata.cgi")
+        self.conn.request("GET", "http://" + self.host + "/" + self.config['GPS_ENDPOINT'])
         self.resp = self.conn.getresponse()
         self.conn.close()
-        '''
-        This should  work, but is blocking??
-        '''
-        # import requests
-        # self.resp = requests.get("http://" + self.host + "/blackvue_livedata.cgi")
 
         return self.resp
+
+    def configure(self):
+        readConfig('gps.json', self.config)
 
     def json_stream(self):
         for line in self.blackview_lines():
             answ = line.decode('utf-8').strip()
-            # print(f'answ: {answ}')
+            # print(f'answ: {answ}')  # this also contains IMS readings.
             if answ.startswith('{"GPS"'):
                 yield json.loads(answ)
             else:
@@ -48,7 +49,6 @@ class BlackViewGPSClient:
     def dict_stream(self) -> Iterable[Dict[str, Any]]:
         if self.json_stream():
             for line in self.json_stream():
-                line["GPS"]["UPDATED"] = datetime.now().__format__("%Y-%m-%d %H:%M:%S")
                 yield line
 
     def close(self):
