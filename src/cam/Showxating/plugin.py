@@ -45,6 +45,7 @@ class ShowxatingPlugin(threading.Thread):
         self.frame_rate = None
         self.frame_delta = None
         self.frame_id = None
+        self.frame_shape = None
 
         self.streamservice = None
         self.streamservice_thread = None
@@ -90,7 +91,7 @@ class ShowxatingPlugin(threading.Thread):
 
         self.parent_thread = threading.current_thread()
         self.streamservice_thread = self.streamservice.t
-        print(f'parent {self.parent_thread} started streamservice {self.streamservice.t.name}')
+        # print(f'parent {self.parent_thread} started streamservice {self.streamservice.t.name}')
 
     def stream(self, frame):
         # I am a SBVP
@@ -119,12 +120,11 @@ class ShowxatingPlugin(threading.Thread):
             self.set_capture()
 
             for frame in self.plugin_capture.run():
-                # TODO: make this a list comprehension calling a method
-                #  impl gets statistics
                 self.start_time = self.plugin_capture.statistics['capture_start_time']
                 self.frame_rate = self.plugin_capture.statistics['capture_frame_rate']
-                self.frame_delta = self.plugin_capture.statistics['capture_frame_period']
+                self.frame_delta = self.plugin_capture.statistics['capture_frame_period'] #  rename
                 self.frame_id = self.plugin_capture.statistics['capture_frame_id']
+                self.frame_shape = self.plugin_capture.statistics['capture_frame_shape']
                 self.majic_color = self.plugin_capture.statistics['capture_majic_color']
                 processed = self.process_frame(frame)
                 self.render(processed)

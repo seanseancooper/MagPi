@@ -101,10 +101,8 @@ class ShowxatingCapture:
                 self.statistics['capture_frame_rate'] = self.capture_frame_rate
                 self.statistics['capture_frame_period'] = round(time.monotonic() - proc_start, 4)
                 self.statistics['capture_frame_id'] = self.f_id
-                self.statistics['capture_majic_color'] = self.highlight(frame, self.plugin_config.get('plugin_majic_pixel', [10, 110]))
                 self.statistics['capture_frame_shape'] = frame.shape
-
-                self.statistics['CAP_PROP_FPS'] = 'INOP'  # DBUG: can this work?
+                self.statistics['capture_majic_color'] = self.highlight(frame, self.plugin_config.get('plugin_majic_pixel', [10, 110]))
 
                 stats = f'{self.capture_name} | OUT: {self.capture_frame_rate:.2f} fps {datetime.now().strftime("%b %d, %Y %X")} '
 
