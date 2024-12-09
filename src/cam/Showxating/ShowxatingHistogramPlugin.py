@@ -31,9 +31,9 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
     @staticmethod
     def compare_hist(a, b, metric):
         distances = []
-        if metric is 'euclidean':
+        if metric == 'euclidean':
             distances = [euclidean_distances(a[i], b[i]) for i in ['b', 'g', 'r']]
-        elif metric is 'paired':
+        elif metric == 'paired':
             distances = [paired_distances(a[i], b[i]) for i in ['b', 'g', 'r']]
         return distances
 
