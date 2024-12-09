@@ -1,8 +1,6 @@
-import os
 import time
 from datetime import datetime
 import cv2 as cv
-from .lib.StreamService import highlight
 
 import logging
 import http.client
@@ -68,6 +66,16 @@ class ShowxatingCapture:
                 else:
                     cam_logger.error(
                             f"[{__name__}] invalid connection string in configuration file.")
+    @staticmethod
+    def highlight(f, arry):
+        """sample a pixel position; use combinatorial 'inversion'
+        of the color to produce a new color that is always visible."""
+        from PIL import Image
+        img = Image.fromarray(f, "RGB")
+        pix = img.load()
+        x, y = arry
+        R, G, B = pix[x, y]
+        return (R + 128) % 255, (G + 128) % 255, (B + 128) % 255
 
     def run(self):
 
@@ -93,7 +101,7 @@ class ShowxatingCapture:
                 self.statistics['capture_frame_rate'] = self.capture_frame_rate
                 self.statistics['capture_frame_period'] = round(time.monotonic() - proc_start, 4)
                 self.statistics['capture_frame_id'] = self.f_id
-                self.statistics['capture_majic_color'] = highlight(frame, 10, 110)  #TODO configure capture_majic_color location!
+                self.statistics['capture_majic_color'] = self.highlight(frame, self.plugin_config.get('plugin_majic_pixel', [10, 110]))
                 self.statistics['capture_frame_shape'] = frame.shape
 
                 self.statistics['CAP_PROP_FPS'] = 'INOP'  # DBUG: can this work?

@@ -83,6 +83,7 @@ class ShowxatingPlugin(threading.Thread):
     def start_streamservice(self, processed):
         handler = StreamingHandler
         handler.src = processed
+        handler.majic_color = self.majic_color
         self.streamservice = StreamService((self.plugin_config['streaming_host'], self.plugin_config['streaming_port']),
                                            self.plugin_config['streaming_path'], handler)
         self.streamservice.stream()
