@@ -34,11 +34,11 @@ class WifiWorker:
         self.results = []               # a list of test results (this should be local to method)
         self.return_all = False         # return all/any
         self.test_results = {}          # mapping of results
+        self.cache_max = 0              # maximum number of SignalPoints displayed in logs
 
         self.DEBUG = False
 
     def __str__(self):
-        cache_max = max(int(self.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -(self.config.get('SIGNAL_CACHE_MAX')))
         return {"SSID"          : self.ssid,
                 "BSSID"         : self.bssid,
                 "created"       : format_time(self.created, "%H:%M:%S"),
@@ -52,13 +52,9 @@ class WifiWorker:
                 "encryption"    : self.is_encrypted,
                 "is_mute"       : self.is_mute,
                 "tracked"       : self.tracked,
-                "signal_cache"  : [pt.get() for pt in self.scanner.signal_cache[self.bssid]][cache_max:],
+                "signal_cache"  : [pt.get() for pt in self.scanner.signal_cache[self.bssid]][self.cache_max:],
                 "tests"         : [x for x in self.test_results]
         }
-
-    def get_MFCC(self):
-        # TODO
-        pass
 
     def process_cell(self, cell):
         """ update static fields, tests"""
