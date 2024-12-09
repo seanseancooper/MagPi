@@ -25,7 +25,6 @@ def arx_player():
 
 @arx_bp.route('/meter', methods=['GET'], subdomain='arx')
 def arx_meter():
-    # TODO:  add to a collection of signalPoint
     return jsonify(arxRec.update_meter())
 
 

@@ -2,6 +2,7 @@ import os
 import queue
 import threading
 import time
+from collections import defaultdict
 from datetime import datetime
 
 import numpy as np
@@ -39,6 +40,8 @@ class ARXRecorder(threading.Thread):
         self.metering_q = queue.Queue(maxsize=1)
         self.peak = 0.0
         self.meter = {'max': 1.0, 'peak_percentage': 0}
+        self.signal_cache = []   # a lists of audio SignalPoint.
+
 
     def configure(self, config_file):
 
@@ -99,6 +102,7 @@ class ARXRecorder(threading.Thread):
 
         try:
             self.peak = min(c_level, 100.00)
+            self.signal_cache.append(self.peak)
             self.metering_q.put_nowait(self.peak)
         except queue.Full:
             pass
