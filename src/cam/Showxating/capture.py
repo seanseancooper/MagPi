@@ -20,7 +20,6 @@ class ShowxatingCapture:
 
         self.capture_name = name
         self.capture = None
-        self.capture_cv_color = (255, 255, 255)   #TODO: put in config
 
         self.capture_param_capture_src = src
 
