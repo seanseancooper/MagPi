@@ -56,7 +56,7 @@ class GPSRetriever(threading.Thread):
                     for result in client.dict_stream(convert_datetime=True, filter=["TPV"]):
                         if not result:
                             break
-                        self.result = result
+                        self.result = result  # use 'heading', not 'track'.
 
             except OSError as e:  # unable to connect.
                 gps_logger.error(f"GPSDClientRetriever {e}")  # unable to connect to GPS Hardware
@@ -83,9 +83,8 @@ class GPSRetriever(threading.Thread):
     @register_retriever
     def DummyGPSRetriever(self, *, c, **retriever_args):
 
-        # TODO: this is bad; I should be using with open() so the file closes when we exit.
         lines = [line.replace('LATITUDE', 'lat').replace('LONGITUDE', 'lon').strip() for line in open(self.config['TEST_FILE'], 'r')]
-        lines = [json.loads(line.replace("\'","\"")) for line in lines]
+        lines = [json.loads(line.replace("\'", "\"")) for line in lines]
 
         while True:
             for i in range(len(lines) - 1):
@@ -121,7 +120,7 @@ class GPSRetriever(threading.Thread):
                                        "time":  datetime.now().__format__(self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f'))
                                        }
                         print(self.result)
-                        time.sleep(self.config.get('DUMMYRETRIEVER_TIMEOUT', 1))
+                        time.sleep(self.config.get('JSRETRIEVER_TIMEOUT', 1))
             except Exception as e:
                 gps_logger.error(f"JavaScriptGPSRetriever: {e}")  # unable to connect to Blackview
 
@@ -141,7 +140,7 @@ class GPSRetriever(threading.Thread):
         return {"speed": self.result['speed']}
 
     def gps_track(self):
-        return {"track": self.result['heading']}
+        return {"track": self.result['heading']}  # if there is a 'track', it's a heading
 
     def gps_heading(self):
         return {"heading": self.result['heading']}
