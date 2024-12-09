@@ -250,10 +250,6 @@ def print_table(table):
         justified_line = []
         for i, el in enumerate(line):
             try:
-                # DBUG: this code intermittently passes updates from the worker
-                # for created, updated, elapsed, is_mute, tracked and signal_cache
-                # 'signal_cache' is a  list and should not be printed at all.
-                # should the other things be printed??
                 if isinstance(el, str):
                     justified_line.append(el.ljust(widths[i] + 2))
                 if isinstance(el, list):

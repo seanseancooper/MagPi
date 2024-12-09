@@ -79,6 +79,20 @@ def print_signals(sgnls, columns):
     [print_signal(sgnl) for sgnl in sgnls]
     print_table(table)
 
+def compare_MFCC():
+    # TODO: Was in Scanner
+    pass
+
+
+def analyze_periodicity():
+    # TODO: Was in Scanner
+    pass
+
+
+def get_MFCC():
+    # TODO: Was in Worker
+    pass
+
 
 def append_to_outfile(config, cell):
     """Append a found cells to a rolling JSON list"""
