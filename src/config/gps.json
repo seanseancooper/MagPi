@@ -18,6 +18,12 @@
 			"DUMMYRETRIEVER_TIMEOUT": 1
 		},
 		{
+			"JSRETRIEVER_HOST": "localhost:5183"
+		},
+		{
+			"JSRETRIEVER_TIMEOUT": 1
+		},
+		{
 			"RETRIEVER_METHOD": "DummyGPSRetriever"
 		},
 		{
@@ -31,6 +37,9 @@
 		},
 		{
 			"GPS_CONNECT_TIMEOUT": 1
+		},
+		{
+			"GPS_ENDPOINT": "blackvue_livedata.cgi"
 		},
 		{
 			"TOKENS": 4
