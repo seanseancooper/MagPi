@@ -12,7 +12,7 @@ wifi_logger = logging.getLogger('wifi_logger')
 class TRXWorker:
     """
     TRXWorker: match a radio frequency from the TRX-1 when it
-    broadcasts. This is diffeerent than wifi, because it
+    broadcasts. This is different than wifi, because it
     is an 'intermittant' signal, not continous.
     """
 
@@ -36,11 +36,11 @@ class TRXWorker:
         self.results = []               # a list of test results (this should be local to method)
         self.return_all = False         # return all/any
         self.test_results = {}          # mapping of results
+        self.cache_max = 0              # used in worker model
 
         self.DEBUG = False
 
     def __str__(self):
-        cache_max = max(int(self.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -(self.config.get('SIGNAL_CACHE_MAX')))
         return {"ALPHATAG"      : self.ALPHATAG,
                 "freq"          : self.freq,
 
@@ -50,7 +50,7 @@ class TRXWorker:
 
                 "is_mute"       : str(self.is_mute),
                 "tracked"       : str(self.tracked),
-                "signal_cache"  : [pt for pt in self.retriever.signal_cache[self.freq]][cache_max:],
+                "signal_cache"  : [pt for pt in self.retriever.signal_cache[self.freq]][self.cache_max:],
                 "tests"         : [x for x in self.test_results]
         }
 

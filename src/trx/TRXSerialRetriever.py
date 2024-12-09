@@ -47,6 +47,7 @@ class TRXSerialRetriever(threading.Thread):
         worker.config = self.config
         worker.created = datetime.now()
         worker.DEBUG = self.config['DEBUG']
+        worker.cache_max = max(int(self.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -(self.config.get('SIGNAL_CACHE_MAX')))
 
     def get_worker(self, freq):
         worker = None
