@@ -25,7 +25,7 @@ class BlackViewGPSClient:
     def blackview_lines(self):
         from http import client
 
-        self.conn = client.HTTPConnection(self.host)  #TODO: port?
+        self.conn = client.HTTPConnection(self.host)  # TODO: port?
         self.conn.set_debuglevel(1)
         self.conn.timeout = self.timeout
         self.conn.request("GET", "http://" + self.host + "/" + self.config['GPS_ENDPOINT'])

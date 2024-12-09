@@ -64,7 +64,7 @@ class TRXWorker:
         self.ALPHATAG = self.attributes['ALPHATAG']
 
         def test(cell):
-            # TODO: use this as an entrypoint to a discrete test in a test
+            # IDEA: use this as an entrypoint to a discrete test in a test
             # framework that would return T or F.
             # need to identify the test...
             # provides [{testname: result}, {...}]

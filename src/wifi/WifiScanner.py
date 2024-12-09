@@ -17,7 +17,7 @@ from src.wifi.WifiWorker import WifiWorker
 
 import logging
 
-# TODO: events to flask subsystem; NET module
+# IDEA: events to flask subsystem; NET module
 wifi_signals = Namespace()
 wifi_started = wifi_signals.signal('WIFI START')
 wifi_updated = wifi_signals.signal('WIFI UPDATED')
@@ -86,7 +86,7 @@ class WifiScanner(threading.Thread):
         self.DEBUG = self.config['DEBUG']
         self.OUTDIR = self.config['OUTFILE_PATH']
 
-        # TODO: make the worker append itself when created.
+        # IDEA: make the worker append itself when created.
         [self.workers.append(WifiWorker(BSSID)) for BSSID in self.searchmap.keys()]
         [self.config_worker(worker) for worker in self.workers]
 
@@ -152,7 +152,7 @@ class WifiScanner(threading.Thread):
     def update_ghosts(self):
         """ find, load and update ghosts """
 
-        # TODO: removval from either tracked or parsed removes *entire*
+        # DBUG: removal from either tracked or parsed removes *entire*
         #  collection of ghosts due to using frozenset.
         tracked = frozenset([key['BSSID'] for key in self.get_tracked_signals()])
         parsed = frozenset([key['BSSID'] for key in self.parsed_signals.copy()])

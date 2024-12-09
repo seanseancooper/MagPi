@@ -16,7 +16,6 @@ class WifiSignalPoint:
         self._lon = lon
         self._lat = lat
         self._sgnl = sgnl
-        # TODO: MFCC here.
 
     def getLatLon(self):
         return self._lat, self._lon
