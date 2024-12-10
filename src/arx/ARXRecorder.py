@@ -2,7 +2,6 @@ import os
 import queue
 import threading
 import time
-from collections import defaultdict
 from datetime import datetime
 
 import numpy as np
@@ -12,17 +11,17 @@ import soundfile as sf
 from src.config import readConfig
 
 
+def file_writing_thread(*, q, **soundfile_args):
+    with sf.SoundFile(**soundfile_args) as f:
+        while True:
+            data = q.get()
+            if data is None:
+                break
+            f.write(data)
+
+
 class ARXRecorder(threading.Thread):
     ''' Passthrough recording '''
-
-    @staticmethod
-    def file_writing_thread(*, q, **soundfile_args):
-        with sf.SoundFile(**soundfile_args) as f:
-            while True:
-                data = q.get()
-                if data is None:
-                    break
-                f.write(data)
 
     def __init__(self):
         super().__init__()
@@ -36,6 +35,7 @@ class ARXRecorder(threading.Thread):
 
         self._stream = None
         self.thread = None
+        self.recording = self.previously_recording = False
         self.audioq = queue.Queue()
         self.metering_q = queue.Queue(maxsize=1)
         self.peak = 0.0
@@ -50,16 +50,6 @@ class ARXRecorder(threading.Thread):
 
         readConfig(config_file, self.config)
 
-        self.create_stream()
-
-        if not os.path.exists(self.config['OUTFILE_PATH']):
-            os.mkdir(self.config['OUTFILE_PATH'])
-
-        self._OUTFILE = os.path.join(self.config['OUTFILE_PATH'],
-                                     datetime.now().strftime(self.config['DATETIME_FORMAT']) +
-                                     "_" +
-                                     self.config['OUTFILE_NAME'] + self.config['OUTFILE_EXTENSION'])
-
     def create_stream(self):
 
         if self._stream is not None:
@@ -72,7 +62,6 @@ class ARXRecorder(threading.Thread):
         DTYPE = self.config.get('DTYPE', 'float32')
         LATENCY = self.config.get('LATENCY', 0.1)
         CHANNELS = self.config.get('CHANNELS', 2)
-
         self._stream = sd.Stream(device=(INPUT_DEVICE,
                                          OUTPUT_DEVICE),
                                  samplerate=SR,
@@ -88,15 +77,17 @@ class ARXRecorder(threading.Thread):
         if status.input_overflow:
             self._input_overflows += 1
 
-        if not self.thread:
-            if self.is_mute:
-                self.audioq.put(None)
-        elif self.thread.is_alive():
-            if self.is_mute is False:
+        if self.recording:
+            if not self.is_mute:
                 self.audioq.put(indata.copy())
             else:
                 # fill with silence..
                 self.audioq.put(np.zeros(np.shape(indata.copy())))
+            self.previously_recording = True
+        else:
+            if self.previously_recording:
+                self.audioq.put(None)
+                self.previously_recording = False
 
         c_level = max(self.peak, np.max(np.abs(indata)))
 
@@ -147,11 +138,23 @@ class ARXRecorder(threading.Thread):
         self.thread.join()
 
     def stop(self):
+        self.recording = False
         self.wait_for_thread()
 
     def run(self):
+        self.recording = True
+
+        if not os.path.exists(self.config['OUTFILE_PATH']):
+            os.mkdir(self.config['OUTFILE_PATH'])
+
+        self._OUTFILE = os.path.join(self.config['OUTFILE_PATH'],
+                                     datetime.now().strftime(self.config['DATETIME_FORMAT']) +
+                                     "_" +
+                                     self.config['OUTFILE_NAME'] + self.config['OUTFILE_EXTENSION'])
+        self.create_stream()
+
         self.thread = threading.Thread(
-                target=self.file_writing_thread,
+                target=file_writing_thread,
                 kwargs=dict(
                         file=self._OUTFILE,
                         mode='w',
@@ -159,13 +162,16 @@ class ARXRecorder(threading.Thread):
                         channels=self.config['CHANNELS'],
                         q=self.audioq,
                 ),
+                # "Exception ignored in: <module 'threading'...":
+                # This cannot be a daemon and 'cut' files correctly
+                # due to the way it is being run.
+                daemon=False,
         )
         self.thread.start()
 
 
 if __name__ == '__main__':
-    from src.config import CONFIG_PATH
 
     arxRec = ARXRecorder()
-    arxRec.configure(os.path.join(CONFIG_PATH, 'arx.json'))
+    arxRec.configure('arx.json')
     arxRec.run()
