@@ -174,4 +174,14 @@ if __name__ == '__main__':
 
     arxRec = ARXRecorder()
     arxRec.configure('arx.json')
-    arxRec.run()
+
+    def run() -> None:
+        import atexit
+
+        def stop():
+            arxRec.stop()  # required.
+        atexit.register(stop)
+
+        arxRec.run()
+
+    run()
