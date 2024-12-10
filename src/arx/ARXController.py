@@ -32,7 +32,7 @@ class ARXController(threading.Thread):
             import atexit
 
             def stop():
-                routes.arxRec.stop()
+                routes.arxRec.stop()  # required.
 
             atexit.register(stop)
 
