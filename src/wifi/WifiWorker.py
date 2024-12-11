@@ -62,6 +62,7 @@ class WifiWorker:
         if cell['SSID'] == '' or None:
             cell['SSID'] = "*HIDDEN SSID*"
 
+        self.ssid = cell['SSID']
         self.vendor = cell['Vendor']
         self.channel = cell['Channel']
         self.frequency = cell['Frequency']
@@ -126,25 +127,19 @@ class WifiWorker:
     def add(self, bssid):
 
         try:
-            cell = self.scanner.get_cell(bssid)
+            worker = self.scanner.get_worker(bssid)
 
-            if cell:
-                worker = self.scanner.get_worker(bssid)  # need to update worker
+            if worker:
                 worker.tracked = True
-
-                # mandatory, albeit late work
-                worker.ssid = cell['SSID']
                 self.scanner.tracked_signals.append(bssid)
-
-                if worker not in self.scanner.workers:  # why would it not be?
+                if worker not in self.scanner.workers:
                     self.scanner.workers.append(worker)
-
                 # SIGNAL: ADDED ITEM
                 return True
 
-            return False  # no cell: should not happen unless ext. modified
+            return False
         except IndexError:
-            return False  # more likely not in parsed_signals, signal is a ghost now
+            return False
 
     def remove(self, bssid):
         _copy = self.scanner.tracked_signals.copy()
