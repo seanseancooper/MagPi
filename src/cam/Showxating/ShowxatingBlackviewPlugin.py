@@ -16,7 +16,7 @@ cam_logger = logging.getLogger('cam_logger')
 def print_symbology(has_symbols, f, rect, m, c):
 
     if has_symbols:
-        if m:    # TODO: make this JSON on an endpoint.
+        if m:
             cv.putText(f, "MOTION DETECTED!", (5, 110), cv.FONT_HERSHEY_PLAIN, 1.0, c, 2)
 
         # yellow rect: items that are moving
@@ -58,7 +58,7 @@ def print_tracked(has_analysis, has_symbols, f, t, rect):
     if has_analysis:
         for w, _ in enumerate([x for x in t][:1], 1):
             o = t.get(_)
-            try:    # TODO: make this JSON on an endpoint.
+            try:
                 cv.putText(f, o.tag, (385, 345 + (w * 20)), cv.FONT_HERSHEY_PLAIN, .75, (255, 255, 255), 1)
             except AttributeError as a:
                 pass
