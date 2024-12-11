@@ -44,12 +44,12 @@ class WifiWorker:
                 "created"       : format_time(self.created, "%H:%M:%S"),
                 "updated"       : format_time(self.updated, "%H:%M:%S"),
                 "elapsed"       : format_delta(self.elapsed, "%H:%M:%S"),
-                "vendor"        : self.vendor,
-                "channel"       : self.channel,
-                "frequency"     : self.frequency,
-                "signal"        : self.signal,
-                "quality"       : self.quality,
-                "encryption"    : self.is_encrypted,
+                "Vendor"        : self.vendor,
+                "Channel"       : self.channel,
+                "Frequency"     : self.frequency,
+                "Signal"        : self.signal,
+                "Quality"       : self.quality,
+                "Encryption"    : self.is_encrypted,
                 "is_mute"       : self.is_mute,
                 "tracked"       : self.tracked,
                 "signal_cache"  : [pt.get() for pt in self.scanner.signal_cache[self.bssid]][self.cache_max:],
@@ -125,21 +125,14 @@ class WifiWorker:
 
     def add(self, bssid):
 
-        worker = self.scanner.get_worker(bssid)
+        worker = self.scanner.get_worker(bssid)  # no SSID yet!
 
         try:
             cell = [cell for cell in self.scanner.parsed_signals if cell['BSSID'] == bssid][0]
             if cell:
+                worker.tracked = True
                 worker.ssid = cell['SSID']
-                self.scanner.tracked_signals.update(
-                    {
-                        worker.bssid: {
-                            "ssid"      : worker.ssid,
-                            "tests"     : {},
-                            "return_all": True
-                        }
-                    }
-                )
+                self.scanner.tracked_signals.update({worker.bssid: worker.__str__()})
 
                 if worker not in self.scanner.workers:
                     self.scanner.workers.append(worker)

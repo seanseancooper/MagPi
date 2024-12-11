@@ -123,16 +123,8 @@ class WifiScanner(threading.Thread):
 
         return sgnlPt
 
-    def update_signal(self, sgnl, worker, fmt):
-        """ update a signal with data from it's worker """
-
-        # this shouldn't change
-        # sgnl['Vendor'] = worker.vendor
-        # sgnl['Channel'] = worker.channel
-        # sgnl['Frequency'] = worker.frequency
-        # sgnl['Quality'] = worker.quality
-        # sgnl['Encryption'] = worker.is_encrypted
-
+    def update_sgnl_dynamics(self, sgnl, worker, fmt):
+        """ update sgnl data with current info from worker """
         sgnl['Signal'] = worker.signal
         sgnl['created'] = format_time(worker.created, fmt)
         sgnl['updated'] = format_time(worker.updated, fmt)
@@ -144,17 +136,17 @@ class WifiScanner(threading.Thread):
         sgnl['results'] = [json.dumps(result) for result in worker.test_results]
 
     def update(self, bssid, _signals):
+        """ put basic signal data into a list """
         worker = self.get_worker(bssid)
-        sgnl = {'BSSID': bssid, 'SSID': worker.ssid}
-        self.update_signal(sgnl, worker, self.config.get('TIMER_FORMAT', "%H:%M:%S"))
+        sgnl = worker.__str__()
+        self.update_sgnl_dynamics(sgnl, worker, self.config.get('TIMER_FORMAT', "%H:%M:%S"))
         _signals.append(sgnl)
 
     def update_ghosts(self):
         """ find, load and update ghosts """
-
         # DBUG: removal from either tracked or parsed removes *entire*
         #  collection of ghosts due to using frozenset.
-        tracked = frozenset([key['BSSID'] for key in self.get_tracked_signals()])
+        tracked = frozenset([key for key in self.tracked_signals])
         parsed = frozenset([key['BSSID'] for key in self.parsed_signals.copy()])
         self.ghost_signals = tracked.difference(parsed)
 
@@ -172,18 +164,18 @@ class WifiScanner(threading.Thread):
         """ updates and returns ALL parsed SIGNALS """
         fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
         self.elapsed = datetime.now() - self.created
-        [self.update_signal(sgnl, self.get_worker(sgnl['BSSID']), fmt) for sgnl in self.parsed_signals]
+        [self.update_sgnl_dynamics(sgnl, self.get_worker(sgnl['BSSID']), fmt) for sgnl in self.parsed_signals]
 
         return self.parsed_signals
 
     def get_tracked_signals(self):
-        """ update and return ONLY tracked signals """
+        """ update, transform and return a list of tracked signals """
         _signals = []
         [self.update(bssid, _signals) for bssid in self.tracked_signals]
         return _signals
 
     def get_ghost_signals(self):
-        """ update and return ghost signals """
+        """ update, transform and return a list of ghost signals """
         _signals = []
         [self.update(item, _signals) for item in self.ghost_signals]
         return _signals
