@@ -27,7 +27,7 @@ def wifi_scan():
 def wifi_scan_bssid(bssid):
     worker = s.get_worker(bssid)
     if worker:
-        return jsonify(worker.__str__())
+        return jsonify(worker.get())
     return "", 404
 
 

@@ -39,6 +39,27 @@ class FrameObjektTracker:
         self.fd_mean = float()              # mean of ALL differences between ALL SEEN frames -- no f_limit.
         self.d_range = float()              # offset +/- allowed difference; frm_delta_pcnt * fd_mean
 
+    def get(self):
+        return {
+            "f_id": self.f_id,                      # current frame id
+            "f_limit": self.f_limit,                # hyperparameter: max age of frames in o_cache_map.
+            "frm_delta_pcnt": self.frm_delta_pcnt,  # hyperparameter: percentage of delta between the current and previous frames over all pixels in frame
+            "contour_limit": self.contour_limit,    # number of contours evaluated by plugin in each pass
+            "tracked": self.tracked,                # mapping of FrameObjekts over last 'f_limit' frames.
+
+            "_ml": self._ml,                        # DO NOT CHANGE: list of (x,y) location of contour in self.contours
+            "_frame_delta": self._frame_delta,      # DO NOT CHANGE: euclidean distance between the current and previous frames
+            "_frame_MSE": self._frame_MSE,
+            "_frame_SSIM": self._frame_SSIM,
+
+            "fd_mean": self.fd_mean,                # mean of ALL differences between ALL SEEN frames -- no f_limit.
+            "d_range": self.d_range,                # offset +/- allowed difference; frm_delta_pcnt * fd_mean
+        }
+
+
+
+
+
     def configure(self):
         readConfig('cam.json', self.config)
 

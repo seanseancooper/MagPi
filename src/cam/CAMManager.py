@@ -20,7 +20,7 @@ class CAMManager(threading.Thread):
         self.statistics = {}                    # not used!
 
     def __str__(self):
-        return {"CAMManager": str(self.config)}
+        return f"CAMManager {str(self.config)}"
 
     def configure(self, config_file):
         readConfig(config_file, self.config)

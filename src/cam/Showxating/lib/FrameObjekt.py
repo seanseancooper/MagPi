@@ -33,7 +33,7 @@ class FrameObjekt:
     def create(f_id):
         return FrameObjekt(f_id)
 
-    def __str__(self):
+    def get(self):
         return {'f_id' : self.f_id,
                 'tag'      : self.tag,
                 'isNew'    : self.isNew,

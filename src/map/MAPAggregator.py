@@ -35,7 +35,7 @@ class MAPAggregator(threading.Thread):
         self.thread = None
 
     def __str__(self):
-        return {f"MAPAggregator: {self.aggregated}"}
+        return f"MAPAggregator: {self.aggregated}"
 
     def configure(self, config_file, **kwargs):
         non_config_files = kwargs.get('non_config_files')

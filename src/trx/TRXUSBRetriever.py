@@ -41,7 +41,7 @@ class TRXUSBRetriever(threading.Thread):
         self.thread = None
 
     def __str__(self):
-        return {f"TRXRetriever: "}
+        return f"TRXRetriever: "
 
     def configure(self, config_file):
         readConfig(config_file, self.config)

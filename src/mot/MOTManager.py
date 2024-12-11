@@ -17,7 +17,7 @@ class MOTManager(threading.Thread):
         self.config = {}
 
     def __str__(self):
-        return {"MOTManager": str(self.config)}
+        return f"MOTManager: {str(self.config)}"
 
     def configure(self, config_file):
         readConfig(config_file, self.config)

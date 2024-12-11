@@ -40,7 +40,7 @@ class TRXWorker:
 
         self.DEBUG = False
 
-    def __str__(self):
+    def get(self):
         return {"ALPHATAG"      : self.ALPHATAG,
                 "freq"          : self.freq,
 
@@ -151,7 +151,7 @@ class TRXWorker:
 
     def stop(self):
         if self.tracked:
-            append_to_outfile(self.config, self.__str__())
+            append_to_outfile(self.config, self.get())
 
     def run(self):
         ''' match a freq and populate data '''

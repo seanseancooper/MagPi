@@ -1,3 +1,5 @@
+import json
+
 from flask import Blueprint, render_template, redirect
 
 from src.cam.CAMManager import CAMManager
@@ -15,8 +17,22 @@ cam_bp = Blueprint(
 
 @cam_bp.route('/')
 def index():
-    # TODO: what observed 'data' can be exposed? tracking?
-    return camMgr.config
+    # TODO: what 'data' can be exposed instead of config?
+    #  capture stats
+    #  plugin config
+    #  tracking hyperparameter config
+    #  tag
+    #  tag location
+    #  self._ml = []                        # DO NOT CHANGE: list of (x,y) location of contour in self.contours
+    #  self._frame_delta                    # DO NOT CHANGE: euclidean distance between the current and previous frames
+    #  self._frame_MSE = float()
+    #  self._frame_SSIM = float()
+    #  motion detected
+    #  analytics: last n frames
+    plugin = camMgr.plugin.get()
+    tracker = camMgr.plugin.tracker.get()
+    streamservice = camMgr.plugin.streamservice.get()
+    return plugin, tracker, streamservice
 
 
 @cam_bp.route("/ctrl", methods=['GET'], subdomain='cam')

@@ -93,6 +93,25 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
         self.processed = None
 
+    def get(self):
+        return {
+            "_area": self._area,
+            "_max_height": self._max_height,
+            "_max_width": self._max_width,
+
+            "has_symbols": self.has_symbols,
+            "has_analysis": self.has_analysis,
+            "has_motion": self.has_motion,
+
+            "_kz": self._kz,
+            "threshold": self.threshold,
+
+            "show_threshold": self.show_threshold,
+            "mediapipe": self.mediapipe,
+
+            "tracked": [_ for _ in self.tracked],
+        }
+
     def get_config(self):
         super().get_config()
         self.tracker.configure()

@@ -28,7 +28,7 @@ class GPSRetriever(threading.Thread):
         self.result = defaultdict(dict)
 
     def __str__(self):
-        return {f"GPSRetriever: time: {self.gps_time()} position: {self.gps_position()} config: {self.config}"}
+        return f"GPSRetriever: time: {self.gps_time()} position: {self.gps_position()} config: {self.config}"
 
     def configure(self, config_file):
         readConfig(config_file, self.config)

@@ -37,7 +37,7 @@ class Trilaterator(threading.Thread):
         self.retriever = GPSRetriever()  # no, use the context GPSRetriever...
         self.scanner = None  # no, use the context WifiScanner...
 
-    def __str__(self):
+    def get(self):
         return {
             "created"       : format_time(self.created, self.config.get('TIMER_FORMAT', "%H:%M:%S")),
             "updated"       : format_time(self.updated, self.config.get('TIMER_FORMAT', "%H:%M:%S")),

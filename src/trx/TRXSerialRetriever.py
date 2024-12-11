@@ -40,7 +40,7 @@ class TRXSerialRetriever(threading.Thread):
         self.thread = None
 
     def __str__(self):
-        return {f"TRXRetriever: "}
+        return f"TRXRetriever: "
 
     def config_worker(self, worker):
         worker.retriever = self

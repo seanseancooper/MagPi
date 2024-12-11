@@ -80,10 +80,12 @@ class StreamService(server.ThreadingHTTPServer):
 
         self.allow_reuse_address = True
 
-    # def server_bind(self):
-    #     import socket
-    #     self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    #     self.socket.bind(self.server_address)
+    def get(self):
+        return {
+            "addr": self.server_address,
+            "config_path": self.config_path,
+            "is_stopped": self.is_stopped
+        }
 
     def serve_forever(self, poll_interval: float = ...) -> None:
         while not self.is_stopped:

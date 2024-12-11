@@ -142,7 +142,7 @@ class WifiScanner(threading.Thread):
     def update(self, bssid, _signals):
         """ put bssid associated signal data into a map as an element in a list of _signals """
         worker = self.get_worker(bssid)
-        sgnl = worker.__str__()
+        sgnl = worker.get()
         self.update_sgnl_dynamics(sgnl, worker, self.config.get('TIMER_FORMAT', "%H:%M:%S"))
         _signals.append(sgnl)
 

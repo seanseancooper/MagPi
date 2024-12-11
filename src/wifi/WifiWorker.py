@@ -38,7 +38,7 @@ class WifiWorker:
 
         self.DEBUG = False
 
-    def __str__(self):
+    def get(self):
         return {"SSID"          : self.ssid,
                 "BSSID"         : self.bssid,
                 "created"       : format_time(self.created, "%H:%M:%S"),
@@ -150,7 +150,7 @@ class WifiWorker:
 
     def stop(self):
         if self.tracked:
-            append_to_outfile(self.config, self.__str__())
+            append_to_outfile(self.config, self.get())
 
     def run(self):
         ''' match a BSSID and populate data '''

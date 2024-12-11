@@ -15,7 +15,7 @@ class EBSManager(threading.Thread):
         self.config = {}
 
     def __str__(self):
-        return {"EBSManager": str(self.config)}
+        return f"EBSManager {str(self.config)}"
 
     def configure(self, config_file):
 
