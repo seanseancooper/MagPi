@@ -328,12 +328,11 @@
         Tabulator.extendModule("mutator", "mutators", {
             signalMutator:function(value, data, type, mutatorParams){
 
-                var sgnlList = [];
-                for (const pt of value) {
-                    let json = JSON.parse(pt)
-                    sgnlList.push(json['sgnl'])
-                }
-                return sgnlList;
+            var sgnlList = [];
+            for (const pt of value) {
+                sgnlList.push(pt['sgnl'])
+            }
+            return sgnlList;
 
             },
         });

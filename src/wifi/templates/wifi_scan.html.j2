@@ -326,8 +326,7 @@
 
             var sgnlList = [];
             for (const pt of value) {
-                let json = JSON.parse(pt)
-                sgnlList.push(json['sgnl'])
+                sgnlList.push(pt['sgnl'])
             }
             return sgnlList;
 

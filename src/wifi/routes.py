@@ -79,7 +79,7 @@ def wifi_stop():
 @wifi_bp.route('/write', methods=['POST'], subdomain='wifi')
 def wifi_write():
     from lib.wifi_utils import write_to_scanlist
-    if write_to_scanlist(s.config, s.tracked_signals):
+    if write_to_scanlist(s.config, s.get_tracked_signals()):
         return "OK", 200
     return "", 500
 

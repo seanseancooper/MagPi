@@ -136,7 +136,7 @@ class WifiScanner(threading.Thread):
 
         sgnl['is_mute'] = worker.is_mute
         sgnl['tracked'] = worker.tracked
-        sgnl['signal_cache'] = [json.dumps(sgnl.get()) for sgnl in self.signal_cache[worker.bssid]]
+        sgnl['signal_cache'] = [sgnl.get() for sgnl in self.signal_cache[worker.bssid]]
         sgnl['results'] = [json.dumps(result) for result in worker.test_results]
 
     def update(self, bssid, _signals):
@@ -183,7 +183,7 @@ class WifiScanner(threading.Thread):
         return _signals
 
     def stop(self):
-        write_to_scanlist(self.config, self.tracked_signals)
+        write_to_scanlist(self.config, self.get_tracked_signals())
         [worker.stop() for worker in self.workers]
         self.parsed_signals.clear()
         wifi_stopped.send(self)

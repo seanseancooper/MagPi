@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-
+from src.lib.utils import format_time, format_delta
 
 class WifiSignalPoint:
     """ discrete class to encapsulate a signal captured at a point.
@@ -25,7 +25,7 @@ class WifiSignalPoint:
 
     def get(self):
         return {
-            "datetime": str(self._dt),
+            "datetime": format_time(self._dt, "%Y-%m-%d %H:%M:%S.%f"),
             "id": str(self._id),
             "lon": self._lon,
             "lat": self._lat,
