@@ -117,7 +117,7 @@
 
             var xhttp = new XMLHttpRequest();
 
-            xhttp.open('POST', "{{ url_for('.index')}}write/", true);
+            xhttp.open('POST', "{{ url_for('.index')}}write", true);
             setsHeaders(xhttp);
             xhttp.setRequestHeader('TARGET', trgt);
             xhttp.send();
@@ -246,7 +246,8 @@
         <button id="none_button" class="none_button" value="" onClick="select_all(false);">
             <span id="none_button_text">NONE</span>
         </button>
-        <button id="write_button" class="write_button" value="" onClick="write_tracked();">
+        <!-- TODO: onClick should noot be hardcoded or even here -->
+        <button id="write_button" class="write_button" value="" onClick="write_tracked(this,'wifi');">
             <span id="write_button_text">WRITE</span>
         </button>
         <button id="load_button" class="reload_button" value="" onClick="reload();">
@@ -417,6 +418,8 @@
         container_elements.push(document.getElementById('trx_container'));
         container_elements.push(document.getElementById("all_button"));
         container_elements.push(document.getElementById("none_button"));
+        container_elements.push(document.getElementById("write_button"));
+        container_elements.push(document.getElementById("load_button"));
 
         container_elements.forEach(function(element) {
 
@@ -441,6 +444,14 @@
 
                 if (event.target.classList.contains('none_button')) {
                     alert('select none');
+                };
+
+                if (event.target.classList.contains('write_button')) {
+                    write_tracked(this,'wifi'); // 'wifi' is a http header
+                };
+
+                if (event.target.classList.contains('load_button')) {
+                    reload();
                 };
 
             });

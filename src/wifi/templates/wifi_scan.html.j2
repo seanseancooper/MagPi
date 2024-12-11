@@ -118,7 +118,7 @@
 
             var xhttp = new XMLHttpRequest();
 
-            xhttp.open('POST', "{{ url_for('.index')}}write/", true);
+            xhttp.open('POST', "{{ url_for('.index')}}write", true);
             setsHeaders(xhttp);
             xhttp.setRequestHeader('TARGET', trgt);
             xhttp.send();
