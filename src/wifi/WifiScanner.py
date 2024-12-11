@@ -148,10 +148,8 @@ class WifiScanner(threading.Thread):
 
     def update_ghosts(self):
         """ find, load and update ghosts """
-        # DBUG: removal from either tracked or parsed removes *entire*
-        #  collection of ghosts due to using frozenset.
         tracked = frozenset([x for x in self.tracked_signals])
-        parsed = frozenset([key['BSSID'] for key in self.parsed_signals.copy()])
+        parsed = frozenset([key['BSSID'] for key in self.parsed_signals])
         self.ghost_signals = tracked.difference(parsed)
 
         def update_ghost(item):
