@@ -102,7 +102,7 @@ class WifiWorker:
         """ updates *dynamic* fields"""
         self.updated = datetime.now()
         self.elapsed = datetime.now() - self.created
-        self.tracked = self.bssid in self.scanner.tracked_signals.keys()
+        self.tracked = self.bssid in self.scanner.tracked_signals
         self.scanner.makeSignalPoint(self.bssid, int(sgnl.get('Signal', -99)))
 
     def match(self, cell):
@@ -125,23 +125,26 @@ class WifiWorker:
 
     def add(self, bssid):
 
-        worker = self.scanner.get_worker(bssid)  # no SSID yet!
-
         try:
-            cell = [cell for cell in self.scanner.parsed_signals if cell['BSSID'] == bssid][0]
-            if cell:
-                worker.tracked = True
-                worker.ssid = cell['SSID']
-                self.scanner.tracked_signals.update({worker.bssid: worker.__str__()})
+            cell = self.scanner.get_cell(bssid)
 
-                if worker not in self.scanner.workers:
+            if cell:
+                worker = self.scanner.get_worker(bssid)  # need to update worker
+                worker.tracked = True
+
+                # mandatory, albeit late work
+                worker.ssid = cell['SSID']
+                self.scanner.tracked_signals.append(bssid)
+
+                if worker not in self.scanner.workers:  # why would it not be?
                     self.scanner.workers.append(worker)
 
                 # SIGNAL: ADDED ITEM
                 return True
-            return False  # no cell
+
+            return False  # no cell: should not happen unless ext. modified
         except IndexError:
-            return False  # not in parsed_signals
+            return False  # more likely not in parsed_signals, signal is a ghost now
 
     def remove(self, bssid):
         _copy = self.scanner.tracked_signals.copy()

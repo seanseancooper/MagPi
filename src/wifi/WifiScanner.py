@@ -43,7 +43,7 @@ class WifiScanner(threading.Thread):
         ''' all wifi signals represented as a list of dictionaries.  '''
 
         self.workers = []                       # list of workers assigned to monitor a discrete signal.
-        self.tracked_signals = {}               # parsed_signals is a list, this is a map. stinky.
+        self.tracked_signals = []               # parsed_signals currently being tracked.
         self.ghost_signals = []                 # signals no longer received, but tracked -- 'ghost' signals
         self.signal_cache = defaultdict(list)   # a mapping of lists of SignalPoint for all signals received.
 
@@ -111,6 +111,10 @@ class WifiScanner(threading.Thread):
         finally:
             return worker
 
+    def get_cell(self, bssid):
+        cell = [_ for _ in self.parsed_signals if _['BSSID'] == bssid][0]
+        return cell
+
     def makeSignalPoint(self, bssid, signal):
         sgnlPt = WifiSignalPoint(bssid, self.longitude, self.latitude, signal)
         self.signal_cache[bssid].append(sgnlPt)
@@ -124,7 +128,7 @@ class WifiScanner(threading.Thread):
         return sgnlPt
 
     def update_sgnl_dynamics(self, sgnl, worker, fmt):
-        """ update sgnl data with current info from worker """
+        """ update sgnl data map with current info from worker """
         sgnl['Signal'] = worker.signal
         sgnl['created'] = format_time(worker.created, fmt)
         sgnl['updated'] = format_time(worker.updated, fmt)
@@ -136,7 +140,7 @@ class WifiScanner(threading.Thread):
         sgnl['results'] = [json.dumps(result) for result in worker.test_results]
 
     def update(self, bssid, _signals):
-        """ put basic signal data into a list """
+        """ put bssid associated signal data into a map as an element in a list of _signals """
         worker = self.get_worker(bssid)
         sgnl = worker.__str__()
         self.update_sgnl_dynamics(sgnl, worker, self.config.get('TIMER_FORMAT', "%H:%M:%S"))
@@ -146,7 +150,7 @@ class WifiScanner(threading.Thread):
         """ find, load and update ghosts """
         # DBUG: removal from either tracked or parsed removes *entire*
         #  collection of ghosts due to using frozenset.
-        tracked = frozenset([key for key in self.tracked_signals])
+        tracked = frozenset([x for x in self.tracked_signals])
         parsed = frozenset([key['BSSID'] for key in self.parsed_signals.copy()])
         self.ghost_signals = tracked.difference(parsed)
 
@@ -169,13 +173,13 @@ class WifiScanner(threading.Thread):
         return self.parsed_signals
 
     def get_tracked_signals(self):
-        """ update, transform and return a list of tracked signals """
+        """ update, transform and return a list of 'rehydrated' tracked signals """
         _signals = []
         [self.update(bssid, _signals) for bssid in self.tracked_signals]
         return _signals
 
     def get_ghost_signals(self):
-        """ update, transform and return a list of ghost signals """
+        """ update, transform and return a list of 'rehydrated' ghost signals """
         _signals = []
         [self.update(item, _signals) for item in self.ghost_signals]
         return _signals
