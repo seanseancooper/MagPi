@@ -80,17 +80,17 @@ def print_signals(sgnls, columns):
     print_table(table)
 
 def compare_MFCC():
-    # TODO: Was in Scanner
+    # TODO: compare_MFCC(), Was in Scanner
     pass
 
 
 def analyze_periodicity():
-    # TODO: Was in Scanner
+    # TODO: analyze_periodicity(), Was in Scanner
     pass
 
 
 def get_MFCC():
-    # TODO: Was in Worker
+    # TODO: get_MFCC(), Was in Worker
     pass
 
 
