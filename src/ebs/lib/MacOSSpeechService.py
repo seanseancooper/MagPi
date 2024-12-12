@@ -20,6 +20,7 @@ class MacOSSpeechService(SpeechService):
         if self.read_msg:
             command = ['say', '-r', '200', self.read_msg]
             pid = runOSCommand(command)
+            self.read_msg = None
             print(f'command: {command} pid: {pid}')
 
     def shutdown(self):
