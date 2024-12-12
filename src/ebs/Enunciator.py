@@ -1,44 +1,100 @@
-import os
 import logging
+import threading
+import time
 
 from src.wifi.lib.TokenBucket import TokenBucket
+from src.config import readConfig
 
 logger_root = logging.getLogger('root')
 
 
-class Enunciator:
+class Enunciator(threading.Thread):
     """ Enunciator speaks its' mind... """
 
+    # Enunciator: Provide auditory feedback on events. This will pass
+    # a message to a queue which is read by an interface for a
+    # SpeechService, which will render it.
+
     def __init__(self, name, tokens, interval):
+        super().__init__()
         self.name = name
         self.tokens = tokens
         self.interval = interval
+        self.speech = None
         self.config = {}
-        self.fifo = None
+        self.message_queue = None                        # the message queue
         self.throttle = None
         self.debug = False
 
-    def configure(self):
+        self.loop_polling_interval = .10
+        self.broadcast_relay_delay = .5
+        self.limit = 8
 
-        self.fifo = self.config.get('FIFO_PATH', os.environ.get('FIFO_PATH', 'scanner.fifo'))
+        self.running_actuator = False
+
+    def stop(self):
+        time.sleep(self.broadcast_relay_delay)
+        msg = "Speech Actuator Service off line"
+        logger_root.info(msg)
+        f'say -r 200 {msg}'
+
+        if self.message_queue:
+            self.message_queue.empty()
+            self.message_queue.shutdown()
+            logger_root.info(f"Speech Actuator Service offline {self.message_queue}")
+
+        time.sleep(1)
+
+    def configure(self):
+        readConfig('ebs.json', self.config)
+
         self.throttle = TokenBucket(int(self.tokens), int(self.interval))
         self.debug = self.config.get('DEBUG', False)
 
+    def init(self):
+        self.message_queue = self.speech.make_fifo()
+
+    def actuate(self):
+        """ gets message on queue to SpeechService"""
+        while True:
+            self.running_actuator = True
+            if not self.message_queue.empty():
+                message = self.message_queue.get()
+
+                if self.debug:
+                    logger_root.info(f'got line {message}')
+
+                try:
+                    # enqueue message to SpeechService.
+                    self.speech.write_queue(message)
+                except Exception as e:
+                    logger_root.error(f'Exception: {e}')
+            else:
+                time.sleep(self.loop_polling_interval)
+
+
     def broadcast(self, message):
+        """ puts message on queue the method clients use to enqueue messages. """
+        if message:
+            if self.running_actuator:
+
+                logger_root.info(f'broadcast received: {message} \n')
+                try:
+                    # push message to fifo
+                    self.message_queue.put(message, block=False, timeout=None)
+                except Exception as e:
+                    logger_root.error(f'Exception:  {e}')
+            else:
+                logger_root.error('Actuator Service not running')
+
+
+    def ebs_messsage(self, message):
         """ Broadcast a message using the EBS speech service"""
 
         if self.throttle.handle(message):
             # handle(mesg) returned the message if 'able'
-            try:
-                if os.path.exists(self.fifo):
-                    import stat
-                    if stat.S_ISFIFO(os.stat(self.fifo).st_mode):
-                        with open(self.fifo, "w") as f:
-                            f.write(str(message) + "\n")
-                            if self.debug:
-                                logger_root.debug(f"[{__name__}]: sent \"{message}\" message to FIFO")
-                else:
-                    logger_root.warning(
-                        f"[{__name__}]: Failed to get FIFO (EBS offline?): Aborted message \"{message}\"")
-            except Exception as e:
-                logger_root.error(f"[{__name__}]:Exception {e} occurred: Stale FIFO? Aborted message \"{message}\"")
+            self.broadcast(message)
+
+    def run(self):
+        self.actuate()
+

@@ -2,7 +2,7 @@ import threading
 import logging
 
 from src.config import readConfig
-from src.lib.utils import runOSCommand
+from src.ebs.lib.MacOSSpeechService import MacOSSpeechService
 
 logger_root = logging.getLogger('root')
 ebs_logger = logging.getLogger('ebs_logger')
@@ -13,33 +13,42 @@ class EBSManager(threading.Thread):
     def __init__(self):
         super().__init__()
         self.config = {}
-
-    def __str__(self):
-        return f"EBSManager {str(self.config)}"
+        self.speechService = None
 
     def configure(self, config_file):
-
-        if not config_file:
-            exit(1)
-
         readConfig(config_file, self.config)
 
-    def ebs_stop(self):
-        if runOSCommand(self.config['EBS']['STOP_COMMAND']) > 0:
-            return 0
-        else:
-            return None
+
+    def enunciate(self, msg):
+        self.speechService.enunciator.broadcast(msg)
+        return
+
+    def stop(self):
+        pass
 
     def ebs_start(self):
-        if runOSCommand(self.config['START_COMMAND']) > 0:
-            return "OK"
-        else:
-            return "FAIL!"
+        # 2 components running in somewhat opposing threads:
+
+        # Enunciator: Provide auditory feedback on events. This will pass
+        # a message to a queue which is read by an interface for a
+        # SpeechService, which will render it.
+        self.speechService = MacOSSpeechService() # TODO: Make cconfigurable
+        self.speechService.configure()
+        self.speechService.init()
+        thread = threading.Thread(target=self.speechService.run, daemon=True)
+        thread.start()
+        # msg = "Speech Actuator Service online"
+        # msg = "It is .... ALIVE!!!"
+        # speechService.enunciator.broadcast(msg)
+        # logger_root.info(msg)
+
+        # Bugger: Uses ARX component to listen for and operationalize
+        # spoken word commands from a library (project-keyword-spotter).
+        # The library will use the Coral adapter to run inference on MFCC
+        # slices in real time.
+        #
 
     def run(self):
         self.ebs_start()
-        # while True:
-        #     try:
-        #         time.sleep(1)
-        #     except KeyboardInterrupt:
-        #         exit(0)
+
+

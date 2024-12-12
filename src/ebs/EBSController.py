@@ -11,7 +11,7 @@ class EBSController(threading.Thread):
         super().__init__()
 
     @staticmethod
-    def create_app(self):
+    def create_app():
         """Create Flask application."""
         app = Flask('EBS',
                     instance_relative_config=True,
@@ -21,7 +21,7 @@ class EBSController(threading.Thread):
 
         with app.app_context():
             if __name__ == '__main__':
-                app.config['SERVER_NAME'] = routes.ebsMgr.config['EBS']['SERVER_NAME']
+                app.config['SERVER_NAME'] = routes.ebsMgr.config['SERVER_NAME']
                 app.config['DEBUG'] = routes.ebsMgr.config['DEBUG']
                 app.register_blueprint(routes.ebs_bp)
             return app
