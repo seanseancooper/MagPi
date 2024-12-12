@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,44 +10,15 @@
     <link rel="stylesheet" href="{{ url_for('ebs_bp.static', filename='css/ebs.css') }}">
 
     <script src="{{ url_for('ebs_bp.static', filename='js/ebs.js') }}"></script>
-    <script src="{{ url_for('ebs_bp.static', filename='js/jquery-3.3.1.min.js') }}"
-            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-            crossorigin="anonymous">
-    </script>
 
 </head>
 <body>
-    <div class="w3-container">
-        <table class="w3-striped w3-card-4">
-{% for cell in parsed_cells: %}
-            <tr class="w3-row">
-                <td class="w3-cell">
-                    {% if cell not in found_cells: %}
-                    <button class="w3-button w3-blue-gray w3-round w3-hover-gray" value="{{cell.BSSID}}" onClick="add('{{cell.BSSID}}')">ADD</button>
-                    {% elif cell.is_mute == False:  %}
-                    <button class="w3-button w3-orange w3-round w3-hover-red" value="{{cell.BSSID}}" onClick="mute('{{cell.BSSID}}')">
-                        <div style="color:black;">MUTE</div>
-                    </button>
-                    {% elif cell.is_mute == True:  %}
-                    <button class="w3-button w3-blue-gray w3-round w3-hover-red" value="{{cell.BSSID}}" onClick="unmute('{{cell.BSSID}}')">
-                        <div style="color:black;">UNMUTE</div>
-                    </button>
-                    {% endif %}
-                </td>
-                <td class="id_container"><b>{{cell.SSID}}</b><br>{{cell.BSSID}}</td>
-                <td class="bar_container" style="width:100px">
-                    <div class="w3-display-container">
-                        <div class="w3-blue-gray w3-round bar" style="height:15px;width:{{cell.Quality}}%;"></div>
-                    </div>
-                </td>
-                <td class="w3-cell" style="width:30px;">{{cell.Quality}}</td>
-                <td class="w3-cell" style="width:50px;">{{cell.Frequency}}</td>
-                <td class="w3-cell" style="width:30px;">{{cell.Signal}}</td>
-                <td class="w3-cell" style="width:75px;">{{cell.Last}}</td>
-                <td class="w3-cell" style="width:200px;">{{cell.Vendor}}</td>
-            </tr>
-{% endfor %}
-        </table>
+    <div>
+    <form action="http://ebs.localhost:5003{{ url_for('.ebs_enunciate', msg=msg) }}"  method="POST">
+        Enunciate:<br>
+        <input type="text" name="msg" value="say something">
+        <input type="submit">
+    </form>
     </div>
 </body>
 </html>

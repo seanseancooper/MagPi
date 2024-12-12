@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, jsonify
+from flask import Blueprint, render_template, request
 
 from src.ebs.EBSManager import EBSManager
 
@@ -15,20 +15,26 @@ ebs_bp = Blueprint(
 
 @ebs_bp.route('/', subdomain='ebs')
 def index():
-    return "OK"
+    return ebsMgr.config
+
+
+@ebs_bp.route('/enunciate', methods=['GET', 'POST'], subdomain='ebs')
+def ebs_enunciate():
+
+    if request.method == 'POST':
+        # result = request.form
+        # json_result = dict(result)
+        msg = request.form.get("msg", "")
+
+        if msg:
+           ebsMgr.enunciate(str(msg))
+
+    return render_template("ebs.html.j2")
 
 
 @ebs_bp.route('/run', methods=['GET', 'POST'], subdomain='ebs')
 def ebs_run():
     return ebsMgr.run()
-
-
-@ebs_bp.route('/enunciate/<msg>', methods=['GET', 'POST'], subdomain='ebs')
-def ebs_enunciate(msg):
-    # TODO: make sure this is only ever a string!!
-    # TODO: form & POST only
-    ebsMgr.enunciate(msg)
-    return "OK"
 
 
 @ebs_bp.route("/stop", methods=['GET', 'POST'], subdomain='ebs')
