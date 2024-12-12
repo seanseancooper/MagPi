@@ -11,7 +11,7 @@ class TokenBucket:
         self.time_unit = time_unit
         self.DEBUG = debug
         self.bucket = tokens
-        self.last_check = time()
+        self.last_check = time.time()
 
     def __repr__(self):
         return f"tokens:{self.tokens} time_unit:{self.time_unit} bucket:{self.bucket} last_check:{self.last_check}"
