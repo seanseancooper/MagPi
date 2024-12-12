@@ -59,7 +59,7 @@ class Enunciator(threading.Thread):
             if not self.message_queue.empty():
                 message = self.message_queue.get()
 
-                logger_root.info(f'actuator: {message} {self.message_queue.qsize()}')
+                logger_root.info(f'actuator: {message}')
 
                 try:
                     # enqueue message to SpeechService.
