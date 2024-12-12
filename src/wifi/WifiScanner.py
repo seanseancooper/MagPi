@@ -26,6 +26,7 @@ wifi_stopped = wifi_signals.signal('WIFI STOP')
 
 logger_root = logging.getLogger('root')
 wifi_logger = logging.getLogger('wifi_logger')
+# speech_logger = logging.getLogger('speech_logger')
 
 
 class WifiScanner(threading.Thread):
@@ -196,6 +197,7 @@ class WifiScanner(threading.Thread):
         # self.stats =  {}
 
         wifi_started.send(self)
+        # speech_logger.info('started')
 
         while True:
 
