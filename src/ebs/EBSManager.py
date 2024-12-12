@@ -18,7 +18,6 @@ class EBSManager(threading.Thread):
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
-
     def enunciate(self, msg):
         self.speechService.enunciator.broadcast(msg)
         return
@@ -32,15 +31,13 @@ class EBSManager(threading.Thread):
         # Enunciator: Provide auditory feedback on events. This will pass
         # a message to a queue which is read by an interface for a
         # SpeechService, which will render it.
-        self.speechService = MacOSSpeechService() # TODO: Make cconfigurable
+
+        self.speechService = MacOSSpeechService()  # TODO: Make configurable
         self.speechService.configure()
         self.speechService.init()
         thread = threading.Thread(target=self.speechService.run, daemon=True)
         thread.start()
-        # msg = "Speech Actuator Service online"
-        # msg = "It is .... ALIVE!!!"
-        # speechService.enunciator.broadcast(msg)
-        # logger_root.info(msg)
+
 
         # Bugger: Uses ARX component to listen for and operationalize
         # spoken word commands from a library (project-keyword-spotter).
