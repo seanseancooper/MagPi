@@ -52,7 +52,7 @@ class Enunciator(threading.Thread):
         self.debug = self.config.get('DEBUG', False)
 
     def init(self):
-        self.message_queue = queue.Queue(maxsize=1)
+        self.message_queue = queue.Queue(maxsize=1)  # make configurable
         self.speech.make_fifo()
 
     def actuate(self):

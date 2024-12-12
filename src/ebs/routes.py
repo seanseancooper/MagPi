@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect
+from flask import Blueprint, redirect, jsonify
 
 from src.ebs.EBSManager import EBSManager
 
@@ -13,17 +13,17 @@ ebs_bp = Blueprint(
 )
 
 
-@ebs_bp.route('/')
+@ebs_bp.route('/', subdomain='ebs')
 def index():
-    return redirect('/enunciate/hello', code=302)
+    return "OK"
 
 
-@ebs_bp.route('/run', methods=['GET', 'POST'])
+@ebs_bp.route('/run', methods=['GET', 'POST'], subdomain='ebs')
 def ebs_run():
     return ebsMgr.run()
 
 
-@ebs_bp.route('/enunciate/<msg>', methods=['GET', 'POST'])
+@ebs_bp.route('/enunciate/<msg>', methods=['GET', 'POST'], subdomain='ebs')
 def ebs_enunciate(msg):
     # TODO: make sure this is only ever a string!!
     # TODO: form & POST only
@@ -31,6 +31,6 @@ def ebs_enunciate(msg):
     return "OK"
 
 
-@ebs_bp.route("/stop", methods=['GET', 'POST'])
+@ebs_bp.route("/stop", methods=['GET', 'POST'], subdomain='ebs')
 def ebs_stop():
     return ebsMgr.stop()
