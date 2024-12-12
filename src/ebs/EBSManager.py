@@ -19,7 +19,8 @@ class EBSManager(threading.Thread):
         readConfig(config_file, self.config)
 
     def enunciate(self, msg):
-        self.speechService.enunciator.broadcast(msg)
+        if self.speechService.enunciator:
+            self.speechService.enunciator.broadcast(msg)
         return
 
     def stop(self):
