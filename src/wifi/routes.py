@@ -1,6 +1,6 @@
 from flask import Blueprint, redirect, render_template, jsonify
-
 from src.wifi.WifiScanner import WifiScanner
+import logging
 
 s = WifiScanner()
 s.configure('wifi.json')
@@ -11,6 +11,8 @@ wifi_bp = Blueprint(
         static_folder=s.config['STATIC_FOLDER'],
         static_url_path='/static'
 )
+
+speech_logger = logging.getLogger('speech_logger')
 
 
 @wifi_bp.route('/', subdomain="wifi")
@@ -50,6 +52,7 @@ def wifi_ghosts():
 @wifi_bp.route('/add/<bssid>', methods=['POST'], subdomain='wifi')
 def add(bssid):
     if s.get_worker(bssid).add(bssid):
+        speech_logger.info(f'added')
         return "OK", 200
     return "", 404
 
@@ -62,6 +65,7 @@ def mute(bssid):
 @wifi_bp.route('/remove/<bssid>', methods=['POST'], subdomain='wifi')
 def remove(bssid):
     if s.get_worker(bssid).remove(bssid):
+        speech_logger.info(f'removed')
         return "OK", 200
     return "", 404
 
@@ -80,6 +84,7 @@ def wifi_stop():
 def wifi_write():
     from lib.wifi_utils import write_to_scanlist
     if write_to_scanlist(s.config, s.get_tracked_signals()):
+        speech_logger.info(f'logged {len(s.get_tracked_signals())} items')
         return "OK", 200
     return "", 500
 
