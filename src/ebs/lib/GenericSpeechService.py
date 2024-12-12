@@ -1,5 +1,6 @@
 import queue
 import threading
+import time
 
 from src.config import readConfig
 from src.ebs.Enunciator import Enunciator
@@ -54,5 +55,6 @@ class SpeechService(threading.Thread):
         while True:
             self.dequeue(1)
             self.process_message()
+            time.sleep(.5)
 
 
