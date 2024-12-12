@@ -21,7 +21,10 @@
 			"DEBUG": false
 		},
 		{
-			"FIFO_PATH": "../../systemd/system/broadcast_actuator/+broadcast.pipe"
+			"SPEECH_RATE": 200
+		},
+		{
+			"SPEECH_VOICE": "Samantha"
 		},
 		{
 			"SERVER_NAME": "localhost:5003"

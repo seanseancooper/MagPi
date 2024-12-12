@@ -14,11 +14,15 @@ class MacOSSpeechService(SpeechService):
     def configure(self):
         super(MacOSSpeechService, self).config()
         # MacOS specific config here
+        # say
+        # [-v voice] [-r rate]
+        # [-o outfile [audio format options] | -n name:port | -a device]
+        # [-f file | string ...]
 
     def process_message(self):
         # MacOS specific impl to render message
         if self.read_msg:
-            command = ['say', '-r', '200', self.read_msg]
+            command = ['say', '-r', str(self.rate), self.read_msg]
             pid = runOSCommand(command)
             self.read_msg = None
             print(f'command: {command} pid: {pid}')

@@ -15,19 +15,21 @@ class SpeechService(threading.Thread):
         super().__init__()
         self.config = {}
         self.enunciator = None
+        self.rate = None
+        self.voice = None
         self.message_queue = None
-        # DO NOT put a field for a specific impl; we want to be able to render to multiple impls simultaneously.
         self.read_msg = None
 
     def config(self):
         # generic config
         readConfig('ebs.json', self.config)
+        self.rate = self.config['SPEECH_RATE']
+        self.voice = self.config['SPEECH_VOICE']
 
     def init(self):
-        # Create a new Enunciator instance.
         self.enunciator = Enunciator('name', 1, 100)
-        self.enunciator.speech = self
         self.enunciator.configure()
+        self.enunciator.speech = self
         self.enunciator.init()
         threading.Thread(target=self.enunciator.run).start()
 
@@ -40,21 +42,18 @@ class SpeechService(threading.Thread):
             self.message_queue.put(m)
 
     def read_queue(self):
-        # read whatever has queued messsages.
         while not self.message_queue.empty():
             self.read_msg = self.message_queue.get()
 
     def process_message(self):
-        # implemented in a subclass
         pass
 
     def shutdown(self):
-        # run my & specific shutdowns, nest.
         pass
 
     def run(self):
         while True:
             self.read_queue()
-            self.process_message()   # runs a thread; dispose when done
+            self.process_message()
 
 
