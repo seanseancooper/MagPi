@@ -1,4 +1,5 @@
 import logging
+import queue
 import threading
 import time
 
@@ -36,9 +37,9 @@ class Enunciator(threading.Thread):
         time.sleep(self.broadcast_relay_delay)
         msg = "Speech Actuator Service off line"
         logger_root.info(msg)
-        f'say -r 200 {msg}'
 
         if self.message_queue:
+            # TODO: this is a thread...
             self.message_queue.empty()
             self.message_queue.shutdown()
             logger_root.info(f"Speech Actuator Service offline {self.message_queue}")
@@ -47,12 +48,12 @@ class Enunciator(threading.Thread):
 
     def configure(self):
         readConfig('ebs.json', self.config)
-
         self.throttle = TokenBucket(int(self.tokens), int(self.interval))
         self.debug = self.config.get('DEBUG', False)
 
     def init(self):
-        self.message_queue = self.speech.make_fifo()
+        self.message_queue = queue.Queue(maxsize=1)
+        self.speech.make_fifo()
 
     def actuate(self):
         """ gets message on queue to SpeechService"""
@@ -69,6 +70,7 @@ class Enunciator(threading.Thread):
                     self.speech.write_queue(message)
                 except Exception as e:
                     logger_root.error(f'Exception: {e}')
+
             else:
                 time.sleep(self.loop_polling_interval)
 
@@ -82,6 +84,7 @@ class Enunciator(threading.Thread):
                 try:
                     # push message to fifo
                     self.message_queue.put(message, block=False, timeout=None)
+
                 except Exception as e:
                     logger_root.error(f'Exception:  {e}')
             else:
