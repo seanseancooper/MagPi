@@ -37,12 +37,11 @@ class SpeechService(threading.Thread):
         self.message_queue = queue.Queue(maxsize=1)
         return self.message_queue
 
-    def write_queue(self, m):
-        while self.message_queue.empty():
-            self.message_queue.put(m)
+    def enqueue(self, m):
+        self.message_queue.put(m, block=True, timeout=None)
 
-    def read_queue(self):
-        while not self.message_queue.empty():
+    def dequeue(self, n):
+        while not self.message_queue.empty():           # this needs to block until message completes
             self.read_msg = self.message_queue.get()
 
     def process_message(self):
@@ -53,7 +52,7 @@ class SpeechService(threading.Thread):
 
     def run(self):
         while True:
-            self.read_queue()
+            self.dequeue(1)
             self.process_message()
 
 

@@ -1,5 +1,7 @@
+import shutil
+import subprocess
+
 from src.ebs.lib.GenericSpeechService import SpeechService
-from src.lib.utils import runOSCommand
 
 
 class MacOSSpeechService(SpeechService):
@@ -22,10 +24,22 @@ class MacOSSpeechService(SpeechService):
     def process_message(self):
         # MacOS specific impl to render message
         if self.read_msg:
-            command = ['say', '-r', str(self.rate), self.read_msg]
+            command = ['say', '-r', str(self.rate), '-v', self.voice, self.read_msg]
+
+            def runOSCommand(command: list):
+                try:
+                    command[0] = shutil.which(command[0])
+                    ps = subprocess.Popen(command)
+                    ps.wait()
+                    return ps.pid
+                except OSError as e:
+                    print(f"[{__name__}]:couldn't create a process for \'{command}\': {e}")
+                return 0
+
             pid = runOSCommand(command)
-            self.read_msg = None
-            print(f'command: {command} pid: {pid}')
+            if pid > 0:
+                self.read_msg = None
+                # self.message_queue.join()
 
     def shutdown(self):
         pass

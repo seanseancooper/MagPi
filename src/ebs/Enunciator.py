@@ -27,14 +27,12 @@ class Enunciator(threading.Thread):
         self.throttle = None
         self.debug = False
 
-        self.loop_polling_interval = .10
-        self.broadcast_relay_delay = .5
-        self.limit = 8
+        self.loop_polling_interval = 1.0
+        self.limit = 10
 
         self.running_actuator = False
 
     def stop(self):
-        time.sleep(self.broadcast_relay_delay)
         msg = "Speech Actuator Service off line"
         logger_root.info(msg)
 
@@ -44,7 +42,6 @@ class Enunciator(threading.Thread):
             self.message_queue.shutdown()
             logger_root.info(f"Speech Actuator Service offline {self.message_queue}")
 
-        time.sleep(1)
 
     def configure(self):
         readConfig('ebs.json', self.config)
@@ -52,7 +49,7 @@ class Enunciator(threading.Thread):
         self.debug = self.config.get('DEBUG', False)
 
     def init(self):
-        self.message_queue = queue.Queue(maxsize=1)  # make configurable
+        self.message_queue = queue.Queue(maxsize=self.limit)  # make configurable
         self.speech.make_fifo()
 
     def actuate(self):
@@ -62,12 +59,12 @@ class Enunciator(threading.Thread):
             if not self.message_queue.empty():
                 message = self.message_queue.get()
 
-                if self.debug:
-                    logger_root.info(f'got line {message}')
+                logger_root.info(f'actuator: {message} {self.message_queue.qsize()}')
 
                 try:
                     # enqueue message to SpeechService.
-                    self.speech.write_queue(message)
+                    self.speech.enqueue(message)
+                    pass
                 except Exception as e:
                     logger_root.error(f'Exception: {e}')
 
@@ -80,11 +77,11 @@ class Enunciator(threading.Thread):
         if message:
             if self.running_actuator:
 
-                logger_root.info(f'broadcast received: {message} \n')
-                try:
-                    # push message to fifo
-                    self.message_queue.put(message, block=False, timeout=None)
+                logger_root.info(f'broadcast: {message}')
 
+                try:
+                    # push message to onto local fifo
+                    self.message_queue.put(message)
                 except Exception as e:
                     logger_root.error(f'Exception:  {e}')
             else:
