@@ -4,7 +4,6 @@ from flask_cors import CORS, cross_origin
 import routes
 from src.lib.rest_server import RESTServer as RESTServer
 import logging
-speech_logger = logging.getLogger('speech_logger')
 
 
 class EBSController(threading.Thread):
@@ -29,22 +28,9 @@ class EBSController(threading.Thread):
             return app
 
     def run(self) -> None:
-        try:
-            import atexit
-
-            def stop():
-                routes.ebsMgr.stop()
-
-            atexit.register(stop)
-
-            if __name__ == '__main__':
-                RESTServer(self.create_app()).run()
-            routes.ebsMgr.run()
-        except KeyboardInterrupt:
-            pass
-        finally:
-            # this works, but may not be the correct place for it.
-            speech_logger.info("Started EBS")
+        if __name__ == '__main__':
+            RESTServer(self.create_app()).run()
+        routes.ebsMgr.run()
 
 
 if __name__ == '__main__':
