@@ -26,7 +26,7 @@ wifi_stopped = wifi_signals.signal('WIFI STOP')
 
 logger_root = logging.getLogger('root')
 wifi_logger = logging.getLogger('wifi_logger')
-# speech_logger = logging.getLogger('speech_logger')
+speech_logger = logging.getLogger('speech_logger')
 
 
 class WifiScanner(threading.Thread):
@@ -197,7 +197,7 @@ class WifiScanner(threading.Thread):
         # self.stats =  {}
 
         wifi_started.send(self)
-        # speech_logger.info('started')
+        speech_logger.info('wifi started')
 
         while True:
 
@@ -227,6 +227,8 @@ class WifiScanner(threading.Thread):
                 self.elapsed = datetime.now() - self.created
                 wifi_updated.send(self)
 
+                if self.polling_count % 10 == 0:
+                    speech_logger.info(f'{len(self.parsed_signals)} signals, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
                 print(f"WifiScanner [{self.polling_count}] "
                       f"{format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
                       f"{format_delta(self.elapsed, self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
@@ -237,5 +239,6 @@ class WifiScanner(threading.Thread):
                 time.sleep(self.config.get('SCAN_TIMEOUT', 5))
             else:
                 wifi_failed.send(self)
+                speech_logger.info(f'looking for data {self.polling_count} ... is wifi available?')
                 print(f"looking for data [{self.polling_count}] {format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))}... is wifi available?")
-                time.sleep(1)
+                time.sleep(5)
