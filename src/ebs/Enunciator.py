@@ -7,28 +7,29 @@ from src.wifi.lib.TokenBucket import TokenBucket
 from src.config import readConfig
 
 logger_root = logging.getLogger('root')
+ebs_logger = logging.getLogger('ebs_logger')
 
 
 class Enunciator(threading.Thread):
     """ Enunciator speaks its' mind... """
 
-    # Enunciator: Provide auditory feedback on events. This will pass
-    # a message to a queue which is read by an interface for a
-    # SpeechService, which will render it.
+    # Enunciator: Provide auditory feedback on events. This passes
+    # a message to a local queue, then passed an interface queue
+    # for a SpeechService implementation, which will render it.
 
     def __init__(self, name, tokens, interval):
         super().__init__()
         self.name = name
         self.tokens = tokens
         self.interval = interval
-        self.speech = None
+        self.speechservice = None
         self.config = {}
         self.message_queue = None                        # the message queue
         self.throttle = None
         self.debug = False
 
         self.loop_polling_interval = 1.0
-        self.limit = 10
+        self.limit = 0
 
         self.running_actuator = False
 
@@ -42,50 +43,44 @@ class Enunciator(threading.Thread):
             self.message_queue.shutdown()
             logger_root.info(f"Speech Actuator Service offline {self.message_queue}")
 
-
     def configure(self):
         readConfig('ebs.json', self.config)
         self.throttle = TokenBucket(int(self.tokens), int(self.interval))
         self.debug = self.config.get('DEBUG', False)
+        self.limit = self.config.get('ENUNCIATOR_MSG_LIMIT', 10)
+        self.loop_polling_interval = self.config.get('ENUNCIATOR_LOOP_POLLING_INTERVAL', 0.5)
 
     def init(self):
         self.message_queue = queue.Queue(maxsize=self.limit)  # make configurable
-        self.speech.make_fifo()
+        self.speechservice.make_fifo()
 
     def actuate(self):
         """ gets message on queue to SpeechService"""
-        while True:
+        while self.speechservice:
             self.running_actuator = True
             if not self.message_queue.empty():
-                message = self.message_queue.get()
-
-                logger_root.info(f'actuator: {message}')
-
                 try:
                     # enqueue message to SpeechService.
-                    self.speech.enqueue(message)
-                    pass
+                    message = self.message_queue.get()
+                    self.speechservice.enqueue(message)
+                    ebs_logger.debug(f'actuator: {message}')
                 except Exception as e:
                     logger_root.error(f'Exception: {e}')
-
             else:
                 time.sleep(self.loop_polling_interval)
-
 
     def broadcast(self, message):
         """ puts message on queue the method clients use to enqueue messages. """
         if message:
             if self.running_actuator:
-
-                logger_root.info(f'broadcast: {message}')
-
                 try:
                     # push message to onto local fifo
                     self.message_queue.put(message)
+                    ebs_logger.debug(f'broadcast: {message}')
                 except Exception as e:
                     logger_root.error(f'Exception:  {e}')
             else:
-                logger_root.error('Actuator Service not running')
+                logger_root.error('Actuator not running')
 
 
     def ebs_messsage(self, message):
