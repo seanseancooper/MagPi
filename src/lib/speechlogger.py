@@ -206,21 +206,15 @@ class SpeechFormatter(logging.Formatter):
         Override this method to implement custom logic
         on the possibly ordered dictionary.
         """
+
+        # UNQUEUED MESSAGES
+        # from src.ebs.EBSManager import EBSManager
+        # ebsMgr = EBSManager()
+        # ebsMgr.configure('ebs.json')
+
+        # QUEUED MESSAGES
         from src.ebs.routes import ebsMgr
-
-        if not ebsMgr.speechService:
-            ebsMgr.start()
-            ebsMgr.speechService.init()
-            import time
-            time.sleep(.1)
-
         ebsMgr.enunciate(log_record['message'])
-
-        # get the ebsManager from the application context
-
-        # if not running, start the entire EBS.
-        # from src.ebs.EBSController import EBSController
-        # threading.Thread(target=EBSController).run()
 
         return log_record
 
