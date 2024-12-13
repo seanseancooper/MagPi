@@ -21,10 +21,16 @@
 			"DEBUG": false
 		},
 		{
-			"SPEECH_RATE": 200
+			"SPEECH_RATE": 225
 		},
 		{
 			"SPEECH_VOICE": "Samantha"
+		},
+		{
+			"ENUNCIATOR_MSG_LIMIT": 5
+		},
+		{
+			"ENUNCIATOR_LOOP_POLLING_INTERVAL": 1
 		},
 		{
 			"SERVER_NAME": "localhost:5003"
