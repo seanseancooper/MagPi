@@ -1,13 +1,11 @@
+import threading
 
 
+class Bugger(threading.Thread):
 
-
-class Bugger():
-
-    def __init__(self, a, b, c):
-        self.a = a
-        self.b = b
-        self.c = c
+    def __init__(self):
+        super().__init__()
+        self.config = {}
 
     # Bugger: Uses ARX component to listen for and operationalize
     # spoken word commands from a library (project-keyword-spotter).
