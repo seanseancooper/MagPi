@@ -1,9 +1,11 @@
 import queue
 import threading
 import time
-
+import logging
 from src.config import readConfig
 from src.ebs.Enunciator import Enunciator
+
+ebs_logger = logging.getLogger('ebs_logger')
 
 
 class SpeechService(threading.Thread):
@@ -22,17 +24,15 @@ class SpeechService(threading.Thread):
         self.read_msg = None
 
     def config(self):
-        # generic config
         readConfig('ebs.json', self.config)
         self.rate = self.config['SPEECH_RATE']
         self.voice = self.config['SPEECH_VOICE']
 
     def init(self):
         self.enunciator = Enunciator('name', 1, 100)
+        self.enunciator.speechservice = self
         self.enunciator.configure()
-        self.enunciator.speech = self
         self.enunciator.init()
-        threading.Thread(target=self.enunciator.run).start()
 
     def make_fifo(self):
         self.message_queue = queue.Queue(maxsize=1)
@@ -41,20 +41,18 @@ class SpeechService(threading.Thread):
     def enqueue(self, m):
         self.message_queue.put(m, block=True, timeout=None)
 
-    def dequeue(self, n):
-        while not self.message_queue.empty():           # this needs to block until message completes
+    def dequeue(self):
+        while not self.message_queue.empty():
             self.read_msg = self.message_queue.get()
 
     def process_message(self):
-        pass
-
-    def shutdown(self):
+        """  overridden in implementation """
         pass
 
     def run(self):
         while True:
-            self.dequeue(1)
+            self.dequeue()
             self.process_message()
-            time.sleep(.5)
+            time.sleep(.1)
 
 

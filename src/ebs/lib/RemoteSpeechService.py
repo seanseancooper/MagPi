@@ -1,4 +1,4 @@
-from GenericSpeechService import SpeechService
+from SpeechService import SpeechService
 
 
 
