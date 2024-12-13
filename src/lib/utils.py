@@ -6,6 +6,8 @@ from string import Template
 import logging
 
 logger_root = logging.getLogger('root')
+speech_logger = logging.getLogger('speech_logger')
+gps_logger = logging.getLogger('gps_logger')
 
 
 def mute(mutable):
@@ -84,4 +86,5 @@ def get_location(locator):
         locator.latitude = position.get('LATITUDE', position.get('lat'))
         locator.longitude = position.get('LONGITUDE', position.get('lon'))
     except Exception as e:
-        logger_root.warning(f"GPS Retrieval Error: {e}")
+        speech_logger.warning(f"GPS Error")
+        gps_logger.warning(f"GPS Retrieval Error: {e}")
