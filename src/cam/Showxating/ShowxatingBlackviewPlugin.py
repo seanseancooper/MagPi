@@ -10,7 +10,11 @@ from src.cam.Showxating.lib.FrameObjektTracker import FrameObjektTracker
 from src.cam.Showxating.lib.utils import draw_rects, draw_contours, wall_images, sortedContours, is_inside
 
 import logging
+
+from src.wifi.lib.TokenBucket import TokenBucket
+
 cam_logger = logging.getLogger('cam_logger')
+speech_logger = logging.getLogger('speech_logger')
 
 
 def print_symbology(has_symbols, f, rect, m, c):
@@ -75,6 +79,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self.has_symbols = True
         self.has_analysis = True
         self.has_motion = False
+        self.had_motion = False
+        self.throttle = None
 
         # hyper parameters
         self.krnl = 17                                  # controls size of items considered relevant
@@ -115,6 +121,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
     def get_config(self):
         super().get_config()
         self.tracker.configure()
+        self.throttle = TokenBucket(int(1), int(3))
 
     def sets_hold_threshold(self, value):
         if value is True:
@@ -205,10 +212,18 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                     if self.tracked:
                         print_tracked(self.has_analysis, self.has_symbols, f, self.tracked, rect)
                         print_symbology(self.has_symbols, f, rect, self.has_motion, self.majic_color)
-
                     print_analytics(self.has_analysis, f, cnt, hier)
 
             self.post_mediapipe(f)
+
+            if self.had_motion != self.has_motion is True:
+                if self.throttle.handle('motion'):
+                    speech_logger.info('motion detected!')
+                self.had_motion = True
+
+        else:
+            self.has_motion = False
+            self.had_motion = False
 
     def process_frame(self, frame):
 
