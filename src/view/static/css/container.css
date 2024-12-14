@@ -4,6 +4,21 @@ body {
     background-color:#333;
 }
 
+.camcontroller {
+    width:709px;
+    height:493px;
+}
+
+.wifiscanner {
+    width:965px;
+    height:935px;
+}
+
+.gpsmapper {
+    width:709px;
+    height:443px;
+}
+
 .tabulator {
     font-family: Helvetica, Arial, sans-serif;
     font-size: 12px;
