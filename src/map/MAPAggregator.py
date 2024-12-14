@@ -3,17 +3,19 @@ import glob
 import threading
 from collections import defaultdict
 import time
+from datetime import datetime
 import requests
 
 from src.config import CONFIG_PATH, readConfig
+from src.lib.utils import format_time, format_delta
 
 import logging
 map_logger = logging.getLogger('gps_logger')
+speech_logger = logging.getLogger('speech_logger')
 
 
 def format_time(_, fmt):
     return f'{_.strftime(fmt)}'
-
 
 class MAPAggregator(threading.Thread):
     """ MAPAggregator visits module REST contexts, retrieves data, and
@@ -25,8 +27,10 @@ class MAPAggregator(threading.Thread):
         self.DEBUG = False
         self.config = {}
         self.configs = defaultdict(dict)
+        self.iteration = 0
 
         self.modules = []
+        self.module_stats = {}
         self.live_modules = []
         self.dead_modules = []
 
@@ -47,6 +51,7 @@ class MAPAggregator(threading.Thread):
         for module_config in configs:
             mod = os.path.basename(module_config).replace('.json', '')
             self.modules.append(mod)
+            self.module_stats[mod] = {'created': datetime.now(), 'updated': datetime.now()}
             readConfig(os.path.basename(module_config), self.configs[mod])
 
         readConfig(config_file, self.config)
@@ -61,6 +66,8 @@ class MAPAggregator(threading.Thread):
         self.dead_modules.clear()
 
         for mod in self.modules:
+            self.module_stats[mod]['updated'] = datetime.now()
+            self.module_stats[mod]['elapsed'] = datetime.now() - self.module_stats[mod]['created']
             try:
                 test = requests.get('http://' + mod + '.' + self.configs[mod]['SERVER_NAME'])
                 if test.ok:
@@ -104,8 +111,10 @@ class MAPAggregator(threading.Thread):
     def run(self):
 
         self.register_modules()
+        speech_logger.info('aggregator started')
 
         while True:
+            self.iteration +=1
 
             for mod in self.live_modules:
                 self.aggregate(mod)
@@ -117,7 +126,28 @@ class MAPAggregator(threading.Thread):
                     self.aggregated.pop(mod)
                 except KeyError: pass  # 'missing' is fine.
 
-            print(f'MAPAggregator: {list(self.aggregated.keys())}) live: {[m for m in self.live_modules]} dead: {[m for m in self.dead_modules]}')
+            def module_info(mod):
+                from termcolor import colored
+
+                created = format_time(self.module_stats[mod]['created'], "%H:%M:%S")
+                updated = format_time(self.module_stats[mod]['updated'], "%H:%M:%S")
+                elapsed = format_delta(self.module_stats[mod]['elapsed'], "%H:%M:%S")
+                messaging = f"{mod}"
+
+                if mod in self.live_modules:
+                    messaging += f" online: {elapsed}"
+
+                if mod in self.dead_modules:
+                    messaging += f" offline: {created}"
+
+                return messaging
+
+            if self.iteration % 10 == 0:
+                # yell about offline modules
+                speech_logger.info([m.split(':')[0] for m in [module_info(mod) for mod in self.modules if mod in self.dead_modules]])
+
+            print(f"MAPAggregator: {[module_info(mod) for mod in self.modules]}")
+
             time.sleep(self.config.get('AGGREGATOR_TIMEOUT', .5))
 
 
