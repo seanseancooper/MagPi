@@ -44,7 +44,7 @@ class MAPAggregator(threading.Thread):
     def configure(self, config_file, **kwargs):
         non_config_files = kwargs.get('non_config_files')
         # no need now for 'view' and 'controller'
-        non_config_files.extend([os.path.basename(config_file), 'view.json', 'controller.json'])
+        non_config_files.extend([os.path.basename(config_file), 'view.json'])
         configs = glob.glob(CONFIG_PATH + "/*.json")
         [configs.remove(CONFIG_PATH + '/' + non_config) for non_config in non_config_files]
 
