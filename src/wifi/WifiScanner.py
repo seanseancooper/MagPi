@@ -187,6 +187,7 @@ class WifiScanner(threading.Thread):
         write_to_scanlist(self.config, self.get_tracked_signals())
         [worker.stop() for worker in self.workers]
         self.parsed_signals.clear()
+        self.tracked_signals.clear()
         wifi_stopped.send(self)
         wifi_logger.info(f"[{__name__}]: WifiScanner stopped. {self.polling_count} iterations.")
 
