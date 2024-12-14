@@ -90,7 +90,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
         self.show_krnl_grid = False
         self.show_threshold = False
-        self.hold_threshold = 0
+        self.hold_threshold = 0                         # number of frames threshold mask is displayed if displayed
 
         self.mediapipe = False  # slow!
         self._pose = None
@@ -127,7 +127,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
     def sets_hold_threshold(self, value):
         if value is True:
-            self.hold_threshold = 100
+            self.hold_threshold = self.plugin_config.get('hold_threshold_max', 5)
         elif value is False:
             self.hold_threshold = 0
 

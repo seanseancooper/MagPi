@@ -12,10 +12,10 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
-			"FORE_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPiExternal/rsrc/cam/training_data/test_movies/cam.mp4"
+			"FORE_VIDEO_URL" : "http://10.99.77.1/blackvue_live.cgi"
 		},
 		{
-			"AFT_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPiExternal/rsrc/cam/training_data/test_movies/cam.mp4"
+			"AFT_VIDEO_URL" : "http://10.99.77.1/blackvue_live.cgi?direction=R"
 		},
 		{
 			"FORWARD_TEST_URL" : ""
@@ -90,6 +90,7 @@
 					"write_mp4": false,
 					"plugin_cv_color": "255, 255, 255",
 					"plugin_majic_pixel": [10, 110],
+					"hold_threshold_max": 5,
 					"tokens": 2,
 					"interval": 60,
 					"debug": false,
