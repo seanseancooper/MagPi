@@ -34,6 +34,8 @@ class ShowxatingCapture:
 
         def initialize():
             self.capture = cv.VideoCapture(self.capture_param_capture_src)
+            if not self.capture.isOpened():
+                cam_logger.warning(cv.getBuildInformation())
 
         if self.capture:
             initialize()
