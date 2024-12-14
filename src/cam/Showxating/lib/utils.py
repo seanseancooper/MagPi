@@ -51,6 +51,24 @@ def draw_rects(frag, rects, clr, fill):
         [cv.rectangle(frag, (x, y), (x+w, y+h), clr, fill) for x, y, w, h in rects]
 
 
+def draw_grid(f, grid_shape, color, thickness):
+    # do this in javascript
+    h, w, _ = f.shape
+    rows, cols = grid_shape
+
+    # draw vertical lines
+    for x in np.arange(start=0, stop=w, step=cols):
+        x = int(round(x))
+        cv.line(f, (x, 125), (x, 345), color=color, thickness=thickness)
+
+    # draw horizontal lines
+    for y in np.arange(start=125, stop=345, step=rows):
+        y = int(round(y))
+        cv.line(f, (0, y), (w, y), color=color, thickness=thickness)
+
+    return f
+
+
 def is_inside(pt, rect):
     x, y = pt
     rx, ry, rw, rh = rect
@@ -147,11 +165,10 @@ def wall_images(frame, conts, getDists, metric):
     if conts.any() or conts:
 
         # this will be a 'contourGroup', get 'bounds' of members
-        br_x, br_y, br_w, br_h = cv.boundingRect(conts)
+        rectangle = br_x, br_y, br_w, br_h = cv.boundingRect(conts)
 
         cnt_img = frame[br_y:br_y + br_h, br_x:br_x + br_w]  # as numpy rows, cols...
         wall = combine_images(cnt_img, canvas, br_y, br_x)
-        rectangle = br_x, br_y, br_w, br_h
 
         if getDists:
             p = ShowxatingHistogramPlugin()
