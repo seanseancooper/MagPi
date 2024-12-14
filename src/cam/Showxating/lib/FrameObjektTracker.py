@@ -124,7 +124,6 @@ class FrameObjektTracker:
               f"CLOSE: {str(o.close).ljust(1, ' ')}\t"
               f"dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}\t"
               f"md: {str(o.md.__format__('.4f')).ljust(3, ' ')}\t"
-              # f"foo: {str(foo.__format__('.4f')).ljust(3, ' ')}\t"
               f"ML: {str(o.ml)}\trect:{str(o.rect).ljust(10, ' ')}\t"
               # f"fd: {str(self.fd_mean.__format__('.4f')).ljust(10, ' ')}\tmse: {str(self._frame_MSE.__format__('.4f')).ljust(10, ' ')}\tssim: {str(self._frame_SSIM.__format__('.4f')).ljust(10, ' ')}"
         )
