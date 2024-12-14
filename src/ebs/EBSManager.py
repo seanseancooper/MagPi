@@ -3,7 +3,6 @@ import logging
 import time
 
 from src.config import readConfig
-from src.ebs.lib.Bugger import Bugger
 from src.ebs.lib.MacOSSpeechService import MacOSSpeechService
 
 logger_root = logging.getLogger('root')
@@ -29,8 +28,6 @@ class EBSManager(threading.Thread):
         return
 
     def ebs_start(self):
-        # 2 components running in somewhat opposing threads:
-
         # Enunciator: Provide auditory feedback on events. This will pass
         # a message to a queue which is read by an interface for a
         # SpeechService, which will render it.
@@ -38,16 +35,6 @@ class EBSManager(threading.Thread):
         self.speechservice = MacOSSpeechService()  # TODO: Make configurable
         self.speechservice.configure()
         self.speechservice.init()
-
-        # Bugger: Uses ARX component to listen for and operationalize
-        # spoken word commands from a library (project-keyword-spotter).
-        # The library will use the Coral adapter to run inference on MFCC
-        # slices in real time.
-
-        self.bugger = Bugger()
-        self.bugger.configure()
-        self.bugger.init()
-        self.bugger.run()
 
         s_thread = threading.Thread(target=self.speechservice.run, daemon=True, name='SpeechService')
         e_thread = threading.Thread(target=self.speechservice.enunciator.run, daemon=True, name='Enunciator')
