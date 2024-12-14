@@ -91,13 +91,8 @@ class ShowxatingPlugin(threading.Thread):
 
         self.parent_thread = threading.current_thread()
         self.streamservice_thread = self.streamservice.t
-        # print(f'parent {self.parent_thread} started streamservice {self.streamservice.t.name}')
 
     def stream(self, frame):
-        # I am a SBVP
-        # [11] self.parent_thread = threading.current_thread()
-        # [12] self.plugin_streamservice_thread = self.streamservice.t
-        # streamservice
         if self.plugin_config['streams'] is True:
             if self.streamservice is not None:
                 self.streamservice.RequestHandlerClass.src = frame
