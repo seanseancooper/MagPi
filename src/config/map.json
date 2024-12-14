@@ -24,13 +24,13 @@
 			"NODE_START_COMMAND": ["npm", "start"]
 		},
 		{
-			"NODE_BUILD": true
+			"NODE_BUILD": false
 		},
 		{
 			"NODE_BUILD_COMMAND": ["npm", "run", "build"]
 		},
 		{
-			"AGGREGATOR_TIMEOUT": 0.1
+			"AGGREGATOR_TIMEOUT": 1.0
 		},
 		{
 			"DATE_FORMAT": "%Y-%m-%d"
