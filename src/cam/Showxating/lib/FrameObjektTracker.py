@@ -56,10 +56,6 @@ class FrameObjektTracker:
             "d_range": self.d_range,                # offset +/- allowed difference; frm_delta_pcnt * fd_mean
         }
 
-
-
-
-
     def configure(self):
         readConfig('cam.json', self.config)
 
