@@ -95,7 +95,7 @@ def get_MFCC():
 
 
 def append_to_outfile(config, cell):
-    """Append a found cells to a rolling JSON list"""
+    """Append found cells to a rolling JSON list"""
     json_logger.info({cell['BSSID']: cell})
 
 
@@ -103,7 +103,8 @@ def write_to_scanlist(config, searchmap):
     """Write current SEARCHMAP out as JSON"""
     make_path(config.get('OUTFILE_PATH', "out"))
     _time = datetime.now().strftime(config.get('DATETIME_FORMAT', "%Y%m%d_%H%M%S"))
-    return write_file(config['OUTFILE_PATH'], "scanlist_" + _time + ".json", json.dumps(searchmap, indent=1), "x")
+    if len(searchmap) > 0:  # don't write nothing; write something.
+        return write_file(config['OUTFILE_PATH'], "scanlist_" + _time + ".json", json.dumps(searchmap, indent=1), "x")
 
 
 def commit_mapping(config, mapping):
