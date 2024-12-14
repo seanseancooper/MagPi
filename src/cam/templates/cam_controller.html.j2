@@ -63,7 +63,7 @@
             xhttp.onload = function() {
                 const resp = xhttp.response;
                 document.getElementById("multi_button").value = resp;
-                document.getElementById("multi_button_text").innerHTML = resp.txt;
+                document.getElementById("multi_button_text").innerHTML = resp;
             }
         }
 
@@ -117,7 +117,7 @@
 
             function updateSlider() {
                 var component = slider.id.replace('_input', '');
-                draw_grid([slider.value, slider.value], '#00F', 1);
+                //draw_grid([slider.value, slider.value], '#00F', 1);
                 const xhttp = new XMLHttpRequest();
                 xhttp.open('POST', '{{ url_for('.index')}}plugin/' + slider.id.replace('cam_slider_', '').replace('_input', '') + "/" + parseFloat(slider.value));
                 setsHeaders(xhttp);
@@ -126,7 +126,7 @@
                 xhttp.onload = function() {
                     if (xhttp.response == "OK") {
                         slider_output.innerText = slider.value;
-                        slider.addEventListener('input', update);
+                        slider.addEventListener('input', updateSlider);
                     }
                 };
             }
