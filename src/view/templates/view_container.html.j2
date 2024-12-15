@@ -123,7 +123,7 @@
             xhttp.send();
 
             xhttp.onload = function() {
-                document.getElementById("write_button").innerHTML = (xhttp.response == "OK")? "DONE": "FAILED";
+                button.innerHTML = (xhttp.response == "OK")? "DONE": "FAILED";
             };
         }
 
@@ -239,20 +239,10 @@
         <button id="filter-clear" class="clear_button">
             <span id="clear_button_text">CLEAR</span>
         </button>
-
-        <button id="all_button" class="all_button" value="" onClick="select_all(true);">
-            <span id="all_button_text">ALL</span>
-        </button>
-        <button id="none_button" class="none_button" value="" onClick="select_all(false);">
-            <span id="none_button_text">NONE</span>
-        </button>
-        <!-- TODO: onClick should noot be hardcoded or even here -->
-        <button id="write_button" class="write_button" value="" onClick="write_tracked(this,'wifi');">
-            <span id="write_button_text">WRITE</span>
-        </button>
-        <button id="load_button" class="reload_button" value="" onClick="reload();">
-            <span id="load_button_text">RELOAD</span>
-        </button>
+        <button id="all_button" class="all_button button" value="all_button" data-action=""  data-target="wifi">ALL</button>
+        <button id="none_button" class="none_button button" value="none_button" data-action=""  data-target="wifi">NONE</button>
+        <button id="write_button" class="write_button button" value="write_button" data-action=""  data-target="wifi">WRITE</button>
+        <button id="reload_button" class="reload_button button" value="reload_button" data-action=""  data-target="">RELOAD</button>
         <span id="container_stats" style="" class="container_stats">
             {{ container.workers|length }} SIGNALS | {{ container.elapsed }} ELAPSED
         </span>
@@ -410,52 +400,6 @@
         };
 
 
-        container_elements = [];
-        container_elements.push(document.getElementById('container'));
-        container_elements.push(document.getElementById('container_tracked'));
-        container_elements.push(document.getElementById('container_ghosts'));
-        container_elements.push(document.getElementById('trx_container'));
-        container_elements.push(document.getElementById("all_button"));
-        container_elements.push(document.getElementById("none_button"));
-        container_elements.push(document.getElementById("write_button"));
-        container_elements.push(document.getElementById("load_button"));
-
-        container_elements.forEach(function(element) {
-
-            element.addEventListener('click', function(event) {
-
-                if (event.target.classList.contains('trk_btn')) {
-                    if (event.target.classList.contains('add_button')) {
-                        add(event.target.value, event.target.attributes['data-trgt'].value);
-                    };
-                    if (event.target.classList.contains('rem_button')) {
-                        remove(event.target.value, event.target.attributes['data-trgt'].value)
-                    };
-                };
-
-                if (event.target.classList.contains('mute_btn')) {
-                    mute(event.target.value, event.target.attributes['data-trgt'].value);
-                };
-
-                if (event.target.classList.contains('all_button')) {
-                    alert('select all');
-                };
-
-                if (event.target.classList.contains('none_button')) {
-                    alert('select none');
-                };
-
-                if (event.target.classList.contains('write_button')) {
-                    write_tracked(this,'wifi'); // 'wifi' is a http header
-                };
-
-                if (event.target.classList.contains('load_button')) {
-                    reload();
-                };
-
-            });
-        });
-
         var container = new Tabulator("#container", {
             ajaxURL:"http://map.localhost:5005/aggregated/wifi",    // request URI
             ajaxConfig:"GET",                                       // ajax config options go here
@@ -488,12 +432,12 @@
 
                     if (data.tracked == true) {
                         if (data.is_mute == false) {
-                            return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-trgt=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE' data-trgt=" + trgt + ">MUTE</button>";
+                            return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
                         } else {
-                            return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-trgt=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE' data-trgt=" + trgt + ">UNMUTE</button>";
+                            return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
                         }
                     } else {
-                        return "<button id='add_button_" + data.BSSID + "' style='width:96px;' class='trk_btn add_button button' value='"+data.BSSID+"' data-action='ADD' data-trgt=" + trgt + ">ADD</button>";
+                        return "<button id='add_button_" + data.BSSID + "' style='width:96px;' class='trk_btn add_button button' value='"+data.BSSID+"' data-action='ADD' data-target=" + trgt + ">ADD</button>";
                     }
                 }},
                 {field:"tracked", width:102, formatter: function(cell, formatterParams) {
@@ -504,7 +448,7 @@
                     var p_signal_color = 'rgba(' + _color + ', 1.0)';
                     var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
                     if (true) {
-                        return "<button id='ACTION_button_" + data.BSSID + "' style='width:96px;' class='trk_btn ACTION_button button' value='"+data.BSSID+"' data-action='ACTION' data-trgt=" + trgt + ">ACTION</button>";
+                        return "<button id='ACTION_button_" + data.BSSID + "' style='width:96px;' class='trk_btn ACTION_button button' value='"+data.BSSID+"' data-action='ACTION' data-target=" + trgt + ">ACTION</button>";
                     }
                 }},
                 {title:"SSID", field:"SSID", width:140, formatter:ssidFormatter, formatterParams:{
@@ -558,9 +502,9 @@
                     var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
 
                     if (data.is_mute == false) {
-                        return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-trgt=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE' data-trgt=" + trgt + ">MUTE</button>";
+                        return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
                     } else {
-                        return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-trgt=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE' data-trgt=" + trgt + ">UNMUTE</button>";
+                        return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
                     }
                 }},
                 {title:"SSID", field:"SSID", formatter:ssidFormatter, formatterParams:{
@@ -608,9 +552,9 @@
                     var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
 
                     if (data.is_mute == false) {
-                        return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-trgt=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE' data-trgt=" + trgt + ">MUTE</button>";
+                        return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
                     } else {
-                        return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-trgt=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE' data-trgt=" + trgt + ">UNMUTE</button>";
+                        return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
                     }
                 }},
                 {title:"SSID", field:"SSID", formatter:ssidFormatter, formatterParams:{
@@ -673,12 +617,12 @@
 
                     if (data.tracked == true) {
                         if (data.is_mute == false) {
-                            return "<button id='remove_button_"+ data.id + "' style='width:24px;' class='trk_btn rem_button' value='"+data.id+"' data-action='REMOVE' data-trgt=" + trgt + ">x</button><button id='mute_button_" + data.id + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.id + "' data-action='MUTE' data-trgt=" + trgt + ">MUTE</button>";
+                            return "<button id='remove_button_"+ data.id + "' style='width:24px;' class='trk_btn rem_button' value='"+data.id+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.id + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
                         } else {
-                            return "<button id='remove_button_"+ data.id + "' style='width:24px;' class='trk_btn rem_button' value='"+data.id+"' data-action='REMOVE' data-trgt=" + trgt + ">x</button><button id='mute_button_" + data.id + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.id + "' data-action='MUTE' data-trgt=" + trgt + ">UNMUTE</button>";
+                            return "<button id='remove_button_"+ data.id + "' style='width:24px;' class='trk_btn rem_button' value='"+data.id+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.id + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
                         }
                     } else {
-                        return "<button id='add_button_" + data.id + "' style='width:96px;' class='trk_btn add_button button' value='"+data.id+"' data-action='ADD' data-trgt=" + trgt + ">ADD</button>";
+                        return "<button id='add_button_" + data.id + "' style='width:96px;' class='trk_btn add_button button' value='"+data.id+"' data-action='ADD' data-target=" + trgt + ">ADD</button>";
                     }
                 }},
 
@@ -711,9 +655,9 @@
 
 
                     if (muteGroup(data.id, trgt)) {
-                        return "<div id='mute_button_" + data.id + "' style='background-color:#F00;' class='' value='" + data.id + "' data-action='MUTE' data-trgt=" + trgt + ">" +  data.attributes.TYPE + "</div>";
+                        return "<div id='mute_button_" + data.id + "' style='background-color:#F00;' class='' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">" +  data.attributes.TYPE + "</div>";
                     } else {
-                        return "<div id='mute_button_" + data.id + "' style='background-color:#FFF;' class='' value='" + data.id + "' data-action='MUTE' data-trgt=" + trgt + ">" +  data.attributes.TYPE + "</div>";
+                        return "<div id='mute_button_" + data.id + "' style='background-color:#FFF;' class='' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">" +  data.attributes.TYPE + "</div>";
                     }
                 },  width:60},
 
@@ -737,6 +681,55 @@
 
             ],
         });
+
+
+        container_elements = [];
+        container_elements.push(document.getElementById('container'));
+        container_elements.push(document.getElementById('container_tracked'));
+        container_elements.push(document.getElementById('container_ghosts'));
+        container_elements.push(document.getElementById('trx_container'));
+        container_elements.push(document.getElementById("all_button"));
+        container_elements.push(document.getElementById("none_button"));
+        container_elements.push(document.getElementById("write_button"));
+        container_elements.push(document.getElementById("reload_button"));
+
+        container_elements.forEach(function(element) {
+
+            element.addEventListener('click', function(event) {
+
+                if (event.target.classList.contains('trk_btn')) {
+                    if (event.target.classList.contains('add_button')) {
+                        add(event.target.value, event.target.attributes['data-target'].value);
+                    };
+                    if (event.target.classList.contains('rem_button')) {
+                        remove(event.target.value, event.target.attributes['data-target'].value)
+                    };
+                };
+
+                if (event.target.classList.contains('mute_btn')) {
+                    mute(event.target.value, event.target.attributes['data-target'].value);
+                };
+
+                if (event.target.classList.contains('all_button')) {
+                    alert(event.target.value);
+                };
+
+                if (event.target.classList.contains('none_button')) {
+                    alert(event.target.value);
+                };
+
+                if (event.target.classList.contains('write_button')) {
+                    write_tracked(this, event.target.attributes['data-target'].value); // 'wifi' the http header
+                };
+
+                if (event.target.classList.contains('reload_button')) {
+                    reload();
+                };
+
+            });
+        });
+
+
     </script>
 </body>
 </html>
