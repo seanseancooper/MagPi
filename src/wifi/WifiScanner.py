@@ -17,7 +17,7 @@ from src.wifi.WifiWorker import WifiWorker
 
 import logging
 
-# IDEA: events to flask subsystem; NET module
+# IDEA: pubsub these signals
 wifi_signals = Namespace()
 wifi_started = wifi_signals.signal('WIFI START')
 wifi_updated = wifi_signals.signal('WIFI UPDATED')
@@ -87,7 +87,7 @@ class WifiScanner(threading.Thread):
         self.DEBUG = self.config['DEBUG']
         self.OUTDIR = self.config['OUTFILE_PATH']
 
-        # IDEA: make the worker append itself when created.
+        # IDEA: worker append itself when created.
         [self.workers.append(WifiWorker(BSSID)) for BSSID in self.searchmap.keys()]
         [self.config_worker(worker) for worker in self.workers]
 
