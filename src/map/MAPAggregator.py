@@ -3,7 +3,7 @@ import glob
 import threading
 from collections import defaultdict
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 
 from src.config import CONFIG_PATH, readConfig
@@ -17,6 +17,7 @@ speech_logger = logging.getLogger('speech_logger')
 def format_time(_, fmt):
     return f'{_.strftime(fmt)}'
 
+
 class MAPAggregator(threading.Thread):
     """ MAPAggregator visits module REST contexts, retrieves data, and
     aggregates to a unified defaultdict for the MAP to consume via a
@@ -28,6 +29,9 @@ class MAPAggregator(threading.Thread):
         self.config = {}
         self.configs = defaultdict(dict)
         self.iteration = 0
+        self.created = datetime.now()
+        self.updated = datetime.now()
+        self.elapsed = timedelta()
 
         self.modules = []
         self.module_stats = {}
@@ -114,7 +118,9 @@ class MAPAggregator(threading.Thread):
         speech_logger.info('aggregator started')
 
         while True:
-            self.iteration +=1
+            self.iteration += 1
+            self.updated = datetime.now()
+            self.elapsed = self.updated-self.created
 
             for mod in self.live_modules:
                 self.aggregate(mod)
@@ -126,27 +132,28 @@ class MAPAggregator(threading.Thread):
                     self.aggregated.pop(mod)
                 except KeyError: pass  # 'missing' is fine.
 
-            def module_info(mod):
-                from termcolor import colored
+            def module_info(m):
+                created = format_time(self.module_stats[m]['created'], "%H:%M:%S")
+                elapsed = format_delta(self.module_stats[m]['elapsed'], "%H:%M:%S")
+                messaging = m + " "
 
-                created = format_time(self.module_stats[mod]['created'], "%H:%M:%S")
-                updated = format_time(self.module_stats[mod]['updated'], "%H:%M:%S")
-                elapsed = format_delta(self.module_stats[mod]['elapsed'], "%H:%M:%S")
-                messaging = f"{mod}"
+                if m in self.live_modules:
+                    messaging += '\033[32monline\033[0m: ' + elapsed + ' '
 
-                if mod in self.live_modules:
-                    messaging += f" online: {elapsed}"
-
-                if mod in self.dead_modules:
-                    messaging += f" offline: {created}"
+                if m in self.dead_modules:
+                    messaging += '\033[31moffline\033[0m: ' + created + ' '
 
                 return messaging
 
-            if self.iteration % 10 == 0:
-                # yell about offline modules
-                speech_logger.info([m.split(':')[0] for m in [module_info(mod) for mod in self.modules if mod in self.dead_modules]])
+            t_elapsed = format_delta(self.elapsed, "%H:%M:%S")
 
-            print(f"MAPAggregator: {[module_info(mod) for mod in self.modules]}")
+            if self.iteration % 10 == 0:
+                print(f"MAPAggegator [{self.iteration}] {t_elapsed} elapsed")
+                # yell about offline modules
+                [speech_logger.info(f'{mod} offline.') for mod in self.dead_modules]
+
+            [print(module_info(mod), end='') for mod in self.modules]
+            print('')
 
             time.sleep(self.config.get('AGGREGATOR_TIMEOUT', .5))
 
