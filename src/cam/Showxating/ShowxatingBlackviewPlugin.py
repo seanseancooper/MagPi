@@ -159,6 +159,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
     def grid_ops(self, f):
         # TODO: do this in javascript instead.
+        # js will need to know width, height of workarea
         if self.show_krnl_grid:
             draw_grid(f, (int(self.krnl), int(self.krnl)), self.majic_color, 1)
 
@@ -213,7 +214,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
             for cnt in conts[:self.tracker.contour_limit]:
 
-                wall, rect, dists = wall_images(f.copy(), cnt, False, 'paired')  #TODO: add to config
+                wall, rect, dists = wall_images(f.copy(), cnt, False, 'paired')  # TODO: add to config
 
                 if self.has_analysis or self.has_symbols:
                     self.tracked = self.tracker.track_objects(self.frame_id, cnt, hier, wall, rect)
