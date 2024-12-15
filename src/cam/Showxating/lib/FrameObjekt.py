@@ -31,7 +31,9 @@ class FrameObjekt:
 
     @staticmethod
     def create(f_id):
-        return FrameObjekt(f_id)
+        o = FrameObjekt(f_id)
+        o.tag = o.create_tag(f_id)
+        return o
 
     def get(self):
         return {'f_id' : self.f_id,
