@@ -46,7 +46,7 @@ class CAMManager(threading.Thread):
     def cam_reload(self, direction):
         self.plugin.streamservice.force_stop()
         self.plugin.streamservice = None
-        self.init_plugin(ShowxatingBlackviewPlugin, direction)
+        self.init_plugin(ShowxatingBlackviewPlugin, direction)  # TODO: make plugin configurable
         self.plugin.run()
 
     def cam_multibutton(self, mode):
