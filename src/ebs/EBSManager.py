@@ -32,7 +32,7 @@ class EBSManager(threading.Thread):
         # a message to a queue which is read by an interface for a
         # SpeechService, which will render it.
 
-        self.speechservice = MacOSSpeechService()  # TODO: Make configurable
+        self.speechservice = MacOSSpeechService()  # TODO: Make configurable, see CAMManager
         self.speechservice.configure()
         self.speechservice.init()
 
