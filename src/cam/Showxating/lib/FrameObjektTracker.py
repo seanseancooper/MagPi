@@ -190,7 +190,6 @@ class FrameObjektTracker:
         if not labeled:
             # f 0
             o = FrameObjekt.create(self.f_id)
-            o.tag = o.create_tag(self.f_id)
             o.ml = self._ml
             o.skip = True
             self.print_frame(o, "N0:")
