@@ -177,7 +177,7 @@
 </head>
 <body>
 <div>
-    <script src="{{ url_for('cam_bp.static', filename='Jcrop-master/dist/jcrop.js') }}"></script>
+    <script src="{{ url_for('cam_bp.static', filename='jcrop/dist/jcrop.js') }}"></script>
     <div id="videodiv" style="" class="videodiv">
         <iframe id="_video" style="" class="_video" src="" onLoad="load_video();"></iframe>
     </div>
@@ -194,6 +194,7 @@
         j.listen('crop.change',(w,e) => {
           var c = Object();
           c.id = 'crop_input';
+          // #TODO: w.h as displayed in UI seems wrong...
           w.pos.w += w.pos.x;
           w.pos.h += w.pos.y;
           c.value = JSON.stringify(w.pos);
