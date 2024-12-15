@@ -66,8 +66,7 @@ class TRXWorker:
         def test(cell):
             # IDEA: use this as an entrypoint to a discrete test in a test
             # framework that would return T or F.
-            # need to identify the test...
-            # provides [{testname: result}, {...}]
+            # worker emits [test] & [result] separately, these should be together [{test:result}].
             try:
                 tests = self.retriever.tracked_signals[self.freq]['tests']
                 # return all results or only ones that passed?
