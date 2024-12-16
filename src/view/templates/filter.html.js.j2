@@ -1,0 +1,99 @@
+    <div id="container_filters" style="" class="container_filters">
+        <!-- this needs to be built from module 'columns' -->
+        <select id="filter-field">
+            <option></option>
+            <option value="is_mute">Muted</option>
+            <option value="tracked">Tracked</option>
+            <option value="SSID">SSID</option>
+            <option value="BSSID">BSSID</option>
+            <option value="Signal">Signal</option>
+            <option value="Channel">Channel</option>
+            <option value="Frequency">Frequency</option>
+            <option value="Quality">Quality</option>
+            <option value="Encryption">Encryption</option>
+            <option value="Vendor">Vendor</option>
+            <option value="created">Found</option>
+            <option value="updated">Last</option>
+        </select>
+        <select id="filter-type">
+            <option value="=">=</option>
+            <option value="<"><</option>
+            <option value="<="><=</option>
+            <option value=">">></option>
+            <option value=">=">>=</option>
+            <option value="!=">!=</option>
+            <option value="like">like</option>
+        </select>
+        <input id="filter-value" type="text" size="16"  placeholder="value to filter">
+        <button id="filter-clear" class="clear_button">
+            <span id="clear_button_text">CLEAR</span>
+        </button>
+        <!-- data-target is module name, possibly pass data-action as the function -->
+        <button id="all_button" class="all_button button" value="all_button" data-action=""  data-target="wifi">ALL</button>
+        <button id="none_button" class="none_button button" value="none_button" data-action=""  data-target="wifi">NONE</button>
+        <button id="write_button" class="write_button button" value="write_button" data-action=""  data-target="wifi">WRITE</button>
+        <button id="reload_button" class="reload_button button" value="reload_button" data-action=""  data-target="">RELOAD</button>
+    </div>
+    <script>
+        /*
+            ********** FILTERS **********
+            pass in the current MODULE_TAB from javascript
+        */
+
+        // Define variables for input elements
+        var fieldEl = document.getElementById("filter-field");
+        var typeEl = document.getElementById("filter-type");
+        var valueEl = document.getElementById("filter-value");
+
+        // var wifi = document.getElementsByClassName('active')
+
+        // filter
+        function customFilter(data){
+            return data.field1 && data.field2 < 3;
+        }
+
+        // Trigger setFilter function with correct parameters
+        function updateFilter(){
+            var filterVal = fieldEl.options[fieldEl.selectedIndex].value;
+            var typeVal = typeEl.options[typeEl.selectedIndex].value;
+
+            // enable filter
+            var filter = filterVal == "function" ? customFilter : filterVal;
+
+            if(filterVal == "function" ){
+                typeEl.disabled = true;
+                valueEl.disabled = true;
+            } else {
+                typeEl.disabled = false;
+                valueEl.disabled = false;
+            }
+
+            if(filterVal){
+                // set wifi to the currently active module_tab
+                wifi.setFilter(filter,typeVal, valueEl.value);
+            }
+        }
+
+        fieldEl.addEventListener("change", updateFilter);
+        typeEl.addEventListener("change", updateFilter);
+        valueEl.addEventListener("keyup", updateFilter);
+
+        document.getElementById("filter-clear").addEventListener("click", function(){
+            fieldEl.value = "";
+            typeEl.value = "=";
+            valueEl.value = "";
+            // set wifi to the currently active module_tab
+            wifi.clearFilter();
+        });
+
+        function reload(){
+            /*
+            THIS IS ONLY FOR THE RELOAD BUTTON.
+            TO GET THIS TO WORK, NEED TO
+            getElementById('reload_button');
+            addEventListener('reload_button');
+            */
+            document.location.reload();
+        }
+
+    </script>

@@ -1,5 +1,5 @@
 {
-	"SCANNER": [
+	"VIEW": [
 		{
 			"DEBUG": false
 		},
@@ -18,6 +18,30 @@
 		{
 			"VIEW_TIMEOUT": 30
 		},
+		{
+			"MODULES": ["wifi", "trx"]
+		},
+		{
+			"MODULE_TABS": {
+				"wifi": ["wifi", "tracked", "ghosts"],
+				"trx": ["trx"]
+			}
+		},
+		{
+			"VIEW_TIMEOUT": 30
+		},
+		{
+			"VIEW_TIMEOUT": 30
+		},
+
+
+
+
+
+
+
+
+
 		{
 			"DATE_FORMAT": "%Y-%m-%d"
 		},
