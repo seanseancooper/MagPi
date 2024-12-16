@@ -127,6 +127,16 @@
             };
         }
 
+        function select_all(button, trgt){
+            // not sure how this should work yet
+            alert('select all: ' + trgt);
+        }
+
+        function select_none(button, trgt){
+        // not sure how this should work yet
+            alert('select none: ' + trgt);
+        }
+
         function loadTab(event, tabName){
 
             var i, tabcontent, tablinks;
@@ -136,13 +146,11 @@
                 tabcontent[i].style.display = "none";
             }
 
-            // Get all elements with class="tablinks" and remove the class "active"
             tablinks = document.getElementsByClassName("tab_button");
             for (i = 0; i < tablinks.length; i++) {
                 tablinks[i].className = tablinks[i].className.replace(" active", "");
             }
 
-            // Show the current tab, and add an "active" class to the button that opened the tab
             document.getElementById(tabName).style.display = "block";
             event.currentTarget.className += " active";
 
@@ -157,7 +165,7 @@
             container.replaceData();
             tracked.replaceData();
             ghosts.replaceData();
-            trx_container.replaceData();
+            trx.replaceData();
         }
 
         /*
@@ -204,10 +212,10 @@
     </div>
 
     <div id="tabs" style="height:30px">
-        <button id="container_tab_container" class="tab_button" onclick="loadTab(event, 'container')">WIFI 00:00:00</button>
-        <button id="container_tab_tracked" class="tab_button" onclick="loadTab(event, 'container_tracked')">99 WIFI TRACKED</button>
-        <button id="container_tab_ghosts" class="tab_button" onclick="loadTab(event, 'container_ghosts')">99 WIFI GHOSTS</button>
-        <button id="container_tab_trx" class="tab_button" onclick="loadTab(event, 'trx_container')">TRX 00:00:00</button>
+        <button id="container_tab_container" class="tab_button active" onclick="loadTab(event, 'container')">WIFI</button>
+        <button id="container_tab_tracked" class="tab_button" onclick="loadTab(event, 'tracked')">TRACKED</button>
+        <button id="container_tab_ghosts" class="tab_button" onclick="loadTab(event, 'ghosts')">GHOSTS</button>
+        <button id="container_tab_trx" class="tab_button" onclick="loadTab(event, 'trx')">TRX 00:00:00</button>
     </div>
 
     <div id="container_filters" style="" class="container_filters">
@@ -247,19 +255,14 @@
             {{ container.workers|length }} SIGNALS | {{ container.elapsed }} ELAPSED
         </span>
     </div>
-
-    <div id="container" class="tabcontent"></div>
-    <div id="container_tracked" class="tabcontent" style="display:none;"></div>
-    <div id="container_ghosts" class="tabcontent" style="display:none;"></div>
-    <div id="trx_container" class="tabcontent" style="display:none;"></div>
-
     <script>
-        const dataLoaderLoading = "&nbsp;";
 
         // Define variables for input elements
         var fieldEl = document.getElementById("filter-field");
         var typeEl = document.getElementById("filter-type");
         var valueEl = document.getElementById("filter-value");
+
+        // var container = document.getElementsByClassName('active')
 
         // filter
         function customFilter(data){
@@ -283,6 +286,7 @@
             }
 
             if(filterVal){
+                // set container to the currently active tab
                 container.setFilter(filter,typeVal, valueEl.value);
             }
         }
@@ -295,9 +299,18 @@
             fieldEl.value = "";
             typeEl.value = "=";
             valueEl.value = "";
-
+            // set container to the currently active tab
             container.clearFilter();
         });
+    </script>
+
+    <div id="container" class="tabcontent"></div>
+    <div id="tracked" class="tabcontent" style="display:none;"></div>
+    <div id="ghosts" class="tabcontent" style="display:none;"></div>
+    <div id="trx" class="tabcontent" style="display:none;"></div>
+
+    <script>
+        const dataLoaderLoading = "&nbsp;";
 
         // Formatter to generate peity charts
         var chartFormatter = function(cell, formatterParams, onRendered){
@@ -478,7 +491,7 @@
             ],
         });
 
-        var tracked = new Tabulator("#container_tracked", {
+        var tracked = new Tabulator("#tracked", {
             ajaxURL:"http://map.localhost:5005/aggregated/wifi/tracked",    // request URI
             ajaxConfig:"GET",                                               // ajax config options go here
             headerVisible:true,                                             // show header
@@ -530,7 +543,7 @@
             ],
         });
 
-        var ghosts = new Tabulator("#container_ghosts", {
+        var ghosts = new Tabulator("#ghosts", {
             ajaxURL:"http://map.localhost:5005/aggregated/wifi/ghosts",     // request URI
             ajaxConfig:"GET",                                               // ajax config options go here
             headerVisible:true,                                             // show header
@@ -580,7 +593,7 @@
             ],
         });
 
-        var trx_container = new Tabulator("#trx_container", {
+        var trx = new Tabulator("#trx", {
             ajaxURL:"http://map.localhost:5005/aggregated/trx", // request URI
             ajaxConfig:"GET",                                   // ajax config options go here
             dataLoaderLoading:dataLoaderLoading,                // change "Loading" message to "&nbsp;"
@@ -682,54 +695,55 @@
             ],
         });
 
+        </script>
 
-        container_elements = [];
-        container_elements.push(document.getElementById('container'));
-        container_elements.push(document.getElementById('container_tracked'));
-        container_elements.push(document.getElementById('container_ghosts'));
-        container_elements.push(document.getElementById('trx_container'));
-        container_elements.push(document.getElementById("all_button"));
-        container_elements.push(document.getElementById("none_button"));
-        container_elements.push(document.getElementById("write_button"));
-        container_elements.push(document.getElementById("reload_button"));
+    <script>
 
-        container_elements.forEach(function(element) {
+    container_elements = [];
+    container_elements.push(document.getElementById('container'));
+    container_elements.push(document.getElementById('tracked'));
+    container_elements.push(document.getElementById('ghosts'));
+    container_elements.push(document.getElementById('trx'));
+    container_elements.push(document.getElementById("all_button"));
+    container_elements.push(document.getElementById("none_button"));
+    container_elements.push(document.getElementById("write_button"));
+    container_elements.push(document.getElementById("reload_button"));
 
-            element.addEventListener('click', function(event) {
+    container_elements.forEach(function(element) {
 
-                if (event.target.classList.contains('trk_btn')) {
-                    if (event.target.classList.contains('add_button')) {
-                        add(event.target.value, event.target.attributes['data-target'].value);
-                    };
-                    if (event.target.classList.contains('rem_button')) {
-                        remove(event.target.value, event.target.attributes['data-target'].value)
-                    };
+        element.addEventListener('click', function(event) {
+
+            if (event.target.classList.contains('trk_btn')) {
+                if (event.target.classList.contains('add_button')) {
+                    add(event.target.value, event.target.attributes['data-target'].value);
                 };
-
-                if (event.target.classList.contains('mute_btn')) {
-                    mute(event.target.value, event.target.attributes['data-target'].value);
+                if (event.target.classList.contains('rem_button')) {
+                    remove(event.target.value, event.target.attributes['data-target'].value)
                 };
+            };
 
-                if (event.target.classList.contains('all_button')) {
-                    alert(event.target.value);
-                };
+            if (event.target.classList.contains('mute_btn')) {
+                mute(event.target.value, event.target.attributes['data-target'].value);
+            };
 
-                if (event.target.classList.contains('none_button')) {
-                    alert(event.target.value);
-                };
+            if (event.target.classList.contains('all_button')) {
+                select_all(this, event.target.attributes['data-target'].value);
+            };
 
-                if (event.target.classList.contains('write_button')) {
-                    write_tracked(this, event.target.attributes['data-target'].value); // 'wifi' the http header
-                };
+            if (event.target.classList.contains('none_button')) {
+                select_none(this, event.target.attributes['data-target'].value);
+            };
 
-                if (event.target.classList.contains('reload_button')) {
-                    reload();
-                };
+            if (event.target.classList.contains('write_button')) {
+                write_tracked(this, event.target.attributes['data-target'].value); // 'wifi' the http header
+            };
 
-            });
+            if (event.target.classList.contains('reload_button')) {
+                reload();
+            };
+
         });
-
-
+    });
     </script>
 </body>
 </html>
