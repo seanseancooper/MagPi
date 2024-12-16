@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ViewContainer [ {{ container.polling_count }} ]</title>
+    <title>
+        ViewContainer:
+        {% for module in container.modules %}
+            {{ module|upper }}
+        {% endfor %}
+    </title>
     <link href="{{ url_for('vc_bp.static', filename='tabulator/css/tabulator_midnight.min.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('vc_bp.static', filename='css/container.css') }}">
 
@@ -15,19 +20,19 @@
             ********** LOADING **********
         */
 
-        const SCAN_TIMEOUT = {{ container.config.get('VIEW_TIMEOUT') * 1000 }}
+        const SCAN_TIMEOUT = {{ container.view_timeout * 1000 }}
         function loadTab(event, tabName){
 
-            var i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tabcontent");
+            var i, module_tab, tab_button;
+            module_tab = document.getElementsByClassName("module_tab");
 
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
+            for (i = 0; i < module_tab.length; i++) {
+                module_tab[i].style.display = "none";
             }
 
-            tablinks = document.getElementsByClassName("tab_button");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            tab_button = document.getElementsByClassName("tab_button");
+            for (i = 0; i < tab_button.length; i++) {
+                tab_button[i].className = tab_button[i].className.replace(" active", "");
             }
 
             document.getElementById(tabName).style.display = "block";
@@ -41,7 +46,8 @@
 
         function replace_data(){
             // use foreach...
-            container.replaceData();
+            // need one for each module tab
+            wifi.replaceData();
             tracked.replaceData();
             ghosts.replaceData();
             trx.replaceData();
@@ -89,16 +95,25 @@
     <div id="bar_container" style="padding-top:2px;padding-bottom:3px;" class="bar_container">
         <div id="meter" style=""><script>make_deadline_bar();</script></div>
     </div>
-
     <div id="tabs" style="height:30px">
-        <!-- load tab buttons into this div-->
-        <button id="container_tab_container" class="tab_button active" onclick="loadTab(event, 'container')">WIFI</button>
+
+        <!-- add a button for each module -->
+        <!--
+        <button id="container_tab_TAB_NAME" class="tab_button" onclick="loadTab(event, 'TAB_NAME')">TAB_NAME</button>
+        -->
+
+        <button id="container_tab_wifi" class="tab_button active" onclick="loadTab(event, 'wifi')">WIFI</button>
         <button id="container_tab_tracked" class="tab_button" onclick="loadTab(event, 'tracked')">TRACKED</button>
         <button id="container_tab_ghosts" class="tab_button" onclick="loadTab(event, 'ghosts')">GHOSTS</button>
-        <button id="container_tab_trx" class="tab_button" onclick="loadTab(event, 'trx')">TRX 00:00:00</button>
-    </div>
 
+        <button id="container_tab_trx" class="tab_button" onclick="loadTab(event, 'trx')">TRX</button>
+
+    </div>
+<!-- END ROOT -->
+
+<!-- BEGIN FILTER Fragment: optional, some things don't need tabulator filtering -->
     <div id="container_filters" style="" class="container_filters">
+        <!-- this needs to be built from module 'columns' -->
         <select id="filter-field">
             <option></option>
             <option value="is_mute">Muted</option>
@@ -127,18 +142,17 @@
         <button id="filter-clear" class="clear_button">
             <span id="clear_button_text">CLEAR</span>
         </button>
+        <!-- data-target is module name, possibly pass data-action as the function -->
         <button id="all_button" class="all_button button" value="all_button" data-action=""  data-target="wifi">ALL</button>
         <button id="none_button" class="none_button button" value="none_button" data-action=""  data-target="wifi">NONE</button>
         <button id="write_button" class="write_button button" value="write_button" data-action=""  data-target="wifi">WRITE</button>
         <button id="reload_button" class="reload_button button" value="reload_button" data-action=""  data-target="">RELOAD</button>
-        <span id="container_stats" style="" class="container_stats">
-            {{ container.workers|length }} SIGNALS | {{ container.elapsed }} ELAPSED
-        </span>
     </div>
     <script>
         /*
             ********** FILTERS **********
-            make this & 'container_filters' a template, include it, and pass in the current container
+            make this & 'container_filters' a template, include it,
+            and pass in the current module_tab from javascript
         */
 
         // Define variables for input elements
@@ -146,7 +160,7 @@
         var typeEl = document.getElementById("filter-type");
         var valueEl = document.getElementById("filter-value");
 
-        // var container = document.getElementsByClassName('active')
+        // var wifi = document.getElementsByClassName('active')
 
         // filter
         function customFilter(data){
@@ -170,8 +184,8 @@
             }
 
             if(filterVal){
-                // set container to the currently active tab
-                container.setFilter(filter,typeVal, valueEl.value);
+                // set wifi to the currently active module_tab
+                wifi.setFilter(filter,typeVal, valueEl.value);
             }
         }
 
@@ -183,11 +197,13 @@
             fieldEl.value = "";
             typeEl.value = "=";
             valueEl.value = "";
-            // set container to the currently active tab
-            container.clearFilter();
+            // set wifi to the currently active module_tab
+            wifi.clearFilter();
         });
     </script>
+<!-- END FILTER -->
 
+<!-- BEGIN BUTTONS Fragment: optional, these buttons only apply to some things -->
     <script>
         /*
             ********** TABLE BUTTONS **********
@@ -320,20 +336,42 @@
         }
 
     </script>
+<!-- END BUTTONS Fragment -->
 
-    <!-- add a div for each container-->
-    <div id="container" class="tabcontent"></div>
-    <div id="tracked" class="tabcontent" style="display:none;"></div>
-    <div id="ghosts" class="tabcontent" style="display:none;"></div>
-    <div id="trx" class="tabcontent" style="display:none;"></div>
+<!-- BEGIN ROOT -->
+    <!-- add a div for each module_tab. -->
+    <div id="wifi" class="module_tab"></div>
+    <div id="tracked" class="module_tab" style="display:none;"></div>
+    <div id="ghosts" class="module_tab" style="display:none;"></div>
+    <div id="trx" class="module_tab" style="display:none;"></div>
 
     <script>
         /*
-            ********** TABLE FUNCTIONS **********
-            src this
+            ********** WIFI FUNCTIONS **********
         */
 
-        const dataLoaderLoading = "&nbsp;";
+        peity.defaults.line = {
+            delimiter: ",",
+            fill: "#777",
+            height: 18,
+            width: 150,
+            max: -100,
+            min: 0,
+            stroke: "#00ff00",
+            strokeWidth: 2
+        }
+
+        Tabulator.extendModule("mutator", "mutators", {
+            signalMutator:function(value, data, type, mutatorParams){
+
+            var sgnlList = [];
+            for (const pt of value) {
+                sgnlList.push(pt['sgnl'])
+            }
+            return sgnlList;
+
+            },
+        });
 
         // Formatter to generate peity charts
         var chartFormatter = function(cell, formatterParams, onRendered){
@@ -350,29 +388,6 @@
 
             return content;
         };
-
-        Tabulator.extendModule("mutator", "mutators", {
-            signalMutator:function(value, data, type, mutatorParams){
-
-            var sgnlList = [];
-            for (const pt of value) {
-                sgnlList.push(pt['sgnl'])
-            }
-            return sgnlList;
-
-            },
-        });
-
-        peity.defaults.line = {
-            delimiter: ",",
-            fill: "#777",
-            height: 18,
-            width: 150,
-            max: -100,
-            min: 0,
-            stroke: "#00ff00",
-            strokeWidth: 2
-        }
 
         // Formatter to generate SSID Quality indicia
         var ssidFormatter = function(cell, params){
@@ -411,6 +426,12 @@
 
             return content
         };
+    </script>
+    <script>
+        /*
+            ********** GENERAL FUNCTIONS **********
+        */
+        const dataLoaderLoading = "&nbsp;";
 
         // Formatter to generate uniqId links
         var uniqIdFormatter = function(cell, params){
@@ -436,35 +457,32 @@
         };
     </script>
 
-
+    <!-- EACH MODULE TAB WILL GO HERE AS AN INCLUDED FRAGMENT -->
     <script>
         /*
             ********** CONTAINER **********
-            make this into a template.
+            make this into a fragment.
         */
 
-        var container = new Tabulator("#container", {
-            ajaxURL:"http://map.localhost:5005/aggregated/wifi",    // request URI
+        var wifi = new Tabulator("#wifi", {
+            ajaxURL:"http://map.localhost:5005/aggregated/wifi",    // request URI [dynamic]; module name at end
             ajaxConfig:"GET",                                       // ajax config options go here
             dataLoaderLoading:dataLoaderLoading,                    // change "Loading" message to "&nbsp;"
-            index:"BSSID",                                          // use uniqId as index
+            index:"BSSID",                                          // use uniqId as index [dynamic]
 
             rowFormatter:function(row){
                 row.getElement().style = "height:24px";
             },
 
             persistence:{
-                sort: true,                             //persist column sorting
-                filter: true,                           //persist filters
-                headerFilter: true,                     //persist header filters
-                group: true,                            //persist row grouping
-                page: true,                             //persist page
-                columns: false,                         //persist columns
+                sort: true,                                         //persist column sorting
+                filter: true,                                       //persist filters
             },
 
             placeholder:"..." ,
 
             columns:[
+
                 {field:"tracked", width:102, formatter: function(cell, formatterParams) {
                     const data = cell.getRow().getData();
                     const trgt = 'wifi';
@@ -483,37 +501,17 @@
                         return "<button id='add_button_" + data.BSSID + "' style='width:96px;' class='trk_btn add_button button' value='"+data.BSSID+"' data-action='ADD' data-target=" + trgt + ">ADD</button>";
                     }
                 }},
-                {field:"tracked", width:102, formatter: function(cell, formatterParams) {
-                    const data = cell.getRow().getData();
-                    const trgt = 'wifi';
-
-                    var _color = colorUniqId(data.BSSID, ':');
-                    var p_signal_color = 'rgba(' + _color + ', 1.0)';
-                    var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
-                    if (true) {
-                        return "<button id='ACTION_button_" + data.BSSID + "' style='width:96px;' class='trk_btn ACTION_button button' value='"+data.BSSID+"' data-action='ACTION' data-target=" + trgt + ">ACTION</button>";
-                    }
-                }},
                 {title:"SSID", field:"SSID", width:140, formatter:ssidFormatter, formatterParams:{
                     field:"Quality",
                     colors:["red", "orange", "yellow", "#008800", "#00FF00"]
                 }},
                 {title:"BSSID", field:"BSSID", width:120},
-                /*
-                {title:"BSSID", field:"BSSID", width:120, formatter:bssidFormatter, formatterParams:{
-                    field: "BSSID"
-                }},
-                */
-                {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter,
-                        // cellClick:function(e, cell){console.log(cell.getValue())}
-                },
+                {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter},
                 {title:"db", field:"Signal", width:30},
                 {title:"Ch.", field:"Channel", width:50},
                 {title:"Freq.", field:"Frequency", width:70},
                 {title:"Sec.", field:"Encryption", formatter: "tickCross", width:30},
                 {title:"Vendor", field:"Vendor", width:100},
-
-
                 {title:"Elapsed", field:"elapsed", width:75},
                 {title:"Created", field:"created", width:75},
                 {title:"Last", field:"updated", width:75},
@@ -521,11 +519,10 @@
             ],
         });
     </script>
-
     <script>
         /*
             ********** TRACKED **********
-            this is a view of container; how can this be supported?
+            this is a view of wifi; how can this be supported?
             data filtering at template level
         */
         var tracked = new Tabulator("#tracked", {
@@ -580,7 +577,6 @@
             ],
         });
     </script>
-
     <script>
         /*
             ********** GHOSTS **********
@@ -636,7 +632,6 @@
             ],
         });
     </script>
-
     <script>
         /*
             ********** TRX **********
@@ -746,18 +741,21 @@
 
         </script>
 
-
     <script>
         /*
             ********** MORE BUTTONS **********
-            src this.
         */
-
         container_elements = [];
-        container_elements.push(document.getElementById('container'));
+
+        // generate one for each 'module' tab; this is wifi module_tab 'array'
+        container_elements.push(document.getElementById('wifi'));
         container_elements.push(document.getElementById('tracked'));
         container_elements.push(document.getElementById('ghosts'));
+
+        // and this is TRX.
         container_elements.push(document.getElementById('trx'));
+
+        // this should be in all modules. add new global buttons here.
         container_elements.push(document.getElementById("all_button"));
         container_elements.push(document.getElementById("none_button"));
         container_elements.push(document.getElementById("write_button"));
@@ -791,7 +789,7 @@
                 if (event.target.classList.contains('write_button')) {
                     write_tracked(this, event.target.attributes['data-target'].value); // 'wifi' the http header
                 };
-
+                // perhaps this can be a fragment for a module specific button?
                 if (event.target.classList.contains('reload_button')) {
                     reload();
                 };
@@ -801,3 +799,4 @@
     </script>
 </body>
 </html>
+<!-- END ROOT -->

@@ -41,4 +41,4 @@ Frequency Analysis Chain:
 PLAN:
 0. Start with the SDR stick I have.
 1. Write ANALYSIS code using FM radio stations (known frequencies, locations, available)
-Later move to 'HackRF' or better hardware, rewrite interface code.
+2. migrate to 'HackRF' or other better hardware, rewrite interface code.
