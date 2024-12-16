@@ -9,8 +9,190 @@
 
     <script type="text/javascript" src="{{ url_for('vc_bp.static', filename='tabulator/js/tabulator.min.js') }}"></script>
     <script src="{{ url_for('vc_bp.static', filename='js/peity-vanilla.js') }}"></script>
+
     <script>
+        /*
+            ********** LOADING **********
+        */
+
         const SCAN_TIMEOUT = {{ container.config.get('VIEW_TIMEOUT') * 1000 }}
+        function loadTab(event, tabName){
+
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            tablinks = document.getElementsByClassName("tab_button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            document.getElementById(tabName).style.display = "block";
+            event.currentTarget.className += " active";
+
+        }
+
+        function reload(){
+            document.location.reload();
+        }
+
+        function replace_data(){
+            // use foreach...
+            container.replaceData();
+            tracked.replaceData();
+            ghosts.replaceData();
+            trx.replaceData();
+        }
+
+        /*
+        a draggable bar would be nice to have!
+        https://codepen.io/manishady/pen/xGYvEK
+        https://codepen.io/GreenSock/pen/eRBdzM
+        */
+
+        function make_deadline_bar() {
+
+            var iteration = 0;
+            let iter_timeout = 100;
+            var bar_div = document.createElement('div');
+            bar_div.id = 'bar_div';
+
+            function update_deadline_bar() {
+
+                setTimeout(function() {
+
+                    bar_div.className = 'bar';
+                    var percentage = (iteration * iter_timeout)/SCAN_TIMEOUT * 100;
+
+                    document.getElementById('bar_div').style = "background-color:rgba(0,255,0,0.50);transition: all " + 0.1 +"s;";
+                    document.getElementById('bar_div').style.width = 100 - percentage + '%';
+
+                    if (percentage >= 100){
+                        replace_data();
+                        iteration = 0;
+                    }
+
+                    update_deadline_bar();
+                    iteration++;
+
+                }, iter_timeout);
+            }
+            document.getElementById('meter').appendChild(bar_div);
+            update_deadline_bar();
+        }
+    </script>
+</head>
+<body>
+    <div id="bar_container" style="padding-top:2px;padding-bottom:3px;" class="bar_container">
+        <div id="meter" style=""><script>make_deadline_bar();</script></div>
+    </div>
+
+    <div id="tabs" style="height:30px">
+        <!-- load tab buttons into this div-->
+        <button id="container_tab_container" class="tab_button active" onclick="loadTab(event, 'container')">WIFI</button>
+        <button id="container_tab_tracked" class="tab_button" onclick="loadTab(event, 'tracked')">TRACKED</button>
+        <button id="container_tab_ghosts" class="tab_button" onclick="loadTab(event, 'ghosts')">GHOSTS</button>
+        <button id="container_tab_trx" class="tab_button" onclick="loadTab(event, 'trx')">TRX 00:00:00</button>
+    </div>
+
+    <div id="container_filters" style="" class="container_filters">
+        <select id="filter-field">
+            <option></option>
+            <option value="is_mute">Muted</option>
+            <option value="tracked">Tracked</option>
+            <option value="SSID">SSID</option>
+            <option value="BSSID">BSSID</option>
+            <option value="Signal">Signal</option>
+            <option value="Channel">Channel</option>
+            <option value="Frequency">Frequency</option>
+            <option value="Quality">Quality</option>
+            <option value="Encryption">Encryption</option>
+            <option value="Vendor">Vendor</option>
+            <option value="created">Found</option>
+            <option value="updated">Last</option>
+        </select>
+        <select id="filter-type">
+            <option value="=">=</option>
+            <option value="<"><</option>
+            <option value="<="><=</option>
+            <option value=">">></option>
+            <option value=">=">>=</option>
+            <option value="!=">!=</option>
+            <option value="like">like</option>
+        </select>
+        <input id="filter-value" type="text" size="16"  placeholder="value to filter">
+        <button id="filter-clear" class="clear_button">
+            <span id="clear_button_text">CLEAR</span>
+        </button>
+        <button id="all_button" class="all_button button" value="all_button" data-action=""  data-target="wifi">ALL</button>
+        <button id="none_button" class="none_button button" value="none_button" data-action=""  data-target="wifi">NONE</button>
+        <button id="write_button" class="write_button button" value="write_button" data-action=""  data-target="wifi">WRITE</button>
+        <button id="reload_button" class="reload_button button" value="reload_button" data-action=""  data-target="">RELOAD</button>
+        <span id="container_stats" style="" class="container_stats">
+            {{ container.workers|length }} SIGNALS | {{ container.elapsed }} ELAPSED
+        </span>
+    </div>
+    <script>
+        /*
+            ********** FILTERS **********
+            make this & 'container_filters' a template, include it, and pass in the current container
+        */
+
+        // Define variables for input elements
+        var fieldEl = document.getElementById("filter-field");
+        var typeEl = document.getElementById("filter-type");
+        var valueEl = document.getElementById("filter-value");
+
+        // var container = document.getElementsByClassName('active')
+
+        // filter
+        function customFilter(data){
+            return data.field1 && data.field2 < 3;
+        }
+
+        // Trigger setFilter function with correct parameters
+        function updateFilter(){
+            var filterVal = fieldEl.options[fieldEl.selectedIndex].value;
+            var typeVal = typeEl.options[typeEl.selectedIndex].value;
+
+            // enable filter
+            var filter = filterVal == "function" ? customFilter : filterVal;
+
+            if(filterVal == "function" ){
+                typeEl.disabled = true;
+                valueEl.disabled = true;
+            } else {
+                typeEl.disabled = false;
+                valueEl.disabled = false;
+            }
+
+            if(filterVal){
+                // set container to the currently active tab
+                container.setFilter(filter,typeVal, valueEl.value);
+            }
+        }
+
+        fieldEl.addEventListener("change", updateFilter);
+        typeEl.addEventListener("change", updateFilter);
+        valueEl.addEventListener("keyup", updateFilter);
+
+        document.getElementById("filter-clear").addEventListener("click", function(){
+            fieldEl.value = "";
+            typeEl.value = "=";
+            valueEl.value = "";
+            // set container to the currently active tab
+            container.clearFilter();
+        });
+    </script>
+
+    <script>
+        /*
+            ********** TABLE BUTTONS **********
+            src this
+        */
 
         function setsHeaders(xhttp) {
             xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
@@ -137,179 +319,20 @@
             alert('select none: ' + trgt);
         }
 
-        function loadTab(event, tabName){
-
-            var i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tabcontent");
-
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-            }
-
-            tablinks = document.getElementsByClassName("tab_button");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].className = tablinks[i].className.replace(" active", "");
-            }
-
-            document.getElementById(tabName).style.display = "block";
-            event.currentTarget.className += " active";
-
-        }
-
-        function reload(){
-            document.location.reload();
-        }
-
-        function replace_data(){
-            // use foreach...
-            container.replaceData();
-            tracked.replaceData();
-            ghosts.replaceData();
-            trx.replaceData();
-        }
-
-        /*
-        a draggable bar would be nice to have!
-        https://codepen.io/manishady/pen/xGYvEK
-        https://codepen.io/GreenSock/pen/eRBdzM
-        */
-
-        function make_deadline_bar() {
-
-            var iteration = 0;
-            let iter_timeout = 100;
-            var bar_div = document.createElement('div');
-            bar_div.id = 'bar_div';
-
-            function update_deadline_bar() {
-
-                setTimeout(function() {
-
-                    bar_div.className = 'bar';
-                    var percentage = (iteration * iter_timeout)/SCAN_TIMEOUT * 100;
-
-                    document.getElementById('bar_div').style = "background-color:rgba(0,255,0,0.50);transition: all " + 0.1 +"s;";
-                    document.getElementById('bar_div').style.width = 100 - percentage + '%';
-
-                    if (percentage >= 100){
-                        replace_data();
-                        iteration = 0;
-                    }
-
-                    update_deadline_bar();
-                    iteration++;
-
-                }, iter_timeout);
-            }
-            document.getElementById('meter').appendChild(bar_div);
-            update_deadline_bar();
-        }
-    </script>
-</head>
-<body>
-    <div id="bar_container" style="padding-top:2px;padding-bottom:3px;" class="bar_container">
-        <div id="meter" style=""><script>make_deadline_bar();</script></div>
-    </div>
-
-    <div id="tabs" style="height:30px">
-        <button id="container_tab_container" class="tab_button active" onclick="loadTab(event, 'container')">WIFI</button>
-        <button id="container_tab_tracked" class="tab_button" onclick="loadTab(event, 'tracked')">TRACKED</button>
-        <button id="container_tab_ghosts" class="tab_button" onclick="loadTab(event, 'ghosts')">GHOSTS</button>
-        <button id="container_tab_trx" class="tab_button" onclick="loadTab(event, 'trx')">TRX 00:00:00</button>
-    </div>
-
-    <div id="container_filters" style="" class="container_filters">
-        <select id="filter-field">
-            <option></option>
-            <option value="is_mute">Muted</option>
-            <option value="tracked">Tracked</option>
-            <option value="SSID">SSID</option>
-            <option value="BSSID">BSSID</option>
-            <option value="Signal">Signal</option>
-            <option value="Channel">Channel</option>
-            <option value="Frequency">Frequency</option>
-            <option value="Quality">Quality</option>
-            <option value="Encryption">Encryption</option>
-            <option value="Vendor">Vendor</option>
-            <option value="created">Found</option>
-            <option value="updated">Last</option>
-        </select>
-        <select id="filter-type">
-            <option value="=">=</option>
-            <option value="<"><</option>
-            <option value="<="><=</option>
-            <option value=">">></option>
-            <option value=">=">>=</option>
-            <option value="!=">!=</option>
-            <option value="like">like</option>
-        </select>
-        <input id="filter-value" type="text" size="16"  placeholder="value to filter">
-        <button id="filter-clear" class="clear_button">
-            <span id="clear_button_text">CLEAR</span>
-        </button>
-        <button id="all_button" class="all_button button" value="all_button" data-action=""  data-target="wifi">ALL</button>
-        <button id="none_button" class="none_button button" value="none_button" data-action=""  data-target="wifi">NONE</button>
-        <button id="write_button" class="write_button button" value="write_button" data-action=""  data-target="wifi">WRITE</button>
-        <button id="reload_button" class="reload_button button" value="reload_button" data-action=""  data-target="">RELOAD</button>
-        <span id="container_stats" style="" class="container_stats">
-            {{ container.workers|length }} SIGNALS | {{ container.elapsed }} ELAPSED
-        </span>
-    </div>
-    <script>
-
-        // Define variables for input elements
-        var fieldEl = document.getElementById("filter-field");
-        var typeEl = document.getElementById("filter-type");
-        var valueEl = document.getElementById("filter-value");
-
-        // var container = document.getElementsByClassName('active')
-
-        // filter
-        function customFilter(data){
-            return data.field1 && data.field2 < 3;
-        }
-
-        // Trigger setFilter function with correct parameters
-        function updateFilter(){
-            var filterVal = fieldEl.options[fieldEl.selectedIndex].value;
-            var typeVal = typeEl.options[typeEl.selectedIndex].value;
-
-            // enable filter
-            var filter = filterVal == "function" ? customFilter : filterVal;
-
-            if(filterVal == "function" ){
-                typeEl.disabled = true;
-                valueEl.disabled = true;
-            } else {
-                typeEl.disabled = false;
-                valueEl.disabled = false;
-            }
-
-            if(filterVal){
-                // set container to the currently active tab
-                container.setFilter(filter,typeVal, valueEl.value);
-            }
-        }
-
-        fieldEl.addEventListener("change", updateFilter);
-        typeEl.addEventListener("change", updateFilter);
-        valueEl.addEventListener("keyup", updateFilter);
-
-        document.getElementById("filter-clear").addEventListener("click", function(){
-            fieldEl.value = "";
-            typeEl.value = "=";
-            valueEl.value = "";
-            // set container to the currently active tab
-            container.clearFilter();
-        });
     </script>
 
+    <!-- add a div for each container-->
     <div id="container" class="tabcontent"></div>
     <div id="tracked" class="tabcontent" style="display:none;"></div>
     <div id="ghosts" class="tabcontent" style="display:none;"></div>
     <div id="trx" class="tabcontent" style="display:none;"></div>
 
     <script>
+        /*
+            ********** TABLE FUNCTIONS **********
+            src this
+        */
+
         const dataLoaderLoading = "&nbsp;";
 
         // Formatter to generate peity charts
@@ -411,7 +434,14 @@
             let avg = R+G+B/3;
             return (avg > 128)? "00,00,00": "255,255,255";
         };
+    </script>
 
+
+    <script>
+        /*
+            ********** CONTAINER **********
+            make this into a template.
+        */
 
         var container = new Tabulator("#container", {
             ajaxURL:"http://map.localhost:5005/aggregated/wifi",    // request URI
@@ -490,7 +520,14 @@
 
             ],
         });
+    </script>
 
+    <script>
+        /*
+            ********** TRACKED **********
+            this is a view of container; how can this be supported?
+            data filtering at template level
+        */
         var tracked = new Tabulator("#tracked", {
             ajaxURL:"http://map.localhost:5005/aggregated/wifi/tracked",    // request URI
             ajaxConfig:"GET",                                               // ajax config options go here
@@ -542,7 +579,13 @@
 
             ],
         });
+    </script>
 
+    <script>
+        /*
+            ********** GHOSTS **********
+            ditto above..
+        */
         var ghosts = new Tabulator("#ghosts", {
             ajaxURL:"http://map.localhost:5005/aggregated/wifi/ghosts",     // request URI
             ajaxConfig:"GET",                                               // ajax config options go here
@@ -592,7 +635,13 @@
 
             ],
         });
+    </script>
 
+    <script>
+        /*
+            ********** TRX **********
+            a view of a different module.
+        */
         var trx = new Tabulator("#trx", {
             ajaxURL:"http://map.localhost:5005/aggregated/trx", // request URI
             ajaxConfig:"GET",                                   // ajax config options go here
@@ -697,53 +746,58 @@
 
         </script>
 
+
     <script>
+        /*
+            ********** MORE BUTTONS **********
+            src this.
+        */
 
-    container_elements = [];
-    container_elements.push(document.getElementById('container'));
-    container_elements.push(document.getElementById('tracked'));
-    container_elements.push(document.getElementById('ghosts'));
-    container_elements.push(document.getElementById('trx'));
-    container_elements.push(document.getElementById("all_button"));
-    container_elements.push(document.getElementById("none_button"));
-    container_elements.push(document.getElementById("write_button"));
-    container_elements.push(document.getElementById("reload_button"));
+        container_elements = [];
+        container_elements.push(document.getElementById('container'));
+        container_elements.push(document.getElementById('tracked'));
+        container_elements.push(document.getElementById('ghosts'));
+        container_elements.push(document.getElementById('trx'));
+        container_elements.push(document.getElementById("all_button"));
+        container_elements.push(document.getElementById("none_button"));
+        container_elements.push(document.getElementById("write_button"));
+        container_elements.push(document.getElementById("reload_button"));
 
-    container_elements.forEach(function(element) {
+        container_elements.forEach(function(element) {
 
-        element.addEventListener('click', function(event) {
+            element.addEventListener('click', function(event) {
 
-            if (event.target.classList.contains('trk_btn')) {
-                if (event.target.classList.contains('add_button')) {
-                    add(event.target.value, event.target.attributes['data-target'].value);
+                if (event.target.classList.contains('trk_btn')) {
+                    if (event.target.classList.contains('add_button')) {
+                        add(event.target.value, event.target.attributes['data-target'].value);
+                    };
+                    if (event.target.classList.contains('rem_button')) {
+                        remove(event.target.value, event.target.attributes['data-target'].value)
+                    };
                 };
-                if (event.target.classList.contains('rem_button')) {
-                    remove(event.target.value, event.target.attributes['data-target'].value)
+
+                if (event.target.classList.contains('mute_btn')) {
+                    mute(event.target.value, event.target.attributes['data-target'].value);
                 };
-            };
 
-            if (event.target.classList.contains('mute_btn')) {
-                mute(event.target.value, event.target.attributes['data-target'].value);
-            };
+                if (event.target.classList.contains('all_button')) {
+                    select_all(this, event.target.attributes['data-target'].value);
+                };
 
-            if (event.target.classList.contains('all_button')) {
-                select_all(this, event.target.attributes['data-target'].value);
-            };
+                if (event.target.classList.contains('none_button')) {
+                    select_none(this, event.target.attributes['data-target'].value);
+                };
 
-            if (event.target.classList.contains('none_button')) {
-                select_none(this, event.target.attributes['data-target'].value);
-            };
+                if (event.target.classList.contains('write_button')) {
+                    write_tracked(this, event.target.attributes['data-target'].value); // 'wifi' the http header
+                };
 
-            if (event.target.classList.contains('write_button')) {
-                write_tracked(this, event.target.attributes['data-target'].value); // 'wifi' the http header
-            };
+                if (event.target.classList.contains('reload_button')) {
+                    reload();
+                };
 
-            if (event.target.classList.contains('reload_button')) {
-                reload();
-            };
-
+            });
         });
-    });
     </script>
 </body>
 </html>
