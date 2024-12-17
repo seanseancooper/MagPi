@@ -19,6 +19,7 @@
             for (i = 0; i < module_tab.length; i++) {
                 module_tab[i].style.display = "none";
                 document.getElementById(module_tab[i].id + '_bar_container').style.display = "none";
+                document.getElementById(module_tab[i].id + '_container_filters').style.display = "none";
             }
 
             tab_button = document.getElementsByClassName("tab_button");
@@ -27,8 +28,10 @@
             }
 
             document.getElementById(tabName + '_bar_container').style.display = "block";
+            document.getElementById(tabName + '_container_filters').style.display = "block";
             document.getElementById(tabName).style.display = "block";
             event.currentTarget.className += " active";
+            // document.getElementById(tabName).className += " active";
 
         }
     </script>
@@ -42,7 +45,11 @@
 
     </div>
 
-{% include 'filter.html.js.j2' %}
+{%- for tab, timeout in container.module_tabs: -%}
+    <div id="{{ tab }}_container_filters" style="{{ 'display:none;' if loop.index0 > 0 }}" class="container_filters">
+    {% include 'filter.html.js.j2' %}
+{%- endfor -%}
+
 {% include 'ops_buttons.js' %}
 
     <script>
@@ -85,15 +92,11 @@
     <script>
         container_elements = [];
 
-        // generate one for each 'module' tab; this is wifi module_tab 'array'
-        container_elements.push(document.getElementById('wifi'));
-        container_elements.push(document.getElementById('tracked'));
-        container_elements.push(document.getElementById('ghosts'));
+        {%- for tab, timeout in container.module_tabs: %}
+        container_elements.push(document.getElementById('{{ tab }}'));
+        {%- endfor %}
 
-        // and this is TRX.
-        container_elements.push(document.getElementById('trx'));
-
-        // this should be in all modules. add new global buttons here.
+        // global buttons here.
         container_elements.push(document.getElementById("all_button"));
         container_elements.push(document.getElementById("none_button"));
         container_elements.push(document.getElementById("write_button"));

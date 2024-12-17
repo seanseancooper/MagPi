@@ -1,6 +1,6 @@
-<div id="container_filters" style="" class="container_filters">
+
     <!-- build from module 'columns' -->
-    <select id="filter-field">
+    <select id="{{ tab }}_filter_field">
         <option></option>
         <option value="is_mute">Muted</option>
         <option value="tracked">Tracked</option>
@@ -15,7 +15,7 @@
         <option value="created">Found</option>
         <option value="updated">Last</option>
     </select>
-    <select id="filter-type">
+    <select id="{{ tab }}_filter_type">
         <option value="=">=</option>
         <option value="<"><</option>
         <option value="<="><=</option>
@@ -24,8 +24,8 @@
         <option value="!=">!=</option>
         <option value="like">like</option>
     </select>
-    <input id="filter-value" type="text" size="16"  placeholder="value to filter">
-    <button id="filter-clear" class="clear_button">
+    <input id="{{ tab }}_filter_value" type="text" size="16"  placeholder="value to filter">
+    <button id="{{ tab }}_filter_clear" class="clear_button">
         <span id="clear_button_text">CLEAR</span>
     </button>
     <button id="all_button" class="all_button button" value="all_button" data-action=""  data-target="wifi">ALL</button>
@@ -34,14 +34,11 @@
     <button id="reload_button" class="reload_button button" value="reload_button" data-action=""  data-target="">RELOAD</button>
 </div>
 <script>
-    var module_name = document.getElementsByClassName('active')[0].id;
-    var current_module = document.getElementById(module_name.replace('container_tab_',''));
-    console.log('current_module:' + current_module)
 
     // Define variables for input elements
-    var fieldEl = document.getElementById("filter-field");
-    var typeEl = document.getElementById("filter-type");
-    var valueEl = document.getElementById("filter-value");
+    var {{ tab }}_fieldEl = document.getElementById("{{ tab }}_filter_field");
+    var {{ tab }}_typeEl = document.getElementById("{{ tab }}_filter_type");
+    var {{ tab }}_valueEl = document.getElementById("{{ tab }}_filter_value");
 
     // filter
     function customFilter(data){
@@ -50,34 +47,33 @@
 
     // Trigger setFilter function with correct parameters
     function updateFilter(){
-        var filterVal = fieldEl.options[fieldEl.selectedIndex].value;
-        var typeVal = typeEl.options[typeEl.selectedIndex].value;
+        var {{ tab }}_filterVal = {{ tab }}_fieldEl.options[{{ tab }}_fieldEl.selectedIndex].value;
+        var {{ tab }}_typeVal = {{ tab }}_typeEl.options[{{ tab }}_typeEl.selectedIndex].value;
 
         // enable filter
-        var filter = filterVal == "function" ? customFilter : filterVal;
+        var {{ tab }}_filter = {{ tab }}_filterVal == "function" ? customFilter : {{ tab }}_filterVal;
 
-        if(filterVal == "function" ){
-            typeEl.disabled = true;
-            valueEl.disabled = true;
+        if({{ tab }}_filterVal == "function" ){
+            {{ tab }}_typeEl.disabled = true;
+            {{ tab }}_valueEl.disabled = true;
         } else {
-            typeEl.disabled = false;
-            valueEl.disabled = false;
+            {{ tab }}_typeEl.disabled = false;
+            {{ tab }}_valueEl.disabled = false;
         }
 
-        if(filterVal){
-            current_module.setFilter(filter,typeVal, valueEl.value);
+        if({{ tab }}_filterVal){
+            {{ tab }}.setFilter({{ tab }}_filter,{{ tab }}_typeVal, {{ tab }}_valueEl.value);
         }
     }
 
-    fieldEl.addEventListener("change", updateFilter);
-    typeEl.addEventListener("change", updateFilter);
-    valueEl.addEventListener("keyup", updateFilter);
+    {{ tab }}_fieldEl.addEventListener("change", updateFilter);
+    {{ tab }}_typeEl.addEventListener("change", updateFilter);
+    {{ tab }}_valueEl.addEventListener("keyup", updateFilter);
 
-    document.getElementById("filter-clear").addEventListener("click", function(){
-        fieldEl.value = "";
-        typeEl.value = "=";
-        valueEl.value = "";
-        console.log('current_module: ' + current_module)
-        current_module.clearFilter();
+    document.getElementById("{{ tab }}_filter_clear").addEventListener("click", function(){
+        {{ tab }}_fieldEl.value = "";
+        {{ tab }}_typeEl.value = "=";
+        {{ tab }}_valueEl.value = "";
+        {{ tab }}.clearFilter();
     });
 </script>
