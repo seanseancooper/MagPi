@@ -19,12 +19,21 @@
 			"VIEW_TIMEOUT": 30
 		},
 		{
-			"MODULES": ["wifi", "trx"]
+			"MODULES": [
+				"wifi",
+				"trx"
+			]
 		},
 		{
 			"MODULE_TABS": {
-				"wifi": ["wifi", "tracked", "ghosts"],
-				"trx": ["trx"]
+				"wifi": {
+					"wifi": 10,
+					"tracked": 20,
+					"ghosts": 30
+				},
+				"trx": {
+					"trx": 60
+				}
 			}
 		},
 

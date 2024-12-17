@@ -15,14 +15,7 @@ class ViewContainer(threading.Thread):
         self.view_timeout = 0                   # backwards compat.
         self.config = {}
         self.modules = []
-        self.module_tabs = {}
-
-        # read fragments in module templates dir.
-        # fragment name is module_tab
-        # templates/
-        #   wifi.j2     <-- the fragment (all js or html)
-        #   tracked.j2
-        #   ghosts.j2
+        self.module_tabs = []
 
     def stop(self):
         print(f'stopping.')
@@ -30,8 +23,15 @@ class ViewContainer(threading.Thread):
     def configure(self, config_file):
         readConfig(config_file, self.config)
         self.modules = self.config.get('MODULES')
-        self.module_tabs = self.config.get('MODULE_TABS')
-        # self.view_timeout = self.module_tabs[mod].get('VIEW_TIMEOUT')
+        _modules = self.config.get('MODULE_TABS')
+        # create tabs and put ViewContainerTab in self.module_tabs
+        for _mod in _modules.items():
+            _m, _conf = _mod
+            for _tab in _conf.items():
+                a, b = _tab
+                # self.module_tabs.append(ViewContainerTab(a, b))
+                self.module_tabs.append(_tab)
+
         self.view_timeout = self.config['VIEW_TIMEOUT']
 
     def add_module(self, m):
@@ -58,3 +58,21 @@ class ViewContainer(threading.Thread):
             time.sleep(1)
             pass
 
+
+class ViewContainerTab:
+
+    def __init__(self, tab, view_timeout):
+        super().__init__()
+
+        self.created = datetime.now()
+        self.updated = datetime.now()
+        self.elapsed = timedelta()
+        self.view_timeout = view_timeout
+        self.module = None
+        self.tab = tab
+
+    def get_tab(self, module_tabs):
+        return [tab.split(':')[0] for tab in module_tabs if tab is self.module]
+
+    def get_timeout(self, module_tabs):
+        return [tab.split(':')[1] for tab in module_tabs if tab is self.module]

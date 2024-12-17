@@ -22,6 +22,7 @@
 
             for (i = 0; i < module_tab.length; i++) {
                 module_tab[i].style.display = "none";
+                document.getElementById(module_tab[i].id + '_bar_container').style.display = "none";
             }
 
             tab_button = document.getElementsByClassName("tab_button");
@@ -29,11 +30,39 @@
                 tab_button[i].className = tab_button[i].className.replace(" active", "");
             }
 
+            document.getElementById(tabName + '_bar_container').style.display = "block";
             document.getElementById(tabName).style.display = "block";
             event.currentTarget.className += " active";
 
         }
     </script>
+</head>
+<body>
+    <div id="tabs" style="height:30px">
+{% for tab, timeout in container.module_tabs: %}
+    <button id="container_tab_{{ tab }}" class="tab_button {{ 'active' if loop.index0 }}" onclick="loadTab(event, '{{ tab }}')">{{ tab }}</button>
+{% endfor %}
+    </div>
+
+<!--
+    BEGIN FILTER: MODULE_TAB LEVEL
+    [optional]
+    currently works on 'initial' tab,
+    PASS MODULE_TAB in js
+    pass 'columns' to 'filter.html.js.j2'
+-->
+{% include 'filter.html.js.j2' %}
+<!-- END FILTER -->
+
+<!--
+    BEGIN OPS BUTTONS: MODULE LEVEL
+    [optional]
+    ADD/MUTE/REMOVE/WRITE/ALL/NONE BUTTONS
+    ALSO REQUIRES 'MORE BUTTONS' BELOW.
+-->
+{% include 'ops_buttons.js' %}
+<!-- END OPS BUTTONS -->
+    <!-- AUTOLOAD MODULE_TAB CALLS MODULE_TAB.replace_data()-->
     <script>
         function reload(){
             // THIS IS ONLY FOR THE BUTTON
@@ -46,94 +75,8 @@
             ghosts.replaceData();
             trx.replaceData();
         }
-
-        /*
-        A MODULE_TAB LEVEL SCAN_TIMEOUT!
-        REPLACE container.view_timeout
-        -------------------------------------------
-        also, a draggable bar would be nice to have!
-        https://codepen.io/manishady/pen/xGYvEK
-        https://codepen.io/GreenSock/pen/eRBdzM
-        */
-
-        const SCAN_TIMEOUT = {{ container.view_timeout * 1000 }}
-
-        function make_deadline_bar() {
-
-            var iteration = 0;
-            let iter_timeout = 100;
-            var bar_div = document.createElement('div');
-            bar_div.id = 'bar_div';
-
-            function update_deadline_bar() {
-
-                setTimeout(function() {
-
-                    bar_div.className = 'bar';
-                    var percentage = (iteration * iter_timeout)/SCAN_TIMEOUT * 100;
-
-                    document.getElementById('bar_div').style = "background-color:rgba(0,255,0,0.50);transition: all " + 0.1 +"s;";
-                    document.getElementById('bar_div').style.width = 100 - percentage + '%';
-
-                    if (percentage >= 100){
-                        replace_data(); // COULD INDIRECT AGAINST MODULE_TAB HERE!!!
-                        iteration = 0;
-                    }
-
-                    update_deadline_bar();
-                    iteration++;
-
-                }, iter_timeout);
-            }
-            document.getElementById('meter').appendChild(bar_div);
-            update_deadline_bar();
-        }
     </script>
-</head>
-<body>
-    <!-- ROOT: LOAD A MODULE_TAB -->
-    <div id="tabs" style="height:30px">
 
-{% for mod, tabs in container.module_tabs.items(): %}
-    {% set outer_loop = loop %}
-    {% for tab in tabs: -%}
-        <button id="container_tab_{{ tab }}" class="tab_button {{ 'active' if loop.index0 == 0 and outer_loop.index0 == 0 }}" onclick="loadTab(event, '{{ tab }}')">{{ tab }}</button>
-    {% endfor %}
-{% endfor %}
-
-    </div>
-
-    <!-- AUTOLOAD MODULE_TAB CALLS MODULE_TAB.replace_data()-->
-    <div id="bar_container" style="padding-top:2px;padding-bottom:3px;" class="bar_container">
-        <div id="meter" style=""><script>make_deadline_bar();</script></div>
-    </div>
-
-<!-- END ROOT -->
-<!--
-    BEGIN FILTER: MODULE_TAB LEVEL
-    [optional] (currently works on 'initial' tab), TRX (only *one* tab),
-
-    NEED TO PASS MODULE_TAB in js
-    need to pass columns tp template
--->
-{% include 'filter.html.js.j2' ignore missing %}
-<!-- END FILTER -->
-<!--
-    BEGIN OPS BUTTONS: MODULE LEVEL
-    [optional]
-    ADD/MUTE/REMOVE/WRITE/ALL/NONE BUTTONS
-    ALSO REQUIRES 'MORE BUTTONS' BELOW.
-    WIFI, TRX, SDR
--->
-{% include 'ops_buttons.js' %}
-<!-- END OPS BUTTONS -->
-<!-- BEGIN ROOT -->
-{% for mod, tabs in container.module_tabs.items(): %}
-    {% set outer_loop = loop %}
-    {% for tab in tabs: -%}
-        <div id="{{ tab }}" class="module_tab" style="{{ 'display:none;' if loop.index0 > 0 or outer_loop.index0 > 0 }}"></div>
-    {% endfor %}
-{% endfor %}
 
     <script>
         const dataLoaderLoading = "&nbsp;";
@@ -152,232 +95,18 @@
         };
     </script>
 
-    <!-- WIFI MODULE_TAB AS FRAGMENT, includes javascript -->
-    {% include 'wifi.js.j2' ignore missing %}
+{% for tab, timeout in container.module_tabs: %}
+    {% include 'autoloader.js.j2' %}
+    <div id="{{ tab }}_bar_container" style="padding-top:2px;padding-bottom:3px;{{ 'display:none;' if loop.index0 > 0 }}" class="bar_container">
+        <div id="{{ tab }}_meter" style=""><script>{{ tab }}_make_deadline_bar();</script></div>
+    </div>
+    <div id="{{ tab }}" class="module_tab" style="{{ 'display:none;' if loop.index0 > 0 }}"></div>
+{% endfor %}
 
-    <script>
-        /*
-            ********** TRACKED **********
-            this is a view of wifi; how can this be supported?
-            data filtering at template level
-        */
-        var tracked = new Tabulator("#tracked", {
-            ajaxURL:"http://map.localhost:5005/aggregated/wifi/tracked",    // request URI
-            ajaxConfig:"GET",                                               // ajax config options go here
-            headerVisible:true,                                             // show header
-            dataLoaderLoading:dataLoaderLoading,                            // change "Loading" message to "&nbsp;"
-            index:"BSSID",                                                  // use BSSID as index
-
-            rowFormatter:function(row){
-                row.getElement().style = "height:24px";
-                if(row.getData().tracked == true){
-                    row.getElement().style.backgroundColor = "#777777";
-                }
-            },
-
-            columns:[
-                {field:"tracked", width:102, formatter: function(cell, formatterParams) {
-                    var data = cell.getRow().getData();
-                    const trgt = 'wifi';
-
-                    var _color = colorUniqId(data.BSSID, ':');
-                    var p_signal_color = 'rgba(' + _color + ', 1.0)';
-                    var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
-
-                    if (data.is_mute == false) {
-                        return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
-                    } else {
-                        return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
-                    }
-                }},
-                {title:"SSID", field:"SSID", formatter:ssidFormatter, formatterParams:{
-                    field:"Quality",
-                    colors:["red", "orange", "yellow", "#008800", "#00FF00"]
-                    },
-                    width:140,
-                },
-                {title:"BSSID", field:"BSSID", width:120},
-                {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, formatterParams:{
-                    type:"line"}
-                },
-
-                {title:"db", field:"Signal", width:30},         // perhaps the last known strength?? an average??
-                {title:"Ch.", field:"Channel", width:50},
-                {title:"Freq.", field:"Frequency", width:70},
-                {title:"Sec.", field:"Encryption", formatter: "tickCross", width:30},
-                {title:"Vendor", field:"Vendor", width:100},
-                {title:"Elapsed", field:"elapsed", width:75},
-                {title:"Created", field:"created", width:75},
-                {title:"Last", field:"updated", width:75},
-
-            ],
-        });
-    </script>
-    <script>
-        /*
-            ********** GHOSTS **********
-            ditto above..
-        */
-        var ghosts = new Tabulator("#ghosts", {
-            ajaxURL:"http://map.localhost:5005/aggregated/wifi/ghosts",     // request URI
-            ajaxConfig:"GET",                                               // ajax config options go here
-            headerVisible:true,                                             // show header
-            dataLoaderLoading:dataLoaderLoading,                            // change "Loading" message to "&nbsp;"
-            index:"BSSID",                                                  // use BSSID as index
-
-            rowFormatter:function(row){
-                row.getElement().style = "height:24px";
-                row.getElement().style.backgroundColor = "#999999";
-            },
-
-            columns:[
-                {field:"tracked", width:102, formatter: function(cell, formatterParams) {
-                    var data = cell.getRow().getData();
-                    const trgt = 'wifi';
-
-                    var _color = colorUniqId(data.BSSID, ':');
-                    var p_signal_color = 'rgba(' + _color + ', 1.0)';
-                    var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
-
-                    if (data.is_mute == false) {
-                        return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
-                    } else {
-                        return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
-                    }
-                }},
-                {title:"SSID", field:"SSID", formatter:ssidFormatter, formatterParams:{
-                    field:"Quality",
-                    colors:["red", "orange", "yellow", "#008800", "#00FF00"]
-                    },
-                    width:140,
-                },
-                {title:"BSSID", field:"BSSID", width:120},
-                {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, formatterParams:{
-                    type:"line"}
-                },
-
-                {title:"db", field:"Signal", width:30},         // perhaps the last known strength?? an average??
-                {title:"Ch.", field:"Channel", width:50},
-                {title:"Freq.", field:"Frequency", width:70},
-                {title:"Sec.", field:"Encryption", formatter: "tickCross", width:30},
-                {title:"Vendor", field:"Vendor", width:100},
-                {title:"Elapsed", field:"elapsed", width:75},
-                {title:"Created", field:"created", width:75},
-                {title:"Last", field:"updated", width:75},
-
-            ],
-        });
-    </script>
-
-    <!-- TRX MODULE TAB AS FRAGMENT -->
-    <script>
-        /*
-            ********** TRX **********
-            a view of a different module.
-        */
-        var trx = new Tabulator("#trx", {
-            ajaxURL:"http://map.localhost:5005/aggregated/trx", // request URI
-            ajaxConfig:"GET",                                   // ajax config options go here
-            dataLoaderLoading:dataLoaderLoading,                // change "Loading" message to "&nbsp;"
-            index:"id",                                         // use unique  id as index
-            // minHeight:435,                                   // set height of *table* (in CSS or here)
-
-            rowFormatter:function(row){
-                row.getElement().style = "height:24px";
-            },
-
-            persistence:{
-                sort: true,                             //persist column sorting
-                filter: true,                           //persist filters
-                headerFilter: true,                     //persist header filters
-                group: true,                            //persist row grouping
-                page: true,                             //persist page
-                columns: true,                          //persist columns
-            },
-
-            placeholder:"..." ,
-
-            columns:[
-
-                {field:"tracked", width:102, formatter: function(cell, formatterParams) {
-                    var data = cell.getRow().getData();
-                    const trgt = 'trx';
-
-                    //  special processing to make string of hex look like a BSSID
-                    var uniqId = data.id.replace('-','').substring(0,12).match(/.{1,2}/g).join(':');
-
-                    var _color = colorUniqId(uniqId, ':');
-                    var p_signal_color = 'rgba(' + _color + ', 1.0)';
-                    var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
-
-                    if (data.tracked == true) {
-                        if (data.is_mute == false) {
-                            return "<button id='remove_button_"+ data.id + "' style='width:24px;' class='trk_btn rem_button' value='"+data.id+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.id + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
-                        } else {
-                            return "<button id='remove_button_"+ data.id + "' style='width:24px;' class='trk_btn rem_button' value='"+data.id+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.id + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
-                        }
-                    } else {
-                        return "<button id='add_button_" + data.id + "' style='width:96px;' class='trk_btn add_button button' value='"+data.id+"' data-action='ADD' data-target=" + trgt + ">ADD</button>";
-                    }
-                }},
-
-                /*
-                {title:"TYPE", field:"attributes.TYPE", cellClick:function(e, cell){
-                    var data = cell.getRow().getData();
-                    const trgt = 'trx';
-
-                    function muteGroup(item, trgt) {
-                        var mutables = [];
-                        cellVal = data.attributes.TYPE;
-
-                        Object.entries(data.attributes).forEach(([key, value]) => {
-                            console.log(`${key} ${value}`);
-
-                            var column = cell.getColumn();
-                            var columnField = column.getField().replace('attributes.','');
-
-                            if (cellVal != null && key == columnField && value == cellVal){
-                                mutables.push(item);
-                            }
-
-                        });
-                        //  iterate  over all the data
-                        mutables.forEach(function(mutable){
-                            add(mutable, trgt);
-                            mute(mutable, trgt);
-                        }
-                    )};
-
-
-                    if (muteGroup(data.id, trgt)) {
-                        return "<div id='mute_button_" + data.id + "' style='background-color:#F00;' class='' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">" +  data.attributes.TYPE + "</div>";
-                    } else {
-                        return "<div id='mute_button_" + data.id + "' style='background-color:#FFF;' class='' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">" +  data.attributes.TYPE + "</div>";
-                    }
-                },  width:60},
-
-                */
-                {title:"TYPE", field:"attributes.TYPE", width:60},
-                /**/
-                {title:"TSYS_TYPE", field:"attributes.TSYS_TYPE", width:40},
-                {title:"TSYS_ID", field:"attributes.TSYS_ID", width:90},
-
-                {title:"SYSTEM", field:"attributes.SYSTEM", width:120},
-                {title:"SITE", field:"attributes.SITE", width:120},
-                {title:"ALPHATAG", field:"attributes.ALPHATAG", width:140},
-
-                {title:"TGID1", field:"attributes.TGID1", width:70},
-                {title:"TGID2", field:"attributes.TGID2", width:70},
-                {title:"RID1", field:"attributes.RID1", width:70},
-                {title:"RID2", field:"attributes.RID2", width:70},
-
-                {title:"FREQ1", field:"attributes.FREQ1", width:80},
-                {title:"FREQ2", field:"attributes.FREQ2", width:80}
-
-            ],
-        });
-
-        </script>
+{% for tab, timeout in container.module_tabs: %}
+    {% set included_tab = tab + '.js.j2' %}
+    {% include included_tab ignore missing %}
+{% endfor %}
 
     <script>
         /*
