@@ -64,15 +64,18 @@ def write():
 
     return redirect(f'http://{MOD}.{config["SERVER_NAME"]}/write', 307)
 
+
 # IdeA: can routes be unified?
-# @vc_bp.route(f'/<path>', methods=['POST'], subdomain='view')
-# def reroute_to_module(path):
-#
-#     MOD = request.headers['TARGET']
-#     resp = requests.get('http://map.localhost:5005/config/' + MOD)
-#     config = resp.json()
-#
-#     return redirect(f'http://{MOD}.{config["SERVER_NAME"]}{request.path}', 307)
+#  perhaps this can the basis for supporting a module specific button fragment?
+
+@vc_bp.route(f'/<path>', methods=['POST'], subdomain='view')
+def reroute_to_module(path):
+
+    MOD = request.headers['TARGET']
+    resp = requests.get('http://map.localhost:5005/config/' + MOD)
+    config = resp.json()
+
+    return redirect(f'http://{MOD}.{config["SERVER_NAME"]}{request.path}', 307)
 
 
 @vc_bp.route('/stop', methods=['POST'], subdomain='view')

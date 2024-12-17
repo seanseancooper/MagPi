@@ -31,7 +31,6 @@
             document.getElementById(tabName + '_container_filters').style.display = "block";
             document.getElementById(tabName).style.display = "block";
             event.currentTarget.className += " active";
-            // document.getElementById(tabName).className += " active";
 
         }
     </script>
@@ -130,11 +129,15 @@
                 if (event.target.classList.contains('write_button')) {
                     write_tracked(this, event.target.attributes['data-target'].value); // 'wifi' the http header
                 };
-                // perhaps this can be a fragment for a module specific button?
                 if (event.target.classList.contains('reload_button')) {
                     reload();
                 };
-
+                // # IdeA: perhaps this can the basis for supporting a module specific button fragment?
+                //  add an id for the button on the app side to identify it.
+                //  the value could go into data-value... as JSON
+                if (event.target.classList.contains({{ tab }} + '_custom_button')) {
+                    alert({{ tab }} + '_custom_button');
+                };
             });
         });
     </script>
