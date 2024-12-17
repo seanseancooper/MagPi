@@ -17,6 +17,8 @@ class ViewContainer(threading.Thread):
         self.modules = []
         self.module_tabs = []
 
+        self.title = None
+
     def stop(self):
         print(f'stopping.')
 
@@ -24,15 +26,15 @@ class ViewContainer(threading.Thread):
         readConfig(config_file, self.config)
         self.modules = self.config.get('MODULES')
         _modules = self.config.get('MODULE_TABS')
-        # create tabs and put ViewContainerTab in self.module_tabs
+
         for _mod in _modules.items():
             _m, _conf = _mod
             for _tab in _conf.items():
-                a, b = _tab
+                # a, b = _tab
                 # self.module_tabs.append(ViewContainerTab(a, b))
                 self.module_tabs.append(_tab)
 
-        self.view_timeout = self.config['VIEW_TIMEOUT']
+        self.title = f"ViewContainer: {[mod.upper() for mod in self.modules]}"
 
     def add_module(self, m):
         self.modules.append(m)
@@ -61,6 +63,7 @@ class ViewContainer(threading.Thread):
 
 class ViewContainerTab:
 
+    # create tabs and put ViewContainerTab in self.module_tabs
     def __init__(self, tab, view_timeout):
         super().__init__()
 

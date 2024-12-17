@@ -3,11 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ViewContainer:
-{%- for module in container.modules -%}
-    {{ module|upper }}:
-{%- endfor -%}
-    </title>
+    <title>{{ container.title }}</title>
     <link href="{{ url_for('vc_bp.static', filename='tabulator/css/tabulator_midnight.min.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('vc_bp.static', filename='css/container.css') }}">
 
@@ -39,45 +35,23 @@
 </head>
 <body>
     <div id="tabs" style="height:30px">
-{% for tab, timeout in container.module_tabs: %}
+
+{%- for tab, timeout in container.module_tabs: %}
     <button id="container_tab_{{ tab }}" class="tab_button {{ 'active' if loop.index0 }}" onclick="loadTab(event, '{{ tab }}')">{{ tab }}</button>
-{% endfor %}
+{%- endfor %}
+
     </div>
 
-<!--
-    BEGIN FILTER: MODULE_TAB LEVEL
-    [optional]
-    currently works on 'initial' tab,
-    PASS MODULE_TAB in js
-    pass 'columns' to 'filter.html.js.j2'
--->
 {% include 'filter.html.js.j2' %}
-<!-- END FILTER -->
-
-<!--
-    BEGIN OPS BUTTONS: MODULE LEVEL
-    [optional]
-    ADD/MUTE/REMOVE/WRITE/ALL/NONE BUTTONS
-    ALSO REQUIRES 'MORE BUTTONS' BELOW.
--->
 {% include 'ops_buttons.js' %}
-<!-- END OPS BUTTONS -->
-    <!-- AUTOLOAD MODULE_TAB CALLS MODULE_TAB.replace_data()-->
+
     <script>
         function reload(){
-            // THIS IS ONLY FOR THE BUTTON
-            document.location.reload();
-        }
-
-        function replace_data(){
-            wifi.replaceData();
-            tracked.replaceData();
-            ghosts.replaceData();
-            trx.replaceData();
+        {%- for tab, timeout in container.module_tabs: %}
+            {{ tab }}.replaceData();
+        {%- endfor %}
         }
     </script>
-
-
     <script>
         const dataLoaderLoading = "&nbsp;";
 
@@ -95,23 +69,20 @@
         };
     </script>
 
-{% for tab, timeout in container.module_tabs: %}
+{%- for tab, timeout in container.module_tabs: -%}
     {% include 'autoloader.js.j2' %}
     <div id="{{ tab }}_bar_container" style="padding-top:2px;padding-bottom:3px;{{ 'display:none;' if loop.index0 > 0 }}" class="bar_container">
         <div id="{{ tab }}_meter" style=""><script>{{ tab }}_make_deadline_bar();</script></div>
     </div>
     <div id="{{ tab }}" class="module_tab" style="{{ 'display:none;' if loop.index0 > 0 }}"></div>
-{% endfor %}
+{%- endfor -%}
 
-{% for tab, timeout in container.module_tabs: %}
-    {% set included_tab = tab + '.js.j2' %}
-    {% include included_tab ignore missing %}
-{% endfor %}
+{%- for tab, timeout in container.module_tabs: -%}
+    {% set module_fragment = tab + '.js.j2' %}
+    {% include module_fragment ignore missing %}
+{%- endfor -%}
 
     <script>
-        /*
-            ********** MORE BUTTONS **********
-        */
         container_elements = [];
 
         // generate one for each 'module' tab; this is wifi module_tab 'array'
