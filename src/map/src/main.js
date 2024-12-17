@@ -481,9 +481,7 @@ function animate(coordinate) {
 
                     if (!cell.is_mute && cell.tracked){
 
-                        for (const s of cell.signal_cache) {
-
-                            const sgnl = JSON.parse(s);
+                        for (const sgnl of cell.signal_cache) {
 
                             var _color = colorUniqId(cell.BSSID, ':');
                             var lonlat = fromLonLat([sgnl.lon, sgnl.lat]);
