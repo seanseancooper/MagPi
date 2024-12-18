@@ -1,6 +1,6 @@
 import os
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 import threading
 import json
 import logging
@@ -26,6 +26,18 @@ class GPSRetriever(threading.Thread):
         self.retrieving = False
         self.thread = None
         self.result = defaultdict(dict)
+
+        self.created = datetime.now()
+        self.updated = datetime.now()
+        self.elapsed = timedelta
+        self.polling_count = 0
+        self.latitude = 0.0
+        self.longitude = 0.0
+
+        # self.workers
+        # self.tracked_signals
+        # self.ghost_signals
+
 
     def __str__(self):
         return f"GPSRetriever: time: {self.gps_time()} position: {self.gps_position()} config: {self.config}"
@@ -57,6 +69,9 @@ class GPSRetriever(threading.Thread):
                         if not result:
                             break
                         self.result = result  # use 'heading', not 'track'.
+                        self.updated = datetime.now()
+                        self.elapsed = self.updated - self.created
+                        self.polling_count += 1
 
             except OSError as e:  # unable to connect.
                 gps_logger.error(f"GPSDClientRetriever {e}")  # unable to connect to GPS Hardware
@@ -76,6 +91,9 @@ class GPSRetriever(threading.Thread):
                                        "time": result['GPS']['UPDATED']}
 
                         gps_logger.debug(f'{self.result}')
+                        self.updated = datetime.now()
+                        self.elapsed = self.updated - self.created
+                        self.polling_count += 1
                         time.sleep(self.config.get('BLACKVIEWGPSRETRIEVER_TIMEOUT', 1))
             except OSError as e:
                 gps_logger.error(f"BlackviewGPSRetriever: {e}")  # unable to connect to Blackview
@@ -98,6 +116,9 @@ class GPSRetriever(threading.Thread):
                                "climb": 0.0,
                                "time":  datetime.now().__format__(self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f'))
                                }
+                self.updated = datetime.now()
+                self.elapsed = self.updated - self.created
+                self.polling_count += 1
                 print(self.result)
                 time.sleep(self.config.get('DUMMYRETRIEVER_TIMEOUT', 1))
 
@@ -120,6 +141,9 @@ class GPSRetriever(threading.Thread):
                                        "time":  datetime.now().__format__(self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f'))
                                        }
                         print(self.result)
+                        self.updated = datetime.now()
+                        self.elapsed = self.updated - self.created
+                        self.polling_count += 1
                         time.sleep(self.config.get('JSRETRIEVER_TIMEOUT', 1))
             except Exception as e:
                 gps_logger.error(f"JavaScriptGPSRetriever: {e}")  # unable to connect to Blackview

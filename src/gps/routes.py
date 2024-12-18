@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect
+from flask import Blueprint, redirect, jsonify
 
 from src.gps.GPSRetriever import GPSRetriever
 
@@ -22,6 +22,21 @@ def index():
 def gps_position():
     """  return entire result """
     return gpsRet.gps_result()
+
+
+@gps_bp.route('/stats', methods=['GET'], subdomain='gps')
+def gps_stats():
+    from src.lib.utils import format_time, format_delta
+
+    # placeholder; this should already be a map called stats in s. I want to be able to add to that map adhoc.
+    stats = {
+        'created': format_time(gpsRet.created, "%H:%M:%S"),
+        'elapsed': format_delta(gpsRet.elapsed, "%H:%M:%S"),
+        'polling_count': gpsRet.polling_count,
+        'latitude': gpsRet.result['lat'],
+        'longitude': gpsRet.result['lon']
+    }
+    return jsonify(stats)
 
 
 @gps_bp.route("/location", methods=['GET'], subdomain="gps")
