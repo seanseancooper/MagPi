@@ -55,7 +55,11 @@ class MAPAggregator(threading.Thread):
         for module_config in configs:
             mod = os.path.basename(module_config).replace('.json', '')
             self.modules.append(mod)
-            self.module_stats[mod] = {'created': datetime.now(), 'updated': datetime.now()}
+            # I am manufacturing the statistic here; instead
+            # I should get the live statistic from the context.
+            self.module_stats[mod] = {'created': '',
+                                      'updated': '',
+                                      'elapsed': ''}
             readConfig(os.path.basename(module_config), self.configs[mod])
 
         readConfig(config_file, self.config)
@@ -70,8 +74,6 @@ class MAPAggregator(threading.Thread):
         self.dead_modules.clear()
 
         for mod in self.modules:
-            self.module_stats[mod]['updated'] = datetime.now()
-            self.module_stats[mod]['elapsed'] = datetime.now() - self.module_stats[mod]['created']
             try:
                 test = requests.get('http://' + mod + '.' + self.configs[mod]['SERVER_NAME'])
                 if test.ok:
@@ -82,9 +84,13 @@ class MAPAggregator(threading.Thread):
     def aggregate(self, mod):
         """ collect responses into aggregation """
         try:
-            resp = requests.get('http://' + mod + '.' + self.configs[mod]['SERVER_NAME'])
-            if resp.ok:
-                self.aggregated[mod] = resp.json()
+            conf = requests.get('http://' + mod + '.' + self.configs[mod]['SERVER_NAME'])
+            if conf.ok:
+                self.aggregated[mod] = conf.json()
+
+            stats = requests.get('http://' + mod + '.' + self.configs[mod]['SERVER_NAME'] + '/stats')
+            if stats.ok:
+                self.module_stats[mod] = stats.json()  # current module stats
         except Exception as e:
             map_logger.warning(f'Aggregator Warning! {e}')
 
@@ -120,7 +126,7 @@ class MAPAggregator(threading.Thread):
         while True:
             self.iteration += 1
             self.updated = datetime.now()
-            self.elapsed = self.updated-self.created
+            self.elapsed = self.updated - self.created
 
             for mod in self.live_modules:
                 self.aggregate(mod)
@@ -133,8 +139,8 @@ class MAPAggregator(threading.Thread):
                 except KeyError: pass  # 'missing' is fine.
 
             def module_info(m):
-                created = format_time(self.module_stats[m]['created'], "%H:%M:%S")
-                elapsed = format_delta(self.module_stats[m]['elapsed'], "%H:%M:%S")
+                created = self.module_stats[m]['created']
+                elapsed = self.module_stats[m]['elapsed']
                 messaging = m + " "
 
                 if m in self.live_modules:

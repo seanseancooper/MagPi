@@ -3,7 +3,6 @@ from flask import Blueprint, redirect, render_template
 from src.map.MAPAggregator import MAPAggregator
 
 mapAgg = MAPAggregator()
-# these don't produce data... yet.
 # TODO: the config hasn't been read yet, how can these be configurable?
 non_config_files = ['arx.json', 'cam.json', 'ebs.json', 'mot.json']
 mapAgg.configure('map.json', non_config_files=non_config_files)
@@ -47,6 +46,20 @@ def aggregated_by_module(mod):
 def config_for_module(mod):
     """ returns module specific config"""
     return mapAgg.configs[mod]
+
+
+#  TODO: let other apps emit stats as well
+@map_bp.route("/stats", methods=['GET'], subdomain='map')
+def module_stats():
+    """ returns module stats"""
+    return mapAgg.module_stats
+
+
+#  TODO: let other apps emit stats as well
+@map_bp.route("/stats/<mod>", methods=['GET'], subdomain='map')
+def stats_for_module(mod):
+    """ returns module specific stats"""
+    return mapAgg.module_stats[mod]
 
 
 @map_bp.route("/aggregated/<mod>/<context>", methods=['GET'], subdomain='map')
