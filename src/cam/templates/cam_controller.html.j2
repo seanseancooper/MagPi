@@ -181,22 +181,22 @@
     <div id="videodiv" style="" class="videodiv">
         <iframe id="_video" style="" class="_video" src="" onLoad="load_video();"></iframe>
     </div>
-    <img id="target" style="" class="target" src="{{ url_for('cam_bp.static', filename='images/transgraphic.gif') }}">
+    <img id="target" style="width:{{ plugin.frame_shape[1] }};height:{{ plugin.frame_shape[0] }};" class="target" src="{{ url_for('cam_bp.static', filename='images/transgraphic.gif') }}">
     <script>
         // interpret crop
         const j = Jcrop.attach('target');
         const w = Jcrop.Widget.create();
-        j.addWidget(w);
         j.setOptions({
             shade: false,
             multi: true
         });
+        j.addWidget(w);
         j.listen('crop.change',(w,e) => {
           var c = Object();
           c.id = 'crop_input';
-          // #TODO: w.h as displayed in UI seems wrong...
           w.pos.w += w.pos.x;
           w.pos.h += w.pos.y;
+          // validate that w/h value does NOT exceed plugin._area
           c.value = JSON.stringify(w.pos);
           handleCropper(c);
         });
