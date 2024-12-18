@@ -29,15 +29,17 @@ class CAMController(threading.Thread):
 
     def run(self) -> None:
         try:
-            import atexit
-
-            def stop():
-                routes.camMgr.stop()
-
-            atexit.register(stop)
+            # import atexit
+            #
+            # def stop():
+            #     routes.camMgr.stop()
+            #
+            # atexit.register(stop)
 
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
+
+            # perhaps this should be a thread
             routes.camMgr.run()
         except KeyboardInterrupt:
             pass
