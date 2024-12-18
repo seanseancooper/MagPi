@@ -2,7 +2,7 @@ import os
 import queue
 import threading
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 import sounddevice as sd
@@ -31,7 +31,9 @@ class ARXRecorder(threading.Thread):
         self._OUTFILE = None
 
         self.is_mute = False
-        self.updated = None
+        self.created = datetime.now()
+        self.updated = datetime.now()
+        self.elapsed = timedelta()              # elapsed time since created
 
         self._stream = None
         self.thread = None
@@ -103,6 +105,9 @@ class ARXRecorder(threading.Thread):
         self.update_meter()
 
     def update_meter(self):
+
+        self.updated = datetime.now()
+        self.elapsed = self.updated - self.created
 
         try:
             self.meter['peak_percentage'] = float(self.metering_q.get_nowait())
