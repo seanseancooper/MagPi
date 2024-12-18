@@ -56,7 +56,7 @@ class TRXSignalPoint:
 
     def update(self, tracked):
         self.updated = datetime.now()
-        self.elapsed = datetime.now() - self.created
+        self.elapsed = self.updated - self.created
         self.tracked = tracked
 
     def get(self):

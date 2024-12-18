@@ -102,7 +102,7 @@ class WifiWorker:
     def update(self, sgnl):
         """ updates *dynamic* fields"""
         self.updated = datetime.now()
-        self.elapsed = datetime.now() - self.created
+        self.elapsed = self.updated - self.created
         self.tracked = self.bssid in self.scanner.tracked_signals
         self.scanner.makeSignalPoint(self.bssid, int(sgnl.get('Signal', -99)))
 

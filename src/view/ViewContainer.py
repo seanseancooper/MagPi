@@ -75,7 +75,7 @@ class ViewContainer(threading.Thread):
     def run(self):
         while True:
             self.updated = datetime.now()
-            self.elapsed = datetime.now() - self.created
+            self.elapsed = self.updated - self.created
             time.sleep(1)
             pass
 

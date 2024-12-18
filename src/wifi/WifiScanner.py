@@ -53,6 +53,7 @@ class WifiScanner(threading.Thread):
         self.reverse = False                    # reverse the sort...
 
         self.created = datetime.now()
+        self.updated = datetime.now()
         self.elapsed = timedelta()              # elapsed time since created
         self.polling_count = 0                  # iterations in this run.
 
@@ -166,7 +167,8 @@ class WifiScanner(threading.Thread):
     def get_parsed_signals(self):
         """ updates and returns ALL parsed SIGNALS """
         fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
-        self.elapsed = datetime.now() - self.created
+        self.updated = datetime.now()
+        self.elapsed = self.updated - self.created
         [self.update_sgnl_dynamics(sgnl, self.get_worker(sgnl['BSSID']), fmt) for sgnl in self.parsed_signals]
 
         return self.parsed_signals
@@ -224,8 +226,8 @@ class WifiScanner(threading.Thread):
                     except IndexError: pass
 
                 [worker.run() for worker in self.workers]
-
-                self.elapsed = datetime.now() - self.created
+                self.updated = datetime.now()
+                self.elapsed = self.updated - self.created
                 wifi_updated.send(self)
 
                 if self.polling_count % 10 == 0:

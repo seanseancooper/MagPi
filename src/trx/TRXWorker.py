@@ -93,7 +93,7 @@ class TRXWorker:
     def update(self):
         """ updates *dynamic* fields"""
         self.updated = datetime.now()
-        self.elapsed = datetime.now() - self.created
+        self.elapsed = self.updated - self.created
         self.tracked = self.freq in self.retriever.tracked_signals.keys()
 
     def match(self, sgnl):
