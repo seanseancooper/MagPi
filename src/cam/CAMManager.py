@@ -1,5 +1,6 @@
 import threading
 import logging
+import time
 
 from flask import json
 
@@ -38,14 +39,25 @@ class CAMManager(threading.Thread):
         self.plugin.plugin_args_capture_src = self.cam_direction(direction)
         self.plugin.get_config()
 
+    def kill_plugin(self):
+        self.plugin.streamservice.force_stop()
+        self.plugin.plugin_process_frames = False
+        time.sleep(.01)
+
+        self.plugin.streamservice = None
+        self.plugin.tracker = None
+        self.plugin.parent_thread = None
+
+        self.plugin = None
+
     def cam_direction(self, direction):
         if not str(self.config['FORWARD_TEST_URL']) > '':
             return self.config[direction.upper() + '_VIDEO_URL']
         return self.config['FORWARD_TEST_URL']
 
     def cam_reload(self, direction):
-        self.plugin.streamservice.force_stop()
-        self.plugin.streamservice = None
+        self.kill_plugin()
+
         self.init_plugin(ShowxatingBlackviewPlugin, direction)  # TODO: make plugin configurable
         self.plugin.run()
 
@@ -62,12 +74,14 @@ class CAMManager(threading.Thread):
         return True
 
     def stop(self):
-        # self.plugin.stop()
-        # stop the previous plugin; it has no stop method
-        # stop the streamservice the plugin implementation started in the interface [self.plugin.streamservice.t]
-        pass
+        self.kill_plugin()
 
     def run(self):
         self.init_plugin(ShowxatingBlackviewPlugin, "FORE")
+        #  how this is being run? perhaps use:
+        #  thread = threading.Thread(target=self.plugin.run, daemon=True)
+        #  thread.start
+        #  self.plugin = thread
+
         self.plugin.run()
 
