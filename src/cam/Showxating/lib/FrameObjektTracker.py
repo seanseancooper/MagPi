@@ -184,7 +184,7 @@ class FrameObjektTracker:
             o.contour_id = self.contour_id
             o.tag = f"{self.f_id}_{o.prev_tag.split('_')[1]}"
 
-            self.print_frame(o, "   ")
+            # self.print_frame(o, "   ")
             labeled.append(o)
 
         if not labeled:
