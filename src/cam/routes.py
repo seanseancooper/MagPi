@@ -17,30 +17,9 @@ cam_bp = Blueprint(
 
 @cam_bp.route('/')
 def index():
-    # TODO: what 'data' can be exposed instead of config?
-    plugin = camMgr.plugin.get()
-    #  capture stats
-    #  plugin config
-
-    tracker = camMgr.plugin.tracker.get()
-    #  tag
-    #  tag location
-    #  self._ml = []                        # DO NOT CHANGE: list of (x,y) location of contour in self.contours
-    #  self._frame_delta                    # DO NOT CHANGE: euclidean distance between the current and previous frames
-    #  self._frame_MSE = float()
-    #  self._frame_SSIM = float()
-    #  self.has_motion                      # motion detected
-    #  analytics: last n tracked frames see
-    #      if has_analysis:
-    #         for w, _ in enumerate([x for x in t][:1], 1):
-    #             o = t.get(_)
-    #             try:
-    #                 cv.putText(f, o.tag, (385, 345 + (w * 20)), cv.FONT_HERSHEY_PLAIN, .75, (255, 255, 255), 1)
-    #             except AttributeError as a:
-    #                 pass
-
-    streamservice = camMgr.plugin.streamservice.get()
-    return jsonify(streamservice)
+    # at some point, this will return stats.
+    # just not yet.
+    return redirect('/ctrl', 302)
 
 
 @cam_bp.route("/ctrl", methods=['GET'], subdomain='cam')
