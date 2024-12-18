@@ -35,6 +35,13 @@ class TRXUSBRetriever(threading.Thread):
         self.out = None
         self.signal_cache = []
 
+        self.created = datetime.now()
+        self.updated = datetime.now()
+        self.elapsed = timedelta()
+        self.polling_count = 0
+        self.latitude = 0.0
+        self.longitude = 0.0
+
         self.tracked_signals = defaultdict(dict)
 
         self.retrieving = False
@@ -178,6 +185,11 @@ class TRXUSBRetriever(threading.Thread):
                         self.makeSignalPoint()
 
                         print(self.out)
+                        # TODO: this needs to update more regularly than
+                        #  the current implementation allows
+                        self.updated = datetime.now()
+                        self.elapsed = self.updated - self.created
+                        self.polling_count += 1
 
                         [sgnl.update(sgnl.tracked) for sgnl in self.signal_cache]
             else:

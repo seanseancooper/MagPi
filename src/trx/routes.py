@@ -53,9 +53,25 @@ def remove(id):
     return "", 404
 
 
-@trx_bp.route('/config', methods=['GET'], subdomain='wifi')
-def wifi_config():
+@trx_bp.route('/config', methods=['GET'], subdomain='trx')
+def trx_config():
     return jsonify(trxRet.config)
+
+
+@trx_bp.route('/stats', methods=['GET'], subdomain='trx')
+def trx_stats():
+    from src.lib.utils import format_time, format_delta
+
+    stats = {
+        'created': format_time(trxRet.created, "%H:%M:%S"),
+        'elapsed': format_delta(trxRet.elapsed, "%H:%M:%S"),
+        'polling_count': trxRet.polling_count,
+        'latitude': trxRet.latitude,
+        'longitude': trxRet.longitude,
+        # 'workers': len(trxRet.workers),  implementation based
+        'tracked': len(trxRet.tracked_signals),
+    }
+    return jsonify(stats)
 
 
 @trx_bp.route('/stop', methods=['POST'], subdomain='wifi')
