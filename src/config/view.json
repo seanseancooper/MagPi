@@ -27,12 +27,12 @@
 		{
 			"MODULE_TABS": {
 				"wifi": {
-					"wifi": 10,
-					"tracked": 20,
-					"ghosts": 30
+					"wifi": 60,
+					"tracked": 10,
+					"ghosts": 5
 				},
 				"trx": {
-					"trx": 60
+					"trx": 120
 				}
 			}
 		},
