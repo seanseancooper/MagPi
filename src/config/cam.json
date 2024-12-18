@@ -12,10 +12,16 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
-			"FORE_VIDEO_URL" : "http://10.99.77.1/blackvue_live.cgi"
+			"FORE_VIDEO_URL_" : "http://10.99.77.1/blackvue_live.cgi"
 		},
 		{
-			"AFT_VIDEO_URL" : "http://10.99.77.1/blackvue_live.cgi?direction=R"
+			"AFT_VIDEO_URL_" : "http://10.99.77.1/blackvue_live.cgi?direction=R"
+		},
+		{
+			"FORE_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPiExternal/rsrc/cam/training_data/test_movies/cam.mp4"
+		},
+		{
+			"AFT_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPiExternal/rsrc/cam/training_data/test_movies/cam.mp4"
 		},
 		{
 			"FORWARD_TEST_URL" : ""
