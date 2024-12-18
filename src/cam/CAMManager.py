@@ -2,8 +2,6 @@ import threading
 import logging
 import time
 
-from flask import json
-
 from src.cam.Showxating.ShowxatingBlackviewPlugin import ShowxatingBlackviewPlugin
 from src.config.__init__ import readConfig
 
@@ -33,13 +31,13 @@ class CAMManager(threading.Thread):
             "ALL": self.config['MULTIBUTTON_ALL']
         }
 
-    def init_plugin(self, pluginClass, direction):
+    def init_plugin(self, pluginClass, direction):  # ?? what does this arm-twisting buy me ??
         self.plugin = pluginClass()
         self.plugin.plugin_name = self.config['PLUGIN_NAME']
         self.plugin.plugin_args_capture_src = self.cam_direction(direction)
         self.plugin.get_config()
 
-    def kill_plugin(self):
+    def kill_plugin(self):  # too much work to shutdown, this is.
         self.plugin.streamservice.force_stop()
         self.plugin.plugin_process_frames = False
         time.sleep(.01)
@@ -48,18 +46,17 @@ class CAMManager(threading.Thread):
         self.plugin.tracker = None
         self.plugin.parent_thread = None
 
-        self.plugin = None
+        self.plugin = None  # ?? thread ownership ??
 
-    def cam_direction(self, direction):
+    def cam_direction(self, direction):  # ?? crash happens w/o change of direction ??
         if not str(self.config['FORWARD_TEST_URL']) > '':
             return self.config[direction.upper() + '_VIDEO_URL']
         return self.config['FORWARD_TEST_URL']
 
     def cam_reload(self, direction):
         self.kill_plugin()
-
         self.init_plugin(ShowxatingBlackviewPlugin, direction)  # TODO: make plugin configurable
-        self.plugin.run()
+        self.plugin.run()  # ?? this may be part of the issue, run() called twice??
 
     def cam_multibutton(self, mode):
         """ set mode of ShowxatingBlackviewPlugin """
@@ -78,10 +75,14 @@ class CAMManager(threading.Thread):
 
     def run(self):
         self.init_plugin(ShowxatingBlackviewPlugin, "FORE")
-        #  how this is being run? perhaps use:
+        #  how this is being run, may be the issue.
+        #  the existing makes it 'owned' by the main thread; not a daemon.
+        #  perhaps use:
         #  thread = threading.Thread(target=self.plugin.run, daemon=True)
         #  thread.start
-        #  self.plugin = thread
+        #  self.plugin = thread <-- camMgr thread attribute is not None.
+        #  > thread management: any excessive threads.
+        #  ?? will the plugin crash in a similar manner if not started by the camMgr ??
 
-        self.plugin.run()
+        self.plugin.run()  # ?? is this being called 2x on reload() ??
 
