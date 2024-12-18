@@ -100,8 +100,8 @@ input[type="range"]:focus::-moz-range-thumb{
 .target {
     width:704px;
     height:480px;
-    left:-1px;
-    top:-1px;
+    left:0px;
+    top:0px;
 }
 
 .jcrop-stage {
