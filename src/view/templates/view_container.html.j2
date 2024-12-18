@@ -39,7 +39,8 @@
     <div id="tabs" style="height:30px">
 
 {%- for tab, timeout in container.module_tabs: %}
-    <button id="container_tab_{{ tab }}" class="tab_button {{ 'active' if loop.index0 }}" onclick="loadTab(event, '{{ tab }}')">{{ tab }}</button>
+    {% set elapsed = container.get_stat_for_module(tab, 'elapsed') %}
+    <button id="container_tab_{{ tab }}" class="tab_button {{ 'active' if loop.index0 }}" onclick="loadTab(event, '{{ tab }}')">{{ tab }} {{ elapsed }}</button>
 {%- endfor %}
 
     </div>
