@@ -57,6 +57,7 @@ class ShowxatingCapture:
                             r1 = conn.getresponse()
                             if r1.status == 200:
                                 initialize()
+                            conn.close()
                         except OSError as e:
                             cam_logger.error(
                                     f"[{__name__}] failed to connect {e}, retrying in 5 seconds...")
