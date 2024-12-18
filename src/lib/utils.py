@@ -17,6 +17,20 @@ def mute(mutable):
     return mutable.is_mute
 
 
+def time_traveller(o):
+    ''' experiment: mutate object AND provide data to caller '''
+
+    o.updated = datetime.now()
+    o.elapsed = o.updated - o.created
+
+    map = {
+        'updated': o.updated,
+        'elapsed': o.elapsed,
+    }
+
+    return o.elapsed, map
+
+
 def enunciate(speakable, message):
     if not speakable.is_mute:
         speakable.speaker.broadcast(f"{message}")
