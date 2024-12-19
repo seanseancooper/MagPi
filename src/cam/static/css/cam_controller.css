@@ -97,13 +97,6 @@ input[type="range"]:focus::-moz-range-thumb{
     height:480px;
 }
 
-.target {
-    width:704px;
-    height:480px;
-    left:0px;
-    top:0px;
-}
-
 .jcrop-stage {
     position:absolute;
     left:0px;
