@@ -148,8 +148,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             self.tracker.f_limit = int(value)
         if field == 'crop':
             json_value = json.loads(value)
-            self._max_height = slice(int(json_value['y']), int(json_value['h']), None)
-            self._max_width = slice(int(json_value['x']), int(json_value['w']), None)
+            self._max_height = slice(int(json_value['y']), int(json_value['y'] + json_value['h']), None)
+            self._max_width = slice(int(json_value['x']), int(json_value['x'] + json_value['w']), None)
 
     def threshold_ops(self, f, t):
         # displayed when self.threshold is changing or threshold_hold is enabled

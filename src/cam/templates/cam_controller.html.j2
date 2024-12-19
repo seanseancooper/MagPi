@@ -5,13 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CAMController</title>
     <style>
-        .highlight {
-            color: rgb{{ plugin.majic_color }};
+
+
+        /* Ensure the size of the image fit the container perfectly */
+        canvas {
+          display: block;
+
+          /* This rule is very important, please don't ignore this */
+          max-width: 100%;
         }
+
     </style>
-    <script>
-        const highlight = {{ plugin.majic_color }};
-    </script>
+
     <link rel="stylesheet" href="{{ url_for('cam_bp.static', filename='css/cropper.css') }}">
     <link rel="stylesheet" href="{{ url_for('cam_bp.static', filename='css/cam_controller.css') }}">
     <script>
@@ -86,25 +91,7 @@
 
             updateCropper();
         }
-        /*
-        function draw_grid(grid_shape, color, thickness){
-            # do this in javascript
-            h, w = target.size()
-            var rows, cols = grid_shape[0], grid_shape[1]
 
-            # draw vertical lines
-            for x in range(start=0, stop=w, step=cols){
-                x = Math.parseInt(Math.round(x));
-                line((x, 125), (x, 345), color, thickness);
-            }
-
-            # draw horizontal lines
-            for y in range(start=125, stop=345, step=rows){
-                y = Math.parseInt(Math.round(y));
-                // line((0, y), (w, y), color, thickness);
-            }
-        }
-        */
         function handleSlider(slider) {
             // handle continous
             const slider_output = document.getElementById(slider.id.replace('_input', '_output'));
@@ -172,36 +159,46 @@
 <body>
 <div>
 
-    <div id="videodiv" style="max-width: 704px;">
-        <iframe id="_video" style="width:{{ plugin.frame_shape[1] }};height:{{ plugin.frame_shape[0] }};" class="_video" src="" onLoad="load_video();"></iframe>
-        <canvas id="target" style="width:704px;height:480px;"></canvas>
+    <div id="videodiv" class="videodiv" style="">
+        <iframe id="_video" style="" class="_video" src="" onLoad="load_video();"></iframe>
+        <canvas id="target" class="_area" style="width:{{ plugin.frame_shape[1] }};height:{{ plugin.frame_shape[0] }};"></canvas>
     </div>
 
     <script src="{{ url_for('cam_bp.static', filename='cropperjs/dist/cropper.js') }}"></script>
     <script>
+        window.addEventListener('DOMContentLoaded', function () {
+            var image = document.querySelector('#target');
+            var cropper = new Cropper(image, {
+                viewMode: 1,
+                center: true,
+                dragMode: 'move',
+                zoomable: false,
+                scalable: false,
+                autoCropArea: .50,
+                restore: false,
+                modal: false,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: false,
+                crop: function (event) {
+                    cropper.getData();
+                    var cropBoxData = cropper.getCropBoxData();
 
-    window.addEventListener('DOMContentLoaded', function () {
+                    var c = Object();
+                    c.id = 'crop_input';
 
-        var image = document.querySelector('#target');
+                    value = {
+                        'x': Math.round(cropBoxData.left),
+                        'y': Math.round(cropBoxData.top),
+                        'w': Math.round(cropBoxData.width),
+                        'h': Math.round(cropBoxData.height)
+                    }
 
-        const ctx = image.getContext("2d");
-        ctx.clearRect(0, 0, image.width, image.height);
-        //ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-        //ctx.globalAlpha = 0.5
-
-        var cropper = new Cropper(image, {
-            viewMode: 1,
-            dragMode: 'move',
-            autoCropArea: 1,
-            restore: false,
-            modal: false,
-            guides: false,
-            highlight: false,
-            cropBoxMovable: true,
-            cropBoxResizable: true,
-            toggleDragModeOnDblclick: false,
-        });
-    });
+                    c.value = JSON.stringify(value);
+                    handleCropper(c);
+                }
+            });
+       });
     </script>
 
     <div id="top_buttons" style="" class="top_buttons highlight">
