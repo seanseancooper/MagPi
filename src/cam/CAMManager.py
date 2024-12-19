@@ -48,7 +48,7 @@ class CAMManager(threading.Thread):
 
         self.plugin = None  # ?? thread ownership ??
 
-    def cam_direction(self, direction):  # ?? crash happens w/o change of direction ??
+    def cam_direction(self, direction):
         if not str(self.config['FORWARD_TEST_URL']) > '':
             return self.config[direction.upper() + '_VIDEO_URL']
         return self.config['FORWARD_TEST_URL']
@@ -77,12 +77,13 @@ class CAMManager(threading.Thread):
         self.init_plugin(ShowxatingBlackviewPlugin, "FORE")
         #  how this is being run, may be the issue.
         #  the existing makes it 'owned' by the main thread; not a daemon.
+        #  ?? what happens if streams AND plugin_displays is false ??
+
         #  perhaps use:
         #  thread = threading.Thread(target=self.plugin.run, daemon=True)
         #  thread.start
         #  self.plugin = thread <-- camMgr thread attribute is not None.
         #  > thread management: any excessive threads.
-        #  ?? will the plugin crash in a similar manner if not started by the camMgr ??
 
         self.plugin.run()  # ?? is this being called 2x on reload() ??
 
