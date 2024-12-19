@@ -29,6 +29,7 @@ class SpeechService(threading.Thread):
         self.voice = self.config['SPEECH_VOICE']
 
     def init(self):
+        # TODO: perhaps reevaluate how this is being started.
         self.enunciator = Enunciator('name', 1, 100)
         self.enunciator.speechservice = self
         self.enunciator.configure()

@@ -45,7 +45,6 @@ class EBSManager(threading.Thread):
         ebs_logger.debug(f'e_thread: {e_thread.__str__()}')
 
         time.sleep(.1)                  # needs time to startup!
-        self.enunciate("EBS")           # best place for this w/o dual startup
 
     def run(self):
         self.ebs_start()

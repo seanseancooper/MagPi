@@ -35,7 +35,7 @@ class Enunciator(threading.Thread):
 
     def stop(self):
         msg = "Speech Actuator Service off line"
-        logger_root.info(msg)
+        self.broadcast(msg)
 
         if self.message_queue:
             # TODO: this is a thread...
