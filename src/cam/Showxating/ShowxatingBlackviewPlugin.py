@@ -246,7 +246,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
             if ret:
                 self.pre_mediapipe(frame)
-
+                # handle crop exceeding dimensions here
                 cropped_frame = frame[self._max_height, self._max_width]
                 cropped_reference = reference[self._max_height, self._max_width]
 

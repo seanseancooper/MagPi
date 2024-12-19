@@ -12,14 +12,8 @@
     <script>
         const highlight = {{ plugin.majic_color }};
     </script>
-    <link rel="stylesheet" href="{{ url_for('cam_bp.static', filename='jcrop/dist/jcrop.css') }}">
+    <link rel="stylesheet" href="{{ url_for('cam_bp.static', filename='css/cropper.css') }}">
     <link rel="stylesheet" href="{{ url_for('cam_bp.static', filename='css/cam_controller.css') }}">
-
-    <script src="{{ url_for('cam_bp.static', filename='js/jquery-3.3.1.min.js') }}"
-            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-            crossorigin="anonymous">
-    </script>
-
     <script>
 
         function setsHeaders(xhttp) {
@@ -177,31 +171,39 @@
 </head>
 <body>
 <div>
-    <script src="{{ url_for('cam_bp.static', filename='jcrop/dist/jcrop.js') }}"></script>
-    <div id="videodiv" style="" class="videodiv">
-        <iframe id="_video" style="" class="_video" src="" onLoad="load_video();"></iframe>
+
+    <div id="videodiv" style="max-width: 704px;">
+        <iframe id="_video" style="width:{{ plugin.frame_shape[1] }};height:{{ plugin.frame_shape[0] }};" class="_video" src="" onLoad="load_video();"></iframe>
+        <canvas id="target" style="width:704px;height:480px;"></canvas>
     </div>
-    <img id="target" style="width:{{ plugin.frame_shape[1] }};height:{{ plugin.frame_shape[0] }};" class="target" src="{{ url_for('cam_bp.static', filename='images/transgraphic.gif') }}">
+
+    <script src="{{ url_for('cam_bp.static', filename='cropperjs/dist/cropper.js') }}"></script>
     <script>
-        // interpret crop
-        const j = Jcrop.attach('target');
-        const w = Jcrop.Widget.create();
-        j.setOptions({
-            shade: false,
-            multi: true
+
+    window.addEventListener('DOMContentLoaded', function () {
+
+        var image = document.querySelector('#target');
+
+        const ctx = image.getContext("2d");
+        ctx.clearRect(0, 0, image.width, image.height);
+        //ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+        //ctx.globalAlpha = 0.5
+
+        var cropper = new Cropper(image, {
+            viewMode: 1,
+            dragMode: 'move',
+            autoCropArea: 1,
+            restore: false,
+            modal: false,
+            guides: false,
+            highlight: false,
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            toggleDragModeOnDblclick: false,
         });
-        j.addWidget(w);
-        j.listen('crop.change',(w,e) => {
-          var c = Object();
-          c.id = 'crop_input';
-          w.pos.w += w.pos.x;
-          w.pos.h += w.pos.y;
-          // validate that w/h value does NOT exceed plugin._area
-          c.value = JSON.stringify(w.pos);
-          handleCropper(c);
-        });
-        j.focus();
+    });
     </script>
+
     <div id="top_buttons" style="" class="top_buttons highlight">
        <button id="fore_aft_button" class="button" value="AFT" onClick="fore_aft(this);">
             <div id="fore_aft_button_text" style="">A</div>
