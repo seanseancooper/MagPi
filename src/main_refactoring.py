@@ -183,7 +183,7 @@ if __name__ == '__main__':
             root.root_bp.register_blueprint(wifi.wifi_bp)
 
             RESTServer(cam.create_app()).run()
-            threading.Thread(target=cam.camMgr.run, daemon=True).start()
+            threading.Thread(target=cam.camMgr.run, name='CAMManager', daemon=True).start()
             root.root_bp.register_blueprint(cam.cam_bp)
 
         # [load_modules(_) for _ in configuration['MODULES']]

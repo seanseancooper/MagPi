@@ -106,7 +106,7 @@ def starts_apps():
     # threading.Thread(target=map.mapAgg.run, daemon=True).start()
 
     RESTServer(ViewController.ViewController.create_app()).run()
-    threading.Thread(target=view.viewContainer.run, daemon=True).start()
+    threading.Thread(target=view.viewContainer.run, name='ViewContainer', daemon=True).start()
 
 
 if __name__ == '__main__':
