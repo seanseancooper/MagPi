@@ -19,10 +19,13 @@ speech_logger = logging.getLogger('speech_logger')
 
 def print_symbology(has_symbols, f, rect, m, c):
 
+    _height, _width, ch = f.shape
+    _start = int(0.25 * _height)
+
     if has_symbols:
         if m:
             # TODO: needs to move dynamically w/ size
-            cv.putText(f, "MOTION DETECTED!", (5, 120), cv.FONT_HERSHEY_PLAIN, 1.0, c, 2)
+            cv.putText(f, "MOTION DETECTED!", (5, _start - 5), cv.FONT_HERSHEY_PLAIN, 1.0, c, 2)
 
         # yellow rect: items that are moving
         try:
@@ -36,12 +39,17 @@ def print_symbology(has_symbols, f, rect, m, c):
 
         except TypeError: pass  # 'NoneType' object is not subscriptable
 
+
 def print_analytics(has_analysis, f, contours, hierarchy):
     if has_analysis:
         draw_contours(f, contours, hierarchy, (64, 255, 64), 1)  # green contours
         # draw_centroid(f, contours, 5, (127, 0, 255), 1)  # purple centroid
 
+
 def print_tracked(has_analysis, has_symbols, f, t, rect):
+    _height, _width, ch = f.shape
+    _end = int(0.70 * _height)
+    _font_size = 0.75
 
     if has_symbols:
 
@@ -64,7 +72,7 @@ def print_tracked(has_analysis, has_symbols, f, t, rect):
         for w, _ in enumerate([x for x in t][:1], 1):
             o = t.get(_)
             try:
-                cv.putText(f, o.tag, (385, 345 + (w * 20)), cv.FONT_HERSHEY_PLAIN, .75, (255, 255, 255), 1)
+                cv.putText(f, o.tag, (385, _end + (w * 20)), cv.FONT_HERSHEY_PLAIN, _font_size, (255, 255, 255), 1)
             except AttributeError as a:
                 pass
 
@@ -73,9 +81,9 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
     def __init__(self):
         super().__init__()
-        self._area = tuple[0:345, 0:704]  # the work area.
-        self._max_height = slice(125, 345)  # view height is 220px
-        self._max_width = slice(0, 704)  # view width, not 'step'
+        self._area = tuple[0:345, 0:704]    # the work area.
+        self._max_height = slice(125, 345)  # work are height is 220px
+        self._max_width = slice(0, 704)     # view width, not 'step'
 
         self.has_symbols = True
         self.has_analysis = False
@@ -203,10 +211,13 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                 draw_pose(f, self._result_T)
 
     def process_contours(self, f, contours, hier):
+        _height, _width, ch = f.shape
+        _start = int(0.25 * _height)
+        _end = int(0.70 * _height)
 
         # delimit the work area
-        cv.line(f, (0, 125), (704, 125), self.majic_color, 1)
-        cv.line(f, (0, 345), (704, 345), self.majic_color, 1)
+        cv.line(f, (0, _start), (_width, _start), self.majic_color, 1)
+        cv.line(f, (0, _end), (_width, _end), self.majic_color, 1)
 
         if contours:
 
@@ -247,7 +258,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
             if ret:
                 self.pre_mediapipe(frame)
-                # handle crop exceeding dimensions here
                 cropped_frame = frame[self._max_height, self._max_width]
                 cropped_reference = reference[self._max_height, self._max_width]
 
