@@ -156,9 +156,9 @@
 <body>
 <div>
 
-    <div id="videodiv" class="videodiv" style="">
-        <iframe id="_video" style="" class="_video" src="" onLoad="load_video();"></iframe>
-        <canvas id="target" class="_area" style="width:{{ plugin.frame_shape[1] }};height:{{ plugin.frame_shape[0] }};"></canvas>
+    <div id="videodiv" class="videodiv" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;">
+        <iframe id="_video" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;" class="_video" src="" onLoad="load_video();"></iframe>
+        <canvas id="target" class="_area" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;"></canvas>
     </div>
 
     <script src="{{ url_for('cam_bp.static', filename='cropperjs/dist/cropper.js') }}"></script>
