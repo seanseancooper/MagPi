@@ -13,7 +13,6 @@ class CAMManager(threading.Thread):
         super().__init__()
         self.config = {}
         self.plugin = None
-        self.thread = None
 
         self.multibutton = {}
         self.statistics = {}                    # not used!
@@ -37,7 +36,9 @@ class CAMManager(threading.Thread):
         self.plugin.plugin_args_capture_src = self.cam_direction(direction)
         self.plugin.get_config()
 
-    def kill_plugin(self):  # too much work to shutdown, this is.
+    def kill_plugin(self):
+        # self.plugin.stop()
+
         self.plugin.stop_streamservice()
         self.plugin.tracker = None
         self.plugin = None
@@ -50,8 +51,7 @@ class CAMManager(threading.Thread):
     def cam_reload(self, direction):
         self.kill_plugin()
         self.init_plugin(ShowxatingBlackviewPlugin, direction)  # TODO: make plugin configurable
-        if not self.thread:
-            self.thread = threading.Thread(target=self.plugin.run, name='BVPlugin').start()
+        threading.Thread(target=self.plugin.run, name='BVPlugin').start()
         return 'OK'
 
     def cam_multibutton(self, mode):
@@ -69,10 +69,9 @@ class CAMManager(threading.Thread):
     def stop(self):
         self.kill_plugin()
 
+    # consider renaming this main,
+    # ending with join() to close threads,
+    # and close() for cleanup.
     def run(self):
         self.init_plugin(ShowxatingBlackviewPlugin, "FORE")
-        if not self.thread:
-            # this doesn't do what I thought it does. No thread!
-            t_thread = threading.Thread(target=self.plugin.run, name='BVPlugin').start()
-            self.thread = t_thread
-            pass
+        threading.Thread(target=self.plugin.run, name='BVPlugin').start()

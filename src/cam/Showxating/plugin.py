@@ -49,7 +49,11 @@ class ShowxatingPlugin(threading.Thread):
         self.frame_shape = None
 
         self.streamservice = None
-        self.streamservice_thread = None
+        # internal representations of thread to start & join
+        # self.plugin_thread = None         # 2nd run ... tx_thread
+        self.streamservice_thread = None    # 1st run ... rx_thread
+
+        self.alive = False
 
         # magic highlight color
         self.majic_color = None
@@ -87,6 +91,7 @@ class ShowxatingPlugin(threading.Thread):
         self.streamservice_thread = None
         self.streamservice = None
 
+    # WRITING....
     def start_streamservice(self, processed):
         handler = StreamingHandler
         handler.src = processed
@@ -105,10 +110,17 @@ class ShowxatingPlugin(threading.Thread):
         return frame
 
     def stop(self):
+        """set a flag to stop worker threads"""
+        # self.alive = False
+        # shutdown frame processing
+        # make running threads read alive & join() if false
         if self.streamservice_thread:
             self.stop_streamservice()
 
     def run(self):
+        # break this into
+        # start() <-- calls _start_plugin(), starts streaming thread, sets alive=True
+        # _start_plugin(): <-- starts plugin thread, does work below
         """ event loop for generic plugin """
 
         try:
@@ -116,6 +128,7 @@ class ShowxatingPlugin(threading.Thread):
             self.get_config()
             self.set_capture()
 
+            # READING...
             for frame in self.plugin_capture.run():
                 self.start_time = self.plugin_capture.statistics['capture_start_time']
                 self.frame_rate = self.plugin_capture.statistics['capture_frame_rate']
@@ -129,8 +142,10 @@ class ShowxatingPlugin(threading.Thread):
                 if cv.waitKey(1) & 0xFF == ord('x'):
                     break
         except ValueError:
+            # consider .join()
             print(f"no frame!!")
         except KeyboardInterrupt:
+            # join()
             pass
 
 

@@ -101,9 +101,7 @@ class StreamService(server.ThreadingHTTPServer):
     def stream(self):
 
         try:
-            if not self.t:
-                self.t = threading.Thread(target=self.serve_forever, name='StreamService')
-            self.t.start()
+            threading.Thread(target=self.serve_forever, name='StreamService').start()
             cam_logger.info(f"NEW {self.t.name} streaming on http://{self.server_address[0]}:{self.server_address[1]}{self.config_path}")
 
         except Exception as e:
