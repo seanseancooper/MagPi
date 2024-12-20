@@ -34,7 +34,7 @@ def cam_snap():
 
 @cam_bp.route("/view/<direction>", methods=['GET', 'POST'], subdomain='cam')
 def cam_direction(direction):
-    camMgr.cam_reload(direction)
+    return camMgr.cam_reload(direction)
 
 
 @cam_bp.route("/multibutton/<mode>", methods=['POST'], subdomain='cam')

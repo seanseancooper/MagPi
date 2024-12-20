@@ -1,6 +1,5 @@
 import threading
 import logging
-import time
 
 from src.cam.Showxating.ShowxatingBlackviewPlugin import ShowxatingBlackviewPlugin
 from src.config.__init__ import readConfig
@@ -14,6 +13,7 @@ class CAMManager(threading.Thread):
         super().__init__()
         self.config = {}
         self.plugin = None
+        self.thread = None
 
         self.multibutton = {}
         self.statistics = {}                    # not used!
@@ -38,15 +38,9 @@ class CAMManager(threading.Thread):
         self.plugin.get_config()
 
     def kill_plugin(self):  # too much work to shutdown, this is.
-        self.plugin.streamservice.force_stop()
-        self.plugin.plugin_process_frames = False
-        time.sleep(.01)
-
-        self.plugin.streamservice = None
+        self.plugin.stop_streamservice()
         self.plugin.tracker = None
-        self.plugin.parent_thread = None
-
-        self.plugin = None  # ?? thread ownership ??
+        self.plugin = None
 
     def cam_direction(self, direction):
         if not str(self.config['FORWARD_TEST_URL']) > '':
@@ -56,7 +50,9 @@ class CAMManager(threading.Thread):
     def cam_reload(self, direction):
         self.kill_plugin()
         self.init_plugin(ShowxatingBlackviewPlugin, direction)  # TODO: make plugin configurable
-        self.plugin.run()  # ?? this may be part of the issue, run() called twice??
+        if not self.thread:
+            self.thread = threading.Thread(target=self.plugin.run, name='BVPlugin').start()
+        return 'OK'
 
     def cam_multibutton(self, mode):
         """ set mode of ShowxatingBlackviewPlugin """
@@ -75,15 +71,8 @@ class CAMManager(threading.Thread):
 
     def run(self):
         self.init_plugin(ShowxatingBlackviewPlugin, "FORE")
-        #  how this is being run, may be the issue.
-        #  the existing makes it 'owned' by the main thread; not a daemon.
-        #  ?? what happens if streams AND plugin_displays is false ??
-
-        #  perhaps use:
-        #  thread = threading.Thread(target=self.plugin.run, daemon=True)
-        #  thread.start
-        #  self.plugin = thread <-- camMgr thread attribute is not None.
-        #  > thread management: any excessive threads.
-
-        self.plugin.run()  # ?? is this being called 2x on reload() ??
-
+        if not self.thread:
+            # this doesn't do what I thought it does. No thread!
+            t_thread = threading.Thread(target=self.plugin.run, name='BVPlugin').start()
+            self.thread = t_thread
+            pass

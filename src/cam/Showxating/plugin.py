@@ -1,6 +1,7 @@
 import os
 import threading
 import cv2 as cv
+import time
 
 import logging.handlers
 from src.cam.Showxating.capture import ShowxatingCapture
@@ -49,7 +50,6 @@ class ShowxatingPlugin(threading.Thread):
 
         self.streamservice = None
         self.streamservice_thread = None
-        self.parent_thread = None
 
         # magic highlight color
         self.majic_color = None
@@ -81,6 +81,12 @@ class ShowxatingPlugin(threading.Thread):
         if self.plugin_config['plugin_displays']:
             self.display(frame)
 
+    def stop_streamservice(self):
+        self.plugin_process_frames = False
+        self.streamservice.force_stop()
+        self.streamservice_thread = None
+        self.streamservice = None
+
     def start_streamservice(self, processed):
         handler = StreamingHandler
         handler.src = processed
@@ -88,8 +94,6 @@ class ShowxatingPlugin(threading.Thread):
         self.streamservice = StreamService((self.plugin_config['streaming_host'], self.plugin_config['streaming_port']),
                                            self.plugin_config['streaming_path'], handler)
         self.streamservice.stream()
-
-        self.parent_thread = threading.current_thread()
         self.streamservice_thread = self.streamservice.t
 
     def stream(self, frame):
@@ -102,12 +106,10 @@ class ShowxatingPlugin(threading.Thread):
 
     def stop(self):
         if self.streamservice_thread:
-            self.streamservice.force_stop()
-            self.parent_thread = None
+            self.stop_streamservice()
 
     def run(self):
         """ event loop for generic plugin """
-        self.parent_thread = threading.current_thread()
 
         try:
 

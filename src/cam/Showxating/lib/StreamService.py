@@ -22,6 +22,10 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
 
         if self.path == self.config_path:
 
+            # am I still sending the correct headers
+            # in the right order at the right time?
+            # Consider reloading vs. new connection
+            # vs. broken connection.
             self.send_response(200)
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
             self.send_header('Cache-Control',
@@ -30,6 +34,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
 
             if type(self.src) is str:  # a new URL
                 cam_logger.debug(f"{threading.current_thread().name} StreamService received {self.src} URL")
+                self.finish()  # explicitly finish the request
                 return
 
             if type(self.src) is np.ndarray:  # a plugin frame
@@ -37,10 +42,6 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                 while self.src is not None:
 
                     def process_frame(my, f):
-
-                        if type(f) is str:
-                            print(f"StreamService received {my.src} URL in do_GET()")
-                            return  # a new URL
 
                         try:
                             import cv2 as cv
@@ -65,7 +66,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
 
         else:
             self.send_error(404)
-            self.end_headers()
+            # self.end_headers()
             self.finish()
 
 
@@ -80,7 +81,7 @@ class StreamService(server.ThreadingHTTPServer):
 
         self.allow_reuse_address = True
 
-    def get(self):
+    def get_status(self):
         return {
             "addr": self.server_address,
             "config_path": self.config_path,
@@ -94,13 +95,14 @@ class StreamService(server.ThreadingHTTPServer):
     def force_stop(self):
         self.server_close()
         self.is_stopped = True
-        self.t.join(1)
+        self.t.join(0.1)
         self.t = None
 
     def stream(self):
 
         try:
-            self.t = threading.Thread(target=self.serve_forever)
+            if not self.t:
+                self.t = threading.Thread(target=self.serve_forever, name='StreamService')
             self.t.start()
             cam_logger.info(f"NEW {self.t.name} streaming on http://{self.server_address[0]}:{self.server_address[1]}{self.config_path}")
 
