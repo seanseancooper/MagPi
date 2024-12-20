@@ -29,7 +29,7 @@ class RESTServer(threading.Thread):
             if self.app.config['SERVER_NAME'] is None:
                 self.app.config['SERVER_NAME'] = self.configuration['SERVER_NAME']
                 self.app.config['DEBUG'] = self.configuration['DEBUG']
-            threading.Thread(target=self.app.run, daemon=True).start()
+            threading.Thread(target=self.app.run, name='RestService', daemon=True).start()
             logger_root.info(f"[RESTServer]: starting HTTP service for {self.app.name}")
         except Exception as e:
             logger_root.error(f"[RESTServer]: HTTP service streaming error on {self.app.name}: {str(e)}")
