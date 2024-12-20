@@ -14,6 +14,68 @@ button {
     background-color:#999;
 }
 
+.videodiv {
+    width:704px;
+    height:480px;
+    position:absolute;
+    left:0px;
+    top:0px;}
+
+._video {
+    position:absolute;
+    left:0px;
+    top:0px;
+    width:704px;
+    height:480px;
+}
+
+._area {
+    position:absolute;
+    left:0px;
+    top:0px;
+    display: block;
+    max-width: 100%;
+}
+
+.top_buttons {
+    position:absolute;
+    left:2px;
+    top:5px;
+}
+
+info_box {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 20px;
+    position:absolute;
+    left:2px;
+    top:40px;
+}
+
+.cam_sliders {
+    position:absolute;
+    left:240px;
+    top:5px;
+}
+
+.cam_slider_outputs{
+    position:relative;
+    top:35px;
+    left:-5px;
+    width:198px;
+    height:55px;
+    border-style:solid;
+    border-width:2px;
+    border-radius:5px;
+    padding: 3px 3px 3px 3px;
+    font-size:14px;
+    font-weight:bold;
+    text-justify:right;
+}
+
+.cam_slider {
+    height:100px;
+}
+
 /*
 https://range-input-css.netlify.app/
 ***** Baseline, reset styles ***********/
@@ -85,61 +147,6 @@ input[type="range"]:focus::-moz-range-thumb{
   outline-offset: 0.125rem;
 }
 
-.videodiv {
-    width:704px;
-    height:480px;
-    position:absolute;
-    left:0px;
-    top:0px;}
-
-._video {
-    position:absolute;
-    left:0px;
-    top:0px;
-    width:704px;
-    height:480px;
-}
-
-._area {
-    position:absolute;
-    left:0px;
-    top:0px;
-    display: block;
-    max-width: 100%;
-}
-
-.top_buttons {
-    position:absolute;
-    left:2px;
-    top:5px;
-}
-
 .wifi_joy {}
 .wifi_joy_status {}
 
-.cam_slider {
-    height:100px;
-    //color:rgba(0,255,0,0.80);
-}
-
-.cam_sliders {
-    position:absolute;
-    left:230px;
-    top:5px;
-}
-
-.cam_slider_outputs{
-    position:absolute;
-    top:40px;
-    left:2px;
-    width:198px;
-    height:75px;
-    border-style:solid;
-    border-width:2px;
-    border-radius:5px;
-    padding: 3px 3px 3px 3px;
-    // color:rgba(0,255,0,0.60);
-    font-size:14px;
-    font-weight:bold;
-    text-justify:right;
-}

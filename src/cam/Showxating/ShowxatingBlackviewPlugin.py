@@ -21,7 +21,8 @@ def print_symbology(has_symbols, f, rect, m, c):
 
     if has_symbols:
         if m:
-            cv.putText(f, "MOTION DETECTED!", (5, 110), cv.FONT_HERSHEY_PLAIN, 1.0, c, 2)
+            # TODO: needs to move dynamically w/ size
+            cv.putText(f, "MOTION DETECTED!", (5, 120), cv.FONT_HERSHEY_PLAIN, 1.0, c, 2)
 
         # yellow rect: items that are moving
         try:

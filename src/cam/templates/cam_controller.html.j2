@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CAMController</title>
     <style>
-
-
         /* Ensure the size of the image fit the container perfectly */
         canvas {
           display: block;
@@ -14,7 +12,6 @@
           /* This rule is very important, please don't ignore this */
           max-width: 100%;
         }
-
     </style>
 
     <link rel="stylesheet" href="{{ url_for('cam_bp.static', filename='css/cropper.css') }}">
@@ -217,7 +214,7 @@
         {% include 'audio_player.html.j2' ignore missing %}
     </div>
 
-    <div id="info_box" style="" class="info_box">
+    <div id="info_box" style="" class="">
         <div id="cam_slider_outputs" style="" class="cam_slider_outputs highlight">
                 ∑:&nbsp;<span id="cam_slider_threshold_output">{{ plugin.threshold | int }}</span>
                 ∞:&nbsp;<span id="cam_checkbox_hold_threshold_output">OFF</span>
@@ -227,14 +224,15 @@
                 ƒ%:&nbsp;<span id="cam_slider_frm_delta_pcnt_output">{{ "{:.2f}".format(plugin.tracker.frm_delta_pcnt) }}</span>
             <br>
                 <span id="crop_output" class="cam_slider_crop_stats">x:0 y:0 w:0 h:0</span>
-                <span id="majic_color_span" class="cam_slider_crop_stats">{{ plugin.majic_color }}</span>
         </div>
     </div>
 
     <span id="cam_sliders" style="" class="cam_sliders highlight">
+        <div id="cam_checkbox_hold_threshold" style="position:absolute;left:0px;">
+            <input id="cam_checkbox_hold_threshold_input" style="position:absolute;left:-20px;top:98px;" type="checkbox" {{ "checked" if plugin.hold_threshold is true }} onChange="handleCheckBox(this);"/>
+        </div>
         <div id="cam_slider_threshold" style="position:absolute;left:0px;">
             ∑<br><input id="cam_slider_threshold_input" style="height:100px;" class="cam_slider" orient="vertical" type="range" min="-100" max="100" step="1" value="{{ plugin.threshold | int }}" onChange="handleSlider(this);"/>
-            <input id="cam_checkbox_hold_threshold_input" style="position:absolute;left:-20px;top:98px;" type="checkbox" {{ "checked" if plugin.hold_threshold is true }} onChange="handleCheckBox(this);"/>
         </div>
         <div id="cam_slider_krnl" style="position:absolute;top:0px;left:25px;">
             ⊞<br><input id="cam_slider_krnl_input" style="" class="cam_slider" orient="vertical" type="range" min="1" max="128" step="2" value="{{ plugin.krnl }}" onChange="handleSlider(this);"/>
