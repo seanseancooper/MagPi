@@ -29,7 +29,7 @@ def cam_controller():
 
 @cam_bp.route("/snap", methods=['POST'], subdomain='cam')
 def cam_snap():
-    camMgr.plugin.cam_snap()
+    return camMgr.plugin.cam_snap()
 
 
 @cam_bp.route("/view/<direction>", methods=['GET', 'POST'], subdomain='cam')

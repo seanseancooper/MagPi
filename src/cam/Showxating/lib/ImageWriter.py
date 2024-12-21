@@ -25,5 +25,7 @@ class ImageWriter:
 
             cv.imwrite(self.OUTFILE_NAME, frame)
 
+        return True
+
     def release(self):
         pass

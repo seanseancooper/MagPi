@@ -137,17 +137,23 @@
         function cam_snap(){
             //  creates still image of current view
             const xhttp = new XMLHttpRequest();
-            xhttp.open('POST', '{{ url_for('.index')}}snap/');
+            xhttp.open('POST', '{{ url_for('.index')}}snap');
             setsHeaders(xhttp);
             xhttp.send();
 
             // on response, run the videobutton animation
             xhttp.onload = function() {
                 const resp = xhttp.response;
-                var _video = document.getElementById('_video');
+                var snapButton = document.getElementById('snap_button_text');
 
                 if (resp == "OK"){
-                    // document.getElementById("_video").classList.append = "videobutton";
+
+                    snapButton.classList.value = "snap_button_text";
+                    snapButton.innerHTML = "+";
+                    setTimeout(function() {
+                        snapButton.innerHTML = "😀";
+                    }, 250);
+
                 }
             };
         };

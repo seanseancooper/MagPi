@@ -180,6 +180,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             _snap(frame)
             break
 
+        return "OK"
+
     def pre_mediapipe(self, f):
 
         if self.mediapipe:
