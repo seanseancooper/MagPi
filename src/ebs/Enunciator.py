@@ -3,7 +3,7 @@ import queue
 import threading
 import time
 
-from src.wifi.lib.TokenBucket import TokenBucket
+from src.ebs.lib.TokenBucket import TokenBucket
 from src.config import readConfig
 
 logger_root = logging.getLogger('root')

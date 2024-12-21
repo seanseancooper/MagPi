@@ -9,7 +9,7 @@ from src.cam.Showxating.lib.utils import draw_grid, draw_contours, wall_images, 
 
 import logging
 
-from src.wifi.lib.TokenBucket import TokenBucket
+from src.ebs.lib.TokenBucket import TokenBucket
 
 cam_logger = logging.getLogger('cam_logger')
 speech_logger = logging.getLogger('speech_logger')
