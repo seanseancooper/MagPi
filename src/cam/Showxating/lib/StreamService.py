@@ -22,17 +22,13 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
 
         if self.path == self.config_path:
 
-            # am I still sending the correct headers
-            # in the right order at the right time?
-            # Consider reloading vs. new connection
-            # vs. broken connection.
             self.send_response(200)
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
             self.send_header('Cache-Control',
                              'no-store, no-cache, must-revalidate, pre-check=0, post-check=0, max-age=0')
             self.end_headers()
 
-            if type(self.src) is str:  # a new URL
+            if type(self.src) is str:  # does this get a string?
                 cam_logger.debug(f"{threading.current_thread().name} StreamService received {self.src} URL")
                 self.finish()  # explicitly finish the request
                 return
@@ -66,7 +62,6 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
 
         else:
             self.send_error(404)
-            # self.end_headers()
             self.finish()
 
 
@@ -104,18 +99,5 @@ class StreamService(server.ThreadingHTTPServer):
 
         except Exception as e:
             cam_logger.error(f"streaming error on http://{self.server_address[0]}:{self.server_address[1]} {self.config_path}! " + str(e))
-
-
-if __name__ == "__main__":
-    import os
-    from src.config.__init__ import readConfig, CONFIG_PATH
-
-    myconfig = {}
-    readConfig(os.path.join(CONFIG_PATH, 'cam.json'), myconfig)
-
-    handler = StreamingHandler  # choose the handler.
-    handler.src = myconfig.get('FORWARD_VIDEO_URL')  # set the handlers' 'source'.
-    svc = StreamService(('cam.localhost', 5002), '/stream', handler)
-    svc.stream()
 
 
