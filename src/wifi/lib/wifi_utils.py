@@ -3,10 +3,9 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 import json
 
-from .iw_parse import matching_line
 from src.config import CONFIG_PATH, readConfig
 from src.lib.utils import make_path, write_file
-from src.wifi.lib.iw_parse import print_table
+from src.wifi.lib.iw_parse import matching_line
 
 import logging
 
@@ -55,6 +54,28 @@ def get_timing(cell):
     if time is None:
         return ""
     return time
+
+
+def print_table(table):
+    # Functional black magic.
+    widths = list(map(max, map(lambda l: map(len, l), zip(*table))))
+
+    justified_table = []
+    for line in table:
+        justified_line = []
+        for i, el in enumerate(line):
+            try:
+                if isinstance(el, str):
+                    justified_line.append(el.ljust(widths[i] + 2))
+                if isinstance(el, list):
+                    pass  # don't deal with lists of signal_cache
+            except AttributeError:
+                pass  # I got an 'el' that doesn't 'justify'
+
+        justified_table.append(justified_line)
+
+    for line in justified_table:
+        print("\t".join(line))
 
 
 def print_signals(sgnls, columns):

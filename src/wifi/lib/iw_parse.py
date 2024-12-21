@@ -249,14 +249,7 @@ def print_table(table):
     for line in table:
         justified_line = []
         for i, el in enumerate(line):
-            try:
-                if isinstance(el, str):
-                    justified_line.append(el.ljust(widths[i] + 2))
-                if isinstance(el, list):
-                    pass  # don't deal with lists of signal_cache
-            except AttributeError:
-                pass  # I got an 'el' that doesn't 'justify'
-
+            justified_line.append(el.ljust(widths[i] + 2))
         justified_table.append(justified_line)
 
     for line in justified_table:
@@ -267,9 +260,9 @@ def print_cells(cells, columns):
     for cell in cells:
         cell_properties = []
         for column in columns:
-            # if column == 'Quality':
-            #     # make print nicer
-            #     cell[column] = cell[column].rjust(3) + " %"
+            if column == 'Quality':
+                # make print nicer
+                cell[column] = cell[column].rjust(3) + " %"
             cell_properties.append(cell[column])
         table.append(cell_properties)
     print_table(table)
@@ -315,7 +308,7 @@ def get_parsed_cells(iw_data, rules=None):
     for cell in cells:
         parsed_cells.append(parse_cell(cell, rules))
 
-    # sort_cells(parsed_cells)
+    sort_cells(parsed_cells)
     return parsed_cells
 
 def call_iwlist(interface='wlan0'):

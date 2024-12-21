@@ -8,7 +8,7 @@ from xml.parsers.expat import ExpatError
 
 from src.wifi.lib.iw_parse import matching_line
 
-from src.config.__init__ import readConfig
+from src.config import readConfig
 import logging
 
 logger_root = logging.getLogger('root')
