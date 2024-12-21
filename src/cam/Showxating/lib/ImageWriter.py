@@ -13,7 +13,7 @@ class ImageWriter:
         self.config = {}
 
     def write(self, writer_name: str, frame):
-        readConfig(os.path.join(CONFIG_PATH, 'cam.json'), self.config)
+        readConfig('cam.json', self.config)
         self.IMAGE_OUT = self.config['OUTFILE_PATH']
         if writer_name:
             PATH = os.path.join(os.getcwd(), self.IMAGE_OUT, self.writer_name)
