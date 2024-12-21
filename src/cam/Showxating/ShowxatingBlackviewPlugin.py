@@ -108,8 +108,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self.tracker = FrameObjektTracker()
         self.tracked = {}
 
-        self.processed = None
-
     def get(self):
         return {
             "_area": self._area,
@@ -274,10 +272,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                 self.process_contours(frame, contours, hier)
                 self.grid_ops(frame)
 
-            self.processed = frame
-
             self.stream(frame)
 
-            return self.processed
+            return frame
 
         return frame
