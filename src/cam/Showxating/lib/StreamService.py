@@ -95,14 +95,12 @@ class StreamService(server.ThreadingHTTPServer):
     def force_stop(self):
         self.server_close()
         self.is_stopped = True
-        self.t.join(0.1)
-        self.t = None
 
     def stream(self):
 
         try:
             threading.Thread(target=self.serve_forever, name='StreamService').start()
-            cam_logger.info(f"NEW {self.t.name} streaming on http://{self.server_address[0]}:{self.server_address[1]}{self.config_path}")
+            cam_logger.info(f"streaming on http://{self.server_address[0]}:{self.server_address[1]}{self.config_path}")
 
         except Exception as e:
             cam_logger.error(f"streaming error on http://{self.server_address[0]}:{self.server_address[1]} {self.config_path}! " + str(e))
