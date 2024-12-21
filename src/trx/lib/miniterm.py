@@ -661,7 +661,7 @@ class Miniterm(object):
                             self.serial.write(block)
                             # Wait for output buffer to drain.
                             self.serial.flush()
-                            sys.stderr.write('.')   # Progress indicator.
+                            sys.stderr.write('..')   # Progress indicator.
                     sys.stderr.write('\n--- File {} sent ---\n'.format(filename))
                 except IOError as e:
                     sys.stderr.write('--- ERROR opening file {}: {} ---\n'.format(filename, e))
