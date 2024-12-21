@@ -34,19 +34,10 @@ class CAMManager(threading.Thread):
             "ALL": self.config['MULTIBUTTON_ALL']
         }
 
-    def _start_streamservice(self):
-        self.streamservice_alive = True
-        self.streamservice_thread = threading.Thread(target=self.streamservice, name='StreamService')
-        self.streamservice_thread.daemon = True
-        self.streamservice_thread.start()
-
-    def _stop_streamservice(self):
-        self.streamservice_alive = False
-        self.streamservice_thread.join()
-
-    def init_plugin(self, pluginClass, direction):
+    def init_plugin(self, pluginClass, direction):  # plugin
         self.plugin = pluginClass
         self.plugin.plugin_name = self.config['PLUGIN_NAME']
+
         self.plugin.plugin_args_capture_src = self.cam_direction(direction)
         self.plugin.get_config()
 
@@ -70,7 +61,7 @@ class CAMManager(threading.Thread):
         except KeyError:
             pass
 
-    def set_plugin_field(self, field, value):
+    def set_plugin_field(self, field, value):  # for routing
         self.plugin.set_field(field, value)
         return True
 
