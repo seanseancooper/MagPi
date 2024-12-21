@@ -210,13 +210,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                 draw_pose(f, self._result_T)
 
     def process_contours(self, f, contours, hier):
-        _height, _width, ch = f.shape
-        _start = int(0.25 * _height)
-        _end = int(0.70 * _height)
-
-        # delimit the work area
-        cv.line(f, (0, _start), (_width, _start), self.majic_color, 1)
-        cv.line(f, (0, _end), (_width, _end), self.majic_color, 1)
 
         if contours:
 
