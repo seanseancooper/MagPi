@@ -85,7 +85,7 @@ class ShowxatingPlugin(object):
             self.display(frame)
 
     # READING (rx_thread)....
-    def _start_streamservice(self):
+    def start_streamservice(self):
         handler = StreamingHandler
         handler.majic_color = self.majic_color
         self.streamservice = StreamService((self.plugin_config['streaming_host'], self.plugin_config['streaming_port']),
@@ -111,7 +111,7 @@ class ShowxatingPlugin(object):
         if not self.alive:
             self.streamservice_thread.join()
 
-    def _start_plugin(self):
+    def start_plugin(self):
         self.get_config()
         self.set_capture()
         try:
@@ -136,9 +136,9 @@ class ShowxatingPlugin(object):
     def start(self):
         self.alive = True
         # READING...
-        self._start_streamservice()
+        self.start_streamservice()
         # WRITING ...
-        self.plugin_thread = threading.Thread(target=self._start_plugin, name='BVPlugin')
+        self.plugin_thread = threading.Thread(target=self.start_plugin, name='BVPlugin')
         self.plugin_thread.daemon = True
         self.plugin_thread.start()
 
