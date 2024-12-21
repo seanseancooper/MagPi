@@ -1,6 +1,7 @@
 import time
 from datetime import datetime
 import cv2 as cv
+from PIL import Image
 
 import logging
 import http.client
@@ -15,14 +16,11 @@ class ShowxatingCapture:
         super().__init__()
 
         self.plugin_config = config
-
-        self.capture_name = name
         self.capture = None
-
+        self.capture_name = name
         self.capture_param_capture_src = src
 
         self.capture_frame_rate = 0.0
-
         self.capture_output_show_stats = False
         self.capture_output_log_stats = False
         self.write_mp4 = False
@@ -73,7 +71,6 @@ class ShowxatingCapture:
     def highlight(f, arry):
         """sample a pixel position; use combinatorial 'inversion'
         of the color to produce a new color that is always visible."""
-        from PIL import Image
         img = Image.fromarray(f, "RGB")
         pix = img.load()
         x, y = arry

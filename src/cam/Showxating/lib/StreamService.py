@@ -16,7 +16,6 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
         self.src = None
         self.config_path = None
         self.majic_color = None
-        cam_logger.debug(f"{threading.current_thread().name} created StreamingHandler for request.")
 
     def do_GET(self):
 
@@ -28,9 +27,8 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                              'no-store, no-cache, must-revalidate, pre-check=0, post-check=0, max-age=0')
             self.end_headers()
 
-            if type(self.src) is str:  # does this get a string?
-                cam_logger.debug(f"{threading.current_thread().name} StreamService received {self.src} URL")
-                self.finish()  # explicitly finish the request
+            if type(self.src) is str:
+                self.finish()
                 return
 
             if type(self.src) is np.ndarray:  # a plugin frame
@@ -72,8 +70,6 @@ class StreamService(server.ThreadingHTTPServer):
         self.config_path = ctx
         self.RequestHandlerClass.config_path = ctx
         self.is_stopped = False
-        self.t = None
-
         self.allow_reuse_address = True
 
     def get_status(self):

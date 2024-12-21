@@ -21,26 +21,24 @@ class ShowxatingPlugin(object):
 
         self.plugin_name = None
 
-        self.plugin_elapsed_time = None
+        self.start_time = None
         self.plugin_current_time = None
+        self.plugin_elapsed_time = None
 
-        # encapsulated config
         self.plugin_config = {}
         self.plugin_capture = None
         self.plugin_args_capture_src = None
 
         self.plugin_process_frames = False
 
-        self.start_time = None
         self.frame_rate = None
         self.frame_delta = None
         self.frame_id = None
         self.frame_shape = None
 
-        self.plugin_thread = None           # 2nd run ... tx_thread
         self.streamservice = None
         self.streamservice_thread = None    # 1st run ... rx_thread
-
+        self.plugin_thread = None           # 2nd run ... tx_thread
         self.is_alive = False
 
         # magic highlight color
@@ -96,7 +94,7 @@ class ShowxatingPlugin(object):
         self.set_capture()
         try:
             for frame in self.plugin_capture.run():
-                self.start_time = self.plugin_capture.statistics['capture_start_time']
+                self.start_time = self.plugin_capture.statistics['capture_start_time']     # rename
                 self.frame_rate = self.plugin_capture.statistics['capture_frame_rate']
                 self.frame_delta = self.plugin_capture.statistics['capture_frame_period']  # rename
                 self.frame_id = self.plugin_capture.statistics['capture_frame_id']
