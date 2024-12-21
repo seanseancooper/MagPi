@@ -1,7 +1,5 @@
 import os
 import threading
-import cv2 as cv
-import time
 
 import logging.handlers
 from src.cam.Showxating.capture import ShowxatingCapture
@@ -28,19 +26,10 @@ class ShowxatingPlugin(object):
 
         # encapsulated config
         self.plugin_config = {}
-
-        # encapsulated capture
         self.plugin_capture = None
-
-        # args on the cli
         self.plugin_args_capture_src = None
 
-        # process_frames? The point is to be able to...
         self.plugin_process_frames = False
-
-        # my encapsulated display(s)
-        self.plugin_displays = False
-        self.plugin_display = {}
 
         self.start_time = None
         self.frame_rate = None
@@ -52,7 +41,7 @@ class ShowxatingPlugin(object):
         self.streamservice = None
         self.streamservice_thread = None    # 1st run ... rx_thread
 
-        self.alive = False
+        self.is_alive = False
 
         # magic highlight color
         self.majic_color = None
@@ -74,27 +63,19 @@ class ShowxatingPlugin(object):
         self.plugin_config, _ = global_config['PLUGINS']
         self.plugin_process_frames = self.plugin_config['plugin_process_frames']
 
-    def display(self, frame):
-        while frame is not None:
-            cv.imshow(self.plugin_name, frame)
-            if cv.waitKey(1) & 0xFF == ord('x'):
-                break
-
-    def render(self, frame):
-        if self.plugin_config['plugin_displays']:
-            self.display(frame)
-
-    # READING (rx_thread)....
     def start_streamservice(self):
         handler = StreamingHandler
         handler.majic_color = self.majic_color
-        self.streamservice = StreamService((self.plugin_config['streaming_host'], self.plugin_config['streaming_port']),
-                                           self.plugin_config['streaming_path'], handler)
+        self.streamservice = StreamService((
+                                self.plugin_config['streaming_host'],
+                                self.plugin_config['streaming_port']
+                            ), self.plugin_config['streaming_path'], handler)
         self.streamservice.stream()
 
     def stream(self, frame):
+        ''' allow a plugin to stream frames '''
         if self.plugin_config['streams'] is True:
-            if not self.streamservice.is_stopped:
+            if not self.streamservice.is_stopped and self.is_alive:
                 self.streamservice.RequestHandlerClass.src = frame
 
     def process_frame(self, frame):
@@ -102,13 +83,12 @@ class ShowxatingPlugin(object):
 
     def stop(self):
         """set a flag to stop threads"""
-        self.alive = False
+        self.is_alive = False
         self.plugin_process_frames = False
         self.streamservice.force_stop()
-        pass
 
     def join(self):
-        if not self.alive:
+        if not self.is_alive:
             self.streamservice_thread.join()
 
     def start_plugin(self):
@@ -116,8 +96,6 @@ class ShowxatingPlugin(object):
         self.set_capture()
         try:
             for frame in self.plugin_capture.run():
-                # WRITING ...
-                self.alive = True
                 self.start_time = self.plugin_capture.statistics['capture_start_time']
                 self.frame_rate = self.plugin_capture.statistics['capture_frame_rate']
                 self.frame_delta = self.plugin_capture.statistics['capture_frame_period']  # rename
@@ -127,16 +105,17 @@ class ShowxatingPlugin(object):
                 self.process_frame(frame)
 
         except ValueError:
-            # consider .join()
             print(f"no frame!!")
         except KeyboardInterrupt:
-            # join()
             pass
 
     def start(self):
-        self.alive = True
+
+        self.is_alive = True
+
         # READING...
         self.start_streamservice()
+
         # WRITING ...
         self.plugin_thread = threading.Thread(target=self.start_plugin, name='BVPlugin')
         self.plugin_thread.daemon = True
