@@ -75,10 +75,10 @@ class ShowxatingPlugin(object):
         self.plugin_process_frames = self.plugin_config['plugin_process_frames']
 
     def display(self, frame):
-        if frame is not None:
+        while frame is not None:
             cv.imshow(self.plugin_name, frame)
-        else:
-            cam_logger.warning("display got no frame!!!")
+            if cv.waitKey(1) & 0xFF == ord('x'):
+                break
 
     def render(self, frame):
         if self.plugin_config['plugin_displays']:
@@ -124,11 +124,8 @@ class ShowxatingPlugin(object):
                 self.frame_id = self.plugin_capture.statistics['capture_frame_id']
                 self.frame_shape = self.plugin_capture.statistics['capture_frame_shape']
                 self.majic_color = self.plugin_capture.statistics['capture_majic_color']
-                processed = self.process_frame(frame)
-                self.render(processed)
+                self.process_frame(frame)
 
-                # if cv.waitKey(1) & 0xFF == ord('x'):
-                #     break
         except ValueError:
             # consider .join()
             print(f"no frame!!")
@@ -145,14 +142,3 @@ class ShowxatingPlugin(object):
         self.plugin_thread.daemon = True
         self.plugin_thread.start()
 
-
-if __name__ == "__main__":
-
-    plugin = ShowxatingPlugin()
-
-    def plugin_stops():
-        cam_logger.info(f"{plugin.plugin_name} plugin stopped.")
-
-    import atexit
-    atexit.register(plugin_stops)
-    plugin.run()
