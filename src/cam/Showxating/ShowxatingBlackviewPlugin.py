@@ -276,9 +276,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
             self.processed = frame
 
-            if self.frame_id == 0:
-                self.start_streamservice(frame)
-
             self.stream(frame)
 
             return self.processed

@@ -13,7 +13,7 @@ cam_logger = logging.getLogger('cam_logger')
 logger_root = logging.getLogger('root')
 
 
-class ShowxatingPlugin(threading.Thread):
+class ShowxatingPlugin(object):
     """plugin implementation for OpenCV code to be inserted into a RTSP video processing chain created by a
     ShowxatingVideoCapture(). This implementation allows 'chaining' the processes by passing frames between
     named, serialized instances of the component."""
@@ -48,9 +48,8 @@ class ShowxatingPlugin(threading.Thread):
         self.frame_id = None
         self.frame_shape = None
 
+        self.plugin_thread = None           # 2nd run ... tx_thread
         self.streamservice = None
-        # internal representations of thread to start & join
-        # self.plugin_thread = None         # 2nd run ... tx_thread
         self.streamservice_thread = None    # 1st run ... rx_thread
 
         self.alive = False
@@ -85,68 +84,66 @@ class ShowxatingPlugin(threading.Thread):
         if self.plugin_config['plugin_displays']:
             self.display(frame)
 
-    def stop_streamservice(self):
-        self.plugin_process_frames = False
-        self.streamservice.force_stop()
-        self.streamservice_thread = None
-        self.streamservice = None
-
-    # WRITING....
-    def start_streamservice(self, processed):
+    # READING (rx_thread)....
+    def _start_streamservice(self):
         handler = StreamingHandler
-        handler.src = processed
         handler.majic_color = self.majic_color
         self.streamservice = StreamService((self.plugin_config['streaming_host'], self.plugin_config['streaming_port']),
                                            self.plugin_config['streaming_path'], handler)
         self.streamservice.stream()
-        self.streamservice_thread = self.streamservice.t
 
     def stream(self, frame):
         if self.plugin_config['streams'] is True:
-            if self.streamservice is not None:
+            if not self.streamservice.is_stopped:
                 self.streamservice.RequestHandlerClass.src = frame
 
     def process_frame(self, frame):
         return frame
 
     def stop(self):
-        """set a flag to stop worker threads"""
-        # self.alive = False
-        # shutdown frame processing
-        # make running threads read alive & join() if false
-        if self.streamservice_thread:
-            self.stop_streamservice()
+        """set a flag to stop threads"""
+        self.alive = False
+        self.plugin_process_frames = False
+        self.streamservice.force_stop()
+        pass
 
-    def run(self):
-        # break this into
-        # start() <-- calls _start_plugin(), starts streaming thread, sets alive=True
-        # _start_plugin(): <-- starts plugin thread, does work below
-        """ event loop for generic plugin """
+    def join(self):
+        if not self.alive:
+            self.streamservice_thread.join()
 
+    def _start_plugin(self):
+        self.get_config()
+        self.set_capture()
         try:
-
-            self.get_config()
-            self.set_capture()
-
-            # READING...
             for frame in self.plugin_capture.run():
+                # WRITING ...
+                self.alive = True
                 self.start_time = self.plugin_capture.statistics['capture_start_time']
                 self.frame_rate = self.plugin_capture.statistics['capture_frame_rate']
-                self.frame_delta = self.plugin_capture.statistics['capture_frame_period'] #  rename
+                self.frame_delta = self.plugin_capture.statistics['capture_frame_period']  # rename
                 self.frame_id = self.plugin_capture.statistics['capture_frame_id']
                 self.frame_shape = self.plugin_capture.statistics['capture_frame_shape']
                 self.majic_color = self.plugin_capture.statistics['capture_majic_color']
                 processed = self.process_frame(frame)
                 self.render(processed)
 
-                if cv.waitKey(1) & 0xFF == ord('x'):
-                    break
+                # if cv.waitKey(1) & 0xFF == ord('x'):
+                #     break
         except ValueError:
             # consider .join()
             print(f"no frame!!")
         except KeyboardInterrupt:
             # join()
             pass
+
+    def start(self):
+        self.alive = True
+        # READING...
+        self._start_streamservice()
+        # WRITING ...
+        self.plugin_thread = threading.Thread(target=self._start_plugin, name='BVPlugin')
+        self.plugin_thread.daemon = True
+        self.plugin_thread.start()
 
 
 if __name__ == "__main__":
