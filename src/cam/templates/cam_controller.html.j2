@@ -18,7 +18,6 @@
     <link rel="stylesheet" href="{{ url_for('cam_bp.static', filename='css/cam_controller.css') }}">
     <script src="{{ url_for('cam_bp.static', filename='js/cam_controller.js') }}"></script>
     <script>
-
         function setsHeaders(xhttp) {
             xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
             xhttp.setRequestHeader('Access-Control-Allow-Methods', 'POST, GET');
@@ -90,8 +89,6 @@
             updateCropper();
         }
 
-
-
         function handleSlider(slider) {
             // handle continous
             const slider_output = document.getElementById(slider.id.replace('_input', '_output'));
@@ -114,8 +111,6 @@
 
             updateSlider();
         }
-
-
 
         function handleGridSlider(slider) {
             const grid = document.getElementById("grid");
@@ -232,7 +227,7 @@
 
     <div id="videodiv" class="videodiv" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;">
         <iframe id="_video" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;" class="_video" src="" onLoad="load_video();"></iframe>
-        <canvas id="target" class="_target" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;"></canvas>
+        <canvas id="target" class="_target" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
         <canvas id="grid" class="_grid" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
     </div>
 
