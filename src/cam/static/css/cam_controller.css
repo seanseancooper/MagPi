@@ -19,21 +19,23 @@ button {
     height:480px;
     position:absolute;
     left:0px;
-    top:0px;}
+    top:0px;
+}
+
+._grid {
+    position:absolute;
+    left:0px;
+    top:0px;
+    display:none;
+}
 
 ._video {
     position:absolute;
     left:0px;
     top:0px;
-    width:704px;
-    height:480px;
 }
 
-._area {
-    //position:relative;
-    //left:0px;
-    //top:0px;
-    //display: block;
+._target {
     max-width: 100%;
     max-height: 100%;
 }
