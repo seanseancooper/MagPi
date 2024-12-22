@@ -1,5 +1,5 @@
 """
-A simple and lightweight JavaScript client based on GPSD client.
+A simple and lightweight GPS/JS client based on GPSD client.
 """
 import requests
 from typing import Union, Iterable, Dict, Any
