@@ -27,10 +27,6 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                              'no-store, no-cache, must-revalidate, pre-check=0, post-check=0, max-age=0')
             self.end_headers()
 
-            if type(self.src) is str:
-                self.finish()
-                return
-
             if type(self.src) is np.ndarray:  # a plugin frame
 
                 while self.src is not None:
@@ -54,13 +50,13 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                             pass
                         except BrokenPipeError:
                             pass
+                        except ValueError:
+                            pass
 
                     process_frame(self, self.src)
-                    self.finish()
 
         else:
             self.send_error(404)
-            self.finish()
 
 
 class StreamService(server.ThreadingHTTPServer):
