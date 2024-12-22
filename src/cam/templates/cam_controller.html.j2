@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CAMController</title>
     <style>
+        .highlight {
+            color: rgb{{ plugin.majic_color }};
+        }
+    </style>
+    <script>
+        const highlight = {{ plugin.majic_color }};
+    </script>
+    <style>
         /* Ensure the size of the image fit the container perfectly */
         canvas {
           display: block;
@@ -127,7 +135,7 @@
 
                 function draw_line(ctx, fx, fy, tx, ty){
                     ctx.lineWidth = 1;
-                    ctx.strokeStyle = "gray";
+                    ctx.strokeStyle = 'rgb{{ plugin.majic_color }}';
 
                     ctx.beginPath();
                     ctx.moveTo(fx, fy);
@@ -287,7 +295,7 @@
         {% include 'audio_player.html.j2' ignore missing %}
     </div>
 
-    <div id="info_box" style="" class="">
+    <div id="info_box" style="" class="highlight">
         <div id="cam_slider_outputs" style="" class="cam_slider_outputs highlight">
                 ∑:&nbsp;<span id="cam_slider_threshold_output">{{ plugin.threshold | int }}</span>
                 ∞:&nbsp;<span id="cam_checkbox_hold_threshold_output">OFF</span>
