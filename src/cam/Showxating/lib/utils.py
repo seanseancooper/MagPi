@@ -52,7 +52,7 @@ def draw_rects(frag, rects, clr, fill):
 
 
 def draw_grid(f, grid_shape, color, thickness):
-    # do this in javascript
+
     h, w, _ = f.shape
     rows, cols = grid_shape
 

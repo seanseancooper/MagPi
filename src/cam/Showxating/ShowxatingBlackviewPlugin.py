@@ -162,12 +162,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             f[self._max_height, self._max_width] = cv.cvtColor(t, cv.COLOR_GRAY2BGR)
             self.hold_threshold -= 1
 
-    def grid_ops(self, f):
-        # TODO: do this in javascript instead.
-        # js will need to know width, height of workarea
-        if self.show_krnl_grid:
-            draw_grid(f, (int(self.krnl), int(self.krnl)), self.majic_color, 1)
-
     def cam_snap(self):
 
         def _snap(frame):
@@ -262,7 +256,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                                               offset=[self._max_width.start, self._max_height.start])
                 self.threshold_ops(frame, THRESHOLD)
                 self.process_contours(frame, contours, hier)
-                self.grid_ops(frame)
 
             self.stream(frame)
 
