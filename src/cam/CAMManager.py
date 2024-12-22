@@ -38,7 +38,7 @@ class CAMManager(threading.Thread):
         self.plugin = pluginClass
         self.plugin.plugin_name = self.config['PLUGIN_NAME']
 
-        self.plugin.plugin_args_capture_src = self.cam_direction(direction)
+        self.plugin.plugin_capture_src = self.cam_direction(direction)
         self.plugin.get_config()
 
     def cam_direction(self, direction):
