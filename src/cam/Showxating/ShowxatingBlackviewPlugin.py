@@ -90,7 +90,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self.had_motion = False
         self.throttle = None
 
-        # hyper parameters
         self.krnl = 17                                  # controls size of items considered relevant
         self._kz = (int(self.krnl), int(self.krnl))
         self.threshold = 15.0                           # pixels additional to the mean during thresholding
