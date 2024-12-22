@@ -34,11 +34,6 @@ class GPSRetriever(threading.Thread):
         self.latitude = 0.0
         self.longitude = 0.0
 
-        # self.workers
-        # self.tracked_signals
-        # self.ghost_signals
-
-
     def __str__(self):
         return f"GPSRetriever: time: {self.gps_time()} position: {self.gps_position()} config: {self.config}"
 
@@ -57,6 +52,12 @@ class GPSRetriever(threading.Thread):
         except AttributeError as e:
             gps_logger.fatal(f'no retriever found {e}')
 
+    def update(self):
+        gps_logger.debug(f'{self.result}')
+        self.updated = datetime.now()
+        self.elapsed = self.updated - self.created
+        self.polling_count += 1
+        print(self.result)
 
     @register_retriever
     def GPSDClientRetriever(self, *, c, **retriever_args):
@@ -69,9 +70,7 @@ class GPSRetriever(threading.Thread):
                         if not result:
                             break
                         self.result = result  # use 'heading', not 'track'.
-                        self.updated = datetime.now()
-                        self.elapsed = self.updated - self.created
-                        self.polling_count += 1
+                        self.update()
 
             except OSError as e:  # unable to connect.
                 gps_logger.error(f"GPSDClientRetriever {e}")  # unable to connect to GPS Hardware
@@ -88,12 +87,10 @@ class GPSRetriever(threading.Thread):
 
                         self.result = {"lat": result['GPS']['LATITUDE'],
                                        "lon": result['GPS']['LONGITUDE'],
-                                       "time": result['GPS']['UPDATED']}
+                                       "time": result['GPS']['UPDATED']
+                                       }
 
-                        gps_logger.debug(f'{self.result}')
-                        self.updated = datetime.now()
-                        self.elapsed = self.updated - self.created
-                        self.polling_count += 1
+                        self.update()
                         time.sleep(self.config.get('BLACKVIEWGPSRETRIEVER_TIMEOUT', 1))
             except OSError as e:
                 gps_logger.error(f"BlackviewGPSRetriever: {e}")  # unable to connect to Blackview
@@ -116,10 +113,7 @@ class GPSRetriever(threading.Thread):
                                "climb": 0.0,
                                "time":  datetime.now().__format__(self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f'))
                                }
-                self.updated = datetime.now()
-                self.elapsed = self.updated - self.created
-                self.polling_count += 1
-                print(self.result)
+                self.update()
                 time.sleep(self.config.get('DUMMYRETRIEVER_TIMEOUT', 1))
 
     @register_retriever
@@ -140,10 +134,7 @@ class GPSRetriever(threading.Thread):
                                        "climb": 0.0,
                                        "time":  datetime.now().__format__(self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f'))
                                        }
-                        print(self.result)
-                        self.updated = datetime.now()
-                        self.elapsed = self.updated - self.created
-                        self.polling_count += 1
+                        self.update()
                         time.sleep(self.config.get('JSRETRIEVER_TIMEOUT', 1))
             except Exception as e:
                 gps_logger.error(f"JavaScriptGPSRetriever: {e}")  # unable to connect to Blackview
