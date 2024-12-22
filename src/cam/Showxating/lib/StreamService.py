@@ -13,8 +13,8 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
 
     def __init__(self, request: bytes, client_address: Tuple[str, int], srvr: socketserver.BaseServer):
         super().__init__(request, client_address, srvr)
-        self.src = None
         self.config_path = None
+        self.src = None
         self.majic_color = None
 
     def do_GET(self):
@@ -46,12 +46,12 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                             my.end_headers()
 
                             my.wfile.write(img_str)
-                        except ConnectionResetError:
-                            pass
-                        except BrokenPipeError:
-                            pass
-                        except ValueError:
-                            pass
+                        except ConnectionResetError as c:
+                            print(f'{c}')
+                        except BrokenPipeError as b:
+                            print(f'{b}')
+                        except ValueError as v:
+                            print(f'{v}')
 
                     process_frame(self, self.src)
 

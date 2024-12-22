@@ -63,12 +63,11 @@ class ShowxatingPlugin(object):
         self.plugin_process_frames = self.plugin_config['plugin_process_frames']
 
     def start_streamservice(self):
-        handler = StreamingHandler
-        handler.majic_color = self.majic_color
+
         self.streamservice = StreamService((
                                 self.plugin_config['streaming_host'],
                                 self.plugin_config['streaming_port']
-                            ), self.plugin_config['streaming_path'], handler)
+                            ), self.plugin_config['streaming_path'], StreamingHandler)
         self.streamservice.stream()
 
     def stream(self, frame):
@@ -76,6 +75,7 @@ class ShowxatingPlugin(object):
         if self.plugin_config['streams'] is True:
             if not self.streamservice.is_stopped and self.is_alive:
                 self.streamservice.RequestHandlerClass.src = frame
+                self.streamservice.RequestHandlerClass.majic_color = self.majic_color
 
     def process_frame(self, frame):
         return frame
