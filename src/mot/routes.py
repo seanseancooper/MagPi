@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect
+from flask import Blueprint, redirect, render_template
 
 from src.mot.MOTManager import MOTManager
 
@@ -14,7 +14,7 @@ mot_bp = Blueprint(
 
 @mot_bp.route('/')
 def index():
-    return redirect("/controlpanel", code=302)
+    return render_template("motion.html.j2")
 
 
 @mot_bp.route("/stop", methods=['GET', 'POST'])

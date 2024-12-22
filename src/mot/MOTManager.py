@@ -38,7 +38,7 @@ class MOTManager(threading.Thread):
         return self.config['MOT']['MOTION_CPANEL_URL']
 
     def run(self):
-        self.start()
+        # self.start()
         while True:
             try:
                 time.sleep(self.config['TIMEOUT'])
