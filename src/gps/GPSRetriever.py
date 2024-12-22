@@ -9,7 +9,6 @@ from gpsdclient import GPSDClient
 
 from src.config import readConfig
 from src.gps.lib.BlackViewGPSClient import BlackViewGPSClient
-from src.gps.lib.JavaScriptGPSClient import JavaScriptGPSClient
 
 
 gps_logger = logging.getLogger('gps_logger')
@@ -115,29 +114,6 @@ class GPSRetriever(threading.Thread):
                                }
                 self.update()
                 time.sleep(self.config.get('DUMMYRETRIEVER_TIMEOUT', 1))
-
-    @register_retriever
-    def JavaScriptGPSRetriever(self, *, c, **retriever_args):
-        while True:
-            try:
-                with JavaScriptGPSClient(**retriever_args) as client:
-                    for result in client.dict_stream():
-                        if not result:
-                            break
-                        result = json.loads(result)
-                        self.result = {"lat": result['GPS']['lat'],
-                                       "lon": result['GPS']['lon'],
-                                       "heading": 0.0,
-                                       "track": 0.0,
-                                       "speed": 0.0,
-                                       "altitude": 0.0,
-                                       "climb": 0.0,
-                                       "time":  datetime.now().__format__(self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f'))
-                                       }
-                        self.update()
-                        time.sleep(self.config.get('JSRETRIEVER_TIMEOUT', 1))
-            except Exception as e:
-                gps_logger.error(f"JavaScriptGPSRetriever: {e}")  # unable to connect to Blackview
 
     def gps_result(self):
         return self.result
