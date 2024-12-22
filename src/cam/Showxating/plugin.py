@@ -2,6 +2,8 @@ import os
 import threading
 
 import logging.handlers
+from datetime import datetime, timedelta
+
 from src.cam.Showxating.capture import ShowxatingCapture
 from src.cam.Showxating.lib.StreamService import StreamService, StreamingHandler
 from src.config import readConfig
@@ -21,19 +23,19 @@ class ShowxatingPlugin(object):
 
         self.plugin_name = None
 
-        self.start_time = None
-        self.plugin_current_time = None
-        self.plugin_elapsed_time = None
+        self.created = datetime.now()
+        self.updated = datetime.now()
+        self.elapsed = timedelta
 
         self.plugin_config = {}
         self.plugin_capture = None
-        self.plugin_args_capture_src = None
+        self.plugin_capture_src = None
 
         self.plugin_process_frames = False
 
-        self.frame_rate = None
-        self.frame_delta = None
         self.frame_id = None
+        self.frame_rate = None
+        self.frame_period = None
         self.frame_shape = None
 
         self.streamservice = None
@@ -41,14 +43,13 @@ class ShowxatingPlugin(object):
         self.plugin_thread = None           # 2nd run ... tx_thread
         self.is_alive = False
 
-        # magic highlight color
         self.majic_color = None
 
     def set_capture(self):
         self.plugin_capture = ShowxatingCapture(self.plugin_name,
-                                                self.plugin_args_capture_src,
+                                                self.plugin_capture_src,
                                                 self.plugin_config)
-        cam_logger.debug(f"{self.plugin_name} initialized capture. src:{self.plugin_args_capture_src}")
+        cam_logger.debug(f"{self.plugin_name} initialized capture. src:{self.plugin_capture_src}")
 
     def get_config(self):
         global_config = {}
@@ -94,12 +95,16 @@ class ShowxatingPlugin(object):
         self.set_capture()
         try:
             for frame in self.plugin_capture.run():
-                self.start_time = self.plugin_capture.statistics['capture_start_time']     # rename
-                self.frame_rate = self.plugin_capture.statistics['capture_frame_rate']
-                self.frame_delta = self.plugin_capture.statistics['capture_frame_period']  # rename
+                self.created = self.plugin_capture.statistics['capture_start_time']
                 self.frame_id = self.plugin_capture.statistics['capture_frame_id']
+                self.frame_rate = self.plugin_capture.statistics['capture_frame_rate']
+                self.frame_period = self.plugin_capture.statistics['capture_frame_period']
                 self.frame_shape = self.plugin_capture.statistics['capture_frame_shape']
                 self.majic_color = self.plugin_capture.statistics['capture_majic_color']
+
+                self.updated = datetime.now()
+                self.elapsed = self.updated - self.created
+
                 self.process_frame(frame)
 
         except ValueError:
