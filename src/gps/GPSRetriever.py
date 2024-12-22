@@ -34,8 +34,8 @@ class GPSRetriever(threading.Thread):
         self.latitude = 0.0
         self.longitude = 0.0
 
-    def __str__(self):
-        return f"GPSRetriever: time: {self.gps_time()} position: {self.gps_position()} config: {self.config}"
+    def get(self):
+        return f"GPSRetriever: {self.result} config: {self.config}"
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
