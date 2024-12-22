@@ -15,7 +15,7 @@ import {toStringHDMS, toStringXY, degreesToStringHDMS} from 'ol/coordinate.js';
 import {transform as xform, fromLonLat, toLonLat} from 'ol/proj.js';
 import {Heatmap as HeatmapLayer} from 'ol/layer.js';
 //import {JSONFeature as JSONFeature} from 'ol/format/JSONFeature.js'; <-- abstract, doesn't import. read direct from response
-import publisher from 'js_gps_ret/index.js'
+//import publisher from 'js_gps_ret/index.js'
 
 
 /*
@@ -156,7 +156,6 @@ const geolocation = new Geolocation({
 
 geolocation.setTracking(true);
 
-//publisher(currentWebMercator);
 
 function getLocation(){
     var xhttp = new XMLHttpRequest();
@@ -186,10 +185,10 @@ if (enable_hardware) {
 geolocation.on('change', function (evt) {
     if (!enable_hardware) {
         const coordJS = geolocation.getPosition();
-        var hdweCoords = toLonLat(coordJS);
-        coordinate = hdweCoords;
-        animate(hdweCoords);
-        update(hdweCoords);
+        var jsCoords = toLonLat(coordJS);
+        coordinate = jsCoords;
+        animate(jsCoords);
+        update(jsCoords);
     }
 });
 
@@ -568,6 +567,10 @@ function update(coordinate) {
 
     console.log('update coordinate: ' + coordinate);
     var source = v_layer.getSource();
+
+    var coordinatesList = document.getElementById("coordinatesList");
+    coordinatesList.innerHTML = "coordinate: " + coordinate;
+
     var featuresList = document.getElementById("featuresList");
     featuresList.innerHTML = "Features: " + source.getFeatures().length;
 
