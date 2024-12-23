@@ -7,7 +7,7 @@ from collections import defaultdict
 from flask.signals import Namespace
 from contextlib import contextmanager
 
-from src.config.__init__ import readConfig
+from src.config import readConfig
 
 from src.lib.utils import get_location, format_time, format_delta
 from src.wifi.lib.wifi_utils import write_to_scanlist, print_signals
