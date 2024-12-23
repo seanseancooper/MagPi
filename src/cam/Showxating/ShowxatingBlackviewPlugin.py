@@ -90,6 +90,11 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self.had_motion = False
         self.throttle = None
 
+        self.cropped_frame = None                       #
+        self.cropped_reference = None                   #
+        self.greyscale_frame = None                     #
+        self.greyscale_refer = None                     #
+
         self.krnl = 17                                  # controls size of items considered relevant
         self._kz = (int(self.krnl), int(self.krnl))
         self.threshold = 15.0                           # pixels additional to the mean during thresholding
@@ -164,7 +169,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
     def threshold_ops(self, f, t):
         # displayed when self.threshold is changing or threshold_hold is enabled
         if self.show_threshold or self.hold_threshold > 0:
-            # IDEA: should this f need to be... use greyscale_frame
+            # transform the greyscale threshold into the color f
             f[self._max_height, self._max_width] = cv.cvtColor(t, cv.COLOR_GRAY2BGR)
             self.hold_threshold -= 1
 
@@ -182,6 +187,29 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             break
 
         return "OK"
+
+
+    def get_histograms(self, frame, wall, rectangle, metric):
+        from src.cam.Showxating.ShowxatingHistogramPlugin import ShowxatingHistogramPlugin
+
+        hist_plugin = ShowxatingHistogramPlugin()
+        hist_plugin.plugin_name = 'ShowxatingHistogramPlugin'
+        hist_plugin.get_config()
+        hist_plugin.f_id = self.frame_id
+        hist_plugin.library = 'cv'  # TODO: add to configurable
+        hist_plugin.greyscale_frame = self.greyscale_frame
+        hist_plugin.rectangle = rectangle
+
+        # gaussian kernel pre processing
+        f_hist = hist_plugin.make_histogram(frame, rectangle)
+        w_hist = hist_plugin.make_histogram(wall, rectangle)
+
+        if self.plugin_config['color_histograms']:
+            dists = hist_plugin.compare_color_hist(f_hist, w_hist, metric=metric)
+        else:
+            dists = hist_plugin.compare_hist(f_hist['greyscale'], w_hist['greyscale'], metric=metric)
+
+        return dists
 
     def pre_mediapipe(self, f):
 
@@ -221,7 +249,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             for cnt in conts[:self.tracker.contour_limit]:
                 # TODO: perhaps scale the image here to 50%
                 # TODO: alternatives to paired
-                wall, rect, dists = wall_images(f.copy(), cnt, False, 'paired')  # TODO: add to config
+                wall, rect = wall_images(f.copy(), cnt)  # TODO: add to config
+                distances = self.get_histograms(f, wall, rect, 'euclidean')
 
                 if self.has_analysis or self.has_symbols:
                     self.tracked = self.tracker.track_objects(self.frame_id, cnt, hier, wall, rect)
@@ -253,13 +282,13 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
             if ret:
                 self.pre_mediapipe(frame)
-                cropped_frame = frame[self._max_height, self._max_width]
-                cropped_reference = reference[self._max_height, self._max_width]
+                self.cropped_frame = frame[self._max_height, self._max_width]
+                self.cropped_reference = reference[self._max_height, self._max_width]
 
-                greyscale_frame = cv.cvtColor(cropped_frame, cv.COLOR_BGR2GRAY)
-                greyscale_refer = cv.cvtColor(cropped_reference, cv.COLOR_BGR2GRAY)
+                self.greyscale_frame = cv.cvtColor(self.cropped_frame, cv.COLOR_BGR2GRAY)
+                self.greyscale_refer = cv.cvtColor(self.cropped_reference, cv.COLOR_BGR2GRAY)
 
-                DELTA = cv.absdiff(greyscale_frame, greyscale_refer)
+                DELTA = cv.absdiff(self.greyscale_frame, self.greyscale_refer)
                 BLURRED = cv.GaussianBlur(DELTA, (int(self.krnl), int(self.krnl)), 0)
                 _, THRESHOLD = cv.threshold(BLURRED, int(np.mean(BLURRED)) + self.threshold, 255, cv.THRESH_BINARY)
                 contours, hier = cv.findContours(THRESHOLD, cv.RETR_TREE, cv.CHAIN_APPROX_NONE,

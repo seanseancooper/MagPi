@@ -3,9 +3,6 @@ import uuid
 import cv2 as cv
 import numpy as np
 
-from src.cam.Showxating.ShowxatingHistogramPlugin import ShowxatingHistogramPlugin
-
-
 def getRectsFromContours(contours):
     rects = np.empty(shape=(1, 4), dtype=np.int32)
 
@@ -129,7 +126,7 @@ def getAggregatedRects(rects):
     return aggregated
 
 
-def wall_images(frame, conts, getDists, metric):
+def wall_images(frame, conts):
     canvas = np.zeros(frame.shape, np.uint8)
     wall = np.zeros(frame.shape, np.uint8)
     rectangle = None
@@ -166,22 +163,11 @@ def wall_images(frame, conts, getDists, metric):
 
         # this will be a 'contourGroup', get 'bounds' of members
         rectangle = br_x, br_y, br_w, br_h = cv.boundingRect(conts)
-
         cnt_img = frame[br_y:br_y + br_h, br_x:br_x + br_w]  # as numpy rows, cols...
         wall = combine_images(cnt_img, canvas, br_y, br_x)
 
-        if getDists:
-            p = ShowxatingHistogramPlugin()
-            p.plugin_name = 'ShowxatingHistogramPlugin'
-            p.get_config()
-            p.library = 'cv'  # TODO: add to configurable
-
-            f_hist = p.make_histogram(frame, rectangle)
-            w_hist = p.make_histogram(wall, rectangle)
-            dists = p.compare_hist(f_hist, w_hist, metric=metric)
-
     # rectangle is bounds of contourGroup
-    return wall, rectangle, dists
+    return wall, rectangle
 
 
 def calculate_contour_distance(contour1, contour2):

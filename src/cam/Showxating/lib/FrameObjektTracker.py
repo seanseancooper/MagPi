@@ -81,45 +81,36 @@ class FrameObjektTracker:
         aged_o = [o for o in self.tracked if self.tracked.get(o).f_id < (self.f_id - self.f_limit)]
         [self.tracked.pop(o) for o in aged_o]
 
-    def set_frame_delta(self, item, wall, rectangle):
+    @staticmethod
+    def make_grey_data(item, rectangle):
+        wx, wy, ww, wh = rectangle
+        return cv.cvtColor(item[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)
+
+    def set_frame_delta(self, X, Y):
         ''' set the allowable difference between frames *fragments_* to the
         average of the paired euclidean distances between the previous 'item'
-        and the current frame 'wall'
+        and the current frame 'wall'.
         '''
-
-        wx, wy, ww, wh = rectangle
-
+        self._frame_SSIM = 0.0
         try:
             # TODO: see metrics of pairwise_distances
-            # TODO: combine with MSE below
             # return the distances between the row vectors of X and Y
-
-            # IDEA: would it be possible to use the greyscale_frame
-            #  (or a slice of it) from the plugin here?
-            X = cv.cvtColor(item[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)
-            Y = cv.cvtColor(wall[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)
             self._frame_delta = np.mean(pairwise_distances(X, Y))
             self._frame_deltas.append(self._frame_delta)
-        except Exception as e:
-            cam_logger.error(f"Problem setting frame delta: {e}")
-
-    def set_frame_MSE(self, item, wall, rectangle):
-
-        wx, wy, ww, wh = rectangle
-        self._frame_SSIM = 0.0
-
-        try:
-            X = cv.cvtColor(item[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)
-            Y = cv.cvtColor(wall[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)
 
             self._frame_MSE = np.sum((X.astype("float") - Y.astype("float")) ** 2)
             self._frame_MSE /= float(X.shape[0] * Y.shape[1])
 
             from skimage.metrics import structural_similarity as ssim
-            self._frame_SSIM = ssim(X, Y)
+            # self._frame_SSIM = ssim(X, Y)
+            # self._frame_MSEs.append(self._frame_MSE)
 
-            self._frame_MSEs.append(self._frame_MSE)
-        except Exception:
+        except Exception as e:
+            # ssim(X, Y) Problem setting frame delta: win_size exceeds image extent.
+            # Either ensure that your images are at least 7x7; or pass win_size explicitly
+            # in the function call, with an odd value less than or equal to the smaller
+            # side of your images. If your images are multichannel (with color channels),
+            # set channel_axis to the axis number corresponding to the channels.
             pass
 
     def print_frame(self, o, origin):
@@ -225,16 +216,17 @@ class FrameObjektTracker:
             # there may not be a previous tag, frame or anything...
             if o.prev_tag:
                 prev_wall = self.tracked.get(o.prev_tag).wall               # we have wall, thus a previous frame
-                self.set_frame_delta(prev_wall, wall, rectangle)            # compare to current wall
-                self.set_frame_MSE(prev_wall, wall, rectangle)
+                X = self.make_grey_data(prev_wall, rectangle)
+                Y = self.make_grey_data(wall, rectangle)
+                self.set_frame_delta(X, Y)                                  # compare to current wall
+
                 o.fd = self._frame_delta                                    # delta of wall image to current f
                 self.fd_mean = np.mean(self._frame_deltas)                  # a float,
                 self.d_range = self.frm_delta_pcnt * self.fd_mean           # percentage of px difference
 
-                # make an evaluation based on delta between
-                # frames. does this f match the previous f
-                # and thus the previous tag?
-
+                # does this f match the previous f
+                # and thus the previous tag? make an
+                # evaluation based on delta between frames.
 
             else:
                 o.tag = o.create_tag(self.f_id)

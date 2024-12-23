@@ -1,4 +1,7 @@
+from collections import defaultdict
+
 import cv2 as cv
+import numpy as np
 from skimage import exposure
 from sklearn.metrics.pairwise import euclidean_distances, paired_distances
 from src.cam.Showxating.plugin import ShowxatingPlugin
@@ -13,6 +16,10 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
 
     def __init__(self):
         super().__init__()
+        self.f_id = 0
+        self.rectangle = []
+        self.greyscale_frame = None
+        self.bins = 32          # TODO: make configurable
         self.out_data = {}
 
         self.library = ''
@@ -20,17 +27,29 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
     def get_config(self):
         return super().get_config()
 
-    def make_histogram(self, f, rect):
+    def make_histogram(self, item, rect):
 
-        x, y, w, h = rect
-        f_region = f[y:y + h, x:x + w]
+        x, y, w, h = self.rectangle = rect
+        f = item[y:y + h, x:x + w]
+        self.out_data = {'b': [],'g': [],'r': []}
 
-        _ = self.process_frame(f_region).T
+        _ = self.process_frame(f).T
         return self.out_data
 
     @staticmethod
     def compare_hist(a, b, metric):
         distances = []
+        # use our MSE here, add to if
+        if metric == 'euclidean':
+            distances = euclidean_distances(a, b)
+        elif metric == 'paired':
+            distances = paired_distances(a, b)
+        return distances
+
+    @staticmethod
+    def compare_color_hist(a, b, metric):
+        distances = []
+        # use our MSE here
         if metric == 'euclidean':
             distances = [euclidean_distances(a[i], b[i]) for i in ['b', 'g', 'r']]
         elif metric == 'paired':
@@ -39,45 +58,32 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
 
     def process_frame(self, f):
         """This method takes as frame, analyzes it and returns the analyzed frame"""
-        cv.imshow('f', f)  # broken??
 
         if self.plugin_process_frames:
 
             # TODO: resize & kernel trick. these don't need to be so big.
+            f = cv.GaussianBlur(f,(5,5),0)
 
-            if self.plugin_config['color_histograms']:
-
-                # https://docs.opencv.org/4.x/d1/db7/tutorial_py_histogram_begins.html
-
-                color = ('b', 'g', 'r')
-
-                for i, col in enumerate(color):
-                    # 2 different ways to do it....
-
-                    if self.library == 'cv':
-                        # images, channels, mask, histSize, ranges[, hist[, accumulate]]
-                        hist = cv.calcHist([f], [i], None, [32], [0, 256], accumulate=False)
-                    else:
-                        hist = exposure.histogram(f, channel_axis=i)
-
-                    self.out_data[col] = hist
-                    print("color: {}, hist: {}".format(col, ",".join(str(x) for x in self.out_data[col])))
-
-            else:
-                # IDEA: use the greyscale_frame from the plugin.
-                greyscale_f = cv.cvtColor(f, cv.COLOR_BGR2GRAY)
+            def get_hist(f):
                 if self.library == 'cv':
                     # images, channels, mask, histSize, ranges[, hist[, accumulate]]
-                    hist = cv.calcHist([greyscale_f], [0], None, [32], [0, 256], accumulate=False)
+                    return cv.calcHist([f], [0], None, [self.bins], [0, 256], accumulate=False)
                 else:
-                    hist = exposure.histogram(greyscale_f, channel_axis=0)
+                    return exposure.histogram(f, nbins=self.bins, channel_axis=0)
 
-                self.out_data['greyscale'] = hist
-                print(f"hist: {hist}")
+            if self.plugin_config['color_histograms']:
+                colors = ['b', 'g', 'r']
+                _, _, ch = f.shape
+                for i in range(ch):
+                    try:
+                        self.out_data[colors[i]] = np.zeros(shape=(32,1))
+                        self.out_data[colors[i]] = get_hist(f[i])
+                    except Exception: pass
+            else:
+                # get a slice
+                br_x, br_y, br_w, br_h = self.rectangle
+                greyscale_f = self.greyscale_frame[br_y:br_y + br_h, br_x:br_x + br_w]
+                self.out_data['greyscale'] = get_hist(greyscale_f)
 
         return f
 
-
-if __name__ == "__main__":
-    thread = ShowxatingHistogramPlugin()
-    thread.run()
