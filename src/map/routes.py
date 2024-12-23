@@ -38,7 +38,7 @@ def aggregated():
 
 @map_bp.route("/aggregated/<mod>", methods=['GET'], subdomain='map')
 def aggregated_by_module(mod):
-    """ returns module speccific aggregated data"""
+    """ returns module specific aggregated data"""
     return mapAgg.aggregated[mod]
 
 

@@ -1,6 +1,5 @@
 Read & Control a remote instance; process event/signal data from it.
     > PHASE 1: control a remote MagPi instance running on networked hardware.
-
     > Galatea: read Galatea sensor group (3DOF, etc.)
     > BOX: remote install & control 'BOX' hardware (perhaps use Ansible?)
 
