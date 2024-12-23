@@ -39,9 +39,11 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
 
     def process_frame(self, f):
         """This method takes as frame, analyzes it and returns the analyzed frame"""
-        cv.imshow('f', f)
+        cv.imshow('f', f)  # broken??
 
         if self.plugin_process_frames:
+
+            # TODO: resize & kernel trick. these don't need to be so big.
 
             if self.plugin_config['color_histograms']:
 
@@ -62,6 +64,7 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
                     print("color: {}, hist: {}".format(col, ",".join(str(x) for x in self.out_data[col])))
 
             else:
+                # IDEA: use the greyscale_frame from the plugin.
                 greyscale_f = cv.cvtColor(f, cv.COLOR_BGR2GRAY)
                 if self.library == 'cv':
                     # images, channels, mask, histSize, ranges[, hist[, accumulate]]

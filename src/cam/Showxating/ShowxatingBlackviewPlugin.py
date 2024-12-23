@@ -127,6 +127,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
     def get_config(self):
         super().get_config()
         self.tracker.configure()
+        # TODO: TokenBucket config
         self.throttle = TokenBucket(int(1), int(3))
 
     def sets_hold_threshold(self, value):
@@ -140,6 +141,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             self.show_threshold = (value == 'true')
         if field == 'mediapipe':
             self.mediapipe = (value == 'true')
+
+
         if field == 'krnl':
             self.krnl = value
             self.show_krnl_grid = True
@@ -150,6 +153,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             self.tracker.frm_delta_pcnt = float(value)
         if field == 'f_limit':
             self.tracker.f_limit = int(value)
+
+
         if field == 'crop':
             json_value = json.loads(value)
             print(f'cropper json: {json_value}')
@@ -159,10 +164,13 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
     def threshold_ops(self, f, t):
         # displayed when self.threshold is changing or threshold_hold is enabled
         if self.show_threshold or self.hold_threshold > 0:
+            # IDEA: should this f need to be... use greyscale_frame
             f[self._max_height, self._max_width] = cv.cvtColor(t, cv.COLOR_GRAY2BGR)
             self.hold_threshold -= 1
 
     def cam_snap(self):
+
+        # TOdO: do not open a new capture for this, get the f
 
         def _snap(frame):
             if frame is not None:
@@ -182,6 +190,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
             mp_pose = mp.solutions.pose
             self._pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+            # TODO: is this fragment already available?
             BGR_T = cv.cvtColor(f[self._max_height, self._max_width], cv.COLOR_RGB2BGR)
             self._result_T = self._pose.process(BGR_T)
 
@@ -210,7 +219,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             conts = sortedContours(contours)
 
             for cnt in conts[:self.tracker.contour_limit]:
-
+                # TODO: perhaps scale the image here to 50%
+                # TODO: alternatives to paired
                 wall, rect, dists = wall_images(f.copy(), cnt, False, 'paired')  # TODO: add to config
 
                 if self.has_analysis or self.has_symbols:

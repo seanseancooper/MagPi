@@ -91,7 +91,11 @@ class FrameObjektTracker:
 
         try:
             # TODO: see metrics of pairwise_distances
+            # TODO: combine with MSE below
             # return the distances between the row vectors of X and Y
+
+            # IDEA: would it be possible to use the greyscale_frame
+            #  (or a slice of it) from the plugin here?
             X = cv.cvtColor(item[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)
             Y = cv.cvtColor(wall[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)
             self._frame_delta = np.mean(pairwise_distances(X, Y))
@@ -223,9 +227,15 @@ class FrameObjektTracker:
                 prev_wall = self.tracked.get(o.prev_tag).wall               # we have wall, thus a previous frame
                 self.set_frame_delta(prev_wall, wall, rectangle)            # compare to current wall
                 self.set_frame_MSE(prev_wall, wall, rectangle)
-                o.fd = self._frame_delta                                    # delta of walls. The wall is specific to the contour group.
+                o.fd = self._frame_delta                                    # delta of wall image to current f
                 self.fd_mean = np.mean(self._frame_deltas)                  # a float,
                 self.d_range = self.frm_delta_pcnt * self.fd_mean           # percentage of px difference
+
+                # make an evaluation based on delta between
+                # frames. does this f match the previous f
+                # and thus the previous tag?
+
+
             else:
                 o.tag = o.create_tag(self.f_id)
 

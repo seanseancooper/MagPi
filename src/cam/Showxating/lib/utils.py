@@ -174,7 +174,7 @@ def wall_images(frame, conts, getDists, metric):
             p = ShowxatingHistogramPlugin()
             p.plugin_name = 'ShowxatingHistogramPlugin'
             p.get_config()
-            p.library = 'cv'  # add to configurable
+            p.library = 'cv'  # TODO: add to configurable
 
             f_hist = p.make_histogram(frame, rectangle)
             w_hist = p.make_histogram(wall, rectangle)
