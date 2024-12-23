@@ -7,6 +7,7 @@ from scipy.optimize import minimize
 from src.lib.utils import format_time, format_delta
 from src.config import readConfig
 import requests
+import json
 
 from src.wifi.lib import WifiSignalPoint
 from src.trx.lib import TRXSignalPoint
@@ -94,7 +95,9 @@ class Trilaterator(threading.Thread):
     def getSignalPointsForBSSID(self, BSSID):
         # WifiSignalPoint: goto MAPAggregator context
         resp = requests.get(f'http://wifi.localhost:5006/scan/{BSSID}')
-        sgnlpts = resp['signal_cache']
+        # resp = requests.get(f'http://map.localhost:5006/aggrgated/wifi')
+        cache = json.dumps(resp)
+        sgnlpts = cache['signal_cache']
         return BSSID, sgnlpts  # scanner.signal_cache.get(BSSID)
 
     def getSignalPointsForUniqId(self, UniqId, scanner):
