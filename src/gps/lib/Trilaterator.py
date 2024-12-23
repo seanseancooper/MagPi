@@ -6,21 +6,18 @@ from scipy.optimize import minimize
 
 from src.lib.utils import format_time, format_delta
 from src.config import readConfig
+import requests
 
-# start w/this & app context... use MAPAggregator
-from src.wifi import WifiScanner
 from src.wifi.lib import WifiSignalPoint
 from src.trx.lib import TRXSignalPoint
 
-
-from src.gps.GPSRetriever import GPSRetriever
 
 class Trilaterator(threading.Thread):
     # based on
     # www.alanzucconi.com/2017/03/13/understanding-geographical-coordinates/
     # https://www.kaggle.com/code/johnbacksund/rssi-trilateration-of-ap-location
 
-    def __init__(self, target: str):
+    def __init__(self):
         super().__init__()
 
         self.config = {}
@@ -33,9 +30,9 @@ class Trilaterator(threading.Thread):
         self.locations = []             #
         self.distances = []
 
-        self.target = target
-        self.retriever = GPSRetriever()  # no, use the context GPSRetriever...
-        self.scanner = None  # no, use the context WifiScanner...
+        self.target = None              # BSSID to trilaterate
+        self.retriever = None           # uses the context GPSRetriever...
+        self.result = None
 
     def get(self):
         return {
@@ -46,7 +43,6 @@ class Trilaterator(threading.Thread):
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
-        self.retriever.configure(config_file)
 
     @staticmethod
     def geographical_distance(latitudeA, longitudeA, latitudeB, longitudeB):
@@ -89,22 +85,23 @@ class Trilaterator(threading.Thread):
         R = 6371.009  # Km
         return R * central_angle
 
-    def get_initial_location(self):
-        # get from app.GPSRetriever..
-        # {'GPS': {'LATITUDE': 39.916891, 'LONGITUDE': -105.06867, 'UPDATED': '2024-10-25 17:55:48'}}.
-        lat = -105.06867
-        lon = 39.916891
-        self.initial_location = (lat, lon)
+    def set_target(self, target):
+        self.target = target
 
-    def getSignalPointsForBSSID(self, BSSID, scanner: WifiScanner):
-        # WifiSignalPoint
-        return scanner.signal_cache.get(BSSID)
+    def get_initial_location(self):
+        self.initial_location = self.retriever.result['lat'], self.retriever.result['lon']
+
+    def getSignalPointsForBSSID(self, BSSID):
+        # WifiSignalPoint: goto MAPAggregator context
+        resp = requests.get(f'http://wifi.localhost:5006/scan/{BSSID}')
+        sgnlpts = resp['signal_cache']
+        return BSSID, sgnlpts  # scanner.signal_cache.get(BSSID)
 
     def getSignalPointsForUniqId(self, UniqId, scanner):
         # TRXSignalPoint, et, al.
         return scanner.signal_cache.get(UniqId)
 
-    def getLocationsForsSignalPoints(self, SignalPoints: list):
+    def getLocationsForSignalPoints(self, SignalPoints: list):
         return [pt.getLatLon() for pt in SignalPoints]
 
     def getDistancesForSignalPoints(self, initial_location, SignalPointList):
@@ -151,11 +148,13 @@ class Trilaterator(threading.Thread):
 
         return location
 
-    def run(self) -> None:
-        t = Trilaterator('BSSID_TARGeT')
+    def run(self):
 
-        t.get_initial_location()
-        t.locations = []  # get the list of sp for BSSID_TARGeT
-        t.distances = []  # getDistancesForSignalPoints
+        self.get_initial_location()
+        BSSID, sgnlPts = self.getSignalPointsForBSSID(self.target)  # get the list of sp for BSSID_TARGeT
+        self.locations = self.getLocationsForSignalPoints(sgnlPts)
+        self.distances = self.getDistancesForSignalPoints(self.initial_location, sgnlPts)
+        self.result = self.trilaterate(self.initial_location, self.locations, self.distances)
 
-        print(f'result: {t.trilaterate(t.initial_location, t.locations, t.distances)}')
+        print(f'result: {self.result}')
+

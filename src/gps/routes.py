@@ -1,9 +1,14 @@
 from flask import Blueprint, redirect, jsonify
 
 from src.gps.GPSRetriever import GPSRetriever
+from src.gps.lib.Trilaterator import Trilaterator as Trilaterator
 
 gpsRet = GPSRetriever()
 gpsRet.configure('gps.json')
+
+trilaterator = Trilaterator()
+trilaterator.configure('gps.json')
+trilaterator.retriever = gpsRet
 
 gps_bp = Blueprint(
         'gps_bp', __name__, subdomain='gps',
@@ -79,3 +84,9 @@ def gps_climb():
 @gps_bp.route("/config", methods=['GET'], subdomain="gps")
 def gps_config():
     return gpsRet.config
+
+
+@gps_bp.route("/<BSSID>/triltaterate", methods=['GET'], subdomain="gps")
+def gps_trilaterate(BSSID):
+    trilaterator.set_target(BSSID)
+    return trilaterator.result
