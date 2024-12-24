@@ -59,7 +59,7 @@ class ShowxatingPlugin(object):
         os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = global_config.get('OPENCV_FFMPEG_CAPTURE_OPTIONS', '')
         os.environ["OPENCV_FFMPEG_WRITER_OPTIONS"] = global_config.get('OPENCV_FFMPEG_WRITER_OPTIONS', '')
 
-        self.plugin_config, _ = global_config['PLUGINS']
+        self.plugin_config = global_config['PLUGIN']
         self.plugin_process_frames = self.plugin_config['plugin_process_frames']
 
     def start_streamservice(self):
