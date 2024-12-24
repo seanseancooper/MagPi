@@ -11,6 +11,7 @@ from src.config import readConfig
 
 import logging
 cam_logger = logging.getLogger('cam_logger')
+speech_logger = logging.getLogger('speech_logger')
 
 
 class FrameObjektTracker:
@@ -24,7 +25,7 @@ class FrameObjektTracker:
         self.f_delta_pcnt = 0.50            # hyperparameter: 0..1 percentage of delta between the current and previous frames over all pixels in frame
         self.l_delta_pcnt = 0.50            # hyperparameter: 0..1 percentage of delta between the current and previous mean locations
         self.contour_limit = None           # number of contours evaluated by plugin in each pass
-        self.contours = None                # ????
+        self.contour = None                # ????
         self.contour_id = None              # ????
         self.tracked = {}                   # mapping of FrameObjekts over last 'f_limit' frames.
         self.greyscale_frame  = None
@@ -120,13 +121,13 @@ class FrameObjektTracker:
             pass
 
     def print_frame(self, o, origin):
-        # print(f"{str(self.f_id)}\t{origin}{o.contour_id}-{str(o.tag[-12:])}\t"
-        print(f"{str(self.f_id)}\t{origin}{str(o.tag)}\t"
+        print(f"{str(self.f_id)}\t{origin}{o.contour_id}-{str(o.tag[-12:])}\t"
+        # print(f"{str(self.f_id)}\t{origin}\t"
               # f"INSIDE: {str(o.is_inside).ljust(2, ' ')}\t"
               f"CLOSE: {str(o.close).ljust(1, ' ')}\t"
               f"dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}\t"
               f"md: {str(o.md.__format__('.4f')).ljust(3, ' ')}\t"
-              # f"ML: {str(o.ml)}\trect:{str(o.rect).ljust(10, ' ')}\t"
+              f"ML: {str(o.ml)}\trect:{str(o.rect).ljust(10, ' ')}\t"
               # f"fd: {str(self.fd_mean.__format__('.4f')).ljust(10, ' ')}\tmse: {str(self._frame_MSE.__format__('.4f')).ljust(10, ' ')}\tssim: {str(self._frame_SSIM.__format__('.4f')).ljust(10, ' ')}"
         )
 
@@ -160,8 +161,9 @@ class FrameObjektTracker:
             o1.prev_tag = str(list(self.tracked.keys())[0])                 # find the last thing with a tag, if not expired already ("when?", f_limit)
             o1.curr_dist = int(o1.distances[0])
 
-            o1.rect = self.tracked.get(o1.prev_tag).rect                    # "where?" was the last thing with a tag? (p_ml)
-            o1.is_inside = is_inside(o1.ml, o1.rect)                        # is the current ml inside the bounding rect of the last thing with a tag?
+            # o1.rect = self.tracked.get(o1.prev_tag).rect                  # WRONG; DO NOT SET .rect here with this!!! "where?" was the last thing with a tag? (p_ml)
+            # o1.rect = self.tracked.get(o1.prev_tag).rect                  # WRONG; this should be the current rect, not the previous
+            # o1.is_inside = is_inside(o1.ml, o1.rect)                        # is the current ml inside the bounding rect of the last thing with a tag?
 
             off = self.l_delta_pcnt * o1.md                                 # did o1 suddenly appear?
             o1.close = in_range(o1.curr_dist, o1.md, off)                   # is the current distance within a range of the median of distances for the last thing with a tag?
@@ -170,6 +172,7 @@ class FrameObjektTracker:
             o1.tag = o1.create_tag(self.f_id)  # NEW TAG
 
             self.print_frame(o1, "N1:")
+            speech_logger.info('NEW')
             labeled.append(o1)
 
         if len(p_ml) > 1:
@@ -182,20 +185,27 @@ class FrameObjektTracker:
             # get the mean location of the distances identified in the previous frame
             o.distances = [euclidean_distances(np.array([self._ml], dtype=int), np.array([p_ml[j]], dtype=int).reshape(1, -1)) for j in np.arange(len(p_ml)) if p_ml[j] is not None]
             o.md = np.mean(o.distances)
-
+            # I think this is wrong; criteria should add:
+            # if it exists, it should be the item w/ a matching tag (don't have that, so closest)
+            # if distance from the closest is > the bounds of the current rect, it is new.
+            # this should choose the closest item within the bounds of it's rect.
             idx = np.argmin(o.distances)                              # the item in the array representing the minimum euclidean distance to the current location
-            o.prev_tag = str(list(self.tracked.keys())[idx])          # its' tag
+
+
+
+            o.prev_tag = str(list(self.tracked.keys())[idx])          # target tag; may not be the right tag
             o.curr_dist = float(o.distances[idx])                     # distance from last location
 
-            o.rect = self.tracked.get(o.prev_tag).rect
-
-            o.is_inside = is_inside(o.ml, o.rect)                     # *MIGHT* BE TRUE
+            # o.rect = self.tracked.get(o.prev_tag).rect              # WRONG; this should be the current rect, not the previous
+            # o.is_inside = is_inside(o.ml, o.rect)                   # *MIGHT* BE TRUE
             off = self.l_delta_pcnt * o.md
             o.close = in_range(o.curr_dist, o.md, off)
 
+
+            # DEFER TAG CREATION
             o.tag = f"{self.f_id}_{o.prev_tag.split('_')[1]}"
 
-            # self.print_frame(o, "   ")
+            self.print_frame(o, "   ")
             labeled.append(o)
 
         if not labeled:
@@ -239,19 +249,19 @@ class FrameObjektTracker:
         Objects can suddenly appear or appear to change *size* if the frame drags due to network latency. Back referencing frames needs a cache.
         """
         self.f_id = f_id
-        self.contours = contour
+        self.contour = contour
         self.contour_id = str(uuid.uuid4()).split('-')[0]
-        distances = self.get_histograms(frame, wall, rectangle, 'euclidean')
+        distances = self.get_histograms(frame, wall, rectangle, 'euclidean')            # the euclidean distance to the previous image
 
-        self._ml = self.get_mean_location(self.contours)  # = c_grps_locs[grp_ident]
+        self._ml = self.get_mean_location(self.contour)  # = c_grps_locs[grp_ident]
 
         for o in self.label_locations():
 
             o.wall = wall
-            o.contours = self.contours                  # = c_grps_cnts[id]
+            o.contour = self.contour                  # = c_grps_cnts[id]
             o.hierarchy = hierarchy                     # unused, will be i of an enumeration
-            o.rect = rectangle
-            o.is_inside = is_inside(o.ml, o.rect)
+            o.rect = rectangle                          # NOW WE GET A RECT.
+            o.is_inside = is_inside(o.ml, o.rect)       # is the current ml inside the current rect?
 
             # there may not be a previous tag, frame or anything...
             if o.prev_tag:
