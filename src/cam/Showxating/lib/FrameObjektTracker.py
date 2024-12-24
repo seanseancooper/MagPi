@@ -121,13 +121,14 @@ class FrameObjektTracker:
             pass
 
     def print_frame(self, o, origin):
-        print(f"{str(self.f_id)}\t{origin}{o.contour_id}-{str(o.tag[-12:])}\t"
-        # print(f"{str(self.f_id)}\t{origin}\t"
-              # f"INSIDE: {str(o.is_inside).ljust(2, ' ')}\t"
-              f"CLOSE: {str(o.close).ljust(1, ' ')}\t"
+        # print(f"{str(self.f_id)}\t{origin}{o.contour_id}-{str(o.tag[-12:])}\t"
+        print(f"{str(self.f_id)}\t{origin}{str(o.tag)}\t"
+        #       f"INSIDE: {str(o.is_inside).ljust(2, ' ')}\t"
+        #       f"CLOSE: {str(o.close).ljust(1, ' ')}\t"
               f"dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}\t"
               f"md: {str(o.md.__format__('.4f')).ljust(3, ' ')}\t"
-              f"ML: {str(o.ml)}\trect:{str(o.rect).ljust(10, ' ')}\t"
+              f"ML: {str(o.ml)}\t"
+              # f"rect:{str(o.rect).ljust(10, ' ')}\t"
               # f"fd: {str(self.fd_mean.__format__('.4f')).ljust(10, ' ')}\tmse: {str(self._frame_MSE.__format__('.4f')).ljust(10, ' ')}\tssim: {str(self._frame_SSIM.__format__('.4f')).ljust(10, ' ')}"
         )
 
@@ -144,36 +145,28 @@ class FrameObjektTracker:
 
         labeled = []
 
-        p_ml = [self.tracked.get(o_tag).ml for o_tag in list(self.tracked.keys())]  # get the previous mean_locations
+        p_ml = [self.tracked.get(o_tag).ml for o_tag in list(self.tracked.keys())]  # get all previous mean_locations (if they exist)
 
         if len(p_ml) == 1:
             # NEW THING
-            o1 = FrameObjekt.create(self.f_id)
+            o = FrameObjekt.create(self.f_id)
 
-            o1.ml = self._ml
-            o1.isNew = True
+            o.ml = self._ml
+            o.isNew = True
 
-            o1.contour_id = self.contour_id
+            o.contour_id = self.contour_id
             # contours are sorted, first p_ml is 'largest' contour
-            o1.distances = euclidean_distances(np.array([self._ml], dtype=int), np.array([p_ml[0]], dtype=int).reshape(1, -1))
-            o1.md = np.mean(o1.distances)
+            o.distances = euclidean_distances(np.array([self._ml], dtype=int), np.array([p_ml[0]], dtype=int).reshape(1, -1))
+            o.md = np.mean(o.distances)
             # popitem removes; is that really what we want?
-            o1.prev_tag = str(list(self.tracked.keys())[0])                 # find the last thing with a tag, if not expired already ("when?", f_limit)
-            o1.curr_dist = int(o1.distances[0])
+            o.prev_tag = str(list(self.tracked.keys())[0])                 # find the last thing with a tag, if not expired already ("when?", f_limit). LEAVE IT IN THERE!
+            o.curr_dist = int(o.distances[0])
 
-            # o1.rect = self.tracked.get(o1.prev_tag).rect                  # WRONG; DO NOT SET .rect here with this!!! "where?" was the last thing with a tag? (p_ml)
-            # o1.rect = self.tracked.get(o1.prev_tag).rect                  # WRONG; this should be the current rect, not the previous
-            # o1.is_inside = is_inside(o1.ml, o1.rect)                        # is the current ml inside the bounding rect of the last thing with a tag?
+            o.tag = o.create_tag(self.f_id)  # NEW TAG
 
-            off = self.l_delta_pcnt * o1.md                                 # did o1 suddenly appear?
-            o1.close = in_range(o1.curr_dist, o1.md, off)                   # is the current distance within a range of the median of distances for the last thing with a tag?
-
-
-            o1.tag = o1.create_tag(self.f_id)  # NEW TAG
-
-            self.print_frame(o1, "N1:")
+            self.print_frame(o, "N1:")
             speech_logger.info('NEW')
-            labeled.append(o1)
+            labeled.append(o)
 
         if len(p_ml) > 1:
             o = FrameObjekt.create(self.f_id)
@@ -191,16 +184,8 @@ class FrameObjektTracker:
             # this should choose the closest item within the bounds of it's rect.
             idx = np.argmin(o.distances)                              # the item in the array representing the minimum euclidean distance to the current location
 
-
-
             o.prev_tag = str(list(self.tracked.keys())[idx])          # target tag; may not be the right tag
             o.curr_dist = float(o.distances[idx])                     # distance from last location
-
-            # o.rect = self.tracked.get(o.prev_tag).rect              # WRONG; this should be the current rect, not the previous
-            # o.is_inside = is_inside(o.ml, o.rect)                   # *MIGHT* BE TRUE
-            off = self.l_delta_pcnt * o.md
-            o.close = in_range(o.curr_dist, o.md, off)
-
 
             # DEFER TAG CREATION
             o.tag = f"{self.f_id}_{o.prev_tag.split('_')[1]}"
@@ -208,7 +193,7 @@ class FrameObjektTracker:
             self.print_frame(o, "   ")
             labeled.append(o)
 
-        if not labeled:
+        if not labeled:                                             # nothing in cache.
             # f 0
             o = FrameObjekt.create(self.f_id)
             o.ml = self._ml
@@ -251,18 +236,21 @@ class FrameObjektTracker:
         self.f_id = f_id
         self.contour = contour
         self.contour_id = str(uuid.uuid4()).split('-')[0]
-        distances = self.get_histograms(frame, wall, rectangle, 'euclidean')            # the euclidean distance to the previous image
+        distances = self.get_histograms(frame, wall, rectangle, 'euclidean')            # array of euclidean distance to the previous image
 
-        self._ml = self.get_mean_location(self.contour)  # = c_grps_locs[grp_ident]
+        self._ml = self.get_mean_location(self.contour)                                 # find the mean location of this target
 
-        for o in self.label_locations():
+        for o in self.label_locations():                                                # go label this location as either NEW, PREV or INITIAL.
 
             o.wall = wall
-            o.contour = self.contour                  # = c_grps_cnts[id]
+            o.contour = self.contour                    # this is one of a group of sorted contours; it could be the first or the smallest. assume first, largest.
             o.hierarchy = hierarchy                     # unused, will be i of an enumeration
             o.rect = rectangle                          # NOW WE GET A RECT.
-            o.is_inside = is_inside(o.ml, o.rect)       # is the current ml inside the current rect?
+            o.is_inside = is_inside(o.ml, o.rect)       # is the current ml inside the current rect? this is MY RECTANGLE, otherwise it is some other contour.
 
+            off = self.l_delta_pcnt * o.md              # did o suddenly appear?
+            o.close = in_range(o.curr_dist, o.md, off)  # is the current distance within a range of the median of distances for the last thing with a tag?
+            print(f'\t\t\t\t\t\tis_inside: {o.is_inside} rect: {o.rect} close: {o.close}')
             # there may not be a previous tag, frame or anything...
             if o.prev_tag:
                 prev_wall = self.tracked.get(o.prev_tag).wall               # we have wall, thus a previous frame
