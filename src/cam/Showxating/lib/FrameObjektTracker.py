@@ -21,7 +21,8 @@ class FrameObjektTracker:
         self.config = {}
 
         self.f_limit = 2                    # hyperparameter: max age of frames in o_cache_map.
-        self.f_delta_pcnt = 1.00            # hyperparameter: percentage of delta between the current and previous frames over all pixels in frame
+        self.f_delta_pcnt = 0.50            # hyperparameter: 0..1 percentage of delta between the current and previous frames over all pixels in frame
+        self.l_delta_pcnt = 0.50            # hyperparameter: 0..1 percentage of delta between the current and previous mean locations
         self.contour_limit = None           # number of contours evaluated by plugin in each pass
         self.contours = None                # ????
         self.contour_id = None              # ????
@@ -66,7 +67,12 @@ class FrameObjektTracker:
 
             self.f_delta_pcnt = float(self.config['TRACKER']['f_delta_pcnt'])
             if self.f_delta_pcnt > 1.0:
-                print(f'bad frm_delta_pcnt: (should be <= 1.0)')
+                print(f'bad f_delta_pcnt: (should be <= 1.0)')
+                exit(1)
+
+            self.l_delta_pcnt = float(self.config['TRACKER']['l_delta_pcnt'])
+            if self.l_delta_pcnt > 1.0:
+                print(f'bad l_delta_pcnt: (should be <= 1.0)')
                 exit(1)
 
             self.contour_limit = int(self.config['TRACKER'].get('contour_limit', None))
@@ -114,12 +120,13 @@ class FrameObjektTracker:
             pass
 
     def print_frame(self, o, origin):
-        print(f"{str(self.f_id)}\t{origin}{o.contour_id}-{str(o.tag[-12:])}\t"
-              f"INSIDE: {str(o.is_inside).ljust(2, ' ')}\t"
+        # print(f"{str(self.f_id)}\t{origin}{o.contour_id}-{str(o.tag[-12:])}\t"
+        print(f"{str(self.f_id)}\t{origin}{str(o.tag)}\t"
+              # f"INSIDE: {str(o.is_inside).ljust(2, ' ')}\t"
               f"CLOSE: {str(o.close).ljust(1, ' ')}\t"
               f"dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}\t"
               f"md: {str(o.md.__format__('.4f')).ljust(3, ' ')}\t"
-              f"ML: {str(o.ml)}\trect:{str(o.rect).ljust(10, ' ')}\t"
+              # f"ML: {str(o.ml)}\trect:{str(o.rect).ljust(10, ' ')}\t"
               # f"fd: {str(self.fd_mean.__format__('.4f')).ljust(10, ' ')}\tmse: {str(self._frame_MSE.__format__('.4f')).ljust(10, ' ')}\tssim: {str(self._frame_SSIM.__format__('.4f')).ljust(10, ' ')}"
         )
 
@@ -144,17 +151,22 @@ class FrameObjektTracker:
 
             o1.ml = self._ml
             o1.isNew = True
+
+            o1.contour_id = self.contour_id
+            # contours are sorted, first p_ml is 'largest' contour
             o1.distances = euclidean_distances(np.array([self._ml], dtype=int), np.array([p_ml[0]], dtype=int).reshape(1, -1))
             o1.md = np.mean(o1.distances)
-
-            o1.prev_tag = str(list(self.tracked.keys())[0])
+            # popitem removes; is that really what we want?
+            o1.prev_tag = str(list(self.tracked.keys())[0])                 # find the last thing with a tag, if not expired already ("when?", f_limit)
             o1.curr_dist = int(o1.distances[0])
 
-            o1.rect = self.tracked.get(o1.prev_tag).rect
-            o1.is_inside = is_inside(o1.ml, o1.rect)                        # *SHOULD* ALWAYS BE TRUE
-            off = 0.50 * o1.md
-            o1.close = in_range(o1.curr_dist, o1.md, off)                   # WILL BE FALSE...
-            o1.contour_id = self.contour_id
+            o1.rect = self.tracked.get(o1.prev_tag).rect                    # "where?" was the last thing with a tag? (p_ml)
+            o1.is_inside = is_inside(o1.ml, o1.rect)                        # is the current ml inside the bounding rect of the last thing with a tag?
+
+            off = self.l_delta_pcnt * o1.md                                 # did o1 suddenly appear?
+            o1.close = in_range(o1.curr_dist, o1.md, off)                   # is the current distance within a range of the median of distances for the last thing with a tag?
+
+
             o1.tag = o1.create_tag(self.f_id)  # NEW TAG
 
             self.print_frame(o1, "N1:")
@@ -163,20 +175,24 @@ class FrameObjektTracker:
         if len(p_ml) > 1:
             o = FrameObjekt.create(self.f_id)
 
+            o.contour_id = self.contour_id
+
             o.ml = self._ml
             o.isNew = False  # could be reset!
+            # get the mean location of the distances identified in the previous frame
             o.distances = [euclidean_distances(np.array([self._ml], dtype=int), np.array([p_ml[j]], dtype=int).reshape(1, -1)) for j in np.arange(len(p_ml)) if p_ml[j] is not None]
             o.md = np.mean(o.distances)
 
-            idx = np.argmin(o.distances)                              # minimum euclidean distance
-            o.prev_tag = str(list(self.tracked.keys())[idx])          # tag closest to current location
-            o.curr_dist = float(o.distances[idx])                     # distance from current location
+            idx = np.argmin(o.distances)                              # the item in the array representing the minimum euclidean distance to the current location
+            o.prev_tag = str(list(self.tracked.keys())[idx])          # its' tag
+            o.curr_dist = float(o.distances[idx])                     # distance from last location
 
             o.rect = self.tracked.get(o.prev_tag).rect
+
             o.is_inside = is_inside(o.ml, o.rect)                     # *MIGHT* BE TRUE
-            off = 0.50 * o.md
+            off = self.l_delta_pcnt * o.md
             o.close = in_range(o.curr_dist, o.md, off)
-            o.contour_id = self.contour_id
+
             o.tag = f"{self.f_id}_{o.prev_tag.split('_')[1]}"
 
             # self.print_frame(o, "   ")
@@ -246,11 +262,14 @@ class FrameObjektTracker:
 
                 o.fd = self._frame_delta                                    # delta of wall image to current f
                 self.fd_mean = np.mean(self._frame_deltas)                  # a float,
-                self.d_range = self.f_delta_pcnt * self.fd_mean           # percentage of px difference
+                self.d_range = self.f_delta_pcnt * self.fd_mean             # percentage of px difference
 
                 # does this f match the previous f
                 # and thus the previous tag? make an
                 # evaluation based on delta between frames.
+                # if not in_range(o.fd, self.fd_mean, self.d_range):
+                #     # o.tag = f"{self.f_id}_{o.prev_tag.split('_')[1]}"
+                #     o.tag = o.create_tag(self.f_id)
 
             else:
                 o.tag = o.create_tag(self.f_id)
