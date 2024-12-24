@@ -133,7 +133,10 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         super().get_config()
         self.tracker.configure()
         # TODO: TokenBucket config
-        self.throttle = TokenBucket(int(1), int(3))
+        # self.throttle = TokenBucket(self.config['TOKENBUCKET'].get('tokens', 1), self.plugin_config['TOKENBUCKET'].get('interval', 60))
+        self.throttle = TokenBucket(1, 60)
+        self.krnl = self.plugin_config.get('krnl', 10.0)
+        self.threshold = self.plugin_config.get('threshold', 10.0)
 
     def sets_hold_threshold(self, value):
         if value is True:
@@ -155,7 +158,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             self.sets_hold_threshold(True)
             self.threshold = float(value)
         if field == 'frm_delta_pcnt':
-            self.tracker.frm_delta_pcnt = float(value)
+            self.tracker.f_delta_pcnt = float(value)
         if field == 'f_limit':
             self.tracker.f_limit = int(value)
 
@@ -188,29 +191,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
         return "OK"
 
-
-    def get_histograms(self, frame, wall, rectangle, metric):
-        from src.cam.Showxating.ShowxatingHistogramPlugin import ShowxatingHistogramPlugin
-
-        hist_plugin = ShowxatingHistogramPlugin()
-        hist_plugin.plugin_name = 'ShowxatingHistogramPlugin'
-        hist_plugin.get_config()
-        hist_plugin.f_id = self.frame_id
-        hist_plugin.library = 'cv'  # TODO: add to configurable
-        hist_plugin.greyscale_frame = self.greyscale_frame
-        hist_plugin.rectangle = rectangle
-
-        # gaussian kernel pre processing
-        f_hist = hist_plugin.make_histogram(frame, rectangle)
-        w_hist = hist_plugin.make_histogram(wall, rectangle)
-
-        if self.plugin_config['color_histograms']:
-            dists = hist_plugin.compare_color_hist(f_hist, w_hist, metric=metric)
-        else:
-            dists = hist_plugin.compare_hist(f_hist['greyscale'], w_hist['greyscale'], metric=metric)
-
-        return dists
-
     def pre_mediapipe(self, f):
 
         if self.mediapipe:
@@ -239,7 +219,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
                 draw_pose(f, self._result_T)
 
-    def process_contours(self, f, contours, hier):
+    def process_contours(self, frame, contours, hier):
 
         if contours:
 
@@ -249,17 +229,17 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             for cnt in conts[:self.tracker.contour_limit]:
                 # TODO: perhaps scale the image here to 50%
                 # TODO: alternatives to paired
-                wall, rect = wall_images(f.copy(), cnt)  # TODO: add to config
-                distances = self.get_histograms(f, wall, rect, 'euclidean')
+                wall, rect = wall_images(frame.copy(), cnt)  # TODO: add to config
 
                 if self.has_analysis or self.has_symbols:
-                    self.tracked = self.tracker.track_objects(self.frame_id, cnt, hier, wall, rect)
+                    self.tracker.greyscale_frame  = self.greyscale_frame
+                    self.tracked = self.tracker.track_objects(self.frame_id, frame, cnt, hier, wall, rect)
                     if self.tracked:
-                        print_tracked(self.has_analysis, self.has_symbols, f, self.tracked, rect)
-                        print_symbology(self.has_symbols, f, rect, self.has_motion, self.majic_color)
-                    print_analytics(self.has_analysis, f, cnt, hier)
+                        print_tracked(self.has_analysis, self.has_symbols, frame, self.tracked, rect)
+                        print_symbology(self.has_symbols, frame, rect, self.has_motion, self.majic_color)
+                    print_analytics(self.has_analysis, frame, cnt, hier)
 
-            self.post_mediapipe(f)
+            self.post_mediapipe(frame)
 
             if self.had_motion != self.has_motion is True:
                 if self.throttle.handle('motion'):
