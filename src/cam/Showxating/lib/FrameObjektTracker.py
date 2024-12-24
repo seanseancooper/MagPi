@@ -21,12 +21,12 @@ class FrameObjektTracker:
         self.config = {}
 
         self.f_limit = 2                    # hyperparameter: max age of frames in o_cache_map.
-        self.frm_delta_pcnt = 1.00          # hyperparameter: percentage of delta between the current and previous frames over all pixels in frame
+        self.f_delta_pcnt = 1.00            # hyperparameter: percentage of delta between the current and previous frames over all pixels in frame
         self.contour_limit = None           # number of contours evaluated by plugin in each pass
         self.contours = None                # ????
         self.contour_id = None              # ????
         self.tracked = {}                   # mapping of FrameObjekts over last 'f_limit' frames.
-
+        self.greyscale_frame  = None
         self._ml = []                       # DO NOT CHANGE: list of (x,y) location of contour in self.contours
         self._frame_delta = float()         # DO NOT CHANGE: euclidean distance between the current and previous frames
         self._frame_deltas = []             # DO NOT CHANGE: list of previous distances over last f_limit frames
@@ -43,7 +43,7 @@ class FrameObjektTracker:
         return {
             "f_id": self.f_id,                      # current frame id
             "f_limit": self.f_limit,                # hyperparameter: max age of frames in o_cache_map.
-            "frm_delta_pcnt": self.frm_delta_pcnt,  # hyperparameter: percentage of delta between the current and previous frames over all pixels in frame
+            "frm_delta_pcnt": self.f_delta_pcnt,  # hyperparameter: percentage of delta between the current and previous frames over all pixels in frame
             "contour_limit": self.contour_limit,    # number of contours evaluated by plugin in each pass
             "tracked": self.tracked,                # mapping of FrameObjekts over last 'f_limit' frames.
 
@@ -64,14 +64,14 @@ class FrameObjektTracker:
             if self.f_limit < 1:
                 self.f_limit = 1
 
+            self.f_delta_pcnt = float(self.config['TRACKER']['f_delta_pcnt'])
+            if self.f_delta_pcnt > 1.0:
+                print(f'bad frm_delta_pcnt: (should be <= 1.0)')
+                exit(1)
+
             self.contour_limit = int(self.config['TRACKER'].get('contour_limit', None))
             if self.contour_limit == 0:
                 print(f'contour_limit warning: (contour_limit should be > 0 or "None" for all contours)')
-
-            self.frm_delta_pcnt = float(self.config['TRACKER']['frm_delta_pcnt'])
-            if self.frm_delta_pcnt > 1.0:
-                print(f'bad frm_delta_pcnt: (should be <= 1.0)')
-                exit(1)
 
         except ValueError:
             print(f'bad value: (should be numeric)')
@@ -192,7 +192,30 @@ class FrameObjektTracker:
 
         return labeled
 
-    def track_objects(self, f_id, contour, hierarchy, wall, rectangle):
+    def get_histograms(self, frame, wall, rectangle, metric):
+        from src.cam.Showxating.ShowxatingHistogramPlugin import ShowxatingHistogramPlugin
+
+        hist_plugin = ShowxatingHistogramPlugin()
+        hist_plugin.plugin_name = 'histogramPlugin'
+        hist_plugin.get_config()
+        hist_plugin.f_id = self.f_id
+        hist_plugin._kz = (3,3) # self.kernel_sz
+        hist_plugin.library = 'cv'  # TODO: add to configurable
+        hist_plugin.greyscale_frame = self.greyscale_frame
+        hist_plugin.rectangle = rectangle
+
+        # gaussian kernel pre processing
+        f_hist = hist_plugin.make_histogram(frame, rectangle)
+        w_hist = hist_plugin.make_histogram(wall, rectangle)
+
+        if self.config['PLUGIN'].get('color_histograms', False):
+            dists = hist_plugin.compare_hist(f_hist, w_hist, metric=metric)
+        else:
+            dists = hist_plugin.compare_hist(f_hist['greyscale'], w_hist['greyscale'], metric=metric)
+
+        return dists
+
+    def track_objects(self, f_id, frame, contour, hierarchy, wall, rectangle):
         """
         LEARNINGS:
         Not all moving things should be tracked; this is very sensitive to minute changes in light, and not all movement is relevant.
@@ -202,6 +225,7 @@ class FrameObjektTracker:
         self.f_id = f_id
         self.contours = contour
         self.contour_id = str(uuid.uuid4()).split('-')[0]
+        distances = self.get_histograms(frame, wall, rectangle, 'euclidean')
 
         self._ml = self.get_mean_location(self.contours)  # = c_grps_locs[grp_ident]
 
@@ -222,7 +246,7 @@ class FrameObjektTracker:
 
                 o.fd = self._frame_delta                                    # delta of wall image to current f
                 self.fd_mean = np.mean(self._frame_deltas)                  # a float,
-                self.d_range = self.frm_delta_pcnt * self.fd_mean           # percentage of px difference
+                self.d_range = self.f_delta_pcnt * self.fd_mean           # percentage of px difference
 
                 # does this f match the previous f
                 # and thus the previous tag? make an
