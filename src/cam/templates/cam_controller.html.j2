@@ -302,7 +302,7 @@
                 ⊞:&nbsp;<span id="cam_slider_krnl_output">{{ plugin.krnl }}</span>
             <br>
                 ƒL:&nbsp;<span id="cam_slider_f_limit_output">{{ plugin.tracker.f_limit }}</span>
-                ƒ%:&nbsp;<span id="cam_slider_frm_delta_pcnt_output">{{ "{:.2f}".format(plugin.tracker.frm_delta_pcnt) }}</span>
+                ƒ%:&nbsp;<span id="cam_slider_frm_delta_pcnt_output">{{ "{:.2f}".format(plugin.tracker.f_delta_pcnt) }}</span>
             <br>
                 <span id="crop_output" class="cam_slider_crop_stats">x:0 y:0 w:0 h:0</span>
         </div>
@@ -322,7 +322,7 @@
             ƒL<br><input id="cam_slider_f_limit_input" style="" class="cam_slider" orient="vertical" type="range" min="1" max="60" step="1" value="{{ plugin.tracker.f_limit }}" onChange="handleSlider(this);"/>
         </div>
         <div id="cam_slider_frm_delta_pcnt" style="position:absolute;top:0px;left:100px;">
-            ƒ%<br><input id="cam_slider_frm_delta_pcnt_input" style="" class="cam_slider" orient="vertical" type="range" min="0.00" max="100.00" step="0.01" value="{{ plugin.tracker.frm_delta_pcnt | float }}" onChange="handleSlider(this);"/>
+            ƒ%<br><input id="cam_slider_frm_delta_pcnt_input" style="" class="cam_slider" orient="vertical" type="range" min="0.00" max="100.00" step="0.01" value="{{ plugin.tracker.f_delta_pcnt | float }}" onChange="handleSlider(this);"/>
         </div>
     </span>
 </div>
