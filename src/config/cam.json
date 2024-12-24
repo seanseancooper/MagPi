@@ -12,40 +12,68 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
-			"FORE_VIDEO_URL_" : "http://10.99.77.1/blackvue_live.cgi"
+			"DATETIME_FORMAT": "%Y%m%d_%H%M%S"
 		},
 		{
-			"AFT_VIDEO_URL_" : "http://10.99.77.1/blackvue_live.cgi?direction=R"
+			"DATE_FORMAT": "%Y-%m-%d %H:%M:%S.%f"
 		},
 		{
-			"FORE_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPiExternal/rsrc/cam/training_data/test_movies/cam.mp4"
+			"TIME_FORMAT": "%H%M%S"
 		},
 		{
-			"AFT_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPiExternal/rsrc/cam/training_data/test_movies/cam.mp4"
+			"PLUGIN_NAME" : "blackviewPlugin"
 		},
 		{
-			"FORWARD_TEST_URL" : ""
+			"PLUGIN": {
+				"capture_output_show_stats": false,
+				"capture_output_log_stats": false,
+				"capture_majic_pixel": [10, 110],
+
+				"FORE_VIDEO_URL_" : "http://10.99.77.1/blackvue_live.cgi",
+				"AFT_VIDEO_URL_" : "http://10.99.77.1/blackvue_live.cgi?direction=R",
+				"FORE_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPiExternal/rsrc/cam/training_data/test_movies/cam.mp4",
+				"AFT_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPiExternal/rsrc/cam/training_data/test_movies/cam.mp4",
+				"FORWARD_TEST_URL" : "",
+
+				"plugin_process_frames": true,
+				"krnl": 17,
+				"threshold": 15.0,
+				"hold_threshold_max": 5,
+
+				"streams": true,
+				"streaming_host": "localhost",
+				"streaming_port": 6100,
+				"streaming_path": "/stream",
+
+				"outfile_path": "../../_out",
+				"outfile_name": "cam_snap",
+				"write_mp4": false,
+
+				"color_histograms": false,
+				"bins": 32,
+				"library": "cv",
+
+				"debug": false
+			}
 		},
 		{
-			"PLUGIN_NAME" : "blackview_test_vis"
+			"TOKENBUCKET": {
+				"tokens": 2,
+				"interval": 60
+			}
+		},
+		{
+			"TRACKER": {
+				"f_limit": 2,
+				"f_delta_pcnt": 1.0,
+				"contour_limit": 2
+			}
 		},
 		{
 			"OPENCV_FFMPEG_CAPTURE_OPTIONS" : "flags;low_delay;live;framedrop|probesize;32|analyzeduration;0|sync;ext|sn|hide_banner|rtsp_transport;tcp|loglevel;debug "
 		},
 		{
 			"OPENCV_FFMPEG_WRITER_OPTIONS" : "loglevel;debug"
-		},
-		{
-			"MOTION_CPANEL_URL" : "http://192.168.1.4:8080"
-		},
-		{
-			"MOTION_CPANEL_URL" : "http://192.168.1.4:8080"
-		},
-		{
-			"MOTION_ALERT_URL" : "http://192.168.1.4:9046"
-		},
-		{
-			"MOTION_IMAGES_DIR": "/tmp/motion"
 		},
 		{
 			"MULTIBUTTON_OFF": [false, false, "SYM"]
@@ -58,88 +86,6 @@
 		},
 		{
 			"MULTIBUTTON_ALL": [true, true, "OFF"]
-		},
-		{
-			"DATETIME_FORMAT": "%Y%m%d_%H%M%S"
-		},
-		{
-			"DATE_FORMAT": "%Y-%m-%d %H:%M:%S.%f"
-		},
-		{
-			"TIME_FORMAT": "%H%M%S"
-		},
-		{
-			"OUTFILE_PATH": "../../_out"
-		},
-		{
-			"OUTFILE_NAME": "cam_snap"
-		},
-		{
-			"PLUGINS": [
-				{	"capture_param_capture_width": 704,
-					"capture_param_capture_height": 480,
-					"capture_output_show_time": false,
-					"capture_output_show_stats": false,
-					"capture_output_log_stats": false,
-					"color_histograms": false,
-					"plugin_process_frames": true,
-					"plugin_process_copies": false,
-					"plugin_displays": false,
-					"display_proc_stats": false,
-					"log_proc_stats": false,
-					"display_rect_stats": false,
-					"log_rect_stats": false,
-					"streams": true,
-					"streaming_host": "localhost",
-					"streaming_port": 6100,
-					"streaming_path": "/stream",
-					"write_mp4": false,
-					"plugin_cv_color": "255, 255, 255",
-					"plugin_majic_pixel": [10, 110],
-					"hold_threshold_max": 5,
-					"tokens": 2,
-					"interval": 60,
-					"debug": false,
-					"fifo_path": "/+broadcast.pipe",
-					"asset_classes": [
-						{"cascade": "plugin_cascade_xml" }
-					],
-					"cascade": [
-						{"plugin_cascade_xml": "haarcascade_frontalface_alt.xml"},
-						{"plugin_cascade_scaleFactor": 1.01},
-						{"plugin_cascade_minNeighbors": 3},
-						{"plugin_cascade_minSize": "50,50"},
-						{"plugin_cascade_maxSize": "500, 500"},
-						{"plugin_cascade_flags": "cv.CASCADE_SCALE_IMAGE"}
-					]
-				},
-				{	"asset_classes": {},
-					"capture_is_image": false,
-					"capture_is_null": false,
-					"capture_output_log_stats": false,
-					"capture_output_show_stats": false,
-					"capture_param_capture_height": 480,
-					"capture_param_capture_width": 704,
-					"display_proc_stats": false,
-					"display_rect_stats": false,
-					"log_proc_stats": false,
-					"log_rect_stats": false,
-					"next_plugin_class": "",
-					"next_plugin_name": "",
-					"plugin_cv_color": "0, 0, 0",
-					"plugin_displays": true,
-					"plugin_process_copies": false,
-					"plugin_process_frames": false,
-					"write_mp4": false
-				}
-			]
-		},
-		{
-			"TRACKER": {
-				"f_limit": 2,
-				"frm_delta_pcnt": 1.0,
-				"contour_limit": 2
-			}
 		}
 	]
 }
