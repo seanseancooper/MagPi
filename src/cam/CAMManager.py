@@ -42,9 +42,9 @@ class CAMManager(threading.Thread):
         self.plugin.get_config()
 
     def cam_direction(self, direction):
-        if not str(self.config['FORWARD_TEST_URL']) > '':
-            return self.config[direction.upper() + '_VIDEO_URL']
-        return self.config['FORWARD_TEST_URL']
+        if not str(self.config['PLUGIN']['FORWARD_TEST_URL']) > '':
+            return self.config['PLUGIN'][direction.upper() + '_VIDEO_URL']
+        return self.config['PLUGIN']['FORWARD_TEST_URL']
 
     def cam_reload(self, direction):
         self.plugin.stop()
