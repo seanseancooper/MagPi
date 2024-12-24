@@ -17,15 +17,18 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
     def __init__(self):
         super().__init__()
         self.f_id = 0
+        self._kz = (3,3)
+        self.library = ''
+        self.bins = 32
         self.rectangle = []
         self.greyscale_frame = None
-        self.bins = 32          # TODO: make configurable
         self.out_data = {}
 
-        self.library = ''
-
     def get_config(self):
-        return super().get_config()
+        super().get_config()
+        # self._kz = self.plugin_config('krnl')
+        self.bins = self.plugin_config.get('bins', 32)
+        self.library = self.plugin_config.get('library', 'cv')
 
     def make_histogram(self, item, rect):
 
@@ -36,47 +39,43 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
         _ = self.process_frame(f).T
         return self.out_data
 
-    @staticmethod
-    def compare_hist(a, b, metric):
-        distances = []
-        # use our MSE here, add to if
-        if metric == 'euclidean':
-            distances = euclidean_distances(a, b)
-        elif metric == 'paired':
-            distances = paired_distances(a, b)
-        return distances
+    def compare_hist(self, a, b, metric):
 
-    @staticmethod
-    def compare_color_hist(a, b, metric):
-        distances = []
-        # use our MSE here
-        if metric == 'euclidean':
-            distances = [euclidean_distances(a[i], b[i]) for i in ['b', 'g', 'r']]
-        elif metric == 'paired':
-            distances = [paired_distances(a[i], b[i]) for i in ['b', 'g', 'r']]
-        return distances
+        if self.plugin_config['color_histograms']:
+            colors = ['b', 'g', 'r']
+            for i in range(len(a)):
+                if metric == 'euclidean':
+                    return euclidean_distances(a[colors[i]], b[colors[i]])
+                elif metric == 'paired':
+                    return paired_distances(a[colors[i]], b[colors[i]])
+        else:
+            if metric == 'euclidean':
+                return euclidean_distances(a, b)
+            elif metric == 'paired':
+                return paired_distances(a, b)
 
     def process_frame(self, f):
         """This method takes as frame, analyzes it and returns the analyzed frame"""
 
         if self.plugin_process_frames:
 
-            # TODO: resize & kernel trick. these don't need to be so big.
-            f = cv.GaussianBlur(f,(5,5),0)
-
             def get_hist(f):
                 if self.library == 'cv':
                     # images, channels, mask, histSize, ranges[, hist[, accumulate]]
                     return cv.calcHist([f], [0], None, [self.bins], [0, 256], accumulate=False)
                 else:
+                    # If channel_axis is not set, the histogram is computed on the flattened image.
                     return exposure.histogram(f, nbins=self.bins, channel_axis=0)
+
+            # kernel size from plugin UI
+            f = cv.GaussianBlur(f, self._kz, 0)
 
             if self.plugin_config['color_histograms']:
                 colors = ['b', 'g', 'r']
                 _, _, ch = f.shape
                 for i in range(ch):
                     try:
-                        self.out_data[colors[i]] = np.zeros(shape=(32,1))
+                        self.out_data[colors[i]] = np.zeros(shape=(self.bins, 1))
                         self.out_data[colors[i]] = get_hist(f[i])
                     except Exception: pass
             else:
