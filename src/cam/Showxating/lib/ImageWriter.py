@@ -14,14 +14,14 @@ class ImageWriter:
 
     def write(self, writer_name: str, frame):
         readConfig('cam.json', self.config)
-        self.IMAGE_OUT = self.config['OUTFILE_PATH']
+        self.IMAGE_OUT = self.config['PLUGIN'].get('outfile_path', '../_out')
         if writer_name:
             PATH = os.path.join(os.getcwd(), self.IMAGE_OUT, self.writer_name)
             if not os.path.exists(PATH):
                 os.makedirs(PATH)
 
             NOW = datetime.now().strftime(self.config['DATETIME_FORMAT'])
-            self.OUTFILE_NAME = os.path.join(PATH, NOW + '_' + self.config['OUTFILE_NAME'] + '.jpg')
+            self.OUTFILE_NAME = os.path.join(PATH, NOW + '_' + self.config['PLUGIN'].get('outfile_name', 'cam_snap') + '.jpg')
 
             cv.imwrite(self.OUTFILE_NAME, frame)
 
