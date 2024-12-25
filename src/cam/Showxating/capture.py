@@ -100,6 +100,11 @@ class ShowxatingCapture:
                 self.statistics['capture_start_time'] = start_time
                 self.statistics['capture_frame_rate'] = self.capture_frame_rate
                 self.statistics['capture_frame_period'] = round(time.monotonic() - proc_start, 4)
+
+                if self.plugin_config['capture_sleep_time'] > 0.0:
+                    z = self.plugin_config['capture_sleep_time'] - self.statistics['capture_frame_period']
+                    time.sleep(z)
+
                 self.statistics['capture_frame_id'] = self.f_id
                 self.statistics['capture_frame_shape'] = frame.shape
                 self.statistics['capture_majic_color'] = self.highlight(frame, self.plugin_config.get('capture_majic_pixel', [10, 110]))

@@ -25,6 +25,7 @@
 		},
 		{
 			"PLUGIN": {
+				"capture_sleep_time": 0.07,
 				"capture_output_show_stats": false,
 				"capture_output_log_stats": false,
 				"capture_majic_pixel": [10, 110],
@@ -49,7 +50,7 @@
 				"outfile_name": "cam_snap",
 				"write_mp4": false,
 
-				"color_histograms": false,
+				"color_histograms": true,
 				"bins": 32,
 				"library": "cv",
 
@@ -65,7 +66,8 @@
 		{
 			"TRACKER": {
 				"f_limit": 2,
-				"f_delta_pcnt": 1.0,
+				"f_delta_pcnt": 0.1,
+				"l_delta_pcnt": 0.5,
 				"contour_limit": 2
 			}
 		},
