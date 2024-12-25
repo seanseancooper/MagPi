@@ -21,7 +21,8 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
         self.library = ''
         self.bins = 32
         self.rectangle = []
-        self.greyscale_frame = None
+        self.compare_method = None
+        self.norm_type = None
         self.out_data = {}
 
     def get_config(self):
@@ -30,29 +31,26 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
         self.bins = self.plugin_config.get('bins', 32)
         self.library = self.plugin_config.get('library', 'cv')
 
-    def make_histogram(self, item, rect):
+    def get_histogram(self, item, rect):
 
         x, y, w, h = self.rectangle = rect
         f = item[y:y + h, x:x + w]
-        self.out_data = {'b': [],'g': [],'r': []}
+        self.out_data = {'b': [], 'g': [], 'r': []}
 
-        _ = self.process_frame(f).T
-        return self.out_data
+        return self.process_frame(f).T
 
-    def compare_hist(self, a, b, metric):
-
-        if self.plugin_config['color_histograms']:
+    def normalize_channels(self, hist):
+        if True:
             colors = ['b', 'g', 'r']
-            for i in range(len(a)):
-                if metric == 'euclidean':
-                    return euclidean_distances(a[colors[i]], b[colors[i]])
-                elif metric == 'paired':
-                    return paired_distances(a[colors[i]], b[colors[i]])
-        else:
-            if metric == 'euclidean':
-                return euclidean_distances(a, b)
-            elif metric == 'paired':
-                return paired_distances(a, b)
+            for i in range(len(colors)):
+                try:
+                    cv.normalize(hist[colors[i]], hist[colors[i]], alpha=0, beta=1, norm_type=self.norm_type)
+                except Exception:
+                    pass
+
+    def compare_hist(self, a, b):
+        return cv.compareHist(a, b, self.compare_method)
+
 
     def process_frame(self, f):
         """This method takes as frame, analyzes it and returns the analyzed frame"""
@@ -67,22 +65,7 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
                     # If channel_axis is not set, the histogram is computed on the flattened image.
                     return exposure.histogram(f, nbins=self.bins, channel_axis=0)
 
-            # kernel size from plugin UI
-            f = cv.GaussianBlur(f, self._kz, 0)
-
-            if self.plugin_config['color_histograms']:
-                colors = ['b', 'g', 'r']
-                _, _, ch = f.shape
-                for i in range(ch):
-                    try:
-                        self.out_data[colors[i]] = np.zeros(shape=(self.bins, 1))
-                        self.out_data[colors[i]] = get_hist(f[i])
-                    except Exception: pass
-            else:
-                # get a slice
-                br_x, br_y, br_w, br_h = self.rectangle
-                greyscale_f = self.greyscale_frame[br_y:br_y + br_h, br_x:br_x + br_w]
-                self.out_data['greyscale'] = get_hist(greyscale_f)
+            return get_hist(f)
 
         return f
 
