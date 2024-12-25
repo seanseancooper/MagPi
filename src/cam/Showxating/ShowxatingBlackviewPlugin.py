@@ -57,14 +57,16 @@ def print_tracked(has_analysis, has_symbols, f, t, rect):
             y = o.ml[1]
             item = f'{o.contour_id}-{o.tag[-12:]} [{x},{y}]'
             pt = x, y
-            if rect and is_inside(pt, rect):
+            # if rect and is_inside(pt, rect):
+            if rect and not o.is_negative:
                 # yellow dot: items being tracked
                 cv.putText(f, item, (x, (y + (i * 10))), cv.FONT_HERSHEY_PLAIN, .75, (0, 255, 255), 1)
                 cv.rectangle(f, (x, y), (x+5, y+5), (0, 255, 255), -1)
             else:
-                # red dot: mean location fails...
-                cv.putText(f, item, (x, (y + (i * 10))), cv.FONT_HERSHEY_PLAIN, .75, (0, 0, 255), 1)
-                cv.rectangle(f, (x, y), (x+5, y+5), (0, 0, 255), -1)
+                # red dot: tests false.
+                # cv.putText(f, item, (x, (y + (i * 10))), cv.FONT_HERSHEY_PLAIN, .75, (0, 0, 255), 1)
+                # cv.rectangle(f, (x, y), (x+5, y+5), (0, 0, 255), -1)
+                pass
 
     if has_analysis:
         for w, _ in enumerate([x for x in t][:1], 1):
