@@ -22,17 +22,20 @@ class FrameObjekt:
         self.curr_dist = 0                                              # [int32: object tracking] euclidean_distance wrt previous mean x, y location
         self.distances = np.zeros(shape=[1, 1], dtype=np.float64)     # [list([1,1]): object location] of previous euclidean_distances wrt previous mean x, y locations.
         self.fd = float()                                               # [float: reporting] euclidean_distance wrt previous frame analysis area
+        self.hist_delta = float()                                       # [float: reporting] histogram distance wrt previous frame analysis area
         self.rect = None                                                # [tuple {x, y, w, h}: object segmentation] bounding rects of contours in this frame
         self.ml = np.ndarray(shape=[2,], dtype=np.int32)                # [tuple {x,y}: object segmentation] mean x, y location of *this* contour
         self.md = float()                                               # mean of self.distances
         self.wall = None                                                # [ndarray: container] image of processed area in this frame
         self.close = None                                               # [boolean: reporting] is this mean location with the bounds of the contour?
         self.is_inside = None
+        self.is_negative = None
+        self.in_range = None
+
 
     @staticmethod
     def create(f_id):
         o = FrameObjekt(f_id)
-        o.tag = o.create_tag(f_id)
         return o
 
     def get(self):
