@@ -12,7 +12,7 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
-			"DATETIME_FORMAT": "%Y%m%d_%H%M%S"
+			"DATETIME_FORMAT": "%Y%m%d_%H%M%S_%f"
 		},
 		{
 			"DATE_FORMAT": "%Y-%m-%d %H:%M:%S.%f"
@@ -25,7 +25,8 @@
 		},
 		{
 			"PLUGIN": {
-				"capture_sleep_time": 0.0,
+				"capture_sleep_time": 0.2,
+				"write_all_frames": true,
 				"capture_output_show_stats": false,
 				"capture_output_log_stats": false,
 				"capture_majic_pixel": [10, 110],

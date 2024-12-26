@@ -12,7 +12,7 @@ class ImageWriter:
         self.OUTFILE_NAME = None
         self.config = {}
 
-    def write(self, writer_name: str, frame):
+    def write(self, writer_name: str, frame, f_id=None):
         readConfig('cam.json', self.config)
         self.IMAGE_OUT = self.config['PLUGIN'].get('outfile_path', '../_out')
         if writer_name:
@@ -21,8 +21,12 @@ class ImageWriter:
                 os.makedirs(PATH)
 
             NOW = datetime.now().strftime(self.config['DATETIME_FORMAT'])
-            self.OUTFILE_NAME = os.path.join(PATH, NOW + '_' + self.config['PLUGIN'].get('outfile_name', 'cam_snap') + '.jpg')
+            filename = f"{NOW}_{self.config['PLUGIN'].get('outfile_name', 'cam_snap')}.jpg"
 
+            if f_id is not None:
+                filename = f"{str(f_id)}_{filename}"
+
+            self.OUTFILE_NAME = os.path.join(PATH, filename)
             cv.imwrite(self.OUTFILE_NAME, frame)
 
         return True

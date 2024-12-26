@@ -1,3 +1,5 @@
+import time
+
 import cv2 as cv
 import numpy as np
 import json
@@ -86,7 +88,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self._max_width = slice(0, 704)     # view width, not 'step'
 
         self.has_symbols = True
-        self.has_analysis = False
+        self.has_analysis = True
 
         self.has_motion = False
         self.had_motion = False
@@ -178,18 +180,19 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             f[self._max_height, self._max_width] = cv.cvtColor(t, cv.COLOR_GRAY2BGR)
             self.hold_threshold -= 1
 
-    def cam_snap(self):
+    def cam_snap(self, frame, f_id=None):
 
-        # TOdO: do not open a new capture for this, get the f
-
-        def _snap(frame):
-            if frame is not None:
+        def _snap(f):
+            if f is not None:
                 writer = ImageWriter("CAMManager")
-                writer.write("CAM_SNAP", frame)
+                writer.write("CAM_SNAP", f, f_id)
 
-        for frame in self.plugin_capture.run():
+        if f_id is not None:
             _snap(frame)
-            break
+        else:
+            for frame in self.plugin_capture.run():
+                _snap(frame)
+                break
 
         return "OK"
 
@@ -240,6 +243,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                         print_tracked(self.has_analysis, self.has_symbols, frame, self.tracked, rect)
                         print_symbology(self.has_symbols, frame, rect, self.has_motion, self.majic_color)
                     print_analytics(self.has_analysis, frame, cnt, hier)
+                    if self.plugin_config['write_all_frames']:
+                        self.cam_snap(frame, self.frame_id)
 
             self.post_mediapipe(frame)
 
