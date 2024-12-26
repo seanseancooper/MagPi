@@ -166,40 +166,42 @@ class FrameObjektTracker:
             o1.rect = rectangle  # NOW WE GET A RECT.
             o1.wall = wall                               # the current wall is my wall.
 
+            o1.contour_id = self.contour_id
             o1.ml = self._ml
             o1.isNew = True
 
-            o1.contour_id = self.contour_id
             # contours are sorted, first p_ml is 'largest' contour
             o1.distances = euclidean_distances(np.array([self._ml], dtype=int), np.array([p_ml[0]], dtype=int).reshape(1, -1))
             o1.md = np.mean(o1.distances)
-            # popitem removes; is that really what we want?
-            o1.prev_tag = str(list(self.tracked.keys())[0])                 # find the last thing with a tag, if not expired already ("when?", f_limit). LEAVE IT IN THERE!
-            o1.curr_dist = int(o1.distances[0])
 
+            o1.curr_dist = int(o1.distances[0])
+            o1.prev_tag = str(list(self.tracked.keys())[0])                 # find the last thing with a tag, if not expired already ("when?", f_limit). LEAVE IT IN THERE!
             o1.tag = o1.create_tag(self.f_id)
+
             o1.is_inside = is_inside(o1.ml, o1.rect)
             o1.close = is_in_range(o1.curr_dist, o1.md, self.l_delta_pcnt * o1.md)
 
+
+
+
+
+
             if o1.is_inside and not o1.is_negative:
-                # NEW item.
+                # 22 NEW item.
                 self.print_frame(o1, "N1:")
+
             else:
-                # NEW item not in focus
+                # 10 NEW item out of focus
                 self.print_frame(o1, "X1:")
 
-            if is_in_range(o1.curr_dist, o1.md, .10 * o1.md):
-                # changed focus
-                self.print_frame(o1, "!1:")
-
-            elif not o1.is_inside and o1.is_negative and o1.close:
-                # not inside rect and doesn't match, but close -- don't label,
-                self.print_frame(o1, "!C:")
-                return labeled
-            elif not o1.is_inside and o1.is_negative:
-                # not inside rect and doesn't match -- don't label
-                self.print_frame(o1, "!X:")
-                return labeled
+            # elif not o1.is_inside and o1.is_negative and o1.close:
+            #     # NONE not inside rect and doesn't match, but close -- don't label,
+            #     self.print_frame(o1, "!C:")
+            #     return labeled
+            # elif not o1.is_inside and o1.is_negative:
+            #     # NONE not inside rect and doesn't match -- don't label
+            #     self.print_frame(o1, "!X:")
+            #     return labeled
             # speech_logger.info('NEW')
             labeled.append(o1)
 
@@ -208,7 +210,7 @@ class FrameObjektTracker:
             oN.rect = rectangle  # NOW WE GET A RECT.
             oN.wall = wall                               # the current wall is my wall.
 
-            oN.contour_id = self.contour_id
+            # oN.contour_id = self.contour_id
             oN.ml = self._ml
             oN.isNew = False  # could be reset!
 
@@ -219,34 +221,36 @@ class FrameObjektTracker:
             # I think this is wrong; criteria should add:
             # if distance from the closest is > the bounds of the current rect, it is new.
             # this should choose the closest item within the bounds of it's rect.
-            idx = np.argmin(oN.distances)                                # the item in the array representing the minimum euclidean distance to the current location
+            idx = np.argmin(oN.distances)                                 # the item in the array representing the minimum euclidean distance to the current location
+
             oN.curr_dist = float(oN.distances[idx])                       # distance from last location
-
-            oN.prev_tag = str(list(self.tracked.keys())[idx])            # target tag; may not be the right tag
+            oN.prev_tag = str(list(self.tracked.keys())[idx])             # target tag; may not be the right tag
             oN.tag = f"{self.f_id}_{oN.prev_tag.split('_')[1]}"           # THIS IS A GUESS
-            # did o suddenly appear?
 
+            # did o suddenly appear?
             # is the current ml inside the current rect? THIS SHOULD ALWAYS BE TRUE
             # if so -- this is MY RECTANGLE, otherwise ths  is indicative of some other contour.
             oN.is_inside = is_inside(oN.ml, oN.rect)
-
             # is the current distance within a range of the
             # median of distances for the last thing with a tag?
             # if NOT, then this is the wrong rect, use the tag of the previous
             # is the current distance larger than the width of the thing??
             oN.close = is_in_range(oN.curr_dist, oN.md, self.l_delta_pcnt * oN.md)
-
             # euclidean distance of the wall histograms
             # observation: this goes negative periodically, apparently
             # on tags that might be in the set of things
             # we don't want. it *often* precedes a tag that has
             # a 'higher' percentage.
 
+
+
+
             oN.hist_delta = self.get_histogram_delta(self.tracked.get(oN.prev_tag).wall, wall, rectangle)
 
             oN.is_negative = False
             if Decimal.from_float(oN.hist_delta).is_signed():
                 oN.is_negative = True
+
 
             # pairwise distance to the previous wall image
             X = self.make_grey_data(self.tracked.get(oN.prev_tag).wall, rectangle)
@@ -265,22 +269,26 @@ class FrameObjektTracker:
             # and thus the previous tag? make an
             # evaluation based on delta between frames.
 
+
+
+
+
             if is_in_range(oN.curr_dist, oN.md, .10 * oN.md):
-                # changed focus
+                # 352 momentary change in focus
                 self.print_frame(oN, "!N:")
 
             if oN.is_inside and not oN.is_negative:
-                # continuation
+                # 1171 continuations
                 self.print_frame(oN, "   ")
 
-            elif not oN.is_inside and oN.is_negative and oN.close:
-                # not inside rect and doesn't match, but close -- don't label,
-                self.print_frame(oN, "CN:")
-                return labeled
-            elif not oN.is_inside and oN.is_negative:
-                # not inside rect and doesn't match -- don't label
-                self.print_frame(oN, "XN:")
-                return labeled
+            # elif not oN.is_inside and oN.is_negative and oN.close:
+            #     # NONE not inside rect and doesn't match, but close -- don't label,
+            #     self.print_frame(oN, "CN:")
+            #     return labeled
+            # elif not oN.is_inside and oN.is_negative:
+            #     # NONE not inside rect and doesn't match -- don't label
+            #     self.print_frame(oN, "XN:")
+            #     return labeled
 
             labeled.append(oN)
 
