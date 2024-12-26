@@ -91,6 +91,13 @@ class FrameObjektTracker:
         aged_o = [o for o in self.tracked if self.tracked.get(o).f_id < (self.f_id - self.f_limit)]
         [self.tracked.pop(o) for o in aged_o]
 
+    def clear_cache(self, f_id):
+        if self.tracked:
+            last_frame = int(list(self.tracked.keys())[-1].split('_')[0])
+            if (f_id - last_frame) > self.f_limit:
+                self.tracked.clear()
+                print('cleared cache!')
+
     @staticmethod
     def make_grey_data(item, rectangle):
         wx, wy, ww, wh = rectangle
@@ -184,9 +191,24 @@ class FrameObjektTracker:
             o1.close = is_in_range(o1.curr_dist, o1.md, self.l_delta_pcnt * o1.md)
 
 
+            o1.hist_delta = self.get_histogram_delta(self.tracked.get(o1.prev_tag).wall, wall, rectangle)
 
+            o1.is_negative = False
+            if Decimal.from_float(o1.hist_delta).is_signed():
+                o1.is_negative = True
 
+            # pairwise distance to the previous wall image
+            X = self.make_grey_data(self.tracked.get(o1.prev_tag).wall, rectangle)
+            Y = self.make_grey_data(wall, rectangle)
+            self.set_frame_delta(X, Y)  # compare to current wall
 
+            o1.fd = self._frame_delta  # delta of wall image to current f
+            self.fd_mean = np.mean(self._frame_deltas)  # a float,
+            self.d_range = self.f_delta_pcnt * self.fd_mean  # percentage of px difference
+
+            o1.in_range = False
+            if is_in_range(o1.fd, self.fd_mean, self.d_range):
+                o1.in_range = True
 
             if o1.is_inside and not o1.is_negative:
                 # 22 NEW item.
@@ -196,15 +218,13 @@ class FrameObjektTracker:
                 # 10 NEW item out of focus
                 self.print_frame(o1, "X1:")
 
-            # elif not o1.is_inside and o1.is_negative and o1.close:
-            #     # NONE not inside rect and doesn't match, but close -- don't label,
-            #     self.print_frame(o1, "!C:")
-            #     return labeled
-            # elif not o1.is_inside and o1.is_negative:
-            #     # NONE not inside rect and doesn't match -- don't label
-            #     self.print_frame(o1, "!X:")
-            #     return labeled
-            # speech_logger.info('NEW')
+            if not o1.is_inside and o1.is_negative and o1.close:
+                # self.print_frame(o1, "!C:")
+                return labeled
+            elif not o1.is_inside and o1.is_negative:
+                # self.print_frame(o1, "!X:")
+                return labeled
+
             labeled.append(o1)
 
         if len(p_ml) > 1:
@@ -278,14 +298,22 @@ class FrameObjektTracker:
                 # 1171 continuations
                 self.print_frame(oN, "   ")
 
-            # elif not oN.is_inside and oN.is_negative and oN.close:
-            #     # NONE not inside rect and doesn't match, but close -- don't label,
-            #     self.print_frame(oN, "CN:")
-            #     return labeled
-            # elif not oN.is_inside and oN.is_negative:
-            #     # NONE not inside rect and doesn't match -- don't label
-            #     self.print_frame(oN, "XN:")
-            #     return labeled
+            # ARE THESE 'SHADOWS'? PAUSE PLAYBACK
+            if not is_in_range(oN.curr_dist, oN.md, .10 * oN.md) and not oN.is_inside:
+                # 17, RANDOM GLINTS AND SHADOWS:
+                # MAY OR MAY NOT
+                # FOLLOW X1, !N
+                # DUPLICATE X1, !N
+                # not inside rect and doesn't match, but close
+                # -- must label
+                self.print_frame(oN, "CN:")
+            elif not is_in_range(oN.curr_dist, oN.md, .10 * oN.md) and oN.is_negative:
+                # 21, RANDOM not inside rect and doesn't match
+                # SHADOW, GLINTS AND *NEW* ITEMS
+                # change conditional to see range in
+                # relation to prev_item.
+                # -- must label
+                self.print_frame(oN, "XN:")
 
             labeled.append(oN)
 

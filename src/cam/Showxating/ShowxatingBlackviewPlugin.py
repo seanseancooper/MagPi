@@ -256,6 +256,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         else:
             self.has_motion = False
             self.had_motion = False
+            self.tracker.clear_cache(self.frame_id)
 
     def process_frame(self, frame):
 
