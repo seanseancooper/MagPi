@@ -134,9 +134,9 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
     def get_config(self):
         super().get_config()
         self.tracker.configure()
-        # TODO: TokenBucket config
-        # self.throttle = TokenBucket(self.config['TOKENBUCKET'].get('tokens', 1), self.plugin_config['TOKENBUCKET'].get('interval', 60))
-        self.throttle = TokenBucket(1, 60)
+        self.throttle = TokenBucket(self.plugin_config['tokenbucket'].get('tokens', 1),
+                                    self.plugin_config['tokenbucket'].get('interval', 60)
+                                    )
         self.krnl = self.plugin_config.get('krnl', 10.0)
         self.threshold = self.plugin_config.get('threshold', 10.0)
 

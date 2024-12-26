@@ -59,25 +59,27 @@ class FrameObjektTracker:
         }
 
     def configure(self):
-        readConfig('cam.json', self.config)
+        tmp = {}
+        readConfig('cam.json', tmp)
+        self.config = tmp['PLUGIN']
 
         try:
-            self.f_limit = int(self.config['TRACKER'].get('f_limit', 1))
+            self.f_limit = int(self.config['tracker'].get('f_limit', 1))
             if self.f_limit < 1:
                 self.f_limit = 1
 
-            self.f_delta_pcnt = float(self.config['TRACKER']['f_delta_pcnt'])
+            self.f_delta_pcnt = float(self.config['tracker']['f_delta_pcnt'])
             if self.f_delta_pcnt > 1.0:
                 print(f'bad f_delta_pcnt: (should be <= 1.0)')
                 exit(1)
 
-            self.l_delta_pcnt = float(self.config['TRACKER']['l_delta_pcnt'])
+            self.l_delta_pcnt = float(self.config['tracker']['l_delta_pcnt'])
             if self.l_delta_pcnt > 1.0:
                 print(f'bad l_delta_pcnt: (should be <= 1.0)')
                 exit(1)
 
            # not implmented. yet...
-            self.contour_limit = int(self.config['TRACKER'].get('contour_limit', None))
+            self.contour_limit = int(self.config['tracker'].get('contour_limit', None))
             if self.contour_limit == 0:
                 print(f'contour_limit warning: (contour_limit should be > 0 or "None" for all contours)')
 
@@ -264,11 +266,6 @@ class FrameObjektTracker:
             oN.in_range = False
             if is_in_range(oN.fd, self.fd_mean, self.d_range):
                 oN.in_range = True
-
-            # does this f match the previous f
-            # and thus the previous tag? make an
-            # evaluation based on delta between frames.
-
 
 
 
