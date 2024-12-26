@@ -181,8 +181,26 @@ class FrameObjektTracker:
             o1.is_inside = is_inside(o1.ml, o1.rect)
             o1.close = is_in_range(o1.curr_dist, o1.md, self.l_delta_pcnt * o1.md)
 
-            self.print_frame(o1, "N1:")
-            speech_logger.info('NEW')
+            if o1.is_inside and not o1.is_negative:
+                # NEW item.
+                self.print_frame(o1, "N1:")
+            else:
+                # NEW item not in focus
+                self.print_frame(o1, "X1:")
+
+            if is_in_range(o1.curr_dist, o1.md, .10 * o1.md):
+                # changed focus
+                self.print_frame(o1, "!1:")
+
+            elif not o1.is_inside and o1.is_negative and o1.close:
+                # not inside rect and doesn't match, but close -- don't label,
+                self.print_frame(o1, "!C:")
+                return labeled
+            elif not o1.is_inside and o1.is_negative:
+                # not inside rect and doesn't match -- don't label
+                self.print_frame(o1, "!X:")
+                return labeled
+            # speech_logger.info('NEW')
             labeled.append(o1)
 
         if len(p_ml) > 1:
@@ -247,7 +265,23 @@ class FrameObjektTracker:
             # and thus the previous tag? make an
             # evaluation based on delta between frames.
 
-            self.print_frame(oN, "   ")
+            if is_in_range(oN.curr_dist, oN.md, .10 * oN.md):
+                # changed focus
+                self.print_frame(oN, "!N:")
+
+            if oN.is_inside and not oN.is_negative:
+                # continuation
+                self.print_frame(oN, "   ")
+
+            elif not oN.is_inside and oN.is_negative and oN.close:
+                # not inside rect and doesn't match, but close -- don't label,
+                self.print_frame(oN, "CN:")
+                return labeled
+            elif not oN.is_inside and oN.is_negative:
+                # not inside rect and doesn't match -- don't label
+                self.print_frame(oN, "XN:")
+                return labeled
+
             labeled.append(oN)
 
         if not labeled:                                             # nothing in cache.
