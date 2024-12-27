@@ -39,7 +39,7 @@ class FrameObjektTracker:
         self._frame_SSIM = float()
 
         self.fd_mean = float()              # mean of ALL differences between ALL SEEN frames -- no f_limit.
-        self.d_range = float()              # offset +/- allowed difference; frm_delta_pcnt * fd_mean
+        self.d_range = 90.00                # offset +/- allowed difference; frm_delta_pcnt * fd_mean
 
     def get(self):
         return {
@@ -137,23 +137,25 @@ class FrameObjektTracker:
             pass
 
     def print_frame(self, o, origin):
-        # print(f"{str(self.f_id)}\t{origin}{o.contour_id}-{str(o.tag[-12:])}\t"
         print(f"{self.f_id}"
               f"\t{origin}"
               f"\t{o.tag}"
               f"\to.avg_loc: {str(o.avg_loc)}"
-              f"\to.rect:{str(o.rect).ljust(10, ' ')}\t"
-              f"\to.fd_in_range: {o.wall_pass} "
-              f"\to.inside_rect: {o.inside_rect} "
-              f"\to.close: {o.close} "
-              f"\to.hist_pass: {o.hist_pass}"
+              f"\to.rect:{str(o.rect).ljust(10, ' ')}"
 
-              f"\tcurr_dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}"
-              f"\tdist_mean: {str(o.dist_mean.__format__('.4f')).ljust(3, ' ')}"
-              f"\tfd_mean: {str(o.fd_mean.__format__('.4f')).ljust(10, ' ')}"
-              f"\thist_delta: {o.hist_delta} "
-              f"\tMSE: {str(self._frame_MSE.__format__('.4f')).ljust(10, ' ')}"
-              )
+              # f"\tcurr_dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}"
+              # f"\tdist_mean: {str(o.dist_mean.__format__('.4f')).ljust(3, ' ')}"
+              
+              # f"\to.fd_in_range: {o.wall_pass}"
+              f"\to.inside_rect: {o.inside_rect}"
+
+              f"\tto.close: {o.close}"
+              f"\to.hist_pass: {o.hist_pass}"
+              f"\to.wall_pass: {o.wall_pass}"
+              # f"\tfd_mean: {str(o.fd_mean.__format__('.4f')).ljust(10, ' ')}"
+              # f"\thist_delta: {o.hist_delta} "
+              # f"\tMSE: {str(self._frame_MSE.__format__('.4f')).ljust(10, ' ')}"
+        )
 
     def init_o(self, wall, rectangle):
         o = FrameObjekt.create(self.f_id)
@@ -228,7 +230,7 @@ class FrameObjektTracker:
                 # 22 NEW item.
                 self.print_frame(o1, "N1:")
             else:
-                # 10 NEW item out of focus
+                # 10 continuation
                 self.print_frame(o1, "X1:")
 
             if not o1.inside_rect and o1.hist_pass and o1.close:
@@ -271,12 +273,8 @@ class FrameObjektTracker:
                 # 1171 continuations
                 self.print_frame(oN, "   ")
 
-            # ARE THESE 'SHADOWS'? PAUSE PLAYBACK
             if not is_in_range(oN.curr_dist, oN.dist_mean, .10 * oN.dist_mean) and not oN.inside_rect:
                 # 17, RANDOM GLINTS AND SHADOWS:
-                # MAY OR MAY NOT
-                # FOLLOW X1, !N
-                # DUPLICATE X1, !N
                 # not inside rect and doesn't match, but close
                 # -- must label
                 self.print_frame(oN, "CN:")
