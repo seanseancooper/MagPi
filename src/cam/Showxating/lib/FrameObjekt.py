@@ -22,15 +22,19 @@ class FrameObjekt:
         self.curr_dist = 0                                              # [int32: object tracking] euclidean_distance wrt previous mean x, y location
         self.distances = np.zeros(shape=[1, 1], dtype=np.float64)     # [list([1,1]): object location] of previous euclidean_distances wrt previous mean x, y locations.
         self.fd = float()                                               # [float: reporting] euclidean_distance wrt previous frame analysis area
+        self.fd_mean = float()
+        self.delta_range = float()
         self.hist_delta = float()                                       # [float: reporting] histogram distance wrt previous frame analysis area
         self.rect = None                                                # [tuple {x, y, w, h}: object segmentation] bounding rects of contours in this frame
-        self.ml = np.ndarray(shape=[2,], dtype=np.int32)                # [tuple {x,y}: object segmentation] mean x, y location of *this* contour
-        self.md = float()                                               # mean of self.distances
+        self.avg_loc = np.ndarray(shape=[2, ], dtype=np.int32)                # [tuple {x,y}: object segmentation] mean x, y location of *this* contour
+        self.dist_mean = float()                                               # mean of self.distances
+
         self.wall = None                                                # [ndarray: container] image of processed area in this frame
+
         self.close = None                                               # [boolean: reporting] is this mean location with the bounds of the contour?
-        self.is_inside = None
-        self.is_negative = None
-        self.in_range = None
+        self.inside_rect = None
+        self.hist_pass = None
+        self.wall_pass = None
 
 
     @staticmethod
@@ -39,13 +43,19 @@ class FrameObjekt:
         return o
 
     def get(self):
-        return {'f_id' : self.f_id,
-                'tag'      : self.tag,
-                'isNew'    : self.isNew,
-                'ml'       : self.ml,
-                'rect'     : self.rect,
-                'skip'     : self.skip,
-                'is_inside': self.is_inside,
+        return {'f_id'          : self.f_id,
+                'tag'           : self.tag,
+                'isNew'         : self.isNew,
+                'fd'            : self.fd,
+                'fd_mean'       : self.fd_mean,
+                'avg_loc'       : self.avg_loc,
+                'dist_mean'     : self.dist_mean,
+                'rect'          : self.rect,
+                'skip'          : self.skip,
+                'close'         : self.close,
+                'inside_rect'   : self.inside_rect,
+                'hist_pass'     : self.hist_pass,
+                'wall_pass'     : self.wall_pass,
                 }
 
     @staticmethod

@@ -96,7 +96,7 @@ class FrameObjektTracker:
             last_frame = int(list(self.tracked.keys())[-1].split('_')[0])
             if (f_id - last_frame) > self.f_limit:
                 self.tracked.clear()
-                print('cleared cache!')
+                print('cache cleared!')
 
     @staticmethod
     def make_grey_data(item, rectangle):
@@ -141,18 +141,56 @@ class FrameObjektTracker:
         print(f"{self.f_id}"
               f"\t{origin}"
               f"\t{o.tag}"
-              f"\to.curr_dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}"
-              f"\to.md: {str(o.md.__format__('.4f')).ljust(3, ' ')}"
-              f"\to.ml: {str(o.ml)}"
+              f"\to.avg_loc: {str(o.avg_loc)}"
               f"\to.rect:{str(o.rect).ljust(10, ' ')}\t"
-              f"\to.fd: {str(self.fd_mean.__format__('.4f')).ljust(10, ' ')}"
-              f"\tmse: {str(self._frame_MSE.__format__('.4f')).ljust(10, ' ')}"
-              f"\to.in_range: {o.in_range} "
-              f"\to.is_inside: {o.is_inside} "
+              f"\to.fd_in_range: {o.wall_pass} "
+              f"\to.inside_rect: {o.inside_rect} "
               f"\to.close: {o.close} "
-              f"\to.hist_delta: {o.hist_delta} "
-              f"\to.is_negative: {o.is_negative}"
-        )
+              f"\to.hist_pass: {o.hist_pass}"
+
+              f"\tcurr_dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}"
+              f"\tdist_mean: {str(o.dist_mean.__format__('.4f')).ljust(3, ' ')}"
+              f"\tfd_mean: {str(o.fd_mean.__format__('.4f')).ljust(10, ' ')}"
+              f"\thist_delta: {o.hist_delta} "
+              f"\tMSE: {str(self._frame_MSE.__format__('.4f')).ljust(10, ' ')}"
+              )
+
+    def init_o(self, wall, rectangle):
+        o = FrameObjekt.create(self.f_id)
+        o.rect = rectangle  # NOW WE GET A RECT.
+        o.wall = wall  # the current wall is my wall.
+
+        # oN.contour_id = self.contour_id
+        o.avg_loc = self._ml
+        o.isNew = False  # could be reset!
+        return o
+
+    def get_stats(self, o, wall, rectangle):
+
+        # is the current distance within a range of the
+        # median of distances for the last thing with a tag?
+        o.close = is_in_range(o.curr_dist, o.dist_mean, self.l_delta_pcnt * o.dist_mean)
+
+        # is the current ml inside the current rect? THIS SHOULD ALWAYS BE TRUE
+        # if so -- this is MY RECTANGLE, otherwise ths  is indicative of some other contour.
+        o.inside_rect = is_inside(o.avg_loc, o.rect)
+
+        # does this histogram match the previous one?
+        # euclidean distance of the wall histograms
+        # observation: this goes negative periodically
+        o.hist_delta = self.get_histogram_delta(self.tracked.get(o.prev_tag).wall, wall, rectangle)
+        o.hist_pass = not Decimal.from_float(o.hist_delta).is_signed()
+
+        # does this wall match the previous one?
+        # pairwise distance to the previous wall image
+        X = self.make_grey_data(self.tracked.get(o.prev_tag).wall, rectangle)
+        Y = self.make_grey_data(wall, rectangle)
+        self.set_frame_delta(X, Y)
+
+        o.fd = self._frame_delta  # delta of wall image to current f
+        o.fd_mean = np.mean(self._frame_deltas)
+        o.delta_range = self.f_delta_pcnt * o.fd_mean  # percentage of px difference
+        o.wall_pass = is_in_range(o.fd, o.fd_mean, self.d_range)
 
     def get_mean_location(self, contours):
         ''' aka 'basically where it is' get the average location of all the contours in the frame '''
@@ -167,78 +205,48 @@ class FrameObjektTracker:
 
         labeled = []
 
-        p_ml = [self.tracked.get(o_tag).ml for o_tag in list(self.tracked.keys())]  # get all previous mean_locations (if they exist)
+        p_ml = [self.tracked.get(o_tag).avg_loc for o_tag in list(self.tracked.keys())]  # get all previous mean_locations (if they exist)
 
         if len(p_ml) == 1:
             # NEW TAG for a different thing; there is only one
-            o1 = FrameObjekt.create(self.f_id)
-            o1.rect = rectangle  # NOW WE GET A RECT.
-            o1.wall = wall                               # the current wall is my wall.
-
-            o1.contour_id = self.contour_id
-            o1.ml = self._ml
-            o1.isNew = True
+            o1 = self.init_o(wall, rectangle)
 
             # contours are sorted, first p_ml is 'largest' contour
             o1.distances = euclidean_distances(np.array([self._ml], dtype=int), np.array([p_ml[0]], dtype=int).reshape(1, -1))
-            o1.md = np.mean(o1.distances)
+            o1.dist_mean = np.mean(o1.distances)
 
             o1.curr_dist = int(o1.distances[0])
-            o1.prev_tag = str(list(self.tracked.keys())[0])                 # find the last thing with a tag, if not expired already ("when?", f_limit). LEAVE IT IN THERE!
+            o1.prev_tag = str(list(self.tracked.keys())[0])
             o1.tag = o1.create_tag(self.f_id)
 
-            o1.is_inside = is_inside(o1.ml, o1.rect)
-            o1.close = is_in_range(o1.curr_dist, o1.md, self.l_delta_pcnt * o1.md)
+            self.get_stats(o1, wall, rectangle)
 
 
-            o1.hist_delta = self.get_histogram_delta(self.tracked.get(o1.prev_tag).wall, wall, rectangle)
 
-            o1.is_negative = False
-            if Decimal.from_float(o1.hist_delta).is_signed():
-                o1.is_negative = True
 
-            # pairwise distance to the previous wall image
-            X = self.make_grey_data(self.tracked.get(o1.prev_tag).wall, rectangle)
-            Y = self.make_grey_data(wall, rectangle)
-            self.set_frame_delta(X, Y)  # compare to current wall
-
-            o1.fd = self._frame_delta  # delta of wall image to current f
-            self.fd_mean = np.mean(self._frame_deltas)  # a float,
-            self.d_range = self.f_delta_pcnt * self.fd_mean  # percentage of px difference
-
-            o1.in_range = False
-            if is_in_range(o1.fd, self.fd_mean, self.d_range):
-                o1.in_range = True
-
-            if o1.is_inside and not o1.is_negative:
+            if o1.inside_rect and not o1.hist_pass:
                 # 22 NEW item.
                 self.print_frame(o1, "N1:")
-
             else:
                 # 10 NEW item out of focus
                 self.print_frame(o1, "X1:")
 
-            if not o1.is_inside and o1.is_negative and o1.close:
+            if not o1.inside_rect and o1.hist_pass and o1.close:
                 # self.print_frame(o1, "!C:")
                 return labeled
-            elif not o1.is_inside and o1.is_negative:
+            elif not o1.inside_rect and o1.hist_pass:
                 # self.print_frame(o1, "!X:")
                 return labeled
 
             labeled.append(o1)
 
         if len(p_ml) > 1:
-            oN = FrameObjekt.create(self.f_id)
-            oN.rect = rectangle  # NOW WE GET A RECT.
-            oN.wall = wall                               # the current wall is my wall.
-
-            # oN.contour_id = self.contour_id
-            oN.ml = self._ml
-            oN.isNew = False  # could be reset!
+            # A CONTINUATION?
+            oN = self.init_o(wall, rectangle)
 
             # get the mean location of the distances identified in the previous frame
             oN.distances = [euclidean_distances(np.array([self._ml], dtype=int), np.array([p_ml[j]], dtype=int).reshape(1, -1)) for j in np.arange(len(p_ml)) if p_ml[j] is not None]
-            oN.md = np.mean(oN.distances)
+            oN.dist_mean = np.mean(oN.distances)
 
             # I think this is wrong; criteria should add:
             # if distance from the closest is > the bounds of the current rect, it is new.
@@ -249,57 +257,22 @@ class FrameObjektTracker:
             oN.prev_tag = str(list(self.tracked.keys())[idx])             # target tag; may not be the right tag
             oN.tag = f"{self.f_id}_{oN.prev_tag.split('_')[1]}"           # THIS IS A GUESS
 
-            # did o suddenly appear?
-            # is the current ml inside the current rect? THIS SHOULD ALWAYS BE TRUE
-            # if so -- this is MY RECTANGLE, otherwise ths  is indicative of some other contour.
-            oN.is_inside = is_inside(oN.ml, oN.rect)
-            # is the current distance within a range of the
-            # median of distances for the last thing with a tag?
-            # if NOT, then this is the wrong rect, use the tag of the previous
-            # is the current distance larger than the width of the thing??
-            oN.close = is_in_range(oN.curr_dist, oN.md, self.l_delta_pcnt * oN.md)
-            # euclidean distance of the wall histograms
-            # observation: this goes negative periodically, apparently
-            # on tags that might be in the set of things
-            # we don't want. it *often* precedes a tag that has
-            # a 'higher' percentage.
+            self.get_stats(oN, wall, rectangle)
 
 
 
 
-            oN.hist_delta = self.get_histogram_delta(self.tracked.get(oN.prev_tag).wall, wall, rectangle)
-
-            oN.is_negative = False
-            if Decimal.from_float(oN.hist_delta).is_signed():
-                oN.is_negative = True
-
-
-            # pairwise distance to the previous wall image
-            X = self.make_grey_data(self.tracked.get(oN.prev_tag).wall, rectangle)
-            Y = self.make_grey_data(wall, rectangle)
-            self.set_frame_delta(X, Y)  # compare to current wall
-
-            oN.fd = self._frame_delta  # delta of wall image to current f
-            self.fd_mean = np.mean(self._frame_deltas)  # a float,
-            self.d_range = self.f_delta_pcnt * self.fd_mean  # percentage of px difference
-
-            oN.in_range = False
-            if is_in_range(oN.fd, self.fd_mean, self.d_range):
-                oN.in_range = True
-
-
-
-
-            if is_in_range(oN.curr_dist, oN.md, .10 * oN.md):
+            if not oN.inside_rect and is_in_range(oN.curr_dist, oN.dist_mean, .10 * oN.dist_mean):
                 # 352 momentary change in focus
+                oN.tag = oN.create_tag(self.f_id)
                 self.print_frame(oN, "!N:")
 
-            if oN.is_inside and not oN.is_negative:
+            if oN.inside_rect and not oN.hist_pass:
                 # 1171 continuations
                 self.print_frame(oN, "   ")
 
             # ARE THESE 'SHADOWS'? PAUSE PLAYBACK
-            if not is_in_range(oN.curr_dist, oN.md, .10 * oN.md) and not oN.is_inside:
+            if not is_in_range(oN.curr_dist, oN.dist_mean, .10 * oN.dist_mean) and not oN.inside_rect:
                 # 17, RANDOM GLINTS AND SHADOWS:
                 # MAY OR MAY NOT
                 # FOLLOW X1, !N
@@ -307,7 +280,7 @@ class FrameObjektTracker:
                 # not inside rect and doesn't match, but close
                 # -- must label
                 self.print_frame(oN, "CN:")
-            elif not is_in_range(oN.curr_dist, oN.md, .10 * oN.md) and oN.is_negative:
+            elif not is_in_range(oN.curr_dist, oN.dist_mean, .10 * oN.dist_mean) and oN.hist_pass:
                 # 21, RANDOM not inside rect and doesn't match
                 # SHADOW, GLINTS AND *NEW* ITEMS
                 # change conditional to see range in
@@ -319,14 +292,7 @@ class FrameObjektTracker:
 
         if not labeled:                                             # nothing in cache.
             # f 0
-            o = FrameObjekt.create(self.f_id)
-            o.rect = rectangle          # the current rectangle is my rect.
-            o.wall = wall               # the current wall is my wall.
-            o.ml = self._ml
-            o.is_inside = is_inside(o.ml, o.rect)
-            o.close = is_in_range(o.curr_dist, o.md, self.l_delta_pcnt * o.md)
-            o.hist_delta = None
-            o.skip = True
+            o = self.init_o(wall, rectangle)
             o.tag = o.create_tag(self.f_id)
             self.print_frame(o, "N0:")
             labeled.append(o)
