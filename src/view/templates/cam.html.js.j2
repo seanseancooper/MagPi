@@ -22,9 +22,9 @@
     }
 </style>
 
-<link rel="stylesheet" href="{{ url_for('cam_bp.static', filename='css/cropper.css') }}">
-<link rel="stylesheet" href="{{ url_for('cam_bp.static', filename='css/cam_controller.css') }}">
-<script src="{{ url_for('cam_bp.static', filename='js/cam_controller.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('vc_bp.static', filename='css/cropper.css') }}">
+<link rel="stylesheet" href="{{ url_for('vc_bp.static', filename='css/cam_controller.css') }}">
+<script src="{{ url_for('vc_bp.static', filename='js/cam_controller.js') }}"></script>
 <script>
     function setsHeaders(xhttp) {
         xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
@@ -36,7 +36,7 @@
     function load_video(){
         var _video = document.getElementById("_video");
 
-        while (_video.src != "http://localhost:6100/stream") {
+        while (_video.src != "http://localhost:6100/stream") {  //TODO: replace as streamhost
             _video.src = "http://localhost:6100/stream";
         }
     }
@@ -239,7 +239,7 @@
         <canvas id="grid" class="_grid" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
     </div>
 
-    <script src="{{ url_for('cam_bp.static', filename='cropperjs/dist/cropper.js') }}"></script>
+    <script src="{{ url_for('vc_bp.static', filename='cropperjs/dist/cropper.js') }}"></script>
     <script>
         window.addEventListener('DOMContentLoaded', function () {
             var image = document.querySelector('#target');
