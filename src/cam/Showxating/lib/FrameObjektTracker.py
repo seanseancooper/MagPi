@@ -212,24 +212,24 @@ class FrameObjektTracker:
 
             o1.curr_dist = int(o1.distances[0])
             o1.prev_tag = str(list(self.tracked.keys())[0])
-            o1.tag = o1.create_tag(self.f_id)
 
+            o1.tag = o1.create_tag(self.f_id)
             self.get_stats(o1, wall, rectangle)
 
             if o1.inside_rect and o1.hist_pass:
-                # 22 NEW item.
+                # item following f0 item.
                 o1.tag = f"{self.f_id}_{o1.prev_tag.split('_')[1]}"
                 self.print_frame(o1, "N1:")
 
-            if not o1.close and not o1.hist_pass:
-                # 352 momentary change in focus
+            if not o1.close and not o1.hist_pass and not o1.wall_pass:
+                # NEW 'interstitial' item
                 o1.tag = o1.create_tag(self.f_id)
                 self.print_frame(o1, "!N:")
 
             labeled.append(o1)
 
         if len(p_ml) > 1:
-            # A CONTINUATION?
+            # CONTINUATION or NEW?
             oN = self.init_o(wall, rectangle)
 
             # get the mean location of the distances identified in the previous frame
@@ -243,20 +243,18 @@ class FrameObjektTracker:
 
             oN.curr_dist = float(oN.distances[idx])                       # distance from last location
             oN.prev_tag = str(list(self.tracked.keys())[idx])             # target tag; may not be the right tag
-            oN.tag = f"{self.f_id}_{oN.prev_tag.split('_')[1]}"           # THIS IS A GUESS
 
+            oN.tag = f"{self.f_id}_{oN.prev_tag.split('_')[1]}"           # THIS IS A GUESS
             self.get_stats(oN, wall, rectangle)
 
             if oN.inside_rect and oN.hist_pass:
-                # 1171 continuations
+                # continuation of motion
                 self.print_frame(oN, "   ")
 
             if not oN.close and not oN.hist_pass:
-                # 21, RANDOM not inside rect and doesn't match
+                # NEW 'interstitial' item
                 oN.tag = oN.create_tag(self.f_id)
                 self.print_frame(oN, "XN:")
-                # self.tracked.pop(oN.prev_tag)
-                return labeled
 
             labeled.append(oN)
 
