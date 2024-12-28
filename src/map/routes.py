@@ -4,7 +4,7 @@ from src.map.MAPAggregator import MAPAggregator
 
 mapAgg = MAPAggregator()
 # TODO: the config hasn't been read yet, how can these be configurable?
-non_config_files = ['arx.json', 'cam.json', 'ebs.json', 'mot.json']
+non_config_files = ['arx.json', 'ebs.json', 'mot.json']
 mapAgg.configure('map.json', non_config_files=non_config_files)
 
 from src.map.lib.NodeRunner import NodeRunner
