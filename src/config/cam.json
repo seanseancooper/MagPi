@@ -59,6 +59,7 @@
 					"f_limit": 3,
 					"f_delta_pcnt": 1.0,
 					"l_delta_pcnt": 0.5,
+					"d_range": 90.00,
 					"contour_limit": 2
 				},
 				"tokenbucket": {
