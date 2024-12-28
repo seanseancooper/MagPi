@@ -25,8 +25,8 @@
 		},
 		{
 			"PLUGIN": {
+				"debug": false,
 				"capture_sleep_time": 0.0,
-				"write_all_frames": true,
 				"capture_output_show_stats": false,
 				"capture_output_log_stats": false,
 				"capture_majic_pixel": [10, 110],
@@ -49,12 +49,13 @@
 
 				"outfile_path": "../../_out",
 				"outfile_name": "cam_snap",
+
+				"write_all_frames": false,
 				"write_mp4": false,
 
 				"color_histograms": true,
 				"bins": 32,
 				"library": "cv",
-				"debug": false,
 				"tracker": {
 					"f_limit": 3,
 					"f_delta_pcnt": 1.0,
