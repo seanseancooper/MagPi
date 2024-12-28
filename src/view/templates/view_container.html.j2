@@ -77,10 +77,12 @@
     </script>
 
 {%- for tab, timeout in container.module_tabs: -%}
-    {% include 'autoloader.js.j2' %}
-    <div id="{{ tab }}_bar_container" style="padding-top:2px;padding-bottom:3px;{{ 'display:none;' if loop.index0 > 0 }}" class="bar_container">
-        <div id="{{ tab }}_meter" style=""><script>{{ tab }}_make_deadline_bar();</script></div>
-    </div>
+    {% if timeout > 0 %}
+        {% include 'autoloader.js.j2' %}
+        <div id="{{ tab }}_bar_container" style="padding-top:2px;padding-bottom:3px;{{ 'display:none;' if loop.index0 > 0 }}" class="bar_container">
+            <div id="{{ tab }}_meter" style=""><script>{{ tab }}_make_deadline_bar();</script></div>
+        </div>
+    {% endif %}
     <div id="{{ tab }}" class="module_tab" style="{{ 'display:none;' if loop.index0 > 0 }}"></div>
 {%- endfor -%}
 
