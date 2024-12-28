@@ -17,6 +17,23 @@ class WifiSignalPoint:
         self._lat = lat
         self._sgnl = sgnl
 
+    # def __repr__(self):
+    #     return "<Point x:{0},y:{1}>".format(self.x, self.y)
+    #
+    # # implement addition (Adding 'Points' isn't natively supported)
+    # def __add__(self, other):
+    #     return Point(self.x + other.x, self.y + other.y)
+    #
+    # # implement subtraction (Subtracting 'Points' isn't natively supported)
+    # def __sub__(self, other):
+    #     return Point(self.x - other.x, self.y - other.y)
+    #
+    # # implement in-place addition  (in-place adding 'Points' isn't natively supported)
+    # def __iadd__(self, other):
+    #     self.x += other.x
+    #     self.y += other.y
+    #     return self
+
     def getLatLon(self):
         return self._lat, self._lon
 
