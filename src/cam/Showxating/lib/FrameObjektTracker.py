@@ -7,6 +7,9 @@ from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
 from sklearn.metrics import euclidean_distances, pairwise_distances
 from sklearn.metrics.pairwise import paired_distances
 
+from datetime import datetime, timedelta
+from src.lib.utils import format_time, format_delta
+
 from src.cam.Showxating.lib.utils import is_in_range, is_inside, getAggregatedRect, getRectsFromContours
 from src.config import readConfig
 
@@ -41,6 +44,10 @@ class FrameObjektTracker:
         self.fd_mean = float()              # mean of ALL differences between ALL SEEN frames -- no f_limit.
         self.d_range = 90.00                # offset +/- allowed difference; frm_delta_pcnt * fd_mean
 
+        self.created = datetime.now()
+        self.updated = datetime.now()
+        self.elapsed = timedelta()
+
     def get(self):
         return {
             "f_id"          : self.f_id,            # current frame id
@@ -56,6 +63,11 @@ class FrameObjektTracker:
 
             "fd_mean"       : self.fd_mean,         # mean of ALL differences between ALL SEEN frames -- no f_limit.
             "d_range"       : self.d_range,         # offset +/- allowed difference; frm_delta_pcnt * fd_mean
+
+            "created": format_time(self.created, "%H:%M:%S"),
+            "updated": format_time(self.updated, "%H:%M:%S"),
+            "elapsed": format_delta(self.elapsed, "%H:%M:%S"),
+
         }
 
     def configure(self):
@@ -299,6 +311,9 @@ class FrameObjektTracker:
         self.contour_id = str(uuid.uuid4()).split('-')[0]
 
         self._ml = self.get_mean_location(contour)       # find the mean location of this target
+
+        self.updated = datetime.now()
+        self.elapsed = self.updated - self.created
 
         for o in self.label_locations(frame, wall, rectangle):  # go label this location as either NEW, PREV or INITIAL.
 

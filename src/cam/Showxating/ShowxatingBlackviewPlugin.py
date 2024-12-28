@@ -1,4 +1,4 @@
-import time
+from datetime import datetime, timedelta
 
 import cv2 as cv
 import numpy as np
@@ -12,6 +12,7 @@ from src.cam.Showxating.lib.utils import draw_grid, draw_contours, wall_images, 
 import logging
 
 from src.ebs.lib.TokenBucket import TokenBucket
+from src.lib.utils import format_time, format_delta
 
 cam_logger = logging.getLogger('cam_logger')
 speech_logger = logging.getLogger('speech_logger')
@@ -114,6 +115,10 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self.tracker = FrameObjektTracker()
         self.tracked = {}
 
+        self.created = datetime.now()
+        self.updated = datetime.now()
+        self.elapsed = timedelta()
+
     def get(self):
         return {
             "_area": self._area,
@@ -131,6 +136,11 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             "mediapipe": self.mediapipe,
 
             "tracked": [_ for _ in self.tracked],
+
+            "created": format_time(self.created, "%H:%M:%S"),
+            "updated": format_time(self.updated, "%H:%M:%S"),
+            "elapsed": format_delta(self.elapsed, "%H:%M:%S"),
+
         }
 
     def get_config(self):
@@ -259,6 +269,9 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             self.tracker.clear_cache(self.frame_id)
 
     def process_frame(self, frame):
+
+        self.updated = datetime.now()
+        self.elapsed = self.updated - self.created
 
         if self.plugin_process_frames:
             # IDEA: can the timing of this be adjusted? Async code to 'grab()' might
