@@ -109,7 +109,7 @@ class MAPAggregator(threading.Thread):
             return messaging
 
         if self.iteration % 10 == 0:
-            print(f"MAPAggegator [{self.iteration}] {format_delta(self.elapsed, "%H:%M:%S")} elapsed")
+            print(f"MAPAggegator [{self.iteration}] {format_delta(self.elapsed, '%H:%M:%S')} elapsed")
             # yell about offline modules
             [speech_logger.info(f'{mod} offline.') for mod in self.dead_modules]
 
