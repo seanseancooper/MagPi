@@ -25,7 +25,7 @@
 		},
 		{
 			"PLUGIN": {
-				"capture_sleep_time": 0.2,
+				"capture_sleep_time": 0.0,
 				"write_all_frames": true,
 				"capture_output_show_stats": false,
 				"capture_output_log_stats": false,
