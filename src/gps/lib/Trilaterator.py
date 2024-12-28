@@ -2,6 +2,7 @@ import math
 import threading
 from datetime import datetime, timedelta
 
+import numpy as np
 from scipy.optimize import minimize
 
 from src.lib.utils import format_time, format_delta
@@ -131,6 +132,7 @@ class Trilaterator(threading.Thread):
         for location, distance in zip(locations, distances):
             distance_calculated = self.great_circle_distance(x[0], x[1], location[0], location[1])
             mse += math.pow(distance_calculated - distance, 2.0)
+            # alt. mse += np.sum((distance_calculated - distance) ** 2)
         return mse / len(distances)
 
     def trilaterate(self, initial_location, locations, distances):
@@ -152,7 +154,7 @@ class Trilaterator(threading.Thread):
         return location
 
     def run(self):
-
+        self.set_target('SOME_BSSID_HERE')
         self.get_initial_location()
         BSSID, sgnlPts = self.getSignalPointsForBSSID(self.target)  # get the list of sp for BSSID_TARGeT
         self.locations = self.getLocationsForSignalPoints(sgnlPts)
