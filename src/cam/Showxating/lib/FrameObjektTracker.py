@@ -44,29 +44,20 @@ class FrameObjektTracker:
         self.fd_mean = float()              # mean of ALL differences between ALL SEEN frames -- no f_limit.
         self.d_range = 90.00                # offset +/- allowed difference; frm_delta_pcnt * fd_mean
 
-        self.created = datetime.now()
-        self.updated = datetime.now()
-        self.elapsed = timedelta()
-
     def get(self):
         return {
-            "f_id"          : self.f_id,            # current frame id
-            "f_limit"       : self.f_limit,         # hyperparameter: max age of frames in o_cache_map.
-            "frm_delta_pcnt": self.f_delta_pcnt,    # hyperparameter: percentage of delta between the current and previous frames over all pixels in frame
-            "contour_limit" : self.contour_limit,   # number of contours evaluated by plugin in each pass
+
+            "f_limit"       : self.f_limit,                 # hyperparameter: max age of frames in o_cache_map.
+            "frm_delta_pcnt": float(self.f_delta_pcnt),     # hyperparameter: percentage of delta between the current and previous frames over all pixels in frame
+            "contour_limit" : self.contour_limit,           # number of contours evaluated by plugin in each pass
             "tracked"       : [self.tracked.get(o).get() for o in self.tracked],       # mapping of FrameObjekts over last 'f_limit' frames.
 
-            "_ml"           : str(self._ml),        # DO NOT CHANGE: list of (x,y) location of contour in self.contours
-            "_frame_delta"  : self._frame_delta,    # DO NOT CHANGE: euclidean distance between the current and previous frames
-            "_frame_MSE"    : self._frame_MSE,
-            # "_frame_SSIM"   : self._frame_SSIM,
+            "_ml"           : str(self._ml),                # DO NOT CHANGE: list of (x,y) location of contour in self.contours
+            "_frame_delta"  : float(self._frame_delta),     # DO NOT CHANGE: euclidean distance between the current and previous frames
+            "_frame_MSE"    : float(self._frame_MSE),
 
-            "fd_mean"       : self.fd_mean,         # mean of ALL differences between ALL SEEN frames -- no f_limit.
-            "d_range"       : self.d_range,         # offset +/- allowed difference; frm_delta_pcnt * fd_mean
-
-            "created": format_time(self.created, "%H:%M:%S"),
-            "updated": format_time(self.updated, "%H:%M:%S"),
-            "elapsed": format_delta(self.elapsed, "%H:%M:%S"),
+            "fd_mean"       : float(self.fd_mean),          # mean of ALL differences between ALL SEEN frames -- no f_limit.
+            "d_range"       : float(self.d_range),          # offset +/- allowed difference; frm_delta_pcnt * fd_mean
 
         }
 
@@ -311,9 +302,6 @@ class FrameObjektTracker:
         self.contour_id = str(uuid.uuid4()).split('-')[0]
 
         self._ml = self.get_mean_location(contour)       # find the mean location of this target
-
-        self.updated = datetime.now()
-        self.elapsed = self.updated - self.created
 
         for o in self.label_locations(frame, wall, rectangle):  # go label this location as either NEW, PREV or INITIAL.
 

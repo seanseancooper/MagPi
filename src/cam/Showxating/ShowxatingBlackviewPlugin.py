@@ -101,7 +101,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self.greyscale_refer = None                     #
 
         self.krnl = 17                                  # controls size of items considered relevant
-        self._kz = (int(self.krnl), int(self.krnl))
+        self._kSz = (int(self.krnl), int(self.krnl))
         self.threshold = 15.0                           # pixels additional to the mean during thresholding
 
         self.show_krnl_grid = False
@@ -115,28 +115,23 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self.tracker = FrameObjektTracker()
         self.tracked = {}
 
-        self.created = datetime.now()
-        self.updated = datetime.now()
-        self.elapsed = timedelta()
-
     def get(self):
         return {
-            "_area": self._area,
-            "_max_height": self._max_height,
-            "_max_width": self._max_width,
+            "area": str(self._area),
+            "max_height": str(self._max_height),
+            "max_width": str(self._max_width),
 
             "has_symbols": self.has_symbols,
             "has_analysis": self.has_analysis,
             "has_motion": self.has_motion,
 
-            "_kz": self._kz,
+            "kSz": str(self._kSz),
             "threshold": self.threshold,
 
             "show_threshold": self.show_threshold,
             "mediapipe": self.mediapipe,
 
-            "tracked": [_ for _ in self.tracked],
-
+            "f_id": self.frame_id,
             "created": format_time(self.created, "%H:%M:%S"),
             "updated": format_time(self.updated, "%H:%M:%S"),
             "elapsed": format_delta(self.elapsed, "%H:%M:%S"),
@@ -269,9 +264,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             self.tracker.clear_cache(self.frame_id)
 
     def process_frame(self, frame):
-
-        self.updated = datetime.now()
-        self.elapsed = self.updated - self.created
 
         if self.plugin_process_frames:
             # IDEA: can the timing of this be adjusted? Async code to 'grab()' might

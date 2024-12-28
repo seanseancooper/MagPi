@@ -73,10 +73,6 @@ def is_inside(pt, rect):
 
 
 def is_in_range(val, initial, offset):
-    # use below and in 'histogram' delta comparisons
-    #  		//JS... is value in range
-    # 		percentValue = parseFloat(value) <= max ? parseFloat(value) : max;
-    # 		percentValue = parseFloat(percentValue) >= min ? parseFloat(percentValue) : min;
     lwr = initial - offset
     upp = initial + offset
 

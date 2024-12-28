@@ -58,7 +58,7 @@ class FrameObjekt:
                 'rect'          : str(self.rect),
 
                 'close'         : self.close,
-                # 'inside_rect'   : self.inside_rect,
+                'inside_rect'   : self.inside_rect is True,
                 'hist_pass'     : self.hist_pass,
                 'wall_pass'     : self.wall_pass,
-                }
+        }
