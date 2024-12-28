@@ -69,14 +69,7 @@ class FrameObjektTracker:
                 self.f_limit = 1
 
             self.f_delta_pcnt = float(self.config['tracker']['f_delta_pcnt'])
-            if self.f_delta_pcnt > 1.0:
-                print(f'bad f_delta_pcnt: (should be <= 1.0)')
-                exit(1)
-
             self.l_delta_pcnt = float(self.config['tracker']['l_delta_pcnt'])
-            if self.l_delta_pcnt > 1.0:
-                print(f'bad l_delta_pcnt: (should be <= 1.0)')
-                exit(1)
 
            # not implmented. yet...
             self.contour_limit = int(self.config['tracker'].get('contour_limit', None))
@@ -143,13 +136,13 @@ class FrameObjektTracker:
               f"\to.avg_loc: {str(o.avg_loc)}"
               f"\to.rect:{str(o.rect).ljust(10, ' ')}"
 
-              # f"\tcurr_dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}"
+              f"\tcurr_dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}"
               # f"\tdist_mean: {str(o.dist_mean.__format__('.4f')).ljust(3, ' ')}"
               
               # f"\to.fd_in_range: {o.wall_pass}"
               f"\to.inside_rect: {o.inside_rect}"
 
-              f"\tto.close: {o.close}"
+              f"\to.close: {o.close}"
               f"\to.hist_pass: {o.hist_pass}"
               f"\to.wall_pass: {o.wall_pass}"
               # f"\tfd_mean: {str(o.fd_mean.__format__('.4f')).ljust(10, ' ')}"
@@ -171,7 +164,7 @@ class FrameObjektTracker:
 
         # is the current distance within a range of the
         # median of distances for the last thing with a tag?
-        o.close = is_in_range(o.curr_dist, o.dist_mean, self.l_delta_pcnt * o.dist_mean)
+        o.close = is_in_range(o.curr_dist, max(o.rect[2], o.rect[3]), self.l_delta_pcnt * max(o.rect[1], o.rect[2]))
 
         # is the current ml inside the current rect? THIS SHOULD ALWAYS BE TRUE
         # if so -- this is MY RECTANGLE, otherwise ths  is indicative of some other contour.
@@ -223,22 +216,15 @@ class FrameObjektTracker:
 
             self.get_stats(o1, wall, rectangle)
 
-
-
-
-            if o1.inside_rect and not o1.hist_pass:
+            if o1.inside_rect and o1.hist_pass:
                 # 22 NEW item.
+                o1.tag = f"{self.f_id}_{o1.prev_tag.split('_')[1]}"
                 self.print_frame(o1, "N1:")
-            else:
-                # 10 continuation
-                self.print_frame(o1, "X1:")
 
-            if not o1.inside_rect and o1.hist_pass and o1.close:
-                # self.print_frame(o1, "!C:")
-                return labeled
-            elif not o1.inside_rect and o1.hist_pass:
-                # self.print_frame(o1, "!X:")
-                return labeled
+            if not o1.close and not o1.hist_pass:
+                # 352 momentary change in focus
+                o1.tag = o1.create_tag(self.f_id)
+                self.print_frame(o1, "!N:")
 
             labeled.append(o1)
 
@@ -261,36 +247,24 @@ class FrameObjektTracker:
 
             self.get_stats(oN, wall, rectangle)
 
-
-
-
-            if not oN.inside_rect and is_in_range(oN.curr_dist, oN.dist_mean, .10 * oN.dist_mean):
-                # 352 momentary change in focus
-                oN.tag = oN.create_tag(self.f_id)
-                self.print_frame(oN, "!N:")
-
-            if oN.inside_rect and not oN.hist_pass:
+            if oN.inside_rect and oN.hist_pass:
                 # 1171 continuations
                 self.print_frame(oN, "   ")
 
-            if not is_in_range(oN.curr_dist, oN.dist_mean, .10 * oN.dist_mean) and not oN.inside_rect:
-                # 17, RANDOM GLINTS AND SHADOWS:
-                # not inside rect and doesn't match, but close
-                # -- must label
-                self.print_frame(oN, "CN:")
-            elif not is_in_range(oN.curr_dist, oN.dist_mean, .10 * oN.dist_mean) and oN.hist_pass:
+            if not oN.close and not oN.hist_pass:
                 # 21, RANDOM not inside rect and doesn't match
-                # SHADOW, GLINTS AND *NEW* ITEMS
-                # change conditional to see range in
-                # relation to prev_item.
-                # -- must label
+                oN.tag = oN.create_tag(self.f_id)
                 self.print_frame(oN, "XN:")
+                # self.tracked.pop(oN.prev_tag)
+                return labeled
 
             labeled.append(oN)
 
         if not labeled:                                             # nothing in cache.
             # f 0
             o = self.init_o(wall, rectangle)
+            o.close = is_in_range(o.curr_dist, o.dist_mean, self.l_delta_pcnt * o.dist_mean)
+            o.inside_rect = is_inside(o.avg_loc, o.rect)
             o.tag = o.create_tag(self.f_id)
             self.print_frame(o, "N0:")
             labeled.append(o)
