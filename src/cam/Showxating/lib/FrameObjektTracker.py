@@ -36,7 +36,7 @@ class FrameObjektTracker:
         self._frame_MSE = float()
         self._frame_MSEs = []
 
-        self._frame_SSIM = float()
+        # self._frame_SSIM = float()
 
         self.fd_mean = float()              # mean of ALL differences between ALL SEEN frames -- no f_limit.
         self.d_range = 90.00                # offset +/- allowed difference; frm_delta_pcnt * fd_mean
@@ -52,7 +52,7 @@ class FrameObjektTracker:
             "_ml"           : self._ml,             # DO NOT CHANGE: list of (x,y) location of contour in self.contours
             "_frame_delta"  : self._frame_delta,    # DO NOT CHANGE: euclidean distance between the current and previous frames
             "_frame_MSE"    : self._frame_MSE,
-            "_frame_SSIM"   : self._frame_SSIM,
+            # "_frame_SSIM"   : self._frame_SSIM,
 
             "fd_mean"       : self.fd_mean,         # mean of ALL differences between ALL SEEN frames -- no f_limit.
             "d_range"       : self.d_range,         # offset +/- allowed difference; frm_delta_pcnt * fd_mean
@@ -110,7 +110,7 @@ class FrameObjektTracker:
         average of the paired euclidean distances between the previous 'item'
         and the current frame 'wall'.
         '''
-        self._frame_SSIM = 0.0
+        # self._frame_SSIM = 0.0
         try:
             # TODO: see metrics of pairwise_distances
             # return the distances between the row vectors of X and Y
@@ -120,11 +120,11 @@ class FrameObjektTracker:
             self._frame_MSE = np.sum((X - Y) ** 2)
             self._frame_MSE /= float(X.shape[0] * Y.shape[1])
 
-            def MSE(X, Y):
-                n = X.shape[0] * Y.shape[1]
-                return 1 / n * np.sum(np.square(X - Y))
-
-            self._frame_SSIM = MSE(X, Y)
+            # def MSE(X, Y):
+            #     n = X.shape[0] * Y.shape[1]
+            #     return 1 / n * np.sum(np.square(X - Y))
+            #
+            # self._frame_SSIM = MSE(X, Y)
 
             # from skimage.metrics import structural_similarity as ssim
             # self._frame_SSIM = ssim(X, Y)
