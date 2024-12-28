@@ -17,9 +17,7 @@ cam_bp = Blueprint(
 
 @cam_bp.route('/')
 def index():
-    # at some point, this will return stats.
-    # just not yet.
-    return redirect('/ctrl', 302)
+    return redirect('/config', 302)
 
 
 @cam_bp.route("/ctrl", methods=['GET'], subdomain='cam')
@@ -48,4 +46,33 @@ def cam_plugin(field, value):
         return "OK"
     return "FAIL"
 
+@cam_bp.route('/config', methods=['GET'], subdomain='cam')
+def cam_config():
+    return jsonify(camMgr.config)
+
+@cam_bp.route('/stats', methods=['GET'], subdomain='cam')
+def cam_stats():
+    from src.lib.utils import format_time, format_delta
+
+    p_stats = {
+
+        "_area": str(camMgr.plugin._area),
+        "_max_height": str(camMgr.plugin._max_height),
+        "_max_width": str(camMgr.plugin._max_width),
+
+        "has_symbols": camMgr.plugin.has_symbols,
+        "has_analysis": camMgr.plugin.has_analysis,
+        "has_motion": camMgr.plugin.has_motion,
+
+        "_kz": str(camMgr.plugin._kz),
+        "threshold": camMgr.plugin.threshold,
+        "show_threshold": camMgr.plugin.show_threshold,
+        "mediapipe": camMgr.plugin.mediapipe,
+        "tracked": [_ for _ in camMgr.plugin.tracked]
+
+    }
+
+    t_stats = camMgr.plugin.tracker.get()
+
+    return jsonify(t_stats)
 

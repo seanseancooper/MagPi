@@ -49,16 +49,16 @@ class FrameObjekt:
 
     def get(self):
         return {'f_id'          : self.f_id,
-                'tag'           : self.tag,
-                'isNew'         : self.isNew,
+                'tag'           : str(self.tag),
+
                 'fd'            : self.fd,
                 'fd_mean'       : self.fd_mean,
-                'avg_loc'       : self.avg_loc,
+                'avg_loc'       : str(self.avg_loc),
                 'dist_mean'     : self.dist_mean,
-                'rect'          : self.rect,
-                'skip'          : self.skip,
+                'rect'          : str(self.rect),
+
                 'close'         : self.close,
-                'inside_rect'   : self.inside_rect,
+                # 'inside_rect'   : self.inside_rect,
                 'hist_pass'     : self.hist_pass,
                 'wall_pass'     : self.wall_pass,
                 }

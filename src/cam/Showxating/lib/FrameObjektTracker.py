@@ -47,9 +47,9 @@ class FrameObjektTracker:
             "f_limit"       : self.f_limit,         # hyperparameter: max age of frames in o_cache_map.
             "frm_delta_pcnt": self.f_delta_pcnt,    # hyperparameter: percentage of delta between the current and previous frames over all pixels in frame
             "contour_limit" : self.contour_limit,   # number of contours evaluated by plugin in each pass
-            "tracked"       : self.tracked,         # mapping of FrameObjekts over last 'f_limit' frames.
+            "tracked"       : [self.tracked.get(o).get() for o in self.tracked],       # mapping of FrameObjekts over last 'f_limit' frames.
 
-            "_ml"           : self._ml,             # DO NOT CHANGE: list of (x,y) location of contour in self.contours
+            "_ml"           : str(self._ml),        # DO NOT CHANGE: list of (x,y) location of contour in self.contours
             "_frame_delta"  : self._frame_delta,    # DO NOT CHANGE: euclidean distance between the current and previous frames
             "_frame_MSE"    : self._frame_MSE,
             # "_frame_SSIM"   : self._frame_SSIM,
