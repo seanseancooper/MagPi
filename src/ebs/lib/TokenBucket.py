@@ -6,15 +6,15 @@ wifi_logger = logging.getLogger('tokenbucket')
 
 class TokenBucket:
 
-    def __init__(self, tokens, time_unit, debug=False):
+    def __init__(self, tokens, interval, debug=False):
         self.tokens = tokens
-        self.time_unit = time_unit
+        self.interval = interval
         self.DEBUG = debug
         self.bucket = tokens
         self.last_check = time.time()
 
     def __repr__(self):
-        return f"tokens:{self.tokens} time_unit:{self.time_unit} bucket:{self.bucket} last_check:{self.last_check}"
+        return f"tokens:{self.tokens} time_unit:{self.interval} bucket:{self.bucket} last_check:{self.last_check}"
 
     def handle(self, message):
 
@@ -26,7 +26,7 @@ class TokenBucket:
             print(f"[{__name__}]: TokenBucket contains: {self.bucket}: {time_passed}")
 
             # DBUG: convert self.bucket to a timedelta and move this internal to WifiScanner
-            self.bucket = self.bucket + time_passed * (self.tokens / self.time_unit)
+            self.bucket = self.bucket + time_passed * (self.tokens / self.interval)
 
             if self.bucket > self.tokens:
                 self.bucket = self.tokens
