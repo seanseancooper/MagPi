@@ -43,19 +43,19 @@ class FrameObjektTracker:
 
     def get(self):
         return {
-            "f_id": self.f_id,                      # current frame id
-            "f_limit": self.f_limit,                # hyperparameter: max age of frames in o_cache_map.
-            "frm_delta_pcnt": self.f_delta_pcnt,  # hyperparameter: percentage of delta between the current and previous frames over all pixels in frame
-            "contour_limit": self.contour_limit,    # number of contours evaluated by plugin in each pass
-            "tracked": self.tracked,                # mapping of FrameObjekts over last 'f_limit' frames.
+            "f_id"          : self.f_id,            # current frame id
+            "f_limit"       : self.f_limit,         # hyperparameter: max age of frames in o_cache_map.
+            "frm_delta_pcnt": self.f_delta_pcnt,    # hyperparameter: percentage of delta between the current and previous frames over all pixels in frame
+            "contour_limit" : self.contour_limit,   # number of contours evaluated by plugin in each pass
+            "tracked"       : self.tracked,         # mapping of FrameObjekts over last 'f_limit' frames.
 
-            "_ml": self._ml,                        # DO NOT CHANGE: list of (x,y) location of contour in self.contours
-            "_frame_delta": self._frame_delta,      # DO NOT CHANGE: euclidean distance between the current and previous frames
-            "_frame_MSE": self._frame_MSE,
-            "_frame_SSIM": self._frame_SSIM,
+            "_ml"           : self._ml,             # DO NOT CHANGE: list of (x,y) location of contour in self.contours
+            "_frame_delta"  : self._frame_delta,    # DO NOT CHANGE: euclidean distance between the current and previous frames
+            "_frame_MSE"    : self._frame_MSE,
+            "_frame_SSIM"   : self._frame_SSIM,
 
-            "fd_mean": self.fd_mean,                # mean of ALL differences between ALL SEEN frames -- no f_limit.
-            "d_range": self.d_range,                # offset +/- allowed difference; frm_delta_pcnt * fd_mean
+            "fd_mean"       : self.fd_mean,         # mean of ALL differences between ALL SEEN frames -- no f_limit.
+            "d_range"       : self.d_range,         # offset +/- allowed difference; frm_delta_pcnt * fd_mean
         }
 
     def configure(self):
@@ -70,8 +70,8 @@ class FrameObjektTracker:
 
             self.f_delta_pcnt = float(self.config['tracker']['f_delta_pcnt'])
             self.l_delta_pcnt = float(self.config['tracker']['l_delta_pcnt'])
+            self.d_range = float(self.config['tracker']['d_range'])
 
-           # not implmented. yet...
             self.contour_limit = int(self.config['tracker'].get('contour_limit', None))
             if self.contour_limit == 0:
                 print(f'contour_limit warning: (contour_limit should be > 0 or "None" for all contours)')
@@ -95,6 +95,15 @@ class FrameObjektTracker:
     def make_grey_data(item, rectangle):
         wx, wy, ww, wh = rectangle
         return cv.cvtColor(item[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)
+
+    @staticmethod
+    def get_mean_location(contours):
+        ''' aka 'basically where it is' get the average location of all the contours in the frame '''
+        x = []
+        y = []
+
+        [(x.append(a), y.append(b)) for [[a, b]] in contours]
+        return np.mean(np.array([x, y]), axis=1, dtype=int)
 
     def set_frame_delta(self, X, Y):
         ''' set the allowable difference between frames *fragments_* to the
@@ -136,28 +145,27 @@ class FrameObjektTracker:
               f"\to.avg_loc: {str(o.avg_loc)}"
               f"\to.rect:{str(o.rect).ljust(10, ' ')}"
 
-              f"\tcurr_dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}"
-              # f"\tdist_mean: {str(o.dist_mean.__format__('.4f')).ljust(3, ' ')}"
-              
-              # f"\to.fd_in_range: {o.wall_pass}"
+              f"\to.fd_in_range: {o.wall_pass}"
               f"\to.inside_rect: {o.inside_rect}"
 
               f"\to.close: {o.close}"
               f"\to.hist_pass: {o.hist_pass}"
               f"\to.wall_pass: {o.wall_pass}"
-              # f"\tfd_mean: {str(o.fd_mean.__format__('.4f')).ljust(10, ' ')}"
-              # f"\thist_delta: {o.hist_delta} "
-              # f"\tMSE: {str(self._frame_MSE.__format__('.4f')).ljust(10, ' ')}"
-        )
+
+              f"\tcurr_dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}"
+              f"\tdist_mean: {str(o.dist_mean.__format__('.4f')).ljust(3, ' ')}"
+
+              f"\tfd_mean: {str(o.fd_mean.__format__('.4f')).ljust(10, ' ')}"
+              f"\thist_delta: {str(o.hist_delta.__format__('.4f')).ljust(10, ' ')}"
+              f"\tMSE: {str(self._frame_MSE.__format__('.4f')).ljust(10, ' ')}")
 
     def init_o(self, wall, rectangle):
         o = FrameObjekt.create(self.f_id)
-        o.rect = rectangle  # NOW WE GET A RECT.
-        o.wall = wall  # the current wall is my wall.
+        o.rect = rectangle
+        o.wall = wall
 
         # oN.contour_id = self.contour_id
         o.avg_loc = self._ml
-        o.isNew = False  # could be reset!
         return o
 
     def get_stats(self, o, wall, rectangle):
@@ -186,14 +194,6 @@ class FrameObjektTracker:
         o.fd_mean = np.mean(self._frame_deltas)
         o.delta_range = self.f_delta_pcnt * o.fd_mean  # percentage of px difference
         o.wall_pass = is_in_range(o.fd, o.fd_mean, self.d_range)
-
-    def get_mean_location(self, contours):
-        ''' aka 'basically where it is' get the average location of all the contours in the frame '''
-        x = []
-        y = []
-
-        [(x.append(a), y.append(b)) for [[a, b]] in contours]
-        return np.mean(np.array([x, y]), axis=1, dtype=int)
 
     def label_locations(self, frame, wall, rectangle):
         """ find elements 'tag' by euclidean distance """
@@ -236,9 +236,6 @@ class FrameObjektTracker:
             oN.distances = [euclidean_distances(np.array([self._ml], dtype=int), np.array([p_ml[j]], dtype=int).reshape(1, -1)) for j in np.arange(len(p_ml)) if p_ml[j] is not None]
             oN.dist_mean = np.mean(oN.distances)
 
-            # I think this is wrong; criteria should add:
-            # if distance from the closest is > the bounds of the current rect, it is new.
-            # this should choose the closest item within the bounds of it's rect.
             idx = np.argmin(oN.distances)                                 # the item in the array representing the minimum euclidean distance to the current location
 
             oN.curr_dist = float(oN.distances[idx])                       # distance from last location
