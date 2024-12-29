@@ -23,38 +23,37 @@ class MAPAggregator(threading.Thread):
         super().__init__()
         self.DEBUG = False
         self.config = {}
-        self.configs = defaultdict(dict)
         self.iteration = 0
         self.created = datetime.now()
         self.updated = datetime.now()
         self.elapsed = timedelta()
 
         self.modules = []
-        self.module_stats = {}
         self.live_modules = []
         self.dead_modules = []
-
-        self.aggregated = defaultdict(str)  # a string representation of the dict.
+        self.module_configs = defaultdict(dict)
+        self.module_stats = defaultdict(dict)
+        self.module_aggregated = defaultdict(str)
 
         self.thread = None
 
     def __str__(self):
-        return f"MAPAggregator: {self.aggregated}"
+        return f"MAPAggregator: {self.module_aggregated}"
 
     def configure(self, config_file, **kwargs):
         non_config_files = kwargs.get('non_config_files')
-        # no need now for 'view'
+        # no need for 'view'
         non_config_files.extend([os.path.basename(config_file), 'view.json'])
-        configs = glob.glob(CONFIG_PATH + "/*.json")
-        [configs.remove(CONFIG_PATH + '/' + non_config) for non_config in non_config_files]
+        config_files = glob.glob(CONFIG_PATH + "/*.json")
+        [config_files.remove(CONFIG_PATH + '/' + non_config) for non_config in non_config_files]
 
-        for module_config in configs:
+        for module_config in config_files:
             mod = os.path.basename(module_config).replace('.json', '')
             self.modules.append(mod)
             self.module_stats[mod] = {'created': '',
                                       'updated': '',
                                       'elapsed': ''}
-            readConfig(os.path.basename(module_config), self.configs[mod])
+            readConfig(os.path.basename(module_config), self.module_configs[mod])
 
         readConfig(config_file, self.config)
 
@@ -69,7 +68,7 @@ class MAPAggregator(threading.Thread):
 
         def test(m):
             try:
-                test = requests.get('http://' + m + '.' + self.configs[m]['SERVER_NAME'])
+                test = requests.get('http://' + m + '.' + self.module_configs[m]['SERVER_NAME'])
                 if test.ok:
                     self.live_modules.append(m)
             except Exception:
@@ -80,14 +79,14 @@ class MAPAggregator(threading.Thread):
     def aggregate(self, mod):
         """ collect responses into aggregation """
         try:
-            conf = requests.get('http://' + mod + '.' + self.configs[mod]['SERVER_NAME'])
+            conf = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
             if conf.ok:
-                self.aggregated[mod] = conf.json()
+                self.module_aggregated[mod] = conf.json()
         except Exception as e:
             map_logger.warning(f'Configuration Aggregator Warning [{mod}]! {e}')
 
         try:
-            stats = requests.get('http://' + mod + '.' + self.configs[mod]['SERVER_NAME'] + '/stats')
+            stats = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'] + '/stats')
             if stats.ok:
                 self.module_stats[mod] = stats.json()  # current module stats
         except Exception as e:
@@ -126,11 +125,11 @@ class MAPAggregator(threading.Thread):
     def unload(self, unload):
         """ unload a specific module, auto reload on next pass """
 
-        copy = self.aggregated.copy()
-        self.aggregated.clear()
+        copy = self.module_aggregated.copy()
+        self.module_aggregated.clear()
 
         def add_module(mod):
-            self.aggregated[mod] = copy[mod]
+            self.module_aggregated[mod] = copy[mod]
 
         [add_module(mod) for mod in copy if mod != unload]
 
@@ -157,7 +156,7 @@ class MAPAggregator(threading.Thread):
 
             for mod in self.dead_modules:
                 try:
-                    self.aggregated.pop(mod)
+                    self.module_aggregated.pop(mod)
                 except KeyError: pass  # 'missing' is fine.
 
             self.report()
