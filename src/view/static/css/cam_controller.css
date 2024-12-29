@@ -4,7 +4,7 @@ body {
     background-color:#333;
 }
 
-button {
+.cam_button {
     width:33px;
     height:33px;
     font-size: 20px;
