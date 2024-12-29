@@ -1,8 +1,13 @@
 
 
+{% set plugin = container.get_module_stats('cam') %}
+{% set config = container.get_module_config('cam') %}
 
+{% set majic_color = plugin['majic_color'] %}
+{% set cam_host_port = config['SERVER_NAME'] %}
 
-
+{% set streaming_host = config['PLUGIN']['streaming_host'] %}
+{% set streaming_port = config['PLUGIN']['streaming_port'] %}
 
 <style>
     .highlight {
@@ -24,7 +29,6 @@
 
 <link rel="stylesheet" href="{{ url_for('vc_bp.static', filename='css/cropper.css') }}">
 <link rel="stylesheet" href="{{ url_for('vc_bp.static', filename='css/cam_controller.css') }}">
-<script src="{{ url_for('vc_bp.static', filename='js/cam_controller.js') }}"></script>
 <script>
     function setsHeaders(xhttp) {
         xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
@@ -36,21 +40,21 @@
     function load_video(){
         var _video = document.getElementById("_video");
 
-        while (_video.src != "http://localhost:6100/stream") {  //TODO: replace as streamhost
-            _video.src = "http://localhost:6100/stream";
+        while (_video.src != "http://{{ streaming_host }}:{{ streaming_port }}/stream") {
+            _video.src = "http://{{ streaming_host }}:{{ streaming_port }}/stream";
         }
     }
 
     function fore_aft(button){
         // changes fore/aft view
         var xhttp = new XMLHttpRequest();
-        xhttp.open('POST', '{{ url_for('.index')}}view/' + button.value);
+        xhttp.open('POST', 'http://{{ tab }}.{{ cam_host_port }}/view/' + button.value);
         setsHeaders(xhttp);
         xhttp.send(); // no response
 
         button.value = (button.value == "FORE")? "AFT": "FORE";
         document.getElementById("fore_aft_button").innerHTML = button.value.split('')[0];
-        document.getElementById("fore_aft_button").classList.value = "fore_aft_button";
+        document.getElementById("fore_aft_button").classList.value = "cam_button";
 
         setTimeout(function() {
             load_video();
@@ -60,7 +64,7 @@
     function cam_multibutton(button){
         // set symbology & analysis
         const xhttp = new XMLHttpRequest();
-        xhttp.open('POST', "{{ url_for('.index')}}multibutton/" + button.value);
+        xhttp.open('POST', "http://{{ tab }}.{{ cam_host_port }}/multibutton/" + button.value);
         setsHeaders(xhttp);
         xhttp.send();
 
@@ -79,7 +83,7 @@
             var component = cropper.id.replace('_input', '');
 
             const xhttp = new XMLHttpRequest();
-            xhttp.open('POST', '{{ url_for('.index')}}plugin/' + component + "/" + cropper.value);
+            xhttp.open('POST', 'http://{{ tab }}.{{ cam_host_port }}/plugin/' + component + "/" + cropper.value);
             setsHeaders(xhttp);
             xhttp.send();
 
@@ -105,7 +109,7 @@
             var component = slider.id.replace('_input', '');
             //draw_grid([slider.value, slider.value], '#00F', 1);
             const xhttp = new XMLHttpRequest();
-            xhttp.open('POST', '{{ url_for('.index')}}plugin/' + slider.id.replace('cam_slider_', '').replace('_input', '') + "/" + parseFloat(slider.value));
+            xhttp.open('POST', 'http://{{ tab }}.{{ cam_host_port }}/plugin/' + slider.id.replace('cam_slider_', '').replace('_input', '') + "/" + parseFloat(slider.value));
             setsHeaders(xhttp);
             xhttp.send();
 
@@ -193,7 +197,7 @@
             var component = checkbox.id.replace('_input', '');
 
             const xhttp = new XMLHttpRequest();
-            xhttp.open('POST', '{{ url_for('.index')}}plugin/' + checkbox.id.replace('cam_checkbox_', '').replace('_input', '') + "/" + checkbox.checked);
+            xhttp.open('POST', 'http://{{ tab }}.{{ cam_host_port }}/plugin/' + checkbox.id.replace('cam_checkbox_', '').replace('_input', '') + "/" + checkbox.checked);
             setsHeaders(xhttp);
             xhttp.send();
 
@@ -210,7 +214,7 @@
     function cam_snap(){
         //  creates still image of current view
         const xhttp = new XMLHttpRequest();
-        xhttp.open('POST', '{{ url_for('.index')}}snap');
+        xhttp.open('POST', 'http://{{ tab }}.{{ cam_host_port }}/snap');
         setsHeaders(xhttp);
         xhttp.send();
 
@@ -231,10 +235,10 @@
 </script>
 
 
-<div>
+<div id="{{ tab }}" class="module_tab" style="position:relative;display:none;">
 
     <div id="videodiv" class="videodiv" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;">
-        <iframe id="_video" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;" class="_video" src="" onLoad="load_video();"></iframe>
+        <iframe id="_video" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;" class="_video" src=""></iframe>
         <canvas id="target" class="_target" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
         <canvas id="grid" class="_grid" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
     </div>
@@ -277,19 +281,19 @@
     </script>
 
     <div id="top_buttons" style="" class="top_buttons highlight">
-       <button id="fore_aft_button" class="button" value="AFT" onClick="fore_aft(this);">
+       <button id="fore_aft_button" class="cam_button" value="AFT" onClick="fore_aft(this);">
             <div id="fore_aft_button_text" style="">A</div>
         </button>
-        <button id="multi_button" style="position:relative;top:-3px;" class="button" value="OFF" onClick="cam_multibutton(this);">
+        <button id="multi_button" style="position:relative;top:-3px;" class="cam_button" value="OFF" onClick="cam_multibutton(this);">
             <div id="multi_button_text" style="font-size:12px;color:#333;position:relative;left:-2px;top:1px;" class="multi_button_text">OFF</div>
         </button>
-        <button id="snap_button" style="position:relative;top:-1px;" class="button"  value="SNAP" onClick="cam_snap();">
+        <button id="snap_button" style="position:relative;top:-1px;" class="cam_button"  value="SNAP" onClick="cam_snap();">
             <div id="snap_button_text" style="" class="snap_button_text">+</div>
         </button>
-        <button id="silence_button" style="position:relative;top:0px;" class="button"  value="SILENCE" onClick="cam_silence();">
+        <button id="silence_button" style="position:relative;top:0px;" class="cam_button"  value="SILENCE" onClick="cam_silence();">
             <div id="silence_button_text" style="position:relative;left:-1px;top:1px;" class="silence_button_text">!</div>
         </button>
-        <button id="erase_button" style="text-align:center;position:relative;top:-1px;left:562px" class="button">
+        <button id="erase_button" style="text-align:center;position:relative;top:-1px;left:562px" class="cam_button">
             <div id="erase_button_text" style="top:1px;color:red;" class="erase_button_text">!</div>
         </button>
         {% include 'audio_player.html.j2' ignore missing %}
@@ -302,7 +306,7 @@
                 ⊞:&nbsp;<span id="cam_slider_krnl_output">{{ plugin.krnl }}</span>
             <br>
                 ƒL:&nbsp;<span id="cam_slider_f_limit_output">{{ plugin.tracker.f_limit }}</span>
-                ƒ%:&nbsp;<span id="cam_slider_frm_delta_pcnt_output">{{ "{:.2f}".format(plugin.tracker.f_delta_pcnt) }}</span>
+                ƒ%:&nbsp;<span id="cam_slider_frm_delta_pcnt_output">{{ plugin.tracker.f_delta_pcnt }}</span>
             <br>
                 <span id="crop_output" class="cam_slider_crop_stats">x:0 y:0 w:0 h:0</span>
         </div>
@@ -322,7 +326,7 @@
             ƒL<br><input id="cam_slider_f_limit_input" style="" class="cam_slider" orient="vertical" type="range" min="1" max="60" step="1" value="{{ plugin.tracker.f_limit }}" onChange="handleSlider(this);"/>
         </div>
         <div id="cam_slider_frm_delta_pcnt" style="position:absolute;top:0px;left:100px;">
-            ƒ%<br><input id="cam_slider_frm_delta_pcnt_input" style="" class="cam_slider" orient="vertical" type="range" min="0.00" max="100.00" step="0.01" value="{{ plugin.tracker.f_delta_pcnt | float }}" onChange="handleSlider(this);"/>
+            ƒ%<br><input id="cam_slider_frm_delta_pcnt_input" style="" class="cam_slider" orient="vertical" type="range" min="0.00" max="100.00" step="0.01" value="{{ plugin.tracker.frm_delta_pcnt | float }}" onChange="handleSlider(this);"/>
         </div>
     </span>
 </div>
