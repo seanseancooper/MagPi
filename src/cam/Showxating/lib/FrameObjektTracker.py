@@ -7,9 +7,6 @@ from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
 from sklearn.metrics import euclidean_distances, pairwise_distances
 from sklearn.metrics.pairwise import paired_distances
 
-from datetime import datetime, timedelta
-from src.lib.utils import format_time, format_delta
-
 from src.cam.Showxating.lib.utils import is_in_range, is_inside, getAggregatedRect, getRectsFromContours
 from src.config import readConfig
 
@@ -28,10 +25,11 @@ class FrameObjektTracker:
         self.f_limit = 2                    # hyperparameter: max age of frames in o_cache_map.
         self.f_delta_pcnt = 0.50            # hyperparameter: 0..1 percentage of delta between the current and previous frames over all pixels in frame
         self.l_delta_pcnt = 0.50            # hyperparameter: 0..1 percentage of delta between the current and previous mean locations
+
         self.contour_limit = None           # number of contours evaluated by plugin in each pass
         self.contour_id = None              # ????
+
         self.tracked = {}                   # mapping of FrameObjekts over last 'f_limit' frames.
-        self.greyscale_frame  = None
         self._ml = []                       # DO NOT CHANGE: list of (x,y) location of contour in self.contours
         self._frame_delta = float()         # DO NOT CHANGE: euclidean distance between the current and previous frames
         self._frame_deltas = []             # DO NOT CHANGE: list of previous distances over last f_limit frames
