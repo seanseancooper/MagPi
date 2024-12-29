@@ -187,16 +187,26 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             f[self._max_height, self._max_width] = cv.cvtColor(t, cv.COLOR_GRAY2BGR)
             self.hold_threshold -= 1
 
-    def cam_snap(self, f_id=None):
+    def cam_snap(self):
+
+        def _snap(f):
+            if f is not None:
+                writer = ImageWriter("CAMManager")
+                writer.write("CAM_SNAP", f, f_id=None)
+
+        _, f = self.plugin_capture.capture.retrieve()
+        _snap(f)
+
+        return "OK"
+
+    def print_frame(self, frame, f_id):
 
         def _snap(f):
             if f is not None:
                 writer = ImageWriter("CAMManager")
                 writer.write("CAM_SNAP", f, f_id)
 
-        for frame in self.plugin_capture.run():
-            _snap(frame)
-            break
+        _snap(frame)
 
         return "OK"
 
@@ -248,7 +258,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                         print_symbology(self.has_symbols, frame, rect, self.has_motion, self.majic_color)
                     print_analytics(self.has_analysis, frame, cnt, hier)
                     if self.plugin_config['write_all_frames']:
-                        self.cam_snap(self.frame_id)
+                        self.print_frame(frame, self.frame_id)
 
             self.post_mediapipe(frame)
 
