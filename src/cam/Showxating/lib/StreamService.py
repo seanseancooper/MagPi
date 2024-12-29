@@ -47,9 +47,9 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
 
                             my.wfile.write(img_str)
                         except ConnectionResetError as c:
-                            print(f'{c}')
+                            pass  # print(f'{c}')
                         except BrokenPipeError as b:
-                            print(f'{b}')
+                            pass  # print(f'{b}')
                         except ValueError as v:
                             print(f'{v}')
 
