@@ -56,7 +56,7 @@ def cam_config():
 def cam_stats():
 
     _stats = camMgr.plugin.get()
-    _stats.update(camMgr.plugin.tracker.get())
+    _stats['tracker'] = camMgr.plugin.tracker.get()
 
     return jsonify(_stats)
 
