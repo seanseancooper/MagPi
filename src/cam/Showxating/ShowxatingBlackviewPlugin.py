@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta
-
 import cv2 as cv
 import numpy as np
 import json
@@ -25,7 +23,6 @@ def print_symbology(has_symbols, f, rect, m, c):
 
     if has_symbols:
         if m:
-            # TODO: needs to move dynamically w/ size
             cv.putText(f, "MOTION DETECTED!", (5, _start - 5), cv.FONT_HERSHEY_PLAIN, 1.0, c, 2)
 
         # yellow rect: items that are moving
@@ -67,8 +64,8 @@ def print_tracked(has_analysis, has_symbols, f, t, rect):
                 cv.rectangle(f, (x, y), (x+5, y+5), (0, 255, 255), -1)
             else:
                 # red dot: tests false.
-                # cv.putText(f, item, (x, (y + (i * 10))), cv.FONT_HERSHEY_PLAIN, .75, (0, 0, 255), 1)
-                # cv.rectangle(f, (x, y), (x+5, y+5), (0, 0, 255), -1)
+                cv.putText(f, item, (x, (y + (i * 10))), cv.FONT_HERSHEY_PLAIN, .75, (0, 0, 255), 1)
+                cv.rectangle(f, (x, y), (x+5, y+5), (0, 0, 255), -1)
                 pass
 
     if has_analysis:
@@ -117,9 +114,9 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
     def get(self):
         return {
-            "area": str(self._area),
-            "max_height": str(self._max_height),
-            "max_width": str(self._max_width),
+            # "area": str(self._area),
+            # "max_height": str(self._max_height),
+            # "max_width": str(self._max_width),
 
             "has_symbols": self.has_symbols,
             "has_analysis": self.has_analysis,
@@ -127,13 +124,13 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
             "kSz": str(self._kSz),
             "threshold": self.threshold,
-
             "show_threshold": self.show_threshold,
             "mediapipe": self.mediapipe,
 
             "f_id": self.frame_id,
             "majic_color": str(self.majic_color),
             "frame_shape": self.frame_shape,
+
             "created": format_time(self.created, "%H:%M:%S"),
             "updated": format_time(self.updated, "%H:%M:%S"),
             "elapsed": format_delta(self.elapsed, "%H:%M:%S"),
@@ -217,8 +214,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
             mp_pose = mp.solutions.pose
             self._pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
-            # TODO: is this fragment already available?
-            BGR_T = cv.cvtColor(f[self._max_height, self._max_width], cv.COLOR_RGB2BGR)
+            BGR_T = cv.cvtColor(f[self._max_height, self._max_width], cv.COLOR_RGB2BGR)  # 'BGR'
             self._result_T = self._pose.process(BGR_T)
 
     def post_mediapipe(self, f):
@@ -246,17 +242,17 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             conts = sortedContours(contours)
 
             for cnt in conts[:self.tracker.contour_limit]:
-                # TODO: perhaps scale the image here to 50%
-                # TODO: alternatives to paired
-                wall, rect = wall_images(frame.copy(), cnt)  # TODO: add to config
+
+                wall, rect = wall_images(frame.copy(), cnt)
 
                 if self.has_analysis or self.has_symbols:
-                    self.tracker.greyscale_frame  = self.greyscale_frame
                     self.tracked = self.tracker.track_objects(self.frame_id, frame, cnt, hier, wall, rect)
+
                     if self.tracked:
                         print_tracked(self.has_analysis, self.has_symbols, frame, self.tracked, rect)
                         print_symbology(self.has_symbols, frame, rect, self.has_motion, self.majic_color)
                     print_analytics(self.has_analysis, frame, cnt, hier)
+
                     if self.plugin_config['write_all_frames']:
                         self.print_frame(frame, self.frame_id)
 
@@ -275,8 +271,10 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
     def process_frame(self, frame):
 
         if self.plugin_process_frames:
-            # IDEA: can the timing of this be adjusted? Async code to 'grab()' might
-            #  be possible.
+
+            # ensure capture is open and if so, get a reference.
+            # failing that (not open?), try *again* to read
+            # the capture to get the reference frame.
             if self.plugin_capture.capture.grab():
                 ret, reference = self.plugin_capture.capture.retrieve()
             else:
@@ -291,10 +289,13 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                 self.greyscale_refer = cv.cvtColor(self.cropped_reference, cv.COLOR_BGR2GRAY)
 
                 DELTA = cv.absdiff(self.greyscale_frame, self.greyscale_refer)
+
                 BLURRED = cv.GaussianBlur(DELTA, (int(self.krnl), int(self.krnl)), 0)
                 _, THRESHOLD = cv.threshold(BLURRED, int(np.mean(BLURRED)) + self.threshold, 255, cv.THRESH_BINARY)
+
                 contours, hier = cv.findContours(THRESHOLD, cv.RETR_TREE, cv.CHAIN_APPROX_NONE,
                                               offset=[self._max_width.start, self._max_height.start])
+
                 self.threshold_ops(frame, THRESHOLD)
                 self.process_contours(frame, contours, hier)
 
