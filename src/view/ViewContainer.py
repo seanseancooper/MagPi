@@ -18,6 +18,7 @@ class ViewContainer(threading.Thread):
         self.modules = []
         self.module_tabs = []
         self.module_stats = defaultdict()
+        self.module_configs = defaultdict()
 
         self.title = None
 
@@ -48,8 +49,19 @@ class ViewContainer(threading.Thread):
             resp = requests.get(f'http://map.localhost:5005/stats/{mod}')
             if resp.ok:
                 self.module_stats[mod] = resp.json()
+                return self.module_stats[mod]
         except Exception as e:
             print(f'ViewContainer failed to get aggregated statistics for {mod}: {e}')
+
+    def get_module_config(self, mod):
+        # get config from *aggregator*, not module
+        try:
+            resp = requests.get(f'http://map.localhost:5005/aggregated/{mod}')
+            if resp.ok:
+                self.module_configs[mod] = resp.json()
+                return self.module_configs[mod]
+        except Exception as e:
+            print(f'ViewContainer failed to aggregate configuration for {mod}: {e}')
 
     def get_stat_for_module(self, m, stat):  # THE VIEW CALLS THIS
         try:
