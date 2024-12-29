@@ -30,15 +30,58 @@
                 }
             }
 
-
-
             tab_button = document.getElementsByClassName("tab_button");
             for (i = 0; i < tab_button.length; i++) {
                 tab_button[i].className = tab_button[i].className.replace(" active", "");
             }
 
-            document.getElementById(tabName + '_bar_container').style.display = "block";
-            document.getElementById(tabName + '_container_filters').style.display = "block";
+            let b_cb = document.getElementById(tabName + '_bar_container');
+            if (b_cb != null) {
+                b_cb.style.display = "block";
+            }
+
+            let f_cb = document.getElementById(tabName + '_container_filters');
+            if (f_cb != null) {
+                f_cb.style.display = "block";
+            }
+
+            // THIS SHOOULD NOT BE HERE !!!
+            if (tabName == 'cam'){
+                load_video();
+
+                var image = document.querySelector('#target');
+                var cropper = new Cropper(image, {
+                    viewMode: 1,
+                    center: true,
+                    dragMode: 'move',
+                    zoomable: false,
+                    scalable: false,
+                    autoCropArea: .50,
+                    restore: false,
+                    modal: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                    cropend: function (event) {
+                        cropper.getData();
+                        var cropBoxData = cropper.getCropBoxData();
+
+                        var c = Object();
+                        c.id = 'crop_input';
+
+                        value = {
+                            'x': Math.round(cropBoxData.left),
+                            'y': Math.round(cropBoxData.top),
+                            'w': Math.round(cropBoxData.width),
+                            'h': Math.round(cropBoxData.height)
+                        }
+
+                        c.value = JSON.stringify(value);
+                        handleCropper(c);
+                    }
+                });
+            }
+
             document.getElementById(tabName).style.display = "block";
             event.currentTarget.className += " active";
 
@@ -158,4 +201,3 @@
     </script>
 </body>
 </html>
-<!-- END ROOT -->

@@ -244,42 +244,6 @@
     </div>
 
     <script src="{{ url_for('vc_bp.static', filename='cropperjs/dist/cropper.js') }}"></script>
-    <script>
-        window.addEventListener('DOMContentLoaded', function () {
-            var image = document.querySelector('#target');
-            var cropper = new Cropper(image, {
-                viewMode: 1,
-                center: true,
-                dragMode: 'move',
-                zoomable: false,
-                scalable: false,
-                autoCropArea: .50,
-                restore: false,
-                modal: false,
-                cropBoxMovable: true,
-                cropBoxResizable: true,
-                toggleDragModeOnDblclick: false,
-                cropend: function (event) {
-                    cropper.getData();
-                    var cropBoxData = cropper.getCropBoxData();
-
-                    var c = Object();
-                    c.id = 'crop_input';
-
-                    value = {
-                        'x': Math.round(cropBoxData.left),
-                        'y': Math.round(cropBoxData.top),
-                        'w': Math.round(cropBoxData.width),
-                        'h': Math.round(cropBoxData.height)
-                    }
-
-                    c.value = JSON.stringify(value);
-                    handleCropper(c);
-                }
-            });
-       });
-    </script>
-
     <div id="top_buttons" style="" class="top_buttons highlight">
        <button id="fore_aft_button" class="cam_button" value="AFT" onClick="fore_aft(this);">
             <div id="fore_aft_button_text" style="">A</div>
