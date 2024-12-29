@@ -18,9 +18,19 @@
 
             for (i = 0; i < module_tab.length; i++) {
                 module_tab[i].style.display = "none";
-                document.getElementById(module_tab[i].id + '_bar_container').style.display = "none";
-                document.getElementById(module_tab[i].id + '_container_filters').style.display = "none";
+
+                let b_c = document.getElementById(module_tab[i].id + '_bar_container');
+                if (b_c != null) {
+                    b_c.style.display = "none";
+                }
+
+                let f_c = document.getElementById(module_tab[i].id + '_container_filters');
+                if (f_c != null) {
+                    f_c.style.display = "none";
+                }
             }
+
+
 
             tab_button = document.getElementsByClassName("tab_button");
             for (i = 0; i < tab_button.length; i++) {
@@ -46,8 +56,10 @@
     </div>
 
 {%- for tab, timeout in container.module_tabs: -%}
-    <div id="{{ tab }}_container_filters" style="{{ 'display:none;' if loop.index0 > 0 }}" class="container_filters">
-    {% include 'filter.html.js.j2' %}
+    {% if timeout > 0 %}
+        <div id="{{ tab }}_container_filters" style="{{ 'display:none;' if loop.index0 > 0 }}" class="container_filters">
+        {% include 'filter.html.js.j2' %}
+    {% endif %}
 {%- endfor -%}
 
 {% include 'ops_buttons.js' %}
@@ -82,8 +94,8 @@
         <div id="{{ tab }}_bar_container" style="padding-top:2px;padding-bottom:3px;{{ 'display:none;' if loop.index0 > 0 }}" class="bar_container">
             <div id="{{ tab }}_meter" style=""><script>{{ tab }}_make_deadline_bar();</script></div>
         </div>
+        <div id="{{ tab }}" class="module_tab" style="{{ 'display:none;' if loop.index0 > 0 }}"></div>
     {% endif %}
-    <div id="{{ tab }}" class="module_tab" style="{{ 'display:none;' if loop.index0 > 0 }}"></div>
 {%- endfor -%}
 
 {%- for tab, timeout in container.module_tabs: -%}
