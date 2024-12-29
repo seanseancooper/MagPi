@@ -54,7 +54,7 @@ def cam_config():
 
 @cam_bp.route('/stats', methods=['GET'], subdomain='cam')
 def cam_stats():
-
+    #TODO: move to manager
     _stats = camMgr.plugin.get()
     _stats['tracker'] = camMgr.plugin.tracker.get()
 
