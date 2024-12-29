@@ -17,7 +17,7 @@ function load_video(){
 function fore_aft(button){
     // changes fore/aft view
     var xhttp = new XMLHttpRequest();
-    xhttp.open('POST', '{{ url_for('.index')}}view/' + button.value);
+    xhttp.open("POST", "{{ url_for('.index') }}view/" + button.value);
     setsHeaders(xhttp);
     xhttp.send(); // no response
 
@@ -33,7 +33,7 @@ function fore_aft(button){
 function cam_multibutton(button){
     // set symbology & analysis
     const xhttp = new XMLHttpRequest();
-    xhttp.open('POST', "{{ url_for('.index')}}multibutton/" + button.value);
+    xhttp.open("POST", "{{ url_for('.index')}}multibutton/" + button.value);
     setsHeaders(xhttp);
     xhttp.send();
 
@@ -52,7 +52,7 @@ function handleCropper(cropper) {
         var component = cropper.id.replace('_input', '');
 
         const xhttp = new XMLHttpRequest();
-        xhttp.open('POST', '{{ url_for('.index')}}plugin/' + component + "/" + cropper.value);
+        xhttp.open(, "{{ url_for('.index')}}plugin/" + component + "/" + cropper.value);
         setsHeaders(xhttp);
         xhttp.send();
 
@@ -78,7 +78,7 @@ function handleSlider(slider) {
         var component = slider.id.replace('_input', '');
         //draw_grid([slider.value, slider.value], '#00F', 1);
         const xhttp = new XMLHttpRequest();
-        xhttp.open('POST', '{{ url_for('.index')}}plugin/' + slider.id.replace('cam_slider_', '').replace('_input', '') + "/" + parseFloat(slider.value));
+        xhttp.open("POST", "{{ url_for('.index')}}plugin/" + slider.id.replace('cam_slider_', '').replace('_input', '') + "/" + parseFloat(slider.value));
         setsHeaders(xhttp);
         xhttp.send();
 
@@ -166,7 +166,7 @@ function handleCheckBox(checkbox) {
         var component = checkbox.id.replace('_input', '');
 
         const xhttp = new XMLHttpRequest();
-        xhttp.open('POST', '{{ url_for('.index')}}plugin/' + checkbox.id.replace('cam_checkbox_', '').replace('_input', '') + "/" + checkbox.checked);
+        xhttp.open("POST", "{{ url_for('.index')}}plugin/" + checkbox.id.replace('cam_checkbox_', '').replace('_input', '') + "/" + checkbox.checked);
         setsHeaders(xhttp);
         xhttp.send();
 
@@ -183,7 +183,7 @@ function handleCheckBox(checkbox) {
 function cam_snap(){
     //  creates still image of current view
     const xhttp = new XMLHttpRequest();
-    xhttp.open('POST', '{{ url_for('.index')}}snap');
+    xhttp.open("POST", "{{ url_for('.index')}}snap");
     setsHeaders(xhttp);
     xhttp.send();
 
