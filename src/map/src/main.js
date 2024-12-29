@@ -431,6 +431,13 @@ map.getTargetElement().addEventListener('pointerleave', function () {
     info.style.visibility = 'hidden';
 });
 
+/*
+#TODO: support
+overlaid data,
+satellite images & wavelengths,
+different resolutions
+*/
+
 new VectorLayer({
     map: map,
     source: new Vector({
