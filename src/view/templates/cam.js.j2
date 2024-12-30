@@ -1,9 +1,6 @@
-
-
 {% set plugin = container.get_module_stats('cam') %}
 {% set config = container.get_module_config('cam') %}
 
-{% set majic_color = plugin['majic_color'] %}
 {% set cam_host_port = config['SERVER_NAME'] %}
 
 {% set streaming_host = config['PLUGIN']['streaming_host'] %}
@@ -11,11 +8,11 @@
 
 <style>
     .highlight {
-        color: rgb{{ plugin.majic_color }};
+        color: rgb{{ get_stat_for_module('CAM', majic_color) }};
     }
 </style>
 <script>
-    const highlight = {{ plugin.majic_color }};
+    var highlight = {{ plugin.majic_color }};
 </script>
 <style>
     /* Ensure the size of the image fit the container perfectly */
@@ -31,6 +28,8 @@
 <link rel="stylesheet" href="{{ url_for('vc_bp.static', filename='css/cam_controller.css') }}">
 <script>
     function setsHeaders(xhttp) {
+        // rhis will work, but get this from data-target instead.
+        xhttp.setRequestHeader('TARGET', '{{ tab }}');
         xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
         xhttp.setRequestHeader('Access-Control-Allow-Methods', 'POST, GET');
         xhttp.setRequestHeader('Content-Type', 'text/html');
@@ -48,7 +47,7 @@
     function fore_aft(button){
         // changes fore/aft view
         var xhttp = new XMLHttpRequest();
-        xhttp.open('POST', 'http://{{ tab }}.{{ cam_host_port }}/view/' + button.value);
+        xhttp.open("POST", "http://{{ tab }}.{{ cam_host_port }}/view/" + button.value);
         setsHeaders(xhttp);
         xhttp.send(); // no response
 
@@ -64,7 +63,7 @@
     function cam_multibutton(button){
         // set symbology & analysis
         const xhttp = new XMLHttpRequest();
-        xhttp.open('POST', "http://{{ tab }}.{{ cam_host_port }}/multibutton/" + button.value);
+        xhttp.open("POST", "http://{{ tab }}.{{ cam_host_port }}/multibutton/" + button.value);
         setsHeaders(xhttp);
         xhttp.send();
 
@@ -75,30 +74,26 @@
         }
     }
 
-    function handleCropper(cropper) {
-        // send crop
-        const cropper_output = document.getElementById(cropper.id.replace('_input', '_output'));
+    function handleCheckBox(checkbox) {
+        // handle binary
+        const cb_output = document.getElementById(checkbox.id.replace('_input', '_output'));
 
-        function updateCropper() {
-            var component = cropper.id.replace('_input', '');
+        function updateCheckBox() {
+            var component = checkbox.id.replace('_input', '');
 
             const xhttp = new XMLHttpRequest();
-            xhttp.open('POST', 'http://{{ tab }}.{{ cam_host_port }}/plugin/' + component + "/" + cropper.value);
+            xhttp.open('POST', 'http://{{ tab }}.{{ cam_host_port }}/plugin/' + checkbox.id.replace('cam_checkbox_', '').replace('_input', '') + "/" + checkbox.checked);
             setsHeaders(xhttp);
             xhttp.send();
 
             xhttp.onload = function() {
-                if (xhttp.response == "OK"){
-                    var j = JSON.parse(cropper.value);
-                    cropper_output.innerText = "x:" + j['x'] +
-                                              " y:" + j['y'] +
-                                              " w:" + j['w'] +
-                                              " h:" + j['h'];
+                if (xhttp.response == "OK") {
+                    cb_output.innerText = (checkbox.checked)? "ON": "OFF";
                 }
             };
         }
 
-        updateCropper();
+        updateCheckBox();
     }
 
     function handleSlider(slider) {
@@ -107,9 +102,8 @@
 
         function updateSlider() {
             var component = slider.id.replace('_input', '');
-            //draw_grid([slider.value, slider.value], '#00F', 1);
             const xhttp = new XMLHttpRequest();
-            xhttp.open('POST', 'http://{{ tab }}.{{ cam_host_port }}/plugin/' + slider.id.replace('cam_slider_', '').replace('_input', '') + "/" + parseFloat(slider.value));
+            xhttp.open("POST", "http://{{ tab }}.{{ cam_host_port }}/plugin/" + slider.id.replace('cam_slider_', '').replace('_input', '') + "/" + parseFloat(slider.value));
             setsHeaders(xhttp);
             xhttp.send();
 
@@ -126,7 +120,6 @@
 
     function handleGridSlider(slider) {
         const grid = document.getElementById("grid");
-
 
         document.querySelector('#cam_slider_krnl_input')
             .addEventListener('input', evt => {
@@ -182,39 +175,42 @@
                 // Restore the transform
                 ctx.restore();
 
-
             }
             updateSlider();
         });
         grid.style.setProperty('display','none');
     }
 
-    function handleCheckBox(checkbox) {
-        // handle binary
-        const cb_output = document.getElementById(checkbox.id.replace('_input', '_output'));
+    function handleCropper(cropper) {
+        // send crop
+        const cropper_output = document.getElementById(cropper.id.replace('_input', '_output'));
 
-        function updateCheckBox() {
-            var component = checkbox.id.replace('_input', '');
+        function updateCropper() {
+            var component = cropper.id.replace('_input', '');
 
             const xhttp = new XMLHttpRequest();
-            xhttp.open('POST', 'http://{{ tab }}.{{ cam_host_port }}/plugin/' + checkbox.id.replace('cam_checkbox_', '').replace('_input', '') + "/" + checkbox.checked);
+            xhttp.open("POST", "http://{{ tab }}.{{ cam_host_port }}/plugin/" + component + "/" + cropper.value);
             setsHeaders(xhttp);
             xhttp.send();
 
             xhttp.onload = function() {
-                if (xhttp.response == "OK") {
-                    cb_output.innerText = (checkbox.checked)? "ON": "OFF";
+                if (xhttp.response == "OK"){
+                    var j = JSON.parse(cropper.value);
+                    cropper_output.innerText = "x:" + j['x'] +
+                                              " y:" + j['y'] +
+                                              " w:" + j['w'] +
+                                              " h:" + j['h'];
                 }
             };
         }
 
-        updateCheckBox();
+        updateCropper();
     }
 
     function cam_snap(){
         //  creates still image of current view
         const xhttp = new XMLHttpRequest();
-        xhttp.open('POST', 'http://{{ tab }}.{{ cam_host_port }}/snap');
+        xhttp.open("POST", "http://{{ tab }}.{{ cam_host_port }}/snap");
         setsHeaders(xhttp);
         xhttp.send();
 
@@ -242,56 +238,43 @@
         <canvas id="target" class="_target" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
         <canvas id="grid" class="_grid" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
     </div>
-
     <script src="{{ url_for('vc_bp.static', filename='cropperjs/dist/cropper.js') }}"></script>
-    <div id="top_buttons" style="" class="top_buttons highlight">
+
+    <div id="cam_button_box" style="left:0px;top:0px;" class="cam_button_box highlight">
        <button id="fore_aft_button" class="cam_button" value="AFT" onClick="fore_aft(this);">
-            <div id="fore_aft_button_text" style="">A</div>
+            <span id="fore_aft_button_text" style="" class="fore_aft_button_text">A</span>
         </button>
-        <button id="multi_button" style="position:relative;top:-3px;" class="cam_button" value="OFF" onClick="cam_multibutton(this);">
-            <div id="multi_button_text" style="font-size:12px;color:#333;position:relative;left:-2px;top:1px;" class="multi_button_text">OFF</div>
+        <button id="multi_button" class="cam_button" value="OFF" data-action="" data-target="CAM" onClick="cam_multibutton(this);">
+            <span id="multi_button_text" style="left:-1px;" class="multi_button_text">OFF</span>
         </button>
-        <button id="snap_button" style="position:relative;top:-1px;" class="cam_button"  value="SNAP" onClick="cam_snap();">
-            <div id="snap_button_text" style="" class="snap_button_text">+</div>
+        <button id="snap_button" class="cam_button"  value="SNAP" data-action="" data-target="CAM" onClick="cam_snap();">
+            <span id="snap_button_text" style="" class="snap_button_text">+</span>
         </button>
-        <button id="silence_button" style="position:relative;top:0px;" class="cam_button"  value="SILENCE" onClick="cam_silence();">
-            <div id="silence_button_text" style="position:relative;left:-1px;top:1px;" class="silence_button_text">!</div>
-        </button>
-        <button id="erase_button" style="text-align:center;position:relative;top:-1px;left:562px" class="cam_button">
-            <div id="erase_button_text" style="top:1px;color:red;" class="erase_button_text">!</div>
-        </button>
-        {% include 'audio_player.html.j2' ignore missing %}
     </div>
 
-    <div id="info_box" style="" class="highlight">
-        <div id="cam_slider_outputs" style="" class="cam_slider_outputs highlight">
-                ∑:&nbsp;<span id="cam_slider_threshold_output">{{ plugin.threshold | int }}</span>
-                ∞:&nbsp;<span id="cam_checkbox_hold_threshold_output">OFF</span>
-                ⊞:&nbsp;<span id="cam_slider_krnl_output">{{ plugin.krnl }}</span>
+    <div id="cam_info_box" style="left:120px;top:0px;" class="cam_info_box highlight">
+        <div id="cam_slider_outputs" style="top:-2px;" class="cam_slider_outputs highlight">
+            ∆:&nbsp;<span id="cam_slider_threshold_output">-000</span>&nbsp;|&nbsp;
+            ∞:&nbsp;<span id="cam_checkbox_hold_threshold_output">OFF</span>&nbsp;|&nbsp;
+            ⊞:&nbsp;<span id="cam_slider_krnl_output">000</span>&nbsp;|&nbsp;
+            ƒ:&nbsp;<span id="cam_slider_f_limit_output">00</span>&nbsp;|&nbsp;
+            %:&nbsp;<span id="cam_slider_frm_delta_pcnt_output">000.00</span>
             <br>
-                ƒL:&nbsp;<span id="cam_slider_f_limit_output">{{ plugin.tracker.f_limit }}</span>
-                ƒ%:&nbsp;<span id="cam_slider_frm_delta_pcnt_output">{{ plugin.tracker.f_delta_pcnt }}</span>
-            <br>
-                <span id="crop_output" class="cam_slider_crop_stats">x:0 y:0 w:0 h:0</span>
+            <span id="crop_output" class="cam_slider_crop_stats">x:0 y:0 w:0 h:0</span>
         </div>
     </div>
 
-    <span id="cam_sliders" style="" class="cam_sliders highlight">
-        <div id="cam_checkbox_hold_threshold" style="position:absolute;left:0px;">
-            <input id="cam_checkbox_hold_threshold_input" style="position:absolute;left:-20px;top:98px;" type="checkbox" {{ "checked" if plugin.hold_threshold is true }} onChange="handleCheckBox(this);"/>
-        </div>
-        <div id="cam_slider_threshold" style="position:absolute;left:0px;">
-            ∑<br><input id="cam_slider_threshold_input" style="height:100px;" class="cam_slider" orient="vertical" type="range" min="-100" max="100" step="1" value="{{ plugin.threshold | int }}" onChange="handleSlider(this);"/>
-        </div>
-        <div id="cam_slider_krnl" style="position:absolute;top:0px;left:25px;">
-            ⊞<br><input id="cam_slider_krnl_input" style="" class="cam_slider" orient="vertical" type="range" min="1" max="128" step="2" value="{{ plugin.krnl }}" onChange="handleGridSlider(this);"/>
-        </div>
-        <div id="cam_slider_f_limit" style="position:absolute;top:0px;left:50px;">
-            ƒL<br><input id="cam_slider_f_limit_input" style="" class="cam_slider" orient="vertical" type="range" min="1" max="60" step="1" value="{{ plugin.tracker.f_limit }}" onChange="handleSlider(this);"/>
-        </div>
-        <div id="cam_slider_frm_delta_pcnt" style="position:absolute;top:0px;left:100px;">
-            ƒ%<br><input id="cam_slider_frm_delta_pcnt_input" style="" class="cam_slider" orient="vertical" type="range" min="0.00" max="100.00" step="0.01" value="{{ plugin.tracker.frm_delta_pcnt | float }}" onChange="handleSlider(this);"/>
-        </div>
-    </span>
+    <div style="left:440px;top:0px;" class="cam_checkbox_box highlight">
+        <input id="cam_checkbox_hold_threshold_input" style="top:2px;left:-2px;" checked type="checkbox" data-action="" data-target="{{ tab }}" onChange="handleCheckBox(this);"/>
+        <br>&nbsp;&nbsp;∞
+    </div>h
+    <div style="left:471px;top:0px;" class="cam_slider_box highlight">
+        <input id="cam_slider_threshold_input" class="cam_slider" type="range" min="-100" max="100" step="1" value="0" data-action="" data-target="{{ tab }}" onChange="handleSlider(this);"/>
+        <input id="cam_slider_krnl_input" class="cam_slider" type="range" min="1" max="128" step="2" value="9" data-action="" data-target="{{ tab }}" onChange="handleGridSlider(this);"/>
+    </div>
+    <div style="left:590px;top:0px;" class="cam_slider_box highlight">
+        <input id="cam_slider_f_limit_input" class="cam_slider" type="range" min="1" max="60" step="1" value="2" data-action="" data-target="{{ tab }}" onChange="handleSlider(this);"/>
+        <input id="cam_slider_frm_delta_pcnt_input" class="cam_slider" type="range" min="0.00" max="100.00" step="0.01" value="50.00" data-action="" data-target="{{ tab }}" onChange="handleSlider(this);"/>
+    </div>
 </div>
 
