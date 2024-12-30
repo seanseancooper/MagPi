@@ -91,7 +91,11 @@
 <body>
     <div id="tabs" style="height:30px">
 {%- for tab, timeout in container.module_tabs: %}
-    {% set elapsed = container.get_stat_for_module(tab, 'elapsed') %}
+    {% if tab in container.modules %}
+        {% set elapsed = container.get_stat_for_module(tab, 'elapsed') %}
+    {% else %}
+        {% set elapsed = '' %}
+    {% endif %}
         <button id="container_tab_{{ tab }}" class="tab_button {{ 'active' if loop.index0 }}" onclick="loadTab(event, '{{ tab }}')">{{ tab | upper }} {{ elapsed }}</button>
 {%- endfor %}
     </div>
