@@ -15,7 +15,7 @@
 			"TEST_FILE": "TEST_FILE.csv"
 		},
 		{
-			"TEST_FILE_TIME_MAX": 15
+			"TEST_FILE_TIME_MAX": 300
 		},
 		{
 			"MUTE_TIME": 30
