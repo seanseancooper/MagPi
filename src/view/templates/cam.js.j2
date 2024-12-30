@@ -8,7 +8,7 @@
 
 <style>
     .highlight {
-        color: rgb{{ get_stat_for_module('CAM', majic_color) }};
+        color: rgb{{ plugin.majic_color }};
     }
 </style>
 <script>
@@ -28,8 +28,6 @@
 <link rel="stylesheet" href="{{ url_for('vc_bp.static', filename='css/cam_controller.css') }}">
 <script>
     function setsHeaders(xhttp) {
-        // rhis will work, but get this from data-target instead.
-        xhttp.setRequestHeader('TARGET', '{{ tab }}');
         xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
         xhttp.setRequestHeader('Access-Control-Allow-Methods', 'POST, GET');
         xhttp.setRequestHeader('Content-Type', 'text/html');
@@ -49,6 +47,7 @@
         var xhttp = new XMLHttpRequest();
         xhttp.open("POST", "http://{{ tab }}.{{ cam_host_port }}/view/" + button.value);
         setsHeaders(xhttp);
+        xhttp.setRequestHeader('TARGET', '{{ tab }}');
         xhttp.send(); // no response
 
         button.value = (button.value == "FORE")? "AFT": "FORE";
@@ -65,6 +64,8 @@
         const xhttp = new XMLHttpRequest();
         xhttp.open("POST", "http://{{ tab }}.{{ cam_host_port }}/multibutton/" + button.value);
         setsHeaders(xhttp);
+        xhttp.setRequestHeader('TARGET', '{{ tab }}');
+
         xhttp.send();
 
         xhttp.onload = function() {
@@ -84,6 +85,8 @@
             const xhttp = new XMLHttpRequest();
             xhttp.open('POST', 'http://{{ tab }}.{{ cam_host_port }}/plugin/' + checkbox.id.replace('cam_checkbox_', '').replace('_input', '') + "/" + checkbox.checked);
             setsHeaders(xhttp);
+            xhttp.setRequestHeader('TARGET', '{{ tab }}');
+
             xhttp.send();
 
             xhttp.onload = function() {
@@ -105,6 +108,8 @@
             const xhttp = new XMLHttpRequest();
             xhttp.open("POST", "http://{{ tab }}.{{ cam_host_port }}/plugin/" + slider.id.replace('cam_slider_', '').replace('_input', '') + "/" + parseFloat(slider.value));
             setsHeaders(xhttp);
+            xhttp.setRequestHeader('TARGET', '{{ tab }}');
+
             xhttp.send();
 
             xhttp.onload = function() {
@@ -191,6 +196,8 @@
             const xhttp = new XMLHttpRequest();
             xhttp.open("POST", "http://{{ tab }}.{{ cam_host_port }}/plugin/" + component + "/" + cropper.value);
             setsHeaders(xhttp);
+            xhttp.setRequestHeader('TARGET', '{{ tab }}');
+
             xhttp.send();
 
             xhttp.onload = function() {
@@ -212,6 +219,8 @@
         const xhttp = new XMLHttpRequest();
         xhttp.open("POST", "http://{{ tab }}.{{ cam_host_port }}/snap");
         setsHeaders(xhttp);
+        xhttp.setRequestHeader('TARGET', '{{ tab }}');
+
         xhttp.send();
 
         // on response, run the videobutton animation
