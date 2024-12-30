@@ -22,7 +22,8 @@
 			"MODULES": [
 				"wifi",
 				"trx",
-				"cam"
+				"cam",
+				"map"
 			]
 		},
 		{
@@ -37,6 +38,9 @@
 				},
 				"cam": {
 					"cam": 0
+				},
+				"map": {
+					"map": 0
 				}
 			}
 		},
