@@ -36,17 +36,20 @@ def module_stats():
 @map_bp.route("/aggregated", methods=['GET'], subdomain='map')
 def aggregated():
     """  returns all aggregated data """
+    return mapAgg.module_aggregated
+
     # TODO: move to manager
-    _configs = mapAgg.module_configs
-    _configs['stats'] = mapAgg.module_stats
-    return jsonify(_configs)
+    # _configs = mapAgg.module_configs
+    # _configs['stats'] = mapAgg.module_stats
+    # return jsonify(_configs)
 
 @map_bp.route("/aggregated/<mod>", methods=['GET'], subdomain='map')
 def aggregated_by_module(mod):
     """ returns module specific aggregated data"""
-    _configs = mapAgg.module_configs[mod]
-    _configs['stats'] = mapAgg.module_stats[mod]
-    return jsonify(_configs)
+    return mapAgg.module_aggregated[mod]
+    # _configs = mapAgg.module_configs[mod]
+    # _configs['stats'] = mapAgg.module_stats[mod]
+    # return jsonify(_configs)
 
 @map_bp.route("/config/<mod>", methods=['GET'], subdomain='map')
 def config_for_module(mod):
