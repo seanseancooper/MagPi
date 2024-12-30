@@ -7,8 +7,8 @@ body {
 .cam_button {
     width:33px;
     height:33px;
-    font-size: 20px;
-    font-weight: bold;
+    font-size:20px;
+    font-weight:bold;
     border-radius:3px;
     color:#333;
     background-color:#999;
@@ -19,7 +19,7 @@ body {
     height:480px;
     position:absolute;
     left:0px;
-    top:0px;
+    top:60px;
 }
 
 ._grid {
@@ -40,46 +40,68 @@ body {
     max-height: 100%;
 }
 
-.top_buttons {
-    position:absolute;
-    left:2px;
-    top:5px;
-}
-
-info_box {
-    position:absolute;
-    left:2px;
-    top:40px;
-}
-
-.cam_sliders {
-    position:absolute;
-    left:240px;
-    top:5px;
-}
-
-.cam_slider_outputs{
+.cam_button_box {
     position:relative;
-    top:35px;
-    left:-5px;
-    width:198px;
-    height:50px;
+    width:106px;
+    height:33px;
     border-style:solid;
     border-width:2px;
     border-radius:5px;
     padding: 3px 3px 3px 3px;
+}
+
+.multi_button_text {
+    position:relative;
+    font-size:12px;
+    font-weight:bold;
+    left:-4px;
+    top:-3px;
+}
+
+.cam_info_box {
+    position:absolute;
+    width:305px;
+    height:33px;
+    border-style:solid;
+    border-width:2px;
+    border-radius:5px;
+    padding: 3px 3px 3px 3px;
+}
+
+.cam_slider_outputs{
+    position:relative;
     font-size:14px;
     font-weight:bold;
     text-justify:right;
 }
 
 .cam_slider {
-    height:100px;
+    height:10px;
+    width:100px;
 }
 
-/*
-https://range-input-css.netlify.app/
-***** Baseline, reset styles ***********/
+.cam_checkbox_box {
+    position:absolute;
+    width:22px;
+    height:39px;
+    border-style:solid;
+    border-width:2px;
+    border-radius:5px;
+    //padding: 3px 3px 3px 3px;
+}
+
+.cam_slider_box {
+    position:absolute;
+    width:104px;
+    height:36x;
+    border-style:solid;
+    border-width:2px;
+    border-radius:5px;
+    padding: 3px 3px 3px 3px;
+}
+
+
+/*********** Baseline, reset styles ***********/
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -96,57 +118,49 @@ input[type="range"]:focus {
 /******** Chrome, Safari, Opera and Edge Chromium styles ********/
 /* slider track */
 input[type="range"]::-webkit-slider-runnable-track {
-  background-color: #333;
-  border-radius: 10px;
-  width: 1px;
-}
-
-input[type=range][orient=vertical] {
-    writing-mode: vertical-lr;
-    direction: rtl;
-    appearance: slider-vertical;
-    width: 2px;
-    vertical-align: bottom;
+  background-color: #ffffff;
+  border-radius: 0px;
+  height: 2px;
 }
 
 /* slider thumb */
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none; /* Override default look */
   appearance: none;
-  margin-left: -7px; /* Centers thumb on the track */
-  background-color: #999;
-  color: #333;
+  margin-top: -6px; /* Centers thumb on the track */
+  background-color: #00ff00;
   border-radius: 2px;
-  height: 15px;
-  width: 15px;
+  height: 14px;
+  width: 5px;
 }
 
 input[type="range"]:focus::-webkit-slider-thumb {
-  outline: 3px solid #333;
+  outline: 3px solid #00ff00;
   outline-offset: 0.125rem;
 }
 
 /*********** Firefox styles ***********/
 /* slider track */
 input[type="range"]::-moz-range-track {
-  background-color: #333;
-  border-radius: 0.5px;
-  height: 100px;
+  background-color: #ffffff;
+  border-radius: 0px;
+  height: 2px;
 }
 
 /* slider thumb */
 input[type="range"]::-moz-range-thumb {
-  background-color: #333;
+  background-color: #00ff00;
   border: none; /*Removes extra border that FF applies*/
-  border-radius: 3px;
-  height: 15px;
-  width: 15px;
+  border-radius: 2px;
+  height: 14px;
+  width: 5px;
 }
 
 input[type="range"]:focus::-moz-range-thumb{
-  outline: 3px solid #808080;
+  outline: 3px solid #00ff00;
   outline-offset: 0.125rem;
 }
+
 
 .wifi_joy {}
 .wifi_joy_status {}
