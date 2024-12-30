@@ -13,7 +13,6 @@ class ViewContainer(threading.Thread):
         self.created = datetime.now()
         self.updated = datetime.now()
         self.elapsed = timedelta()
-        self.view_timeout = 0                   # backwards compat.
         self.config = {}
         self.modules = []
         self.module_tabs = []
@@ -44,7 +43,7 @@ class ViewContainer(threading.Thread):
         print(f'added module {m}')
 
     def get_module_stats(self, mod):
-        # get stats from *aggregator*, not module
+        """ return all stats """
         try:
             resp = requests.get(f'http://map.localhost:5005/stats/{mod}')
             if resp.ok:
@@ -54,19 +53,21 @@ class ViewContainer(threading.Thread):
             print(f'ViewContainer failed to get aggregated statistics for {mod}: {e}')
 
     def get_module_config(self, mod):
-        # get config from *aggregator*, not module
+        """ return all config """
         try:
-            resp = requests.get(f'http://map.localhost:5005/aggregated/{mod}')
+            resp = requests.get(f'http://map.localhost:5005/config/{mod}')
             if resp.ok:
                 self.module_configs[mod] = resp.json()
                 return self.module_configs[mod]
         except Exception as e:
+            self.module_tabs.pop(mod)
             print(f'ViewContainer failed to aggregate configuration for {mod}: {e}')
 
-    def get_stat_for_module(self, m, stat):  # THE VIEW CALLS THIS
+    def get_stat_for_module(self, m, stat):
+        """ return a specific value from stats """
         try:
             self.get_module_stats(m)
-            value = self.module_stats[m].get(stat) or 'unknown'
+            value = self.module_stats[m].get(stat) or 'offline'
             return value
         except KeyError:
             return 'unknown'
