@@ -83,6 +83,7 @@ def wifi_stats():
     # placeholder; this should already be a map called stats in s. I want to be able to add to that map adhoc.
     stats = {
         'created': format_time(s.created, s.config['TIME_FORMAT']),
+        'updated': format_time(s.updated, s.config['TIME_FORMAT']),
         'elapsed': format_delta(s.elapsed, s.config['TIME_FORMAT']),
         'polling_count': s.polling_count,
         'lat': s.latitude,

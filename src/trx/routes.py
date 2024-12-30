@@ -64,6 +64,7 @@ def trx_stats():
 
     stats = {
         'created': format_time(trxRet.created, "%H:%M:%S"),
+        'updated': format_time(trxRet.updated, "%H:%M:%S"),
         'elapsed': format_delta(trxRet.elapsed, "%H:%M:%S"),
         'polling_count': trxRet.polling_count,
         'latitude': trxRet.latitude,
