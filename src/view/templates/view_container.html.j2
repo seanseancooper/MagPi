@@ -45,7 +45,7 @@
                 f_cb.style.display = "block";
             }
 
-            // THIS SHOOULD NOT BE HERE !!!
+            // THIS SHOULD NOT BE HERE !!!
             if (tabName == 'cam'){
                 load_video();
 
@@ -90,22 +90,21 @@
 </head>
 <body>
     <div id="tabs" style="height:30px">
-
 {%- for tab, timeout in container.module_tabs: %}
     {% set elapsed = container.get_stat_for_module(tab, 'elapsed') %}
-    <button id="container_tab_{{ tab }}" class="tab_button {{ 'active' if loop.index0 }}" onclick="loadTab(event, '{{ tab }}')">{{ tab }} {{ elapsed }}</button>
+        <button id="container_tab_{{ tab }}" class="tab_button {{ 'active' if loop.index0 }}" onclick="loadTab(event, '{{ tab }}')">{{ tab | upper }} {{ elapsed }}</button>
 {%- endfor %}
-
     </div>
 
 {%- for tab, timeout in container.module_tabs: -%}
     {% if timeout > 0 %}
-        <div id="{{ tab }}_container_filters" style="{{ 'display:none;' if loop.index0 > 0 }}" class="container_filters">
-        {% include 'filter.html.js.j2' %}
+    <div id="{{ tab }}_container_filters" style="{{ 'display:none;' if loop.index0 > 0 }}" class="container_filters">
+    {% include 'filter.html.js.j2' %}
+    </div>
     {% endif %}
 {%- endfor -%}
 
-{% include 'ops_buttons.js' %}
+    {% include 'ops_buttons.js' %}
 
     <script>
         function reload(){
@@ -134,10 +133,10 @@
 {%- for tab, timeout in container.module_tabs: -%}
     {% if timeout > 0 %}
         {% include 'autoloader.js.j2' %}
-        <div id="{{ tab }}_bar_container" style="padding-top:2px;padding-bottom:3px;{{ 'display:none;' if loop.index0 > 0 }}" class="bar_container">
-            <div id="{{ tab }}_meter" style=""><script>{{ tab }}_make_deadline_bar();</script></div>
-        </div>
-        <div id="{{ tab }}" class="module_tab" style="{{ 'display:none;' if loop.index0 > 0 }}"></div>
+    <div id="{{ tab }}_bar_container" style="padding-top:2px;padding-bottom:3px;{{ 'display:none;' if loop.index0 > 0 }}" class="bar_container">
+        <div id="{{ tab }}_meter" style=""><script>{{ tab }}_make_deadline_bar();</script></div>
+    </div>
+    <div id="{{ tab }}" class="module_tab" style="{{ 'display:none;' if loop.index0 > 0 }}"></div>
     {% endif %}
 {%- endfor -%}
 
