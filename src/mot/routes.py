@@ -14,7 +14,7 @@ mot_bp = Blueprint(
 
 @mot_bp.route('/')
 def index():
-    return render_template("motion.html.j2")
+    return render_template("cam_divs.html.j2")
 
 
 @mot_bp.route("/stop", methods=['GET', 'POST'])
