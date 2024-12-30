@@ -38,12 +38,12 @@ class MAPController(threading.Thread):
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
 
-            import os
-            os.chdir('src/')
-            if routes.mapAgg.config['NODE_BUILD'] is True:
-                routes.node.build()
-
-            routes.node.run()
+            # import os
+            # os.chdir('src/')
+            # if routes.mapAgg.config['NODE_BUILD'] is True:
+            #     routes.node.build()
+            #
+            # routes.node.run()
             routes.mapAgg.run()
 
         except KeyboardInterrupt:
