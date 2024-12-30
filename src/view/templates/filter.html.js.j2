@@ -1,38 +1,36 @@
-
-    <!-- build from module 'columns' -->
-    <select id="{{ tab }}_filter_field">
-        <option></option>
-        <option value="is_mute">Muted</option>
-        <option value="tracked">Tracked</option>
-        <option value="SSID">SSID</option>
-        <option value="BSSID">BSSID</option>
-        <option value="Signal">Signal</option>
-        <option value="Channel">Channel</option>
-        <option value="Frequency">Frequency</option>
-        <option value="Quality">Quality</option>
-        <option value="Encryption">Encryption</option>
-        <option value="Vendor">Vendor</option>
-        <option value="created">Found</option>
-        <option value="updated">Last</option>
-    </select>
-    <select id="{{ tab }}_filter_type">
-        <option value="=">=</option>
-        <option value="<"><</option>
-        <option value="<="><=</option>
-        <option value=">">></option>
-        <option value=">=">>=</option>
-        <option value="!=">!=</option>
-        <option value="like">like</option>
-    </select>
-    <input id="{{ tab }}_filter_value" type="text" size="16"  placeholder="value to filter">
-    <button id="{{ tab }}_filter_clear" class="clear_button">
-        <span id="clear_button_text">CLEAR</span>
-    </button>
-    <button id="all_button" class="all_button button" value="all_button" data-action=""  data-target="{{ tab }}">ALL</button>
-    <button id="none_button" class="none_button button" value="none_button" data-action=""  data-target="{{ tab }}">NONE</button>
-    <button id="write_button" class="write_button button" value="write_button" data-action=""  data-target="{{ tab }}">WRITE</button>
-    <button id="reload_button" class="reload_button button" value="reload_button" data-action=""  data-target="{{ tab }}">RELOAD</button>
-</div>
+<!-- build from module 'columns' -->
+<select id="{{ tab }}_filter_field">
+    <option></option>
+    <option value="is_mute">Muted</option>
+    <option value="tracked">Tracked</option>
+    <option value="SSID">SSID</option>
+    <option value="BSSID">BSSID</option>
+    <option value="Signal">Signal</option>
+    <option value="Channel">Channel</option>
+    <option value="Frequency">Frequency</option>
+    <option value="Quality">Quality</option>
+    <option value="Encryption">Encryption</option>
+    <option value="Vendor">Vendor</option>
+    <option value="created">Found</option>
+    <option value="updated">Last</option>
+</select>
+<select id="{{ tab }}_filter_type">
+    <option value="=">=</option>
+    <option value="<"><</option>
+    <option value="<="><=</option>
+    <option value=">">></option>
+    <option value=">=">>=</option>
+    <option value="!=">!=</option>
+    <option value="like">like</option>
+</select>
+<input id="{{ tab }}_filter_value" type="text" size="16"  placeholder="filter this.">
+<button id="{{ tab }}_filter_clear" class="clear_button">
+    <span id="clear_button_text">CLEAR</span>
+</button>
+<button id="all_button" class="all_button button" value="all_button" data-action=""  data-target="{{ tab }}">ALL</button>
+<button id="none_button" class="none_button button" value="none_button" data-action=""  data-target="{{ tab }}">NONE</button>
+<button id="write_button" class="write_button button" value="write_button" data-action=""  data-target="{{ tab }}">WRITE</button>
+<button id="reload_button" class="reload_button button" value="reload_button" data-action=""  data-target="{{ tab }}">RELOAD</button>
 <script>
 
     // Define variables for input elements
