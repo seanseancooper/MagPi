@@ -33,6 +33,7 @@ class MAPAggregator(threading.Thread):
         self.dead_modules = []
         self.module_configs = defaultdict(dict)
         self.module_stats = defaultdict(dict)
+        self.module_aggregated = defaultdict(str)
 
         self.thread = None
 
@@ -75,6 +76,14 @@ class MAPAggregator(threading.Thread):
     def aggregate(self, mod):
         """ collect responses into aggregation """
         try:
+            conf = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
+            if conf.ok:
+                self.module_aggregated[mod] = conf.json()
+        except Exception as e:
+            map_logger.warning(f'Configuration Aggregator Warning [{mod}]! {e}')
+
+
+        try:
             stats = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'] + '/stats')
             if stats.ok:
                 self.module_stats[mod] = stats.json()  # current module stats
@@ -84,6 +93,7 @@ class MAPAggregator(threading.Thread):
     def report(self):
 
         def module_info(m):
+            updated = self.module_stats[m]['updated'] or '--:--:--'
             created = self.module_stats[m]['created'] or '--:--:--'
             elapsed = self.module_stats[m]['elapsed'] or '00:00:00'
             messaging = m + " "
@@ -92,7 +102,7 @@ class MAPAggregator(threading.Thread):
                 messaging += '\033[32monline\033[0m: ' + elapsed + ' '
 
             if m in self.dead_modules:
-                messaging += '\033[31moffline\033[0m: ' + created + ' '
+                messaging += '\033[31moffline\033[0m: ' + updated + ' '
 
             return messaging
 
@@ -114,11 +124,11 @@ class MAPAggregator(threading.Thread):
     def unload(self, unload):
         """ unload a specific module, auto reload on next pass """
 
-        copy = self.module_stats.copy()
-        self.module_stats.clear()
+        copy = self.module_aggregated.copy()
+        self.module_aggregated.clear()
 
         def add_module(mod):
-            self.module_stats[mod] = copy[mod]
+            self.module_aggregated[mod] = copy[mod]
 
         [add_module(mod) for mod in copy if mod != unload]
 
@@ -143,10 +153,11 @@ class MAPAggregator(threading.Thread):
 
             self.register_modules()
 
-            # for mod in self.dead_modules:
-            #     self.module_stats.pop(mod)
-            #     self.module_stats[mod] = {'created': '', 'elapsed': ''}
-
+            for mod in self.dead_modules:
+                try:
+                    self.module_aggregated.pop(mod)
+                    # self.module_stats[mod] = {'created': '', 'elapsed': ''}
+                except KeyError: pass  # 'missing' is fine.
             self.report()
 
             time.sleep(self.config.get('AGGREGATOR_TIMEOUT', .5))
