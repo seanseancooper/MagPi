@@ -119,7 +119,9 @@
                 colors:["red", "orange", "yellow", "#008800", "#00FF00"]
             }},
             {title:"BSSID", field:"BSSID", width:120},
-            {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter},
+            {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, sorter:"array", sorterParams:{
+                type:"length"
+            }},
             {title:"db", field:"Signal", width:30},
             {title:"Ch.", field:"Channel", width:50},
             {title:"Freq.", field:"Frequency", width:70},
