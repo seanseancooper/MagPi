@@ -23,7 +23,7 @@ class MAPAggregator(threading.Thread):
         super().__init__()
         self.DEBUG = False
         self.config = {}
-        self.iteration = 0
+
         self.created = datetime.now()
         self.updated = datetime.now()
         self.elapsed = timedelta()
@@ -31,10 +31,12 @@ class MAPAggregator(threading.Thread):
         self.modules = []
         self.live_modules = []
         self.dead_modules = []
-        self.module_configs = defaultdict(dict)
+
         self.module_stats = defaultdict(dict)
+        self.module_configs = defaultdict(dict)
         self.module_aggregated = defaultdict(str)
 
+        self.iteration = 0
         self.thread = None
 
     def configure(self, config_file, **kwargs):

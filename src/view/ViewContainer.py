@@ -9,13 +9,14 @@ class ViewContainer(threading.Thread):
 
     def __init__(self):
         super().__init__()
-
+        self.config = {}
         self.created = datetime.now()
         self.updated = datetime.now()
         self.elapsed = timedelta()
-        self.config = {}
+
         self.modules = []
         self.module_tabs = []
+
         self.module_stats = defaultdict()
         self.module_configs = defaultdict()
 
