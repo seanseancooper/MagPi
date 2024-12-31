@@ -146,7 +146,9 @@
 
 {%- for tab, timeout in container.module_tabs: -%}
     {% set module_fragment = tab + '.js.j2' %}
-    {% include module_fragment ignore missing %}
+    {% if tab in container.module_stats.keys() %}
+        {% include module_fragment ignore missing %}
+    {% endif %}
 {%- endfor -%}
 
     <script>
