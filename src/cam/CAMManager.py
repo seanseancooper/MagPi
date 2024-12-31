@@ -65,6 +65,14 @@ class CAMManager(threading.Thread):
         self.plugin.set_field(field, value)
         return True
 
+    def get_plugin_stats(self):
+        _stats = self.plugin.get()
+        _stats['tracker'] = self.plugin.tracker.get()
+        return _stats
+
+    def get_tracker_stats(self):
+        return  self.plugin.tracker.get()
+
     def stop(self):
         self.plugin.stop()
 
