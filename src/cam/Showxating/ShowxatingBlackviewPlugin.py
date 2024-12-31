@@ -114,27 +114,23 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
     def get(self):
         return {
-            # "area": str(self._area),
-            # "max_height": str(self._max_height),
-            # "max_width": str(self._max_width),
-
             "has_symbols": self.has_symbols,
             "has_analysis": self.has_analysis,
             "has_motion": self.has_motion,
-
-            "kSz": str(self._kSz),
-            "threshold": self.threshold,
-            "show_threshold": self.show_threshold,
             "mediapipe": self.mediapipe,
 
+            "kSz": str(self._kSz),
+            "threshold": self.threshold,                        # int value
+
             "f_id": self.frame_id,
-            "majic_color": str(self.majic_color),
-            "frame_shape": self.frame_shape,
+            "majic_color": str(self.majic_color),               # variable
+            "frame_shape": self.frame_shape,                    # constant
+            "show_threshold": self.show_threshold,
+            "hold_threshold": self.hold_threshold,              # true if checked
 
             "created": format_time(self.created, "%H:%M:%S"),
             "updated": format_time(self.updated, "%H:%M:%S"),
             "elapsed": format_delta(self.elapsed, "%H:%M:%S"),
-
         }
 
     def get_config(self):
