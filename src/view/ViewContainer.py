@@ -37,7 +37,7 @@ class ViewContainer(threading.Thread):
                 # self.module_tabs.append(ViewContainerTab(a, b))
                 self.module_tabs.append(_tab)
 
-        self.title = f"ViewContainer: {[mod.upper() for mod in self.modules]}"
+        self.title = f"MagPi ViewContainer: {[mod.upper() for mod in self.modules]}"
 
     def add_module(self, m):
         self.modules.append(m)
