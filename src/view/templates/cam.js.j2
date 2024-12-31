@@ -1,7 +1,7 @@
 {% set plugin = container.get_module_stats('cam') %}
 {% set config = container.get_module_config('cam') %}
 
-{% set cam_host_port = config['SERVER_NAME'] %}
+{% set cam_host, cam_port = config['SERVER_NAME'].split(':') %}
 
 {% set streaming_host = config['PLUGIN']['streaming_host'] %}
 {% set streaming_port = config['PLUGIN']['streaming_port'] %}
@@ -45,7 +45,7 @@
     function fore_aft(button){
         // changes fore/aft view
         var xhttp = new XMLHttpRequest();
-        xhttp.open("POST", "http://{{ tab }}.{{ cam_host_port }}/view/" + button.value);
+        xhttp.open("POST", "http://{{ tab }}.{{ cam_host }}:{{ cam_port }}/view/" + button.value);
         setsHeaders(xhttp);
         xhttp.setRequestHeader('TARGET', '{{ tab }}');
         xhttp.send(); // no response
@@ -62,7 +62,7 @@
     function cam_multibutton(button){
         // set symbology & analysis
         const xhttp = new XMLHttpRequest();
-        xhttp.open("POST", "http://{{ tab }}.{{ cam_host_port }}/multibutton/" + button.value);
+        xhttp.open("POST", "http://{{ tab }}.{{ cam_host }}:{{ cam_port }}/multibutton/" + button.value);
         setsHeaders(xhttp);
         xhttp.setRequestHeader('TARGET', '{{ tab }}');
 
@@ -83,7 +83,7 @@
             var component = checkbox.id.replace('_input', '');
 
             const xhttp = new XMLHttpRequest();
-            xhttp.open('POST', 'http://{{ tab }}.{{ cam_host_port }}/plugin/' + checkbox.id.replace('cam_checkbox_', '').replace('_input', '') + "/" + checkbox.checked);
+            xhttp.open('POST', 'http://{{ tab }}.{{ cam_host }}:{{ cam_port }}/plugin/' + checkbox.id.replace('cam_checkbox_', '').replace('_input', '') + "/" + checkbox.checked);
             setsHeaders(xhttp);
             xhttp.setRequestHeader('TARGET', '{{ tab }}');
 
@@ -106,7 +106,7 @@
         function updateSlider() {
             var component = slider.id.replace('_input', '');
             const xhttp = new XMLHttpRequest();
-            xhttp.open("POST", "http://{{ tab }}.{{ cam_host_port }}/plugin/" + slider.id.replace('cam_slider_', '').replace('_input', '') + "/" + parseFloat(slider.value));
+            xhttp.open("POST", "http://{{ tab }}.{{ cam_host }}:{{ cam_port }}/plugin/" + slider.id.replace('cam_slider_', '').replace('_input', '') + "/" + parseFloat(slider.value));
             setsHeaders(xhttp);
             xhttp.setRequestHeader('TARGET', '{{ tab }}');
 
@@ -194,7 +194,7 @@
             var component = cropper.id.replace('_input', '');
 
             const xhttp = new XMLHttpRequest();
-            xhttp.open("POST", "http://{{ tab }}.{{ cam_host_port }}/plugin/" + component + "/" + cropper.value);
+            xhttp.open("POST", "http://{{ tab }}.{{ cam_host }}:{{ cam_port }}/plugin/" + component + "/" + cropper.value);
             setsHeaders(xhttp);
             xhttp.setRequestHeader('TARGET', '{{ tab }}');
 
@@ -217,7 +217,7 @@
     function cam_snap(){
         //  creates still image of current view
         const xhttp = new XMLHttpRequest();
-        xhttp.open("POST", "http://{{ tab }}.{{ cam_host_port }}/snap");
+        xhttp.open("POST", "http://{{ tab }}.{{ cam_host }}:{{ cam_port }}/snap");
         setsHeaders(xhttp);
         xhttp.setRequestHeader('TARGET', '{{ tab }}');
 
@@ -249,7 +249,7 @@
     </div>
     <script src="{{ url_for('vc_bp.static', filename='cropperjs/dist/cropper.js') }}"></script>
 
-    <div id="cam_button_box" style="left:0px;top:0px;" class="cam_button_box highlight">
+    <div id="cam_button_box" style="left:5px;top:5px;" class="cam_button_box highlight">
        <button id="fore_aft_button" class="cam_button" value="AFT" onClick="fore_aft(this);">
             <span id="fore_aft_button_text" style="" class="fore_aft_button_text">A</span>
         </button>
@@ -261,7 +261,7 @@
         </button>
     </div>
 
-    <div id="cam_info_box" style="left:120px;top:0px;" class="cam_info_box highlight">
+    <div id="cam_info_box" style="left:125px;top:5px;" class="cam_info_box highlight">
         <div id="cam_slider_outputs" style="top:-2px;" class="cam_slider_outputs highlight">
             ∆:&nbsp;<span id="cam_slider_threshold_output">-000</span>&nbsp;|&nbsp;
             ∞:&nbsp;<span id="cam_checkbox_hold_threshold_output">OFF</span>&nbsp;|&nbsp;
@@ -273,15 +273,15 @@
         </div>
     </div>
 
-    <div style="left:440px;top:0px;" class="cam_checkbox_box highlight">
-        <input id="cam_checkbox_hold_threshold_input" style="top:2px;left:-2px;" checked type="checkbox" data-action="" data-target="{{ tab }}" onChange="handleCheckBox(this);"/>
+    <div style="left:445px;top:5px;" class="cam_checkbox_box highlight">
+        <input id="cam_checkbox_hold_threshold_input" style="top:2px;left:-2px;" type="checkbox" {{ 'checked' if plugin.show_threshold is true }} data-action="" data-target="{{ tab }}" onChange="handleCheckBox(this);"/>
         <br>&nbsp;&nbsp;∞
-    </div>h
-    <div style="left:471px;top:0px;" class="cam_slider_box highlight">
+    </div>
+    <div style="left:476px;top:5px;" class="cam_slider_box highlight">
         <input id="cam_slider_threshold_input" class="cam_slider" type="range" min="-100" max="100" step="1" value="0" data-action="" data-target="{{ tab }}" onChange="handleSlider(this);"/>
         <input id="cam_slider_krnl_input" class="cam_slider" type="range" min="1" max="128" step="2" value="9" data-action="" data-target="{{ tab }}" onChange="handleGridSlider(this);"/>
     </div>
-    <div style="left:590px;top:0px;" class="cam_slider_box highlight">
+    <div style="left:595px;top:5px;" class="cam_slider_box highlight">
         <input id="cam_slider_f_limit_input" class="cam_slider" type="range" min="1" max="60" step="1" value="2" data-action="" data-target="{{ tab }}" onChange="handleSlider(this);"/>
         <input id="cam_slider_frm_delta_pcnt_input" class="cam_slider" type="range" min="0.00" max="100.00" step="0.01" value="50.00" data-action="" data-target="{{ tab }}" onChange="handleSlider(this);"/>
     </div>
