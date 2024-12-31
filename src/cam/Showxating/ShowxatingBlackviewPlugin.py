@@ -64,8 +64,8 @@ def print_tracked(has_analysis, has_symbols, f, t, rect):
                 cv.rectangle(f, (x, y), (x+5, y+5), (0, 255, 255), -1)
             else:
                 # red dot: tests false.
-                cv.putText(f, item, (x, (y + (i * 10))), cv.FONT_HERSHEY_PLAIN, .75, (0, 0, 255), 1)
-                cv.rectangle(f, (x, y), (x+5, y+5), (0, 0, 255), -1)
+                # cv.putText(f, item, (x, (y + (i * 10))), cv.FONT_HERSHEY_PLAIN, .75, (0, 0, 255), 1)
+                # cv.rectangle(f, (x, y), (x+5, y+5), (0, 0, 255), -1)
                 pass
 
     if has_analysis:
@@ -86,7 +86,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self._max_width = slice(0, 704)     # view width, not 'step'
 
         self.has_symbols = True
-        self.has_analysis = True
+        self.has_analysis = False
 
         self.has_motion = False
         self.had_motion = False
@@ -101,7 +101,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self._kSz = (int(self.krnl), int(self.krnl))
         self.threshold = 15.0                           # pixels additional to the mean during thresholding
 
-        self.show_krnl_grid = False
         self.show_threshold = False
         self.hold_threshold = 0                         # number of frames threshold mask is displayed if displayed
 
@@ -157,7 +156,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
         if field == 'krnl':
             self.krnl = value
-            self.show_krnl_grid = True
         if field == 'threshold':
             self.sets_hold_threshold(True)
             self.threshold = float(value)

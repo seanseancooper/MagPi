@@ -22,17 +22,17 @@ class FrameObjektTracker:
         self.f_id = 0                       # current frame id
         self.config = {}
 
-        self.f_limit = 2                    # hyperparameter: max age of frames in o_cache_map.
-        self.f_delta_pcnt = 0.50            # hyperparameter: 0..1 percentage of delta between the current and previous frames over all pixels in frame
-        self.l_delta_pcnt = 0.50            # hyperparameter: 0..1 percentage of delta between the current and previous mean locations
+        self.f_limit = 2                    # max age of frames in o_cache_map.
+        self.f_delta_pcnt = 0.50            # 0..1 percentage of delta between current/previous f over all pixels
+        self.l_delta_pcnt = 0.50            # 0..1 percentage of delta between the current/previous mean locations
 
         self.contour_limit = None           # number of contours evaluated by plugin in each pass
         self.contour_id = None              # ????
 
         self.tracked = {}                   # mapping of FrameObjekts over last 'f_limit' frames.
-        self._ml = []                       # DO NOT CHANGE: list of (x,y) location of contour in self.contours
-        self._frame_delta = float()         # DO NOT CHANGE: euclidean distance between the current and previous frames
-        self._frame_deltas = []             # DO NOT CHANGE: list of previous distances over last f_limit frames
+        self._ml = []                       # list of (x,y) location of contour in self.contours
+        self._frame_delta = float()         # euclidean distance between the current and previous frames
+        self._frame_deltas = []             # list of previous distances over last f_limit frames
 
         self._frame_MSE = float()
         self._frame_MSEs = []
@@ -45,17 +45,17 @@ class FrameObjektTracker:
     def get(self):
         return {
 
-            "f_limit"       : self.f_limit,                 # hyperparameter: max age of frames in o_cache_map.
-            "frm_delta_pcnt": float(self.f_delta_pcnt),     # hyperparameter: percentage of delta between the current and previous frames over all pixels in frame
-            # "contour_limit" : self.contour_limit,           # number of contours evaluated by plugin in each pass
-            # "tracked"       : [self.tracked.get(o).get() for o in self.tracked],       # mapping of FrameObjekts over last 'f_limit' frames.
+            "f_limit"       : self.f_limit,
+            "frm_delta_pcnt": float(self.f_delta_pcnt),
+            # "contour_limit" : self.contour_limit,
+            # "tracked"       : [self.tracked.get(o).get() for o in self.tracked],
 
-            # "_ml"           : str(self._ml),                # DO NOT CHANGE: list of (x,y) location of contour in self.contours
-            # "_frame_delta"  : float(self._frame_delta),     # DO NOT CHANGE: euclidean distance between the current and previous frames
+            # "_ml"           : str(self._ml),
+            # "_frame_delta"  : float(self._frame_delta),
             # "_frame_MSE"    : float(self._frame_MSE),
 
-            # "fd_mean"       : float(self.fd_mean),          # mean of ALL differences between ALL SEEN frames -- no f_limit.
-            # "d_range"       : float(self.d_range),          # offset +/- allowed difference; frm_delta_pcnt * fd_mean
+            # "fd_mean"       : float(self.fd_mean),
+            # "d_range"       : float(self.d_range),
 
         }
 
@@ -191,24 +191,27 @@ class FrameObjektTracker:
         Y = self.make_grey_data(wall, rectangle)
         self.set_frame_delta(X, Y)
 
-        o.fd = self._frame_delta  # delta of wall image to current f
+        o.fd = self._frame_delta                            # delta of wall image to current f
         o.fd_mean = np.mean(self._frame_deltas)
-        o.delta_range = self.f_delta_pcnt * o.fd_mean  # percentage of px difference
+        o.delta_range = self.f_delta_pcnt * o.fd_mean       # percentage of px difference
         o.wall_pass = is_in_range(o.fd, o.fd_mean, self.d_range)
 
     def label_locations(self, frame, wall, rectangle):
         """ find elements 'tag' by euclidean distance """
 
         labeled = []
-
-        p_ml = [self.tracked.get(o_tag).avg_loc for o_tag in list(self.tracked.keys())]  # get all previous mean_locations (if they exist)
+        # get all previous mean_locations (if they exist)
+        p_ml = [self.tracked.get(o_tag).avg_loc for o_tag in list(self.tracked.keys())]
 
         if len(p_ml) == 1:
             # NEW TAG for a different thing; there is only one
             o1 = self.init_o(wall, rectangle)
 
-            # contours are sorted, first p_ml is 'largest' contour
-            o1.distances = euclidean_distances(np.array([self._ml], dtype=int), np.array([p_ml[0]], dtype=int).reshape(1, -1))
+            o1.distances = euclidean_distances(
+                    np.array([self._ml], dtype=int),
+                    np.array([p_ml[0]], dtype=int).reshape(1, -1)
+            )
+
             o1.dist_mean = np.mean(o1.distances)
 
             o1.curr_dist = int(o1.distances[0])
@@ -234,15 +237,22 @@ class FrameObjektTracker:
             oN = self.init_o(wall, rectangle)
 
             # get the mean location of the distances identified in the previous frame
-            oN.distances = [euclidean_distances(np.array([self._ml], dtype=int), np.array([p_ml[j]], dtype=int).reshape(1, -1)) for j in np.arange(len(p_ml)) if p_ml[j] is not None]
+            oN.distances = [euclidean_distances(
+                    np.array([self._ml], dtype=int),
+                    np.array([p_ml[j]], dtype=int).reshape(1, -1))
+                for j in np.arange(len(p_ml)) if p_ml[j] is not None]
+
             oN.dist_mean = np.mean(oN.distances)
 
-            idx = np.argmin(oN.distances)                                 # the item in the array representing the minimum euclidean distance to the current location
+            # the item in the array representing
+            # the minimum euclidean distance to
+            # the current location
+            idx = np.argmin(oN.distances)
 
             oN.curr_dist = float(oN.distances[idx])                       # distance from last location
-            oN.prev_tag = str(list(self.tracked.keys())[idx])             # target tag; may not be the right tag
+            oN.prev_tag = str(list(self.tracked.keys())[idx])             # 'target' tag; may not be the right tag
 
-            oN.tag = f"{self.f_id}_{oN.prev_tag.split('_')[1]}"           # THIS IS A GUESS
+            oN.tag = f"{self.f_id}_{oN.prev_tag.split('_')[1]}"
             self.get_stats(oN, wall, rectangle)
 
             if oN.inside_rect and oN.hist_pass:
@@ -256,7 +266,7 @@ class FrameObjektTracker:
 
             labeled.append(oN)
 
-        if not labeled:                                             # nothing in cache.
+        if not labeled:
             # f 0
             o = self.init_o(wall, rectangle)
             o.close = is_in_range(o.curr_dist, o.dist_mean, self.l_delta_pcnt * o.dist_mean)
@@ -291,20 +301,26 @@ class FrameObjektTracker:
     def track_objects(self, f_id, frame, contour, hierarchy, wall, rectangle):
         """
         LEARNINGS:
-        Not all moving things should be tracked; this is very sensitive to minute changes in light, and not all movement is relevant.
-        Not all tracked things move; Consider flashing lights or any localized, repetitive change. Tracking seizes!
-        Objects can suddenly appear or appear to change *size* if the frame drags due to network latency. Back referencing frames needs a cache.
+        Not all moving things should be tracked; this is very sensitive to minute
+        changes in light, and not all movement is relevant.
+        Not all tracked things move; Consider flashing lights or any localized,
+        repetitive change. Tracking seizes!
+        Objects can suddenly appear or appear to change *size* if the frame drags
+        due to network latency. Back referencing frames needs a cache.
         """
 
         self.f_id = f_id
         self.contour_id = str(uuid.uuid4()).split('-')[0]
 
-        self._ml = self.get_mean_location(contour)       # find the mean location of this target
+        self._ml = self.get_mean_location(contour)
 
-        for o in self.label_locations(frame, wall, rectangle):  # go label this location as either NEW, PREV or INITIAL.
+        for o in self.label_locations(frame, wall, rectangle):
 
-            o.contour = contour                          # this is one of a group of sorted contours; it could be the first or the smallest. first is largest.
-            o.hierarchy = hierarchy                      # unused for now, will be i of an enumeration
+            # this is one of a group of sorted
+            # contours; it could be the first
+            # or the smallest. first is largest.
+            o.contour = contour
+            o.hierarchy = hierarchy                      # unused for now
 
             if not o.prev_tag:
                 o.prev_tag = o.tag
