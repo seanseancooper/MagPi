@@ -54,6 +54,10 @@ class MAPAggregator(threading.Thread):
 
         readConfig(config_file, self.config)
 
+    def get(self):
+        return {
+        }
+
     def start_module(self, mod):
         ''' start module in modules '''
         print(f'started module: {mod}')
