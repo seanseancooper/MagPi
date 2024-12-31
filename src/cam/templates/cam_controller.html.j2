@@ -299,7 +299,7 @@
         <div id="cam_slider_outputs" style="" class="cam_slider_outputs highlight">
                 ∑:&nbsp;<span id="cam_slider_threshold_output">{{ plugin.threshold | int }}</span>
                 ∞:&nbsp;<span id="cam_checkbox_hold_threshold_output">OFF</span>
-                ⊞:&nbsp;<span id="cam_slider_krnl_output">{{ plugin.krnl }}</span>
+                ⊞:&nbsp;<span id="cam_slider_krnl_output">{{ plugin.kSz }}</span>
             <br>
                 ƒL:&nbsp;<span id="cam_slider_f_limit_output">{{ plugin.tracker.f_limit }}</span>
                 ƒ%:&nbsp;<span id="cam_slider_frm_delta_pcnt_output">{{ "{:.2f}".format(plugin.tracker.f_delta_pcnt) }}</span>
@@ -316,7 +316,7 @@
             ∑<br><input id="cam_slider_threshold_input" style="height:100px;" class="cam_slider" orient="vertical" type="range" min="-100" max="100" step="1" value="{{ plugin.threshold | int }}" onChange="handleSlider(this);"/>
         </div>
         <div id="cam_slider_krnl" style="position:absolute;top:0px;left:25px;">
-            ⊞<br><input id="cam_slider_krnl_input" style="" class="cam_slider" orient="vertical" type="range" min="1" max="128" step="2" value="{{ plugin.krnl }}" onChange="handleGridSlider(this);"/>
+            ⊞<br><input id="cam_slider_krnl_input" style="" class="cam_slider" orient="vertical" type="range" min="1" max="128" step="2" value="{{ plugin.kSz }}" onChange="handleGridSlider(this);"/>
         </div>
         <div id="cam_slider_f_limit" style="position:absolute;top:0px;left:50px;">
             ƒL<br><input id="cam_slider_f_limit_input" style="" class="cam_slider" orient="vertical" type="range" min="1" max="60" step="1" value="{{ plugin.tracker.f_limit }}" onChange="handleSlider(this);"/>
