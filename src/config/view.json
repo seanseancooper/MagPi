@@ -16,6 +16,9 @@
 			"STATIC_URL_PATH": "static"
 		},
 		{
+			"AGGREGATOR_TIMEOUT": 1.0
+		},
+		{
 			"VIEW_TIMEOUT": 30
 		},
 		{
@@ -48,7 +51,7 @@
 			"DATE_FORMAT": "%Y-%m-%d"
 		},
 		{
-			"TIME_FORMAT": "%H:%M:%S"
+			"TIME_FORMAT": "%H:%M:%S.%f"
 		},
 		{
 			"TIMER_FORMAT": "%H:%M:%S"
