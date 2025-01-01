@@ -1,29 +1,20 @@
-{% set plugin = container.get_module_stats('cam') %}
 {% set config = container.get_module_config('cam') %}
-
 {% set cam_host, cam_port = config['SERVER_NAME'].split(':') %}
-
 {% set streaming_host = config['PLUGIN']['streaming_host'] %}
 {% set streaming_port = config['PLUGIN']['streaming_port'] %}
 
+{% if 'cam' in container.live_modules %}
+    {% set plugin = container.get_module_stats('cam') %}
+{% else %}
+    {% set plugin = { 'frame_shape': (480, 640, 0), 'majic_color': (128, 255, 128) } %}
+{% endif %}
+
 <style>
-    .highlight {
-        color: rgb{{ plugin.majic_color }};
-    }
-</style>
-<script>
-    var highlight = {{ plugin.majic_color }};
-</script>
-<style>
-    /* Ensure the size of the image fit the container perfectly */
     canvas {
       display: block;
-
-      /* This rule is very important, please don't ignore this */
       max-width: 100%;
     }
 </style>
-
 <link rel="stylesheet" href="{{ url_for('vc_bp.static', filename='css/cropper.css') }}">
 <link rel="stylesheet" href="{{ url_for('vc_bp.static', filename='css/cam_controller.css') }}">
 <script>
@@ -239,7 +230,6 @@
     };
 </script>
 
-
 <div id="{{ tab }}" class="module_tab" style="position:relative;display:none;">
 
     <div id="videodiv" class="videodiv" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;">
@@ -249,7 +239,7 @@
     </div>
     <script src="{{ url_for('vc_bp.static', filename='cropperjs/dist/cropper.js') }}"></script>
 
-    <div id="cam_button_box" style="left:5px;top:5px;" class="cam_button_box highlight">
+    <div id="cam_button_box" style="left:5px;top:5px;color: rgb{{ plugin.majic_color }}" class="cam_button_box">
        <button id="fore_aft_button" class="cam_button" value="AFT" onClick="fore_aft(this);">
             <span id="fore_aft_button_text" style="" class="fore_aft_button_text">A</span>
         </button>
@@ -261,8 +251,8 @@
         </button>
     </div>
 
-    <div id="cam_info_box" style="left:125px;top:5px;" class="cam_info_box highlight">
-        <div id="cam_slider_outputs" style="top:-2px;" class="cam_slider_outputs highlight">
+    <div id="cam_info_box" style="left:125px;top:5px;color: rgb{{ plugin.majic_color }}" class="cam_info_box">
+        <div id="cam_slider_outputs" style="top:-2px;" class="cam_slider_outputs">
             ∆:&nbsp;<span id="cam_slider_threshold_output">-000</span>&nbsp;|&nbsp;
             ∞:&nbsp;<span id="cam_checkbox_hold_threshold_output">OFF</span>&nbsp;|&nbsp;
             ⊞:&nbsp;<span id="cam_slider_krnl_output">000</span>&nbsp;|&nbsp;
@@ -273,17 +263,16 @@
         </div>
     </div>
 
-    <div style="left:445px;top:5px;" class="cam_checkbox_box highlight">
+    <div style="left:445px;top:5px;color: rgb{{ plugin.majic_color }}" class="cam_checkbox_box">
         <input id="cam_checkbox_hold_threshold_input" style="top:2px;left:-2px;" type="checkbox" {{ 'checked' if plugin.show_threshold is true }} data-action="" data-target="{{ tab }}" onChange="handleCheckBox(this);"/>
         <br>&nbsp;&nbsp;∞
     </div>
-    <div style="left:476px;top:5px;" class="cam_slider_box highlight">
+    <div style="left:476px;top:5px;color: rgb{{ plugin.majic_color }}" class="cam_slider_box">
         <input id="cam_slider_threshold_input" class="cam_slider" type="range" min="-100" max="100" step="1" value="0" data-action="" data-target="{{ tab }}" onChange="handleSlider(this);"/>
         <input id="cam_slider_krnl_input" class="cam_slider" type="range" min="1" max="128" step="2" value="9" data-action="" data-target="{{ tab }}" onChange="handleGridSlider(this);"/>
     </div>
-    <div style="left:595px;top:5px;" class="cam_slider_box highlight">
+    <div style="left:595px;top:5px;color: rgb{{ plugin.majic_color }}" class="cam_slider_box">
         <input id="cam_slider_f_limit_input" class="cam_slider" type="range" min="1" max="60" step="1" value="2" data-action="" data-target="{{ tab }}" onChange="handleSlider(this);"/>
         <input id="cam_slider_frm_delta_pcnt_input" class="cam_slider" type="range" min="0.00" max="100.00" step="0.01" value="50.00" data-action="" data-target="{{ tab }}" onChange="handleSlider(this);"/>
     </div>
 </div>
-
