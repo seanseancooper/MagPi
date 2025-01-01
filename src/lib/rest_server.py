@@ -7,7 +7,6 @@ logger_root = logging.getLogger('root')
 
 
 class RESTServer(threading.Thread):
-    ''' This is NOT a REST server, it is a 'wrapper'! '''
 
     def __init__(self, app):
         super().__init__()
@@ -21,14 +20,10 @@ class RESTServer(threading.Thread):
 
         self.configure()
 
-        # from flask_cors import CORS, cross_origin
-        # cors = CORS(self.app)
-        # self.app.config['CORS_HEADERS'] = 'Content-Type'
-
         try:
             if self.app.config['SERVER_NAME'] is None:
                 self.app.config['SERVER_NAME'] = self.configuration['SERVER_NAME']
-                self.app.config['DEBUG'] = self.configuration['DEBUG']
+                self.app.config['DEBUG'] = self.configuration['DEBUG'] #TODO:does this work?
             threading.Thread(target=self.app.run, name='RestService', daemon=True).start()
             logger_root.info(f"[RESTServer]: starting HTTP service for {self.app.name}")
         except Exception as e:
