@@ -3,6 +3,8 @@ import shutil
 import subprocess
 from datetime import datetime
 from string import Template
+import requests
+import json
 import logging
 
 logger_root = logging.getLogger('root')
@@ -92,8 +94,6 @@ def runOSCommand(command: list):
 
 def get_location(locator):
     """ gets location from GPS endpoint"""
-    import requests
-    import json
     try:
         resp = requests.get(locator.config.get('GPS_ENDPOINT', 'http://gps.localhost:5004/position'))
         position = json.loads(resp.text)
