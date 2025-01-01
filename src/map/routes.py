@@ -24,14 +24,11 @@ map_bp = Blueprint(
 def index():
     return redirect("/map", code=302)
 
+
 @map_bp.route("/map", methods=['GET'], subdomain='map')
 def map():
     return render_template(mapAgg.config['MAP_TEMPLATE'])
 
-@map_bp.route("/stats", methods=['GET'], subdomain='map')
-def module_stats():
-    """ returns module stats"""
-    return mapAgg.module_stats
 
 @map_bp.route("/aggregated", methods=['GET'], subdomain='map')
 def aggregated():
@@ -43,6 +40,7 @@ def aggregated():
     # _configs['stats'] = mapAgg.module_stats
     # return jsonify(_configs)
 
+
 @map_bp.route("/aggregated/<mod>", methods=['GET'], subdomain='map')
 def aggregated_by_module(mod):
     """ returns module specific aggregated data"""
@@ -51,27 +49,6 @@ def aggregated_by_module(mod):
     # _configs['stats'] = mapAgg.module_stats[mod]
     # return jsonify(_configs)
 
-@map_bp.route("/config/<mod>", methods=['GET'], subdomain='map')
-def config_for_module(mod):
-    """ returns module specific config"""
-    return mapAgg.module_configs[mod]
-
-@map_bp.route("/stats/<mod>", methods=['GET'], subdomain='map')
-def stats_for_module(mod):
-    """ returns module specific stats"""
-    return mapAgg.module_stats[mod]
-
-@map_bp.route('/reload/<mod>', subdomain='map')
-def reload(mod):
-    if mapAgg.reload(mod):
-        return "OK", 200
-    return "FAIL", 500
-
-@map_bp.route('/unload/<mod>', subdomain='map')
-def unload(mod):
-    if mapAgg.unload(mod):
-        return "OK", 200
-    return "FAIL", 500
 
 @map_bp.route("/aggregated/<mod>/<context>", methods=['GET'], subdomain='map')
 def aggregated_by_module_context(mod, context):
