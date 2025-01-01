@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 import requests
 
 from src.config import CONFIG_PATH, readConfig
-from src.lib.utils import format_delta, format_time
 
 import logging
 map_logger = logging.getLogger('gps_logger')
@@ -49,20 +48,9 @@ class MAPAggregator(threading.Thread):
         for module_config in config_files:
             mod = os.path.basename(module_config).replace('.json', '')
             self.modules.append(mod)
-            self.module_stats[mod] = {'created': '',
-                                      'updated': '',
-                                      'elapsed': ''}
             readConfig(os.path.basename(module_config), self.module_configs[mod])
 
         readConfig(config_file, self.config)
-
-    def get(self):
-        return {
-        }
-
-    def start_module(self, mod):
-        ''' start module in modules '''
-        print(f'started module: {mod}')
 
     def register_modules(self):
         """ discover 'live' module REST contexts """
@@ -88,7 +76,6 @@ class MAPAggregator(threading.Thread):
         except Exception as e:
             map_logger.warning(f'Configuration Aggregator Warning [{mod}]! {e}')
 
-
         try:
             stats = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'] + '/stats')
             if stats.ok:
@@ -96,58 +83,12 @@ class MAPAggregator(threading.Thread):
         except Exception as e:
             map_logger.warning(f'Aggregator Warning [{mod}]! {e}')
 
-    def report(self):
-
-        def module_info(m):
-            updated = self.module_stats[m]['updated'] or '--:--:--'
-            created = self.module_stats[m]['created'] or '--:--:--'
-            elapsed = self.module_stats[m]['elapsed'] or '00:00:00'
-            messaging = m + " "
-
-            if m in self.live_modules:
-                messaging += '\033[32monline\033[0m: ' + elapsed + ' '
-
-            if m in self.dead_modules:
-                messaging += '\033[31moffline\033[0m: ' + updated + ' '
-
-            return messaging
-
-        if self.iteration % 10 == 0:
-            print(f"MAPAggegator [{self.iteration}] {format_delta(self.elapsed, '%H:%M:%S')} elapsed")
-            # yell about offline modules
-            [speech_logger.info(f'{mod} offline.') for mod in self.dead_modules]
-
-        [print(module_info(mod), end='') for mod in self.modules]
-        print('')
-
-    def reload(self, mod):
-        """ reload specific module """
-        self.unload(mod)
-        self.aggregate(mod)
-        print(f'reloaded {mod}')
-        return True
-
-    def unload(self, unload):
-        """ unload a specific module, auto reload on next pass """
-
-        copy = self.module_aggregated.copy()
-        self.module_aggregated.clear()
-
-        def add_module(mod):
-            self.module_aggregated[mod] = copy[mod]
-
-        [add_module(mod) for mod in copy if mod != unload]
-
-        print(f'unloaded {unload}')
-        return True
-
     def stop(self):
         pass
 
     def run(self):
 
         self.register_modules()
-        speech_logger.info('aggregator started')
 
         while True:
             self.iteration += 1
@@ -162,9 +103,7 @@ class MAPAggregator(threading.Thread):
             for mod in self.dead_modules:
                 try:
                     self.module_aggregated.pop(mod)
-                    # self.module_stats[mod] = {'created': '', 'elapsed': ''}
                 except KeyError: pass  # 'missing' is fine.
-            self.report()
 
             time.sleep(self.config.get('AGGREGATOR_TIMEOUT', .5))
 
