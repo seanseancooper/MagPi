@@ -98,26 +98,26 @@ def stats_for_module(mod):
     return viewContainer.module_stats[mod]
 
 
-@vc_bp.route("/aggregated", methods=['GET'], subdomain='view')
+@vc_bp.route("/data", methods=['GET'], subdomain='view')
 def aggregated():
     """  returns all aggregated data """
-    return viewContainer.module_aggregated
+    return viewContainer.module_data
     # TODO: move to manager
     # _configs = viewContainer.module_configs
     # _configs['stats'] = viewContainer.module_stats
     # return jsonify(_configs)
 
 
-@vc_bp.route("/aggregated/<mod>", methods=['GET'], subdomain='view')
+@vc_bp.route("/data/<mod>", methods=['GET'], subdomain='view')
 def aggregated_by_module(mod):
     """ returns module specific aggregated data"""
-    return viewContainer.module_aggregated[mod]
+    return viewContainer.module_data[mod]
     # _configs = viewContainer.module_configs[mod]
     # _configs['stats'] = viewContainer.module_stats[mod]
     # return jsonify(_configs)
 
 
-@vc_bp.route("/aggregated/<mod>/<context>", methods=['GET'], subdomain='view')
+@vc_bp.route("/data/<mod>/<context>", methods=['GET'], subdomain='view')
 def aggregated_by_module_context(mod, context):
     """ redirect to a specific context of a module """
     return redirect('http://' + mod + '.' + viewContainer.module_configs[mod]['SERVER_NAME'] + '/' + context, code=302)
