@@ -108,6 +108,7 @@ class ViewContainer(threading.Thread):
         """ return a specific value from stats """
         # self.reload(m)
         value = self.module_stats[m].get(stat) or 'offline'
+        return value
 
     def reload(self, mod):
         """ reload specific module """

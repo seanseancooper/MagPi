@@ -127,9 +127,9 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             "show_threshold": self.show_threshold,
             "hold_threshold": self.hold_threshold,              # true if checked
 
-            "created": format_time(self.created, "%H:%M:%S"),
-            "updated": format_time(self.updated, "%H:%M:%S"),
-            "elapsed": format_delta(self.elapsed, "%H:%M:%S"),
+            "created": self.created,
+            "updated": self.updated,
+            "elapsed": self.elapsed,
         }
 
     def get_config(self):
