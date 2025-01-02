@@ -32,7 +32,7 @@ class ViewContainer(threading.Thread):
 
         self.module_stats = defaultdict(dict)
         self.module_configs = defaultdict(dict)
-        self.module_aggregated = defaultdict(str)
+        self.module_data = defaultdict(dict)
 
         self.title = None
         self.iteration = 0
@@ -85,7 +85,7 @@ class ViewContainer(threading.Thread):
         try:
             data = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
             if data.ok:
-                self.module_aggregated[mod] = data.json()
+                self.module_data[mod] = data.json()
         except Exception as e:
             view_logger.warning(f'Data Aggregator Warning [{mod}]! {e}')
 
@@ -106,8 +106,8 @@ class ViewContainer(threading.Thread):
 
     def get_stat_for_module(self, m, stat):
         """ return a specific value from stats """
+        # self.reload(m)
         value = self.module_stats[m].get(stat) or 'offline'
-        return value
 
     def reload(self, mod):
         """ reload specific module """
@@ -119,11 +119,11 @@ class ViewContainer(threading.Thread):
     def unload(self, unload):
         """ unload a specific module, auto reload on next pass """
 
-        copy = self.module_aggregated.copy()
-        self.module_aggregated.clear()
+        copy = self.module_data.copy()
+        self.module_data.clear()
 
         def add_module(mod):
-            self.module_aggregated[mod] = copy[mod]
+            self.module_data[mod] = copy[mod]
 
         [add_module(mod) for mod in copy if mod != unload]
 
@@ -187,8 +187,7 @@ class ViewContainer(threading.Thread):
 
             for mod in self.dead_modules:
                 try:
-                    self.module_aggregated.pop(mod)
-                    # self.module_stats[mod] = {'created': '', 'elapsed': ''}
+                    self.module_data[mod] = {}
                 except KeyError: pass  # 'missing' is fine.
 
             self.report()
