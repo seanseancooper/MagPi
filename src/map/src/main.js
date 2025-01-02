@@ -467,10 +467,10 @@ function animate(coordinate) {
     const hdweCoords = fromLonLat(coordinate);
 
     var xhttp = new XMLHttpRequest();
-    let URL = "http://view.localhost:5110/aggregated";
+    let URL = "http://map.localhost:5005/aggregated";
     xhttp.open("GET", URL, true);
 
-    setHeaders(xhttp, 'view.localhost:5110');
+    setHeaders(xhttp, 'map.localhost:5005');
 
     xhttp.onload = function(){
         const resp = xhttp.response;
