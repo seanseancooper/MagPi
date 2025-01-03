@@ -27,10 +27,10 @@
 <button id="{{ tab.tab }}_filter_clear" class="clear_button">
     <span id="clear_button_text">CLEAR</span>
 </button>
-<button id="all_button" class="all_button button" value="all_button" data-action=""  data-target="{{ tab.tab }}">ALL</button>
-<button id="none_button" class="none_button button" value="none_button" data-action=""  data-target="{{ tab.tab }}">NONE</button>
-<button id="write_button" class="write_button button" value="write_button" data-action=""  data-target="{{ tab.tab }}">WRITE</button>
-<button id="reload_button" class="reload_button button" value="reload_button" data-action=""  data-target="{{ tab.tab }}">RELOAD</button>
+<button id="{{ tab.tab }}_all_button" class="all_button button" value="all_button" data-action=""  data-target="{{ tab.module }}">ALL</button>
+<button id="{{ tab.tab }}_none_button" class="none_button button" value="none_button" data-action=""  data-target="{{ tab.module }}">NONE</button>
+<button id="{{ tab.tab }}_write_button" class="write_button button" value="write_button" data-action=""  data-target="{{ tab.module }}">WRITE</button>
+<button id="{{ tab.tab }}_reload_button" class="reload_button button" value="reload_button" data-action=""  data-target="{{ tab.module }}">RELOAD</button>
 <script>
 
     // Define variables for input elements

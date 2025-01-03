@@ -91,12 +91,7 @@
 <body>
     <div id="tabs" style="height:30px">
 {%- for tab in container.module_tabs: -%}
-    {%- if tab.module in container.modules -%}
-        {% set elapsed = container.get_stat_for_module(tab.module, 'elapsed') %}
-    {%- else -%}
-        {% set elapsed = '' %}
-    {%- endif -%}
-        <button id="container_tab_{{ tab.tab }}" class="tab_button{{ ' active' if loop.index0 == 0 }}" onclick="loadTab(event, '{{ tab.tab }}')">{{ tab.tab }} {{ elapsed }}</button>
+        <button id="container_tab_{{ tab.tab }}" class="tab_button{{ ' active' if loop.index0 == 0 }}" onclick="loadTab(event, '{{ tab.tab }}')">{{ tab.tab }}</button>
 {% endfor %}
     </div>
 
@@ -113,7 +108,7 @@
     <script>
         function reload(){
         {%- for tab in container.module_tabs: %}
-            {{ tab.module }}.replaceData();
+            {{ tab.tab }}.replaceData();
         {%- endfor %}
         }
     </script>
@@ -161,11 +156,13 @@
         container_elements.push(document.getElementById('{{ tab.tab }}'));
         {%- endfor %}
 
+        {%- for tab in container.module_tabs: %}
         // global buttons here.
-        container_elements.push(document.getElementById("all_button"));
-        container_elements.push(document.getElementById("none_button"));
-        container_elements.push(document.getElementById("write_button"));
-        container_elements.push(document.getElementById("reload_button"));
+        container_elements.push(document.getElementById("{{ tab.tab }}_all_button"));
+        container_elements.push(document.getElementById("{{ tab.tab }}_none_button"));
+        container_elements.push(document.getElementById("{{ tab.tab }}_write_button"));
+        container_elements.push(document.getElementById("{{ tab.tab }}_reload_button"));
+        {%- endfor %}
 
         container_elements.forEach(function(element) {
 
@@ -201,9 +198,9 @@
                 // # IdeA: perhaps this can the basis for supporting a module specific button fragment?
                 //  add an id for the button on the app side to identify it.
                 //  the value could go into data-value... as JSON
-                if (event.target.classList.contains('' + '_custom_button')) {
-                    alert('' + '_custom_button');
-                };
+                //if (event.target.classList.contains('' + '_custom_button')) {
+                //    alert('' + '_custom_button');
+                //};
             });
         });
     </script>
