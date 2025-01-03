@@ -4,21 +4,6 @@ body {
     background-color:#333;
 }
 
-.camcontroller {
-    width:709px;
-    height:493px;
-}
-
-.wifiscanner {
-    width:965px;
-    height:935px;
-}
-
-.gpsmapper {
-    width:709px;
-    height:443px;
-}
-
 .tabulator {
     font-family: Helvetica, Arial, sans-serif;
     font-size: 12px;
@@ -49,13 +34,13 @@ button {
 }
 
 .tab_button {
-    width:150px;
+    width:140px;
     height:25px;
     font-size: 15px;
     font-weight: bold;
     color: #333;
     background-color: #999;
-    border-radius:3px;
+    border-radius:4px;
 }
 
 .rem_button {
