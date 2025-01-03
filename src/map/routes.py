@@ -22,7 +22,7 @@ map_bp = Blueprint(
 
 @map_bp.route('/', subdomain='map')
 def index():
-    return redirect("/map", code=302)
+    return redirect("/aggregated", code=302)
 
 
 @map_bp.route("/map", methods=['GET'], subdomain='map')
