@@ -30,6 +30,17 @@ def map():
     return render_template(mapAgg.config['MAP_TEMPLATE'])
 
 
+@map_bp.route('/stats', methods=['GET'], subdomain='map')
+def map_stats():
+    from src.lib.utils import format_time, format_delta
+    stats = {
+        'created': format_time(mapAgg.created, "%H:%M:%S"),
+        'updated': format_time(mapAgg.updated, "%H:%M:%S"),
+        'elapsed': format_delta(mapAgg.elapsed, "%H:%M:%S"),
+    }
+    return jsonify(stats)
+
+
 @map_bp.route("/aggregated", methods=['GET'], subdomain='map')
 def aggregated():
     """  returns all aggregated data """
