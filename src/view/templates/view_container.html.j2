@@ -90,14 +90,14 @@
 </head>
 <body>
     <div id="tabs" style="height:30px">
-{%- for tab in container.module_tabs: %}
-    {% if tab.module in container.modules %}
+{%- for tab in container.module_tabs: -%}
+    {%- if tab.module in container.modules -%}
         {% set elapsed = container.get_stat_for_module(tab.module, 'elapsed') %}
-    {% else %}
+    {%- else -%}
         {% set elapsed = '' %}
-    {% endif %}
-        <button id="container_tab_{{ tab.tab }}" class="tab_button {{ 'active' if loop.index0 }}" onclick="loadTab(event, '{{ tab.tab }}')">{{ tab.tab | upper }} {{ elapsed }}</button>
-{%- endfor %}
+    {%- endif -%}
+        <button id="container_tab_{{ tab.tab }}" class="tab_button{{ ' active' if loop.index0 == 0 }}" onclick="loadTab(event, '{{ tab.tab }}')">{{ tab.tab }} {{ elapsed }}</button>
+{% endfor %}
     </div>
 
 {%- for tab in container.module_tabs: -%}
