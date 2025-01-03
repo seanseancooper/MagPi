@@ -3,7 +3,7 @@
     {% if 'cam' in container.live_modules %}
         {% set plugin = container.get_module_stats('cam') %}
     {% else %}
-        {% set plugin = { 'frame_shape': (480, 640, 0), 'majic_color': (128, 255, 128) } %}
+        {% set plugin = { 'frame_shape': (480, 702, 0), 'majic_color': (255, 0, 0) } %}
     {% endif %}
 {% endif %}
 
@@ -307,15 +307,15 @@
         </div>
     </div>
 
-    <div style="left:445px;top:5px;color: rgb{{ plugin.majic_color }}" class="cam_checkbox_box">
+    <div style="left:415px;top:5px;color: rgb{{ plugin.majic_color }}" class="cam_checkbox_box">
         <input id="cam_checkbox_hold_threshold_input" style="top:2px;left:-2px;" type="checkbox" {{ 'checked' if plugin.show_threshold is true }} data-action="" data-target="cam" onChange="handleCheckBox(this);"/>
         <br>&nbsp;&nbsp;∞
     </div>
-    <div style="left:476px;top:5px;color: rgb{{ plugin.majic_color }}" class="cam_slider_box">
+    <div style="left:446px;top:5px;color: rgb{{ plugin.majic_color }}" class="cam_slider_box">
         <input id="cam_slider_threshold_input" class="cam_slider" type="range" min="-100" max="100" step="1" value="0" data-action="" data-target="cam" onChange="handleSlider(this);"/>
         <input id="cam_slider_krnl_input" class="cam_slider" type="range" min="1" max="128" step="2" value="9" data-action="" data-target="cam" onChange="handleGridSlider(this);"/>
     </div>
-    <div style="left:595px;top:5px;color: rgb{{ plugin.majic_color }}" class="cam_slider_box">
+    <div style="left:565px;top:5px;color: rgb{{ plugin.majic_color }}" class="cam_slider_box">
         <input id="cam_slider_f_limit_input" class="cam_slider" type="range" min="1" max="60" step="1" value="2" data-action="" data-target="cam" onChange="handleSlider(this);"/>
         <input id="cam_slider_frm_delta_pcnt_input" class="cam_slider" type="range" min="0.00" max="100.00" step="0.01" value="50.00" data-action="" data-target="cam" onChange="handleSlider(this);"/>
     </div>
