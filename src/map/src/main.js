@@ -540,7 +540,7 @@ function animate(coordinate) {
                     }
                 });
             }
-
+            /*
             if (_signals.cam) {
                 _signals.cam.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
@@ -550,7 +550,7 @@ function animate(coordinate) {
                     }
                 });
             }
-
+            */
             if (_signals.arx) {
                 _signals.arx.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
