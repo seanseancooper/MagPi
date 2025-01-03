@@ -1,5 +1,5 @@
 <!-- build from module 'columns' -->
-<select id="{{ tab }}_filter_field">
+<select id="{{ tab.tab }}_filter_field">
     <option></option>
     <option value="is_mute">Muted</option>
     <option value="tracked">Tracked</option>
@@ -14,7 +14,7 @@
     <option value="created">Found</option>
     <option value="updated">Last</option>
 </select>
-<select id="{{ tab }}_filter_type">
+<select id="{{ tab.tab }}_filter_type">
     <option value="=">=</option>
     <option value="<"><</option>
     <option value="<="><=</option>
@@ -23,20 +23,20 @@
     <option value="!=">!=</option>
     <option value="like">like</option>
 </select>
-<input id="{{ tab }}_filter_value" type="text" size="16"  placeholder="filter this.">
-<button id="{{ tab }}_filter_clear" class="clear_button">
+<input id="{{ tab.tab }}_filter_value" type="text" size="16"  placeholder="filter this.">
+<button id="{{ tab.tab }}_filter_clear" class="clear_button">
     <span id="clear_button_text">CLEAR</span>
 </button>
-<button id="all_button" class="all_button button" value="all_button" data-action=""  data-target="{{ tab }}">ALL</button>
-<button id="none_button" class="none_button button" value="none_button" data-action=""  data-target="{{ tab }}">NONE</button>
-<button id="write_button" class="write_button button" value="write_button" data-action=""  data-target="{{ tab }}">WRITE</button>
-<button id="reload_button" class="reload_button button" value="reload_button" data-action=""  data-target="{{ tab }}">RELOAD</button>
+<button id="all_button" class="all_button button" value="all_button" data-action=""  data-target="{{ tab.tab }}">ALL</button>
+<button id="none_button" class="none_button button" value="none_button" data-action=""  data-target="{{ tab.tab }}">NONE</button>
+<button id="write_button" class="write_button button" value="write_button" data-action=""  data-target="{{ tab.tab }}">WRITE</button>
+<button id="reload_button" class="reload_button button" value="reload_button" data-action=""  data-target="{{ tab.tab }}">RELOAD</button>
 <script>
 
     // Define variables for input elements
-    var {{ tab }}_fieldEl = document.getElementById("{{ tab }}_filter_field");
-    var {{ tab }}_typeEl = document.getElementById("{{ tab }}_filter_type");
-    var {{ tab }}_valueEl = document.getElementById("{{ tab }}_filter_value");
+    var {{ tab.tab }}_fieldEl = document.getElementById("{{ tab.tab }}_filter_field");
+    var {{ tab.tab }}_typeEl = document.getElementById("{{ tab.tab }}_filter_type");
+    var {{ tab.tab }}_valueEl = document.getElementById("{{ tab.tab }}_filter_value");
 
     // filter
     function customFilter(data){
@@ -45,33 +45,33 @@
 
     // Trigger setFilter function with correct parameters
     function updateFilter(){
-        var {{ tab }}_filterVal = {{ tab }}_fieldEl.options[{{ tab }}_fieldEl.selectedIndex].value;
-        var {{ tab }}_typeVal = {{ tab }}_typeEl.options[{{ tab }}_typeEl.selectedIndex].value;
+        var {{ tab.tab }}_filterVal = {{ tab.tab }}_fieldEl.options[{{ tab.tab }}_fieldEl.selectedIndex].value;
+        var {{ tab.tab }}_typeVal = {{ tab.tab }}_typeEl.options[{{ tab.tab }}_typeEl.selectedIndex].value;
 
         // enable filter
-        var {{ tab }}_filter = {{ tab }}_filterVal == "function" ? customFilter : {{ tab }}_filterVal;
+        var {{ tab.tab }}_filter = {{ tab.tab }}_filterVal == "function" ? customFilter : {{ tab.tab }}_filterVal;
 
-        if({{ tab }}_filterVal == "function" ){
-            {{ tab }}_typeEl.disabled = true;
-            {{ tab }}_valueEl.disabled = true;
+        if({{ tab.tab }}_filterVal == "function" ){
+            {{ tab.tab }}_typeEl.disabled = true;
+            {{ tab.tab }}_valueEl.disabled = true;
         } else {
-            {{ tab }}_typeEl.disabled = false;
-            {{ tab }}_valueEl.disabled = false;
+            {{ tab.tab }}_typeEl.disabled = false;
+            {{ tab.tab }}_valueEl.disabled = false;
         }
 
-        if({{ tab }}_filterVal){
-            {{ tab }}.setFilter({{ tab }}_filter,{{ tab }}_typeVal, {{ tab }}_valueEl.value);
+        if({{ tab.tab }}_filterVal){
+            {{ tab.tab }}.setFilter({{ tab.tab }}_filter,{{ tab.tab }}_typeVal, {{ tab.tab }}_valueEl.value);
         }
     }
 
-    {{ tab }}_fieldEl.addEventListener("change", updateFilter);
-    {{ tab }}_typeEl.addEventListener("change", updateFilter);
-    {{ tab }}_valueEl.addEventListener("keyup", updateFilter);
+    {{ tab.tab }}_fieldEl.addEventListener("change", updateFilter);
+    {{ tab.tab }}_typeEl.addEventListener("change", updateFilter);
+    {{ tab.tab }}_valueEl.addEventListener("keyup", updateFilter);
 
-    document.getElementById("{{ tab }}_filter_clear").addEventListener("click", function(){
-        {{ tab }}_fieldEl.value = "";
-        {{ tab }}_typeEl.value = "=";
-        {{ tab }}_valueEl.value = "";
-        {{ tab }}.clearFilter();
+    document.getElementById("{{ tab.tab }}_filter_clear").addEventListener("click", function(){
+        {{ tab.tab }}_fieldEl.value = "";
+        {{ tab.tab }}_typeEl.value = "=";
+        {{ tab.tab }}_valueEl.value = "";
+        {{ tab.tab }}.clearFilter();
     });
 </script>

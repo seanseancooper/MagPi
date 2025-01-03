@@ -92,7 +92,7 @@
     <div id="tabs" style="height:30px">
 {%- for tab in container.module_tabs: %}
     {% if tab.module in container.modules %}
-        {% set elapsed = container.get_stat_for_module(tab, 'elapsed') %}
+        {% set elapsed = container.get_stat_for_module(tab.module, 'elapsed') %}
     {% else %}
         {% set elapsed = '' %}
     {% endif %}
