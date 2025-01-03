@@ -23,7 +23,7 @@ class TokenBucket:
             time_passed = current - self.last_check
             self.last_check = current
 
-            print(f"[{__name__}]: TokenBucket contains: {self.bucket}: {time_passed}")
+            # print(f"[{__name__}]: TokenBucket contains: {self.bucket}: {time_passed}")
 
             # DBUG: convert self.bucket to a timedelta and move this internal to WifiScanner
             self.bucket = self.bucket + time_passed * (self.tokens / self.interval)
@@ -32,9 +32,9 @@ class TokenBucket:
                 self.bucket = self.tokens
 
             if self.bucket < 1:
-                print(f"[{__name__}]: TokenBucket message dropped: {str(message)} bucket contains: {self.bucket}")
+                # print(f"[{__name__}]: TokenBucket message dropped: {str(message)} bucket contains: {self.bucket}")
                 return None
             else:
                 self.bucket = self.bucket - 1
-                print(f"[{__name__}]: TokenBucket message returned: {str(message)} bucket contains: {self.bucket}")
+                # print(f"[{__name__}]: TokenBucket message returned: {str(message)} bucket contains: {self.bucket}")
                 return message
