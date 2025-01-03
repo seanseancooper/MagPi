@@ -8,7 +8,7 @@
 
     function add(uniqId, trgt){
         var xhttp = new XMLHttpRequest();
-        xhttp.open("POST", "{{ url_for('.index')}}add/" + uniqId, true);
+        xhttp.open("POST", "{{ url_for('.index') }}add/" + uniqId, true);
         setsHeaders(xhttp);
         xhttp.setRequestHeader('TARGET', trgt);
         xhttp.send();
@@ -33,7 +33,7 @@
     function mute(uniqId, trgt){
         var xhttp = new XMLHttpRequest();
 
-        xhttp.open("POST", "{{ url_for('.index')}}mute/" + uniqId, true);
+        xhttp.open("POST", "{{ url_for('.index') }}mute/" + uniqId, true);
         setsHeaders(xhttp);
         xhttp.setRequestHeader('TARGET', trgt);
         xhttp.send();
@@ -64,7 +64,7 @@
 
     function remove(uniqId, trgt){
         var xhttp = new XMLHttpRequest();
-        xhttp.open("POST", "{{ url_for('.index')}}remove/" + uniqId, true);
+        xhttp.open("POST", "{{ url_for('.index') }}remove/" + uniqId, true);
         setsHeaders(xhttp);
         xhttp.setRequestHeader('TARGET', trgt);
         xhttp.send();
@@ -104,7 +104,7 @@
 
         var xhttp = new XMLHttpRequest();
 
-        xhttp.open('POST', "{{ url_for('.index')}}write", true);
+        xhttp.open('POST', "{{ url_for('.index') }}write", true);
         setsHeaders(xhttp);
         xhttp.setRequestHeader('TARGET', trgt);
         xhttp.send();
@@ -116,11 +116,11 @@
 
     function select_all(button, trgt){
         // not sure how this should work yet
-        alert('select all: ' + trgt);
+        alert('select all: ' + trgt + ' ' + button.id);
     }
 
     function select_none(button, trgt){
     // not sure how this should work yet
-        alert('select none: ' + trgt);
+        alert('select none: ' + trgt + ' ' + button.id);
     }
 </script>
