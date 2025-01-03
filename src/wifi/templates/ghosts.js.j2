@@ -1,51 +1,57 @@
-<script>
-    var ghosts = new Tabulator("#ghosts", {
-        ajaxURL:"http://wifi.localhost:5006/ghosts",                    // request URI
-        ajaxConfig:"GET",                                               // ajax config options go here
-        headerVisible:true,                                             // show header
-        dataLoaderLoading:dataLoaderLoading,                            // change "Loading" message to "&nbsp;"
-        index:"BSSID",                                                  // use BSSID as index
+{% if container %}
+<div id="ghosts" class="module_tab" style="position:relative;display:none;">
+{% else %}
+<div id="ghosts" class="module_tab" style="position:relative;display:block;">
+{% endif %}
+    <script>
+        var ghosts = new Tabulator("#ghosts", {
+            ajaxURL:"http://wifi.localhost:5006/ghosts",                    // request URI
+            ajaxConfig:"GET",                                               // ajax config options go here
+            headerVisible:true,                                             // show header
+            dataLoaderLoading:dataLoaderLoading,                            // change "Loading" message to "&nbsp;"
+            index:"BSSID",                                                  // use BSSID as index
 
-        rowFormatter:function(row){
-            row.getElement().style = "height:24px";
-            row.getElement().style.backgroundColor = "#999999";
-        },
+            rowFormatter:function(row){
+                row.getElement().style = "height:24px";
+                row.getElement().style.backgroundColor = "#999999";
+            },
 
-        columns:[
-            {field:"tracked", width:102, formatter: function(cell, formatterParams) {
-                var data = cell.getRow().getData();
-                const trgt = 'wifi';
+            columns:[
+                {field:"tracked", width:102, formatter: function(cell, formatterParams) {
+                    var data = cell.getRow().getData();
+                    const trgt = 'wifi';
 
-                var _color = colorUniqId(data.BSSID, ':');
-                var p_signal_color = 'rgba(' + _color + ', 1.0)';
-                var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
+                    var _color = colorUniqId(data.BSSID, ':');
+                    var p_signal_color = 'rgba(' + _color + ', 1.0)';
+                    var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
 
-                if (data.is_mute == false) {
-                    return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
-                } else {
-                    return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
-                }
-            }},
-            {title:"SSID", field:"SSID", formatter:ssidFormatter, formatterParams:{
-                field:"Quality",
-                colors:["red", "orange", "yellow", "#008800", "#00FF00"]
+                    if (data.is_mute == false) {
+                        return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
+                    } else {
+                        return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
+                    }
+                }},
+                {title:"SSID", field:"SSID", formatter:ssidFormatter, formatterParams:{
+                    field:"Quality",
+                    colors:["red", "orange", "yellow", "#008800", "#00FF00"]
+                    },
+                    width:140,
                 },
-                width:140,
-            },
-            {title:"BSSID", field:"BSSID", width:120},
-            {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, formatterParams:{
-                type:"line"}
-            },
+                {title:"BSSID", field:"BSSID", width:120},
+                {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, formatterParams:{
+                    type:"line"}
+                },
 
-            {title:"db", field:"Signal", width:30},         // perhaps the last known strength?? an average??
-            {title:"Ch.", field:"Channel", width:50},
-            {title:"Freq.", field:"Frequency", width:70},
-            {title:"Sec.", field:"Encryption", formatter: "tickCross", width:30},
-            {title:"Vendor", field:"Vendor", width:100},
-            {title:"Elapsed", field:"elapsed", width:75},
-            {title:"Created", field:"created", width:75},
-            {title:"Last", field:"updated", width:75},
+                {title:"db", field:"Signal", width:30},         // perhaps the last known strength?? an average??
+                {title:"Ch.", field:"Channel", width:50},
+                {title:"Freq.", field:"Frequency", width:70},
+                {title:"Sec.", field:"Encryption", formatter: "tickCross", width:30},
+                {title:"Vendor", field:"Vendor", width:100},
+                {title:"Elapsed", field:"elapsed", width:75},
+                {title:"Created", field:"created", width:75},
+                {title:"Last", field:"updated", width:75},
 
-        ],
-    });
-</script>
+            ],
+        });
+    </script>
+</div>

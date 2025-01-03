@@ -11,12 +11,6 @@
 {% set streaming_host = config['PLUGIN']['streaming_host'] %}
 {% set streaming_port = config['PLUGIN']['streaming_port'] %}
 
-<style>
-    canvas {
-      display: block;
-      max-width: 100%;
-    }
-</style>
 <link rel="stylesheet" href="{{ url_for('.static', filename='css/cropper.css') }}">
 <link rel="stylesheet" href="{{ url_for('.static', filename='css/cam_controller.css') }}">
 <script>
@@ -233,11 +227,10 @@
 </script>
 
 {% if container %}
-    <div id="cam" class="module_tab" style="position:relative;display:none;">
+<div id="cam" class="module_tab" style="position:relative;display:none;">
 {% else %}
-    <div id="cam" class="module_tab" style="position:relative;display:block;">
+<div id="cam" class="module_tab" style="position:relative;display:block;">
 {% endif %}
-
     <div id="videodiv" class="videodiv" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;">
         <iframe id="_video" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;" class="_video" src=""></iframe>
         <canvas id="target" class="_target" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>

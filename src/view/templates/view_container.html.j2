@@ -135,13 +135,7 @@
     <div id="{{ tab.tab }}_bar_container" style="padding-top:2px;padding-bottom:3px;{{ 'display:none;' if loop.index0 > 0 }}" class="bar_container">
         <div id="{{ tab.tab }}_meter" style=""><script>{{ tab.tab }}_make_deadline_bar();</script></div>
     </div>
-    <div id="{{ tab.tab }}" class="module_tab" style="{{ 'display:none;' if loop.index0 > 0 }}"></div>
     {% endif %}
-{%- endfor -%}
-
-{%- for tab in container.module_tabs: -%}
-    {% set module_fragment = tab.module + '.js.j2' %}
-    {% include module_fragment ignore missing %}
 {%- endfor -%}
 
 {%- for containerTab in container.module_tabs: -%}
@@ -157,7 +151,6 @@
         {%- endfor %}
 
         {%- for tab in container.module_tabs: %}
-        // global buttons here.
         container_elements.push(document.getElementById("{{ tab.tab }}_all_button"));
         container_elements.push(document.getElementById("{{ tab.tab }}_none_button"));
         container_elements.push(document.getElementById("{{ tab.tab }}_write_button"));

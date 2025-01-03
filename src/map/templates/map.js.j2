@@ -1,5 +1,9 @@
 
 <!-- https://stackoverflow.com/questions/5867985/full-screen-iframe-with-a-height-of-100 -->
+{% if container %}
 <div id="map" class="module_tab" style="position:relative;display:none;">
+{% else %}
+<div id="map" class="module_tab" style="position:relative;display:block;">
+{% endif %}
     <iframe src="http://localhost:5173/" allow="geolocation" height="720px;" width="100%"></iframe>
 </div>
