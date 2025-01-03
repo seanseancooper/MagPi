@@ -90,19 +90,19 @@
 </head>
 <body>
     <div id="tabs" style="height:30px">
-{%- for tab, timeout in container.module_tabs: %}
-    {% if tab in container.modules %}
+{%- for tab in container.module_tabs: %}
+    {% if tab.module in container.modules %}
         {% set elapsed = container.get_stat_for_module(tab, 'elapsed') %}
     {% else %}
         {% set elapsed = '' %}
     {% endif %}
-        <button id="container_tab_{{ tab }}" class="tab_button {{ 'active' if loop.index0 }}" onclick="loadTab(event, '{{ tab }}')">{{ tab | upper }} {{ elapsed }}</button>
+        <button id="container_tab_{{ tab.tab }}" class="tab_button {{ 'active' if loop.index0 }}" onclick="loadTab(event, '{{ tab.tab }}')">{{ tab.tab | upper }} {{ elapsed }}</button>
 {%- endfor %}
     </div>
 
-{%- for tab, timeout in container.module_tabs: -%}
-    {% if timeout > 0 %}
-    <div id="{{ tab }}_container_filters" style="{{ 'display:none;' if loop.index0 > 0 }}" class="container_filters">
+{%- for tab in container.module_tabs: -%}
+    {% if tab.timeout > 0 %}
+    <div id="{{ tab.tab }}_container_filters" style="{{ 'display:none;' if loop.index0 > 0 }}" class="container_filters">
     {% include 'filter.html.js.j2' %}
     </div>
     {% endif %}
@@ -112,8 +112,8 @@
 
     <script>
         function reload(){
-        {%- for tab, timeout in container.module_tabs: %}
-            {{ tab }}.replaceData();
+        {%- for tab in container.module_tabs: %}
+            {{ tab.module }}.replaceData();
         {%- endfor %}
         }
     </script>
@@ -134,26 +134,31 @@
         };
     </script>
 
-{%- for tab, timeout in container.module_tabs: -%}
-    {% if timeout > 0 %}
+{%- for tab in container.module_tabs: -%}
+    {% if tab.timeout > 0 %}
         {% include 'autoloader.js.j2' %}
-    <div id="{{ tab }}_bar_container" style="padding-top:2px;padding-bottom:3px;{{ 'display:none;' if loop.index0 > 0 }}" class="bar_container">
-        <div id="{{ tab }}_meter" style=""><script>{{ tab }}_make_deadline_bar();</script></div>
+    <div id="{{ tab.tab }}_bar_container" style="padding-top:2px;padding-bottom:3px;{{ 'display:none;' if loop.index0 > 0 }}" class="bar_container">
+        <div id="{{ tab.tab }}_meter" style=""><script>{{ tab.tab }}_make_deadline_bar();</script></div>
     </div>
-    <div id="{{ tab }}" class="module_tab" style="{{ 'display:none;' if loop.index0 > 0 }}"></div>
+    <div id="{{ tab.tab }}" class="module_tab" style="{{ 'display:none;' if loop.index0 > 0 }}"></div>
     {% endif %}
 {%- endfor -%}
 
-{%- for tab, timeout in container.module_tabs: -%}
-    {% set module_fragment = tab + '.js.j2' %}
+{%- for tab in container.module_tabs: -%}
+    {% set module_fragment = tab.module + '.js.j2' %}
+    {% include module_fragment ignore missing %}
+{%- endfor -%}
+
+{%- for containerTab in container.module_tabs: -%}
+    {% set module_fragment = containerTab.get_module_fragment() %}
     {% include module_fragment ignore missing %}
 {%- endfor -%}
 
     <script>
         container_elements = [];
 
-        {%- for tab, timeout in container.module_tabs: %}
-        container_elements.push(document.getElementById('{{ tab }}'));
+        {%- for tab in container.module_tabs: %}
+        container_elements.push(document.getElementById('{{ tab.tab }}'));
         {%- endfor %}
 
         // global buttons here.
@@ -196,8 +201,8 @@
                 // # IdeA: perhaps this can the basis for supporting a module specific button fragment?
                 //  add an id for the button on the app side to identify it.
                 //  the value could go into data-value... as JSON
-                if (event.target.classList.contains({{ tab }} + '_custom_button')) {
-                    alert({{ tab }} + '_custom_button');
+                if (event.target.classList.contains('' + '_custom_button')) {
+                    alert('' + '_custom_button');
                 };
             });
         });

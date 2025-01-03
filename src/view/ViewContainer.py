@@ -8,6 +8,7 @@ import requests
 
 from src.config import readConfig, CONFIG_PATH
 from src.lib.utils import format_time, format_delta
+import jinja2
 
 import logging
 
@@ -59,9 +60,9 @@ class ViewContainer(threading.Thread):
 
             if mod not in ['gps']:
                 for tup in _module_tabs[mod].items():
-                    _tab, _tab_time = tup
-                    # self.module_tabs.append(ViewContainerTab(_tab, _time))
-                    self.module_tabs.append(tup)
+                    _tab, _time = tup
+                    self.module_tabs.append(ViewContainerTab(mod, _tab, _time))
+                    # self.module_tabs.append(tup)
 
         self.title = f"MagPi ViewContainer: {[mod.upper() for mod in self.modules]}"
 
@@ -197,19 +198,21 @@ class ViewContainer(threading.Thread):
 
 class ViewContainerTab:
 
-    # create tabs and put ViewContainerTab in self.module_tabs
-    def __init__(self, tab, view_timeout):
+    def __init__(self, module, tab, timeout):
         super().__init__()
 
         self.created = datetime.now()
         self.updated = datetime.now()
         self.elapsed = timedelta()
-        self.view_timeout = view_timeout
-        self.module = None
+        self.module = module
         self.tab = tab
+        self.timeout = timeout
 
-    def get_tab(self, module_tabs):
-        return [tab.split(':')[0] for tab in module_tabs if tab is self.module]
+    def get_module_fragment(self):
 
-    def get_timeout(self, module_tabs):
-        return [tab.split(':')[1] for tab in module_tabs if tab is self.module]
+        _path = f'{os.path.abspath(".").replace("/view","")}/{self.module}/templates'
+        templateLoader = jinja2.FileSystemLoader(searchpath=_path)
+        templateEnv = jinja2.Environment(loader=templateLoader)
+        TEMPLATE_FILE = f'{self.tab}.js.j2'
+
+        return templateEnv.get_template(TEMPLATE_FILE)
