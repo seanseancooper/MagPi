@@ -56,13 +56,12 @@ class ViewContainer(threading.Thread):
             self.modules.append(mod)
             readConfig(os.path.basename(module_config), self.module_configs[mod])
 
-            _module_tabs = self.config.get('MODULE_TABS')
-
-            if mod not in ['gps']:
-                for tup in _module_tabs[mod].items():
+        _module_tabs = self.config.get('MODULE_TABS')
+        for _mod in [x for x in _module_tabs]:
+            if _mod not in ['gps']:
+                for tup in _module_tabs[_mod].items():
                     _tab, _time = tup
-                    self.module_tabs.append(ViewContainerTab(mod, _tab, _time))
-                    # self.module_tabs.append(tup)
+                    self.module_tabs.append(ViewContainerTab(_mod, _tab, _time))
 
         self.title = f"MagPi ViewContainer: {[mod.upper() for mod in self.modules]}"
 
@@ -164,8 +163,8 @@ class ViewContainer(threading.Thread):
 
             return messaging
 
-        if self.iteration % 10 == 0:
-            print(f"MAPAggregator [{self.iteration}] {format_delta(self.elapsed, '%H:%M:%S')} elapsed")
+        if self.iteration % 100 == 0:
+            print(f"ViewContainer [{self.iteration}] {format_delta(self.elapsed, '%H:%M:%S')} elapsed")
             # yell about offline modules
             # [speech_logger.info(f'{mod} offline.') for mod in self.dead_modules]
 
