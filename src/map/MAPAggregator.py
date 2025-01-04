@@ -10,7 +10,6 @@ from src.config import CONFIG_PATH, readConfig
 
 import logging
 map_logger = logging.getLogger('gps_logger')
-speech_logger = logging.getLogger('speech_logger')
 
 
 class MAPAggregator(threading.Thread):
@@ -40,7 +39,7 @@ class MAPAggregator(threading.Thread):
     def configure(self, config_file, **kwargs):
 
         non_config_files = kwargs.get('non_config_files')
-        non_config_files.extend([os.path.basename(config_file), 'view.json'])
+        non_config_files.extend([os.path.basename(config_file)])
         config_files = glob.glob(CONFIG_PATH + "/*.json")
         [config_files.remove(CONFIG_PATH + '/' + non_config) for non_config in non_config_files]
 
