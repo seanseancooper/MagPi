@@ -16,14 +16,14 @@ cam_logger = logging.getLogger('cam_logger')
 speech_logger = logging.getLogger('speech_logger')
 
 
-def print_symbology(has_symbols, f, rect, m, c):
+def print_symbology(p, f, rect):
 
     _height, _width, ch = f.shape
     _start = int(0.25 * _height)
 
-    if has_symbols:
-        if m:
-            cv.putText(f, "MOTION DETECTED!", (5, _start - 5), cv.FONT_HERSHEY_PLAIN, 1.0, c, 2)
+    if p.has_symbols:
+        if p.has_motion:
+            cv.putText(f, "MOTION DETECTED!", (5, _start - 5), cv.FONT_HERSHEY_PLAIN, 1.0, p.majic_color, 2)
 
         # yellow rect: items that are moving
         try:
@@ -32,27 +32,28 @@ def print_symbology(has_symbols, f, rect, m, c):
                 item = f'({x},{y})'
                 cv.putText(f, item, (x - 15, y - 10), cv.FONT_HERSHEY_PLAIN, .75, (0, 255, 255), 1)
                 cv.rectangle(f, (x, y), (x + w, y + h), (0, 255, 255), 2)
+
             if np.any(rect):
                 print_rect(rect)
 
         except TypeError: pass  # 'NoneType' object is not subscriptable
 
 
-def print_analytics(has_analysis, f, contours, hierarchy):
-    if has_analysis:
+def print_analytics(p, f, contours, hierarchy):
+    if p.has_analysis:
         draw_contours(f, contours, hierarchy, (64, 255, 64), 1)  # green contours
         # draw_centroid(f, contours, 5, (127, 0, 255), 1)  # purple centroid
 
 
-def print_tracked(has_analysis, has_symbols, f, t, rect):
+def print_tracked(p, f, rect):
     _height, _width, ch = f.shape
     _end = int(0.70 * _height)
     _font_size = 0.75
 
-    if has_symbols:
+    if p.has_symbols:
 
-        for i, _ in enumerate(t):
-            o = t.get(_)
+        for i, _ in enumerate(p.tracked):
+            o = p.tracked.get(_)
             x = o.avg_loc[0]
             y = o.avg_loc[1]
             item = f'{o.contour_id}-{o.tag[-12:]} [{x},{y}]'
@@ -68,9 +69,9 @@ def print_tracked(has_analysis, has_symbols, f, t, rect):
                 # cv.rectangle(f, (x, y), (x+5, y+5), (0, 0, 255), -1)
                 pass
 
-    if has_analysis:
-        for w, _ in enumerate([x for x in t][:1], 1):
-            o = t.get(_)
+    if p.has_analysis:
+        for w, _ in enumerate([x for x in p.tracked][:p.tracker.contour_limit], 1):
+            o = p.tracked.get(_)
             try:
                 cv.putText(f, o.tag, (385, _end + (w * 20)), cv.FONT_HERSHEY_PLAIN, _font_size, (255, 255, 255), 1)
             except AttributeError as a:
@@ -243,9 +244,9 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                     self.tracked = self.tracker.track_objects(self.frame_id, frame, cnt, hier, wall, rect)
 
                     if self.tracked:
-                        print_tracked(self.has_analysis, self.has_symbols, frame, self.tracked, rect)
-                        print_symbology(self.has_symbols, frame, rect, self.has_motion, self.majic_color)
-                    print_analytics(self.has_analysis, frame, cnt, hier)
+                        print_tracked(self, frame, rect)
+                        print_symbology(self, frame, rect)
+                    print_analytics(self, frame, cnt, hier)
 
                     if self.plugin_config['write_all_frames']:
                         self.print_frame(frame, self.frame_id)
