@@ -1,17 +1,17 @@
 import os
 import glob
 import threading
-import time
 from collections import defaultdict
+import time
 from datetime import datetime, timedelta
 import requests
 
 from src.config import readConfig, CONFIG_PATH
+
 from src.lib.utils import format_time, format_delta
 import jinja2
 
 import logging
-
 view_logger = logging.getLogger('view_logger')
 speech_logger = logging.getLogger('speech_logger')
 
@@ -25,21 +25,28 @@ class ViewContainer(threading.Thread):
         self.updated = datetime.now()
         self.elapsed = timedelta()
 
-        self.live_modules = []
-        self.dead_modules = []
-
         self.modules = []
         self.module_tabs = []
+        self.live_modules = []
+        self.dead_modules = []
 
         self.module_stats = defaultdict(dict)
         self.module_configs = defaultdict(dict)
         self.module_data = defaultdict(dict)
 
-        self.title = None
         self.iteration = 0
+        self.title = None
 
     def stop(self):
         print(f'stopping.')
+
+    @staticmethod
+    def get_view_container(app):
+        with app.app_context():
+            from flask import g
+            if "viewcontainer" not in g:
+                g.viewcontainer = ViewContainer()
+            return g.viewcontainer
 
     def configure(self, config_file, **kwargs):
 
@@ -52,7 +59,6 @@ class ViewContainer(threading.Thread):
 
         for module_config in config_files:
             mod = os.path.basename(module_config).replace('.json', '')
-
             self.modules.append(mod)
             readConfig(os.path.basename(module_config), self.module_configs[mod])
 
@@ -106,7 +112,6 @@ class ViewContainer(threading.Thread):
 
     def get_stat_for_module(self, m, stat):
         """ return a specific value from stats """
-        # self.reload(m)
         value = self.module_stats[m].get(stat) or 'offline'
         return value
 
@@ -130,15 +135,6 @@ class ViewContainer(threading.Thread):
 
         print(f'unloaded {unload}')
         return True
-
-    @staticmethod
-    def get_view_container(app):
-
-        with app.app_context():
-            from flask import g
-            if "viewcontainer" not in g:
-                g.viewcontainer = ViewContainer()
-            return g.viewcontainer
 
     def report(self):
 
