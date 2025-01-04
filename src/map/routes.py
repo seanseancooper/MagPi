@@ -4,7 +4,7 @@ from src.map.MAPAggregator import MAPAggregator
 
 mapAgg = MAPAggregator()
 # TODO: the config hasn't been read yet, how can these be configurable?
-non_config_files = ['arx.json', 'ebs.json', 'mot.json']
+non_config_files = ['arx.json', 'cam.json', 'ebs.json', 'gps.json', 'mot.json', 'view.json']
 mapAgg.configure('map.json', non_config_files=non_config_files)
 
 from src.map.lib.NodeRunner import NodeRunner
@@ -22,7 +22,7 @@ map_bp = Blueprint(
 
 @map_bp.route('/', subdomain='map')
 def index():
-    return redirect("/aggregated", code=302)
+    return redirect("/data", code=302)
 
 
 @map_bp.route("/map", methods=['GET'], subdomain='map')
@@ -41,27 +41,19 @@ def map_stats():
     return jsonify(stats)
 
 
-@map_bp.route("/aggregated", methods=['GET'], subdomain='map')
+@map_bp.route("/data", methods=['GET'], subdomain='map')
 def aggregated():
     """  returns all aggregated data """
     return mapAgg.module_data
 
-    # TODO: move to manager
-    # _configs = mapAgg.module_configs
-    # _configs['stats'] = mapAgg.module_stats
-    # return jsonify(_configs)
 
-
-@map_bp.route("/aggregated/<mod>", methods=['GET'], subdomain='map')
+@map_bp.route("/data/<mod>", methods=['GET'], subdomain='map')
 def aggregated_by_module(mod):
     """ returns module specific aggregated data"""
     return mapAgg.module_data[mod]
-    # _configs = mapAgg.module_configs[mod]
-    # _configs['stats'] = mapAgg.module_stats[mod]
-    # return jsonify(_configs)
 
 
-@map_bp.route("/aggregated/<mod>/<context>", methods=['GET'], subdomain='map')
+@map_bp.route("/data/<mod>/<context>", methods=['GET'], subdomain='map')
 def aggregated_by_module_context(mod, context):
     """ redirect to a specific context of a module """
     return redirect('http://' + mod + '.' + mapAgg.module_configs[mod]['SERVER_NAME'] + '/' + context, code=302)
