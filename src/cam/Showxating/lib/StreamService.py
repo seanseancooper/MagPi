@@ -17,12 +17,40 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
         self.src = None
         self.majic_color = None
 
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, '
+                                                         'Access-Control-*, '
+                                                         'Access-Control-Allow-Origin, '
+                                                         'Access-Control-Allow-Headers, '
+                                                         'Access-Control-Allow-Methods, '
+                                                         'access-control-allow-origin, '
+                                                         'access-control-allow-headers, '
+                                                         'access-control-allow-methods, '
+                                                         'TARGET, '
+                                                         'majic-color')
+        self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+
     def do_GET(self):
 
         if self.path == self.config_path:
 
             self.send_response(200)
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, '
+                                                             'Access-Control-*, '
+                                                             'Access-Control-Allow-Origin, '
+                                                             'Access-Control-Allow-Headers, '
+                                                             'Access-Control-Allow-Methods, '
+                                                             'access-control-allow-origin, '
+                                                             'access-control-allow-headers, '
+                                                             'access-control-allow-methods, '
+                                                             'TARGET, '
+                                                             'majic-color')
+            self.send_header('Access-Control-Allow-Methods', 'GET')
+            self.send_header('Access-Control-Allow-Origin', '*')
             self.send_header('Cache-Control',
                              'no-store, no-cache, must-revalidate, pre-check=0, post-check=0, max-age=0')
             self.end_headers()
