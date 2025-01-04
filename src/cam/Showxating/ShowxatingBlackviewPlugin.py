@@ -119,13 +119,13 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             "mediapipe": self.mediapipe,
 
             "kSz": str(self._kSz),
-            "threshold": self.threshold,                        # int value
+            "threshold": self.threshold,
 
             "f_id": self.frame_id,
-            "majic_color": str(self.majic_color),               # variable
-            "frame_shape": self.frame_shape,                    # constant
+            "majic_color": self.majic_color,
+            "frame_shape": self.frame_shape,
             "show_threshold": self.show_threshold,
-            "hold_threshold": self.hold_threshold,              # true if checked
+            "hold_threshold": self.hold_threshold,
 
             "created": format_time(self.created, "%H:%M:%S"),
             "updated": format_time(self.updated, "%H:%M:%S"),
