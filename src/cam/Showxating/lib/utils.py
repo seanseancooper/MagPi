@@ -129,13 +129,13 @@ def wall_images(frame, conts):
     dists = []
 
     # https://stackoverflow.com/questions/48979219/opencv-composting-2-images-of-differing-size
-    def combine_images(image1, image2, anchor_y, anchor_x):
-        fg, w = image1, image2  # no refs
+    def combine_images(paint, canvas, anchor_y, anchor_x):
+        fg, c = paint, canvas  # no refs
 
         # Check if the foreground is inbound with the new coordinates
         # and raise an error if out of bounds
-        bg_height = w.shape[0]
-        bg_width = w.shape[1]
+        bg_height = c.shape[0]
+        bg_width = c.shape[1]
         fg_height = fg.shape[0]
         fg_width = fg.shape[1]
 
@@ -146,14 +146,14 @@ def wall_images(frame, conts):
         anchor_x_end = anchor_x + fg_width
 
         alpha = 1.0
-        w[anchor_y:anchor_y_end, anchor_x:anchor_x_end, :] = cv.addWeighted(fg,
+        c[anchor_y:anchor_y_end, anchor_x:anchor_x_end, :] = cv.addWeighted(fg,
                  alpha,
-                 w[anchor_y:anchor_y + fg_height, anchor_x:anchor_x + fg_width:],
+                 c[anchor_y:anchor_y + fg_height, anchor_x:anchor_x + fg_width:],
                  1-alpha,
                  0,
-                 w)
+                 c)
 
-        return w
+        return c
 
     if conts.any() or conts:
 
