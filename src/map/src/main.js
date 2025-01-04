@@ -160,7 +160,7 @@ geolocation.setTracking(true);
 function getLocation(){
     var xhttp = new XMLHttpRequest();
     var block = true;
-    xhttp.open("GET", 'http://gps.localhost:5004/position', block);
+    xhttp.open("GET", 'http://gps.localhost:5004/position', block);  // #ToDO: find a way to not hardcode URL
     setHeaders(xhttp, 'gps.localhost:5004');
 
     xhttp.onload = function(){
@@ -467,7 +467,7 @@ function animate(coordinate) {
     const hdweCoords = fromLonLat(coordinate);
 
     var xhttp = new XMLHttpRequest();
-    let URL = "http://map.localhost:5005/aggregated";
+    let URL = "http://map.localhost:5005/data";  // #ToDO: find a way to not hardcode URL
     xhttp.open("GET", URL, true);
 
     setHeaders(xhttp, 'map.localhost:5005');
@@ -526,12 +526,12 @@ function animate(coordinate) {
                         var p_signal_color = 'rgba(' + _color + ', 1.0)';
 
                         // symbology for TRX SignalPoints
-                         createConcentric(source, lonlat, numConcentrics, p_signal_color, sgnlStrength, cell);
+                        createConcentric(source, lonlat, numConcentrics, p_signal_color, sgnlStrength, cell);
                     }
                 });
             }
-
-            if (_signals.sdr) {
+            /*
+            if (_signals.sdr.length > 0) {
                 _signals.sdr.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
                         console.log('SDR: ' +  cell);
@@ -540,8 +540,8 @@ function animate(coordinate) {
                     }
                 });
             }
-            /*
-            if (_signals.cam) {
+
+            if (_signals.cam.length > 0) {
                 _signals.cam.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
                         console.log('CAM: ' +  cell);
@@ -550,8 +550,8 @@ function animate(coordinate) {
                     }
                 });
             }
-            */
-            if (_signals.arx) {
+
+            if (_signals.arx.length > 0) {
                 _signals.arx.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
                         console.log('ARX: ' +  cell);
@@ -560,6 +560,7 @@ function animate(coordinate) {
                     }
                 });
             }
+            */
 
             map.render();
             return true;
