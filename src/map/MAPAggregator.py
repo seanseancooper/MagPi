@@ -20,9 +20,7 @@ class MAPAggregator(threading.Thread):
     """
     def __init__(self):
         super().__init__()
-        self.DEBUG = False
         self.config = {}
-
         self.created = datetime.now()
         self.updated = datetime.now()
         self.elapsed = timedelta()
@@ -31,26 +29,28 @@ class MAPAggregator(threading.Thread):
         self.live_modules = []
         self.dead_modules = []
 
-        self.module_stats = defaultdict(dict)
         self.module_configs = defaultdict(dict)
-        self.module_aggregated = defaultdict(str)
+        self.module_data = defaultdict(dict)
 
         self.iteration = 0
-        self.thread = None
+
+    def stop(self):
+        print(f'stopping.')
 
     def configure(self, config_file, **kwargs):
+
         non_config_files = kwargs.get('non_config_files')
-        # never 'view'
         non_config_files.extend([os.path.basename(config_file), 'view.json'])
         config_files = glob.glob(CONFIG_PATH + "/*.json")
         [config_files.remove(CONFIG_PATH + '/' + non_config) for non_config in non_config_files]
+
+        readConfig(config_file, self.config)
 
         for module_config in config_files:
             mod = os.path.basename(module_config).replace('.json', '')
             self.modules.append(mod)
             readConfig(os.path.basename(module_config), self.module_configs[mod])
 
-        readConfig(config_file, self.config)
 
     def register_modules(self):
         """ discover 'live' module REST contexts """
@@ -70,21 +70,11 @@ class MAPAggregator(threading.Thread):
     def aggregate(self, mod):
         """ collect responses into aggregation """
         try:
-            conf = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
-            if conf.ok:
-                self.module_aggregated[mod] = conf.json()
+            data = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
+            if data.ok:
+                self.module_data[mod] = data.json()
         except Exception as e:
-            map_logger.warning(f'Configuration Aggregator Warning [{mod}]! {e}')
-
-        try:
-            stats = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'] + '/stats')
-            if stats.ok:
-                self.module_stats[mod] = stats.json()  # current module stats
-        except Exception as e:
-            map_logger.warning(f'Aggregator Warning [{mod}]! {e}')
-
-    def stop(self):
-        pass
+            map_logger.warning(f'Data Aggregator Warning [{mod}]! {e}')
 
     def run(self):
 
@@ -102,7 +92,7 @@ class MAPAggregator(threading.Thread):
 
             for mod in self.dead_modules:
                 try:
-                    self.module_aggregated.pop(mod)
+                    self.module_data[mod] = {}
                 except KeyError: pass  # 'missing' is fine.
 
             time.sleep(self.config.get('AGGREGATOR_TIMEOUT', .5))
