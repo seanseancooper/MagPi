@@ -222,6 +222,11 @@ class FrameObjektTracker:
 
             if o1.inside_rect and o1.hist_pass:
                 # item following f0 item.
+
+                # back reference and merge the rects (n largest) and
+                # take a pic of the merged area (use frame)
+                # largest area wins.
+
                 o1.tag = f"{self.f_id}_{o1.prev_tag.split('_')[1]}"
                 self.print_frame(o1, "N1:")
 
@@ -257,6 +262,9 @@ class FrameObjektTracker:
 
             if oN.inside_rect and oN.hist_pass:
                 # continuation of motion
+                # back reference and merge the rects (n largest) and take a pic of the merged area
+                # largest area wins.
+
                 self.print_frame(oN, "   ")
 
             if not oN.close and not oN.hist_pass:
