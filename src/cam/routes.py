@@ -22,7 +22,7 @@ def index():
 
 @cam_bp.route("/ctrl", methods=['GET'], subdomain='cam')
 def cam_controller():
-    return render_template("cam_controller.html.j2",
+    return render_template("cam.html.j2",
                            config=camMgr.config,
                            plugin=camMgr.plugin)
 
