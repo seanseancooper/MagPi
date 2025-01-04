@@ -30,30 +30,36 @@
     }
 
     function load_video_new(){
-        const _video = document.getElementById("_video");
 
-        const reqHeaders = new Headers();
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("GET", "http://{{ streaming_host }}:{{ streaming_port }}/stream");
+        setsHeaders(xhttp);
+        //xhttp.setRequestHeader('TARGET', 'cam');
+        xhttp.send();
 
-        reqHeaders.set('Access-Control-Allow-Origin', 'localhost:5002');
-        //reqHeaders.set('Access-Control-Allow-Methods', 'GET');
-        //reqHeaders.set('Access-Control-Allow-Headers', 'Content-type, Content-length, Cache-Control, Access-Control-*, majic-color');
+        xhttp.onload = function() {
+            const resp = xhttp.response;
+            console.log("response.headers =", resp.headers);
 
-        const options = {
-          headers: reqHeaders,
-        };
+            const _video = document.getElementById("_video");
+            const objectURL = URL.createObjectURL(resp.blob());
+            _video.src = objectURL;
+        }
 
-        const myRequest = new Request("http://{{ streaming_host }}:{{ streaming_port }}/stream", options);
-
+        /*
+        const myRequest = new Request("http://{{ streaming_host }}:{{ streaming_port }}/stream");
         fetch(myRequest)
           .then((response) => {
             console.log("response.headers =", response.headers);
-            // get majic-color from header!
             return response.blob();
           })
           .then((myBlob) => {
+            const _video = document.getElementById("_video");
+            // var _video = document.querySelector('#_video');
             const objectURL = URL.createObjectURL(myBlob);
             _video.src = objectURL;
           });
+        */
     }
 
     function fore_aft(button){
