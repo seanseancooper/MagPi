@@ -29,6 +29,33 @@
         }
     }
 
+    function load_video_new(){
+        const _video = document.getElementById("_video");
+
+        const reqHeaders = new Headers();
+
+        reqHeaders.set('Access-Control-Allow-Origin', 'localhost:5002');
+        //reqHeaders.set('Access-Control-Allow-Methods', 'GET');
+        //reqHeaders.set('Access-Control-Allow-Headers', 'Content-type, Content-length, Cache-Control, Access-Control-*, majic-color');
+
+        const options = {
+          headers: reqHeaders,
+        };
+
+        const myRequest = new Request("http://{{ streaming_host }}:{{ streaming_port }}/stream", options);
+
+        fetch(myRequest)
+          .then((response) => {
+            console.log("response.headers =", response.headers);
+            // get majic-color from header!
+            return response.blob();
+          })
+          .then((myBlob) => {
+            const objectURL = URL.createObjectURL(myBlob);
+            _video.src = objectURL;
+          });
+    }
+
     function fore_aft(button){
         // changes fore/aft view
         var xhttp = new XMLHttpRequest();
