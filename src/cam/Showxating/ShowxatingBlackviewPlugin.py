@@ -255,7 +255,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
             if self.had_motion != self.has_motion is True:
                 if self.throttle.handle('motion'):
-                    speech_logger.info('motion detected!')
+                    pass
+                    # speech_logger.info('motion detected!')
                 self.had_motion = True
 
         else:

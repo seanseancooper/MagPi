@@ -18,35 +18,44 @@
         xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
         xhttp.setRequestHeader('Access-Control-Allow-Methods', 'POST, GET');
         xhttp.setRequestHeader('Content-Type', 'text/html');
-        xhttp.setRequestHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-*, majic-color');
+        xhttp.setRequestHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-*, MAJIC-COLOR');
     }
 
     function load_video(){
         var _video = document.getElementById("_video");
+        const stream = "http://{{ streaming_host }}:{{ streaming_port }}/stream";
 
-        while (_video.src != "http://{{ streaming_host }}:{{ streaming_port }}/stream") {
-            _video.src = "http://{{ streaming_host }}:{{ streaming_port }}/stream";
+        while (_video.src != stream) {
+            _video.src = stream;
         }
     }
 
-    function load_video_new(){
+    /*
+    function load_video_broken(){
 
         var xhttp = new XMLHttpRequest();
-        xhttp.open("GET", "http://{{ streaming_host }}:{{ streaming_port }}/stream");
+        var _video = document.getElementById("_video");
+        const stream = "http://{{ streaming_host }}:{{ streaming_port }}/stream";
+
+        xhttp.open("GET", stream);
         setsHeaders(xhttp);
-        //xhttp.setRequestHeader('TARGET', 'cam');
         xhttp.send();
 
-        xhttp.onload = function() {
-            const resp = xhttp.response;
-            console.log("response.headers =", resp.headers);
+        xhttp.onreadystatechange = function() {
+            if (xhttp.response != null) {
 
-            const _video = document.getElementById("_video");
-            const objectURL = URL.createObjectURL(resp.blob());
-            _video.src = objectURL;
-        }
+                const portal = new Image();
+                portal.src = stream;
+                _video.appendChild = portal;
 
-        /*
+                if (this.readyState === this.HEADERS_RECEIVED) {
+                    const headers = xhttp.getAllResponseHeaders();
+                    console.log("headers =", headers);
+                }
+            }
+        };
+
+        // needs headers
         const myRequest = new Request("http://{{ streaming_host }}:{{ streaming_port }}/stream");
         fetch(myRequest)
           .then((response) => {
@@ -54,13 +63,12 @@
             return response.blob();
           })
           .then((myBlob) => {
-            const _video = document.getElementById("_video");
-            // var _video = document.querySelector('#_video');
             const objectURL = URL.createObjectURL(myBlob);
-            _video.src = objectURL;
+            _video.appendChild = objectURL;
           });
-        */
+
     }
+    */
 
     function fore_aft(button){
         // changes fore/aft view
@@ -265,7 +273,7 @@
 <div id="cam" class="module_tab" style="position:relative;display:block;">
 {% endif %}
     <div id="videodiv" class="videodiv" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;">
-        <iframe id="_video" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;" class="_video" src=""></iframe>
+        <iframe id="_video" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;" class="_video" src="http://{{ streaming_host }}:{{ streaming_port }}/stream"></iframe>
         <canvas id="target" class="_target" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
         <canvas id="grid" class="_grid" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
     </div>
