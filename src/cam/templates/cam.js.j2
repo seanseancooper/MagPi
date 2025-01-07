@@ -21,6 +21,7 @@
         xhttp.setRequestHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-*, MAJIC-COLOR');
     }
 
+    //
     function load_video(){
         var _video = document.getElementById("_video");
         const stream = "http://{{ streaming_host }}:{{ streaming_port }}/stream";
@@ -29,45 +30,25 @@
             _video.src = stream;
         }
     }
-
     /*
-    function load_video_broken(){
 
-        var xhttp = new XMLHttpRequest();
-        var _video = document.getElementById("_video");
-        const stream = "http://{{ streaming_host }}:{{ streaming_port }}/stream";
+    function load_video(){
 
-        xhttp.open("GET", stream);
-        setsHeaders(xhttp);
-        xhttp.send();
+        const stream = new Request("http://{{ streaming_host }}:{{ streaming_port }}/stream");
 
-        xhttp.onreadystatechange = function() {
-            if (xhttp.response != null) {
-
-                const portal = new Image();
-                portal.src = stream;
-                _video.appendChild = portal;
-
-                if (this.readyState === this.HEADERS_RECEIVED) {
-                    const headers = xhttp.getAllResponseHeaders();
-                    console.log("headers =", headers);
-                }
-            }
-        };
-
-        // needs headers
-        const myRequest = new Request("http://{{ streaming_host }}:{{ streaming_port }}/stream");
-        fetch(myRequest)
+        fetch(stream)
           .then((response) => {
             console.log("response.headers =", response.headers);
             return response.blob();
           })
           .then((myBlob) => {
+            var _video = document.getElementById("_video");
             const objectURL = URL.createObjectURL(myBlob);
-            _video.appendChild = objectURL;
+            _video.src = objectURL;
           });
 
-    }
+    };
+
     */
 
     function fore_aft(button){
