@@ -13,7 +13,6 @@ logger_root = logging.getLogger('root')
 class ShowxatingCapture:
 
     def __init__(self, name, src, config):
-        super().__init__()
 
         self.plugin_config = config
         self.capture = None
