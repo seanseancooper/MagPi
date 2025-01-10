@@ -35,7 +35,7 @@ class ShowxatingCapture:
                 cam_logger.warning(cv.getBuildInformation())
 
         if self.capture:
-            initialize()
+            pass
         else:
             while self.capture is None:
                 # camera capture (0)
