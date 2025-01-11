@@ -124,3 +124,4 @@ class ShowxatingCapture:
             else:
                 cam_logger.warning(f"{self.capture_name} capture returned NO REF!")
                 self.capture.release()
+                exit(0)
