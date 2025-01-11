@@ -78,23 +78,23 @@ class StreamService(ThreadingHTTPServer):
         super().__init__(addr, hndlr)
         self.config_path = ctx
         self.RequestHandlerClass.config_path = ctx
-        self.is_stopped = False
+        self.stopped = False
         self.allow_reuse_address = True
 
     def get_status(self):
         return {
             "addr": self.server_address,
             "config_path": self.config_path,
-            "is_stopped": self.is_stopped
+            "stopped": self.stopped
         }
 
     def serve_forever(self, poll_interval: float = ...) -> None:
-        while not self.is_stopped:
+        while not self.stopped:
             self.handle_request()
 
     def force_stop(self):
         self.server_close()
-        self.is_stopped = True
+        self.stopped = True
 
     def stream(self):
 
