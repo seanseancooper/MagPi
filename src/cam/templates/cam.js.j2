@@ -34,7 +34,7 @@
                 //var _videoimg = document.getElementById("_videoimg");  <img id="_videoimg" src="">
                 //_videoimg.src = url;
 
-                var _videodiv = document.getElementById("_videodiv");
+                var _videodiv = document.getElementById("video");
                 const image = new Image();
                 image.src = url;
                 image.style = "position:absolute;left:0px;top:0px;z-index:-1;";
@@ -256,19 +256,19 @@
           //var _videoimg = document.getElementById("_videoimg");  <img id="_videoimg" src="">
           //_videoimg.src = url;
 
-          var _videodiv = document.getElementById("_videodiv");
-          const image = new Image();
-          image.src = url;
-          image.style = "position:absolute;left:0px;top:0px;z-index:-1;";
-          _videodiv.appendChild(image);
+          var _videodiv = document.getElementById("video");
+          const i = new Image();
+          i.src = url;
+          i.style = "position:absolute;left:0px;top:0px;z-index:-1;";
+          _videodiv.appendChild(i);
 
         });
     </script>
 
     <div id="videodiv" class="videodiv" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;">
-        <div id="_videodiv" class="_video" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;">
-            <canvas id="_target" class="_target" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
-            <canvas id="grid" class="_grid" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
+        <div id="video" class="video" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;">
+            <canvas id="target" class="target" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
+            <canvas id="grid" class="grid" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
         </div>
     </div>
 
@@ -277,7 +277,7 @@
     {% if not container %}
     <script>
         window.addEventListener('DOMContentLoaded', function () {
-            var image = document.querySelector('#_target');
+            var image = document.querySelector('#target');
             var cropper = new Cropper(image, {
                 viewMode: 1,
                 center: true,
