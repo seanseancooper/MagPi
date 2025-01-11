@@ -21,35 +21,26 @@
         xhttp.setRequestHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-*, MAJIC-COLOR');
     }
 
-    //
-    function load_video(){
-        var _video = document.getElementById("_video");
-        const stream = "http://{{ streaming_host }}:{{ streaming_port }}/stream";
-
-        while (_video.src != stream) {
-            _video.src = stream;
-        }
-    }
-    /*
-
     function load_video(){
 
-        const stream = new Request("http://{{ streaming_host }}:{{ streaming_port }}/stream");
+        const url  = "http://{{ streaming_host }}:{{ streaming_port }}/stream";
+        const stream = new Request(url);
 
-        fetch(stream)
-          .then((response) => {
-            console.log("response.headers =", response.headers);
-            return response.blob();
-          })
-          .then((myBlob) => {
-            var _video = document.getElementById("_video");
-            const objectURL = URL.createObjectURL(myBlob);
-            _video.src = objectURL;
-          });
+        fetch(url)
+            .then((response) => {
+                const myBlob = response.blob();
+                console.log("YOLO response.headers:", response.headers);
 
+                //var _videoimg = document.getElementById("_videoimg");  <img id="_videoimg" src="">
+                //_videoimg.src = url;
+
+                var _videodiv = document.getElementById("_videodiv");
+                const image = new Image();
+                image.src = url;
+                image.style = "position:absolute;left:0px;top:0px;z-index:-1;";
+                _videodiv.appendChild(image);
+        });
     };
-
-    */
 
     function fore_aft(button){
         // changes fore/aft view
@@ -253,17 +244,40 @@
 {% else %}
 <div id="cam" class="module_tab" style="position:relative;display:block;">
 {% endif %}
+
+    <script>
+      const url  = "http://{{ streaming_host }}:{{ streaming_port }}/stream";
+
+      fetch(url)
+        .then((response) => {
+          const myBlob = response.blob();
+          console.log("YOLO response.headers:", response.headers);
+
+          //var _videoimg = document.getElementById("_videoimg");  <img id="_videoimg" src="">
+          //_videoimg.src = url;
+
+          var _videodiv = document.getElementById("_videodiv");
+          const image = new Image();
+          image.src = url;
+          image.style = "position:absolute;left:0px;top:0px;z-index:-1;";
+          _videodiv.appendChild(image);
+
+        });
+    </script>
+
     <div id="videodiv" class="videodiv" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;">
-        <iframe id="_video" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;" class="_video" src="http://{{ streaming_host }}:{{ streaming_port }}/stream"></iframe>
-        <canvas id="target" class="_target" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
-        <canvas id="grid" class="_grid" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
+        <div id="_videodiv" class="_video" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;">
+            <canvas id="_target" class="_target" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
+            <canvas id="grid" class="_grid" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
+        </div>
     </div>
+
     <script src="{{ url_for('.static', filename='cropperjs/dist/cropper.js') }}"></script>
 
     {% if not container %}
     <script>
         window.addEventListener('DOMContentLoaded', function () {
-            var image = document.querySelector('#target');
+            var image = document.querySelector('#_target');
             var cropper = new Cropper(image, {
                 viewMode: 1,
                 center: true,
