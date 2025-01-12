@@ -40,7 +40,7 @@ class ShowxatingPlugin(object):
         self.frame_shape = None
 
         self.streamservice = None
-        self.streamservice_thread = None    # 1st run ... rx_thread
+        self.streamservice_thread = None    # 1st run ... this is missing.
         self.plugin_thread = None           # 2nd run ... tx_thread
         self.is_alive = False
 
@@ -72,7 +72,6 @@ class ShowxatingPlugin(object):
         self.streamservice.stream()
 
     def stream(self, frame):
-        ''' allow a plugin to stream frames '''
         if self.plugin_config['streams'] is True:
             if not self.streamservice.stopped and self.is_alive:
                 self.streamservice.RequestHandlerClass.src = frame
@@ -87,7 +86,7 @@ class ShowxatingPlugin(object):
     def stream_direct(self):
         """Video streaming generator function."""
         yield b'--jpgboundary\r\n'
-        while True:
+        while self.is_alive:
             f = self.get_frame()
 
             import cv2 as cv
@@ -100,13 +99,15 @@ class ShowxatingPlugin(object):
         """set a flag to stop threads"""
         self.is_alive = False
         self.plugin_process_frames = False
+        # self.streamservice.streamservice_thread.join()
+        # self.plugin_capture.capture.release()
         self.streamservice.force_stop()
 
-    def join(self):
-        if not self.is_alive:
-            self.streamservice_thread.join()
+    # def join(self):
+    #     if not self.is_alive:
+    #         self.streamservice_thread.join()
 
-    def start_plugin(self):
+    def _plugin(self):
         self.get_config()
         self.set_capture()
         try:
@@ -136,7 +137,7 @@ class ShowxatingPlugin(object):
         self.start_streamservice()
 
         # WRITING ...
-        self.plugin_thread = threading.Thread(target=self.start_plugin, name='BVPlugin')
+        self.plugin_thread = threading.Thread(target=self._plugin, name='BVPlugin')
         self.plugin_thread.daemon = True
         self.plugin_thread.start()
 

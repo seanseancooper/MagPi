@@ -66,7 +66,6 @@ def cam_stats_tracker():
 
 @cam_bp.route('/stream')
 def video_feed():
-    """Video streaming route. Put this in the src attribute of an img tag."""
     return Response(camMgr.plugin.stream_direct(),
                     mimetype='multipart/x-mixed-replace; boundary=--jpgboundary')
 

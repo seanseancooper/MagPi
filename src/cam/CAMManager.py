@@ -71,7 +71,7 @@ class CAMManager(threading.Thread):
         return _stats
 
     def get_tracker_stats(self):
-        return  self.plugin.tracker.get()
+        return self.plugin.tracker.get()
 
     def stop(self):
         self.plugin.stop()
@@ -82,10 +82,10 @@ class CAMManager(threading.Thread):
         self.plugin.start()
 
         try:
-            self.plugin.join()
+            self.plugin.plugin_thread.join()
         except KeyboardInterrupt:
             pass
-        self.plugin.join()
+        # self.plugin.plugin_thread.join()
 
     def run(self):
         self.main()
