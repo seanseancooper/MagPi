@@ -33,6 +33,7 @@ class ShowxatingPlugin(object):
 
         self.plugin_process_frames = False
 
+        self.frame = None
         self.frame_id = None
         self.frame_rate = None
         self.frame_period = None
@@ -73,12 +74,27 @@ class ShowxatingPlugin(object):
     def stream(self, frame):
         ''' allow a plugin to stream frames '''
         if self.plugin_config['streams'] is True:
-            if not self.streamservice.is_stopped and self.is_alive:
+            if not self.streamservice.stopped and self.is_alive:
                 self.streamservice.RequestHandlerClass.src = frame
                 self.streamservice.RequestHandlerClass.majic_color = self.majic_color
 
     def process_frame(self, frame):
         return frame
+
+    def get_frame(self):
+        return self.frame
+
+    def stream_direct(self):
+        """Video streaming generator function."""
+        yield b'--jpgboundary\r\n'
+        while True:
+            f = self.get_frame()
+
+            import cv2 as cv
+            params = (cv.IMWRITE_JPEG_QUALITY, 100)
+            img_str = cv.imencode('.jpeg', f, params)[1].tobytes()
+
+            yield b'Content-Type: image/jpeg\r\n\r\n' + img_str + b'\r\n--jpgboundary\r\n'
 
     def stop(self):
         """set a flag to stop threads"""
@@ -105,7 +121,7 @@ class ShowxatingPlugin(object):
                 self.updated = datetime.now()
                 self.elapsed = self.updated - self.created
 
-                self.process_frame(frame)
+                self.frame = self.process_frame(frame)
 
         except ValueError:
             print(f"no frame!!")

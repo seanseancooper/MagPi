@@ -295,6 +295,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                 self.threshold_ops(frame, THRESHOLD)
                 self.process_contours(frame, contours, hier)
 
+            # 'streamservice' streaming
             self.stream(frame)
 
             return frame
