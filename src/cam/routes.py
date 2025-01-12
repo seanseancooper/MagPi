@@ -62,10 +62,3 @@ def cam_stats():
 @cam_bp.route('/stats/tracker', methods=['GET'], subdomain='cam')
 def cam_stats_tracker():
     return jsonify(camMgr.get_tracker_stats())
-
-
-@cam_bp.route('/stream')
-def video_feed():
-    return Response(camMgr.plugin.stream_direct(),
-                    mimetype='multipart/x-mixed-replace; boundary=--jpgboundary')
-
