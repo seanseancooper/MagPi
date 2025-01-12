@@ -22,25 +22,14 @@
     }
 
     function load_video(){
+        var _video = document.getElementById("video");
+        // const stream = "/stream";
+        const stream  = "http://{{ streaming_host }}:{{ streaming_port }}/stream";
 
-        const url  = "http://{{ streaming_host }}:{{ streaming_port }}/stream";
-        const stream = new Request(url);
-
-        fetch(url)
-            .then((response) => {
-                const myBlob = response.blob();
-                console.log("YOLO response.headers:", response.headers);
-
-                //var _videoimg = document.getElementById("_videoimg");  <img id="_videoimg" src="">
-                //_videoimg.src = url;
-
-                var _videodiv = document.getElementById("video");
-                const image = new Image();
-                image.src = url;
-                image.style = "position:absolute;left:0px;top:0px;z-index:-1;";
-                _videodiv.appendChild(image);
-        });
-    };
+        while (_video.src != stream) {
+            _video.src = stream;
+        }
+    }
 
     function fore_aft(button){
         // changes fore/aft view
@@ -245,31 +234,10 @@
 <div id="cam" class="module_tab" style="position:relative;display:block;">
 {% endif %}
 
-    <script>
-      const url  = "http://{{ streaming_host }}:{{ streaming_port }}/stream";
-
-      fetch(url)
-        .then((response) => {
-          const myBlob = response.blob();
-          console.log("YOLO response.headers:", response.headers);
-
-          //var _videoimg = document.getElementById("_videoimg");  <img id="_videoimg" src="">
-          //_videoimg.src = url;
-
-          var _videodiv = document.getElementById("video");
-          const i = new Image();
-          i.src = url;
-          i.style = "position:absolute;left:0px;top:0px;z-index:-1;";
-          _videodiv.appendChild(i);
-
-        });
-    </script>
-
     <div id="videodiv" class="videodiv" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;">
-        <div id="video" class="video" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;">
-            <canvas id="target" class="target" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
-            <canvas id="grid" class="grid" width="{{ plugin.frame_shape[1] }}" height="{{ plugin.frame_shape[0] }}"></canvas>
-        </div>
+        <iframe id="video" class="video" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;" src="/stream"></iframe>
+        <canvas id="target" class="target" width="{{ plugin.frame_shape[1] }}px" height="{{ plugin.frame_shape[0] }}px"></canvas>
+        <canvas id="grid" class="grid" width="{{ plugin.frame_shape[1] }}px" height="{{ plugin.frame_shape[0] }}px"></canvas>
     </div>
 
     <script src="{{ url_for('.static', filename='cropperjs/dist/cropper.js') }}"></script>

@@ -1,6 +1,6 @@
 import json
 
-from flask import Blueprint, render_template, redirect, jsonify
+from flask import Blueprint, render_template, redirect, jsonify, Response
 
 from src.cam.CAMManager import CAMManager
 
@@ -62,4 +62,11 @@ def cam_stats():
 @cam_bp.route('/stats/tracker', methods=['GET'], subdomain='cam')
 def cam_stats_tracker():
     return jsonify(camMgr.get_tracker_stats())
+
+
+@cam_bp.route('/stream')
+def video_feed():
+    """Video streaming route. Put this in the src attribute of an img tag."""
+    return Response(camMgr.plugin.stream_direct(),
+                    mimetype='multipart/x-mixed-replace; boundary=--jpgboundary')
 
