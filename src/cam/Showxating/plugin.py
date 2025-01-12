@@ -40,8 +40,7 @@ class ShowxatingPlugin(object):
         self.frame_shape = None
 
         self.streamservice = None
-        self.streamservice_thread = None    # 1st run ... this is missing.
-        self.plugin_thread = None           # 2nd run ... tx_thread
+        self.plugin_thread = None
         self.is_alive = False
 
         self.majic_color = None
@@ -64,7 +63,6 @@ class ShowxatingPlugin(object):
         self.plugin_process_frames = self.plugin_config['plugin_process_frames']
 
     def start_streamservice(self):
-
         self.streamservice = StreamService((
                                 self.plugin_config['streaming_host'],
                                 self.plugin_config['streaming_port']
@@ -99,8 +97,6 @@ class ShowxatingPlugin(object):
         """set a flag to stop threads"""
         self.is_alive = False
         self.plugin_process_frames = False
-        # self.streamservice.streamservice_thread.join()
-        # self.plugin_capture.capture.release()
         self.streamservice.force_stop()
 
     # def join(self):
@@ -123,6 +119,7 @@ class ShowxatingPlugin(object):
                 self.elapsed = self.updated - self.created
 
                 self.frame = self.process_frame(frame)
+                self.stream(frame)
 
         except ValueError:
             print(f"no frame!!")
