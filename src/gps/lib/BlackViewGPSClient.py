@@ -28,7 +28,7 @@ class BlackViewGPSClient:
         self.conn = client.HTTPConnection(self.host)  # TODO: port?
         self.conn.set_debuglevel(1)
         self.conn.timeout = self.timeout
-        self.conn.request("GET", "http://" + self.host + "/" + self.config['GPS_ENDPOINT'])
+        self.conn.request("GET", "http://" + self.host + "/blackvue_livedata.cgi")
         self.resp = self.conn.getresponse()
         self.conn.close()
 

@@ -9,7 +9,7 @@ from gpsdclient import GPSDClient
 
 from src.config import readConfig
 from src.gps.lib.BlackViewGPSClient import BlackViewGPSClient
-
+from src.lib.utils import format_time
 
 gps_logger = logging.getLogger('gps_logger')
 retrievers = {}
@@ -76,6 +76,7 @@ class GPSRetriever(threading.Thread):
 
     @register_retriever
     def BlackviewGPSRetriever(self, *, c, **retriever_args):
+        # "GPS_HOST": "10.99.77.1" "GPS_PORT": 80 "GPS_CONNECT_TIMEOUT": 10
         while True:
             try:
                 with BlackViewGPSClient(**retriever_args) as client:
@@ -86,11 +87,11 @@ class GPSRetriever(threading.Thread):
 
                         self.result = {"lat": result['GPS']['LATITUDE'],
                                        "lon": result['GPS']['LONGITUDE'],
-                                       "time": result['GPS']['UPDATED']
+                                       "time": format_time(datetime.now(), self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f'))
                                        }
 
                         self.update()
-                        time.sleep(self.config.get('BLACKVIEWGPSRETRIEVER_TIMEOUT', 1))
+                        time.sleep(self.config.get('RETRIEVER_TIMEOUT', 1))
             except OSError as e:
                 gps_logger.error(f"BlackviewGPSRetriever: {e}")  # unable to connect to Blackview
 
@@ -113,7 +114,7 @@ class GPSRetriever(threading.Thread):
                                "time":  datetime.now().__format__(self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f'))
                                }
                 self.update()
-                time.sleep(self.config.get('DUMMYRETRIEVER_TIMEOUT', 1))
+                time.sleep(self.config.get('RETRIEVER_TIMEOUT', 1))
 
     def gps_result(self):
         return self.result
