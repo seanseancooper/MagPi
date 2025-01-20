@@ -5,7 +5,6 @@ import logging.handlers
 from datetime import datetime, timedelta
 
 from src.cam.Showxating.capture import ShowxatingCapture
-from src.cam.Showxating.lib.StreamService import StreamService, StreamingHandler
 from src.config import readConfig
 
 
@@ -62,13 +61,6 @@ class ShowxatingPlugin(object):
         self.plugin_config = global_config['PLUGIN']
         self.plugin_process_frames = self.plugin_config['plugin_process_frames']
 
-    # def start_streamservice(self):
-    #     self.streamservice = StreamService((
-    #                             self.plugin_config['streaming_host'],
-    #                             self.plugin_config['streaming_port']
-    #                         ), self.plugin_config['streaming_path'], StreamingHandler)
-    #     self.streamservice.stream()
-
     def stream(self, frame):
         if self.plugin_config['streams'] is True:
             if not self.streamservice.stopped and self.is_alive:
@@ -97,7 +89,6 @@ class ShowxatingPlugin(object):
         """set a flag to stop threads"""
         self.is_alive = False
         self.plugin_process_frames = False
-        # self.streamservice.force_stop()
 
     # def join(self):
     #     if not self.is_alive:
@@ -132,10 +123,6 @@ class ShowxatingPlugin(object):
 
         self.is_alive = True
 
-        # READING...
-        # self.start_streamservice()
-
-        # WRITING ...
         self.plugin_thread = threading.Thread(target=self._plugin, name='BVPlugin')
         self.plugin_thread.daemon = True
         self.plugin_thread.start()
