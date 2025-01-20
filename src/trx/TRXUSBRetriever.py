@@ -56,7 +56,7 @@ class TRXUSBRetriever(threading.Thread):
     def get_scan(self):
         return self.out
 
-    def makeSignalPoint(self):
+    def make_signalpoint(self):
         get_location(self)
         sgnl = TRXSignalPoint(self.longitude, self.latitude, self.out)
 
@@ -176,13 +176,11 @@ class TRXUSBRetriever(threading.Thread):
                         vals = line.split(',')
                         self.out = dict([(keys[i], vals[i]) for i in range(len(keys))])
                         if FIX_TIME:
-                            # self.out['COMP_DATE'] = format(datetime.now(), self.config['DATE_FORMAT'])
-                            # self.out['COMP_TIME'] = format(datetime.now(), self.config['TIME_FORMAT'])
                             self.out['SCAN_DATE'] = format(datetime.now(), self.config['DATE_FORMAT'])
                             self.out['SCAN_TIME'] = format(datetime.now(), self.config['TIME_FORMAT'])
                         time.sleep(random.randint(1, self.config['TEST_FILE_TIME_MAX']))
 
-                        self.makeSignalPoint()
+                        self.make_signalpoint()
 
                         print(self.out)
                         # TODO: this needs to update more regularly than
@@ -260,8 +258,6 @@ class TRXUSBRetriever(threading.Thread):
                                                          usb.util.endpoint_direction(e.bEndpointAddress) == \
                                                          usb.util.ENDPOINT_IN)
 
-
-
                     # # Claim interface
                     # usb.util.claim_interface(device, 0)
 
@@ -270,8 +266,8 @@ class TRXUSBRetriever(threading.Thread):
                     message = 'A'
                     chksum = sum(bytes(message, encoding='utf-8')) and 0xFF
 
-                    bytes_written = self.write_to_adu(device, EP_OUT, message)  # send STX A ETX
-                    bytes_written = self.write_to_adu(device, EP_OUT, chksum)  # send SUM
+                    # bytes_written = self.write_to_adu(device, EP_OUT, message)  # send STX A ETX
+                    # bytes_written = self.write_to_adu(device, EP_OUT, chksum)  # send SUM
 
                     # Read data back
                     data = self.read_from_adu(device, EP_IN, 200)  # read from EP_IN device with a 200 millisecond timeout
