@@ -62,12 +62,12 @@ class ShowxatingPlugin(object):
         self.plugin_config = global_config['PLUGIN']
         self.plugin_process_frames = self.plugin_config['plugin_process_frames']
 
-    def start_streamservice(self):
-        self.streamservice = StreamService((
-                                self.plugin_config['streaming_host'],
-                                self.plugin_config['streaming_port']
-                            ), self.plugin_config['streaming_path'], StreamingHandler)
-        self.streamservice.stream()
+    # def start_streamservice(self):
+    #     self.streamservice = StreamService((
+    #                             self.plugin_config['streaming_host'],
+    #                             self.plugin_config['streaming_port']
+    #                         ), self.plugin_config['streaming_path'], StreamingHandler)
+    #     self.streamservice.stream()
 
     def stream(self, frame):
         if self.plugin_config['streams'] is True:
@@ -97,7 +97,7 @@ class ShowxatingPlugin(object):
         """set a flag to stop threads"""
         self.is_alive = False
         self.plugin_process_frames = False
-        self.streamservice.force_stop()
+        # self.streamservice.force_stop()
 
     # def join(self):
     #     if not self.is_alive:
@@ -107,7 +107,9 @@ class ShowxatingPlugin(object):
         self.get_config()
         self.set_capture()
         try:
-            for frame in self.plugin_capture.run():
+            frame_iterator = self.plugin_capture.run()
+            for frame in frame_iterator:
+
                 self.created = self.plugin_capture.statistics['capture_start_time']
                 self.frame_id = self.plugin_capture.statistics['capture_frame_id']
                 self.frame_rate = self.plugin_capture.statistics['capture_frame_rate']
@@ -131,7 +133,7 @@ class ShowxatingPlugin(object):
         self.is_alive = True
 
         # READING...
-        self.start_streamservice()
+        # self.start_streamservice()
 
         # WRITING ...
         self.plugin_thread = threading.Thread(target=self._plugin, name='BVPlugin')

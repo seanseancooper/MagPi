@@ -2,6 +2,7 @@ import threading
 import logging
 
 from src.cam.Showxating.ShowxatingBlackviewPlugin import ShowxatingBlackviewPlugin
+from src.cam.Showxating.lib.StreamService import StreamService, StreamingHandler
 from src.config.__init__ import readConfig
 
 cam_logger = logging.getLogger('cam_logger')
@@ -37,6 +38,7 @@ class CAMManager(threading.Thread):
     def init_plugin(self, pluginClass, direction):  # plugin
         self.plugin = pluginClass
         self.plugin.plugin_name = self.config['PLUGIN_NAME']
+        self.plugin.streamservice = self.streamservice
 
         self.plugin.plugin_capture_src = self.cam_direction(direction)
         self.plugin.get_config()
@@ -76,7 +78,17 @@ class CAMManager(threading.Thread):
     def stop(self):
         self.plugin.stop()
 
+    def start_streamservice(self):
+        self.streamservice = StreamService((
+                                self.config['PLUGIN']['streaming_host'],
+                                self.config['PLUGIN']['streaming_port']
+                            ), self.config['PLUGIN']['streaming_path'], StreamingHandler)
+        self.streamservice.stream()
+
     def main(self):
+
+        self.start_streamservice()
+
         plugin = ShowxatingBlackviewPlugin()
         self.init_plugin(plugin, "FORE")
         self.plugin.start()

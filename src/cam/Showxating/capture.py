@@ -6,6 +6,8 @@ from PIL import Image
 import logging
 import http.client
 
+from src.cam.Showxating.lib.CaptureEvent import CaptureEvent
+
 cam_logger = logging.getLogger('cam_logger')
 logger_root = logging.getLogger('root')
 
@@ -26,6 +28,9 @@ class ShowxatingCapture:
 
         self.f_id = 0
         self.statistics = {}
+        self.frame = None
+        self.last_access = 0
+        self.event = CaptureEvent()
 
     def init_capture(self):
 
@@ -66,6 +71,7 @@ class ShowxatingCapture:
                 else:
                     cam_logger.error(
                             f"[{__name__}] invalid connection string in configuration file.")
+
     @staticmethod
     def highlight(f, arry):
         """sample a pixel position; use combinatorial 'inversion'
@@ -119,6 +125,7 @@ class ShowxatingCapture:
                     logger_root.debug(stats)
 
                 self.f_id += 1
+                self.event.set()  # send signal to clients
                 yield frame
 
             else:
