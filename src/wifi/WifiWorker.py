@@ -104,7 +104,7 @@ class WifiWorker:
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
         self.tracked = self.bssid in self.scanner.tracked_signals
-        self.scanner.makeSignalPoint(self.bssid, int(sgnl.get('Signal', -99)))
+        self.scanner.make_signalpoint(self.bssid, int(sgnl.get('Signal', -99)))
 
     def match(self, cell):
         """ process the matching BSSID and return data in it as a 'cell' """

@@ -117,7 +117,7 @@ class WifiScanner(threading.Thread):
         cell = [_ for _ in self.parsed_signals if _['BSSID'] == bssid][0]
         return cell
 
-    def makeSignalPoint(self, bssid, signal):
+    def make_signalpoint(self, bssid, signal):
         sgnlPt = WifiSignalPoint(bssid, self.longitude, self.latitude, signal)
         self.signal_cache[bssid].append(sgnlPt)
 
@@ -157,7 +157,7 @@ class WifiScanner(threading.Thread):
         def update_ghost(item):
             self.get_worker(item).signal = -99
             self.get_worker(item).updated = datetime.now()
-            self.makeSignalPoint(str(item), self.get_worker(item).signal)
+            self.make_signalpoint(str(item), self.get_worker(item).signal)
 
         [update_ghost(item) for item in self.ghost_signals]
 
