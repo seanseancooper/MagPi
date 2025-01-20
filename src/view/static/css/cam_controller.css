@@ -27,22 +27,22 @@ canvas {
     top:0px;
 }
 
-._grid {
+.video {
+    position:absolute;
+    left:0px;
+    top:0px;
+}
+
+.target {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.grid {
     position:absolute;
     left:0px;
     top:0px;
     display:none;
-}
-
-._video {
-    position:absolute;
-    left:0px;
-    top:0px;
-}
-
-._target {
-    max-width: 100%;
-    max-height: 100%;
 }
 
 .cam_button_box {
