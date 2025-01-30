@@ -137,7 +137,7 @@ class MacOSAirportWifiRetriever(threading.Thread):
                 properties:
         """
 
-        cells = [[]]
+        cells = [{}]
         parsed_cells = []
 
         if not airport_data:
