@@ -510,7 +510,7 @@ function animate(coordinate) {
                     }
                 });
             };
-
+            /*
             if (_signals.trx) {
                 _signals.trx.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
@@ -530,7 +530,7 @@ function animate(coordinate) {
                     }
                 });
             }
-            /*
+
             if (_signals.sdr.length > 0) {
                 _signals.sdr.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
