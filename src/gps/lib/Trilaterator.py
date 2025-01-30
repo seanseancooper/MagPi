@@ -96,10 +96,10 @@ class Trilaterator(threading.Thread):
     def getSignalPointsForBSSID(self, BSSID):
         # WifiSignalPoint: goto MAPAggregator context
         resp = requests.get(f'http://wifi.localhost:5006/scan/{BSSID}')
-        # resp = requests.get(f'http://map.localhost:5006/aggrgated/wifi')
+        # resp = requests.get(f'http://map.localhost:5006/data/wifi')
         cache = json.dumps(resp)
         sgnlpts = cache['signal_cache']
-        return BSSID, sgnlpts  # scanner.signal_cache.get(BSSID)
+        return BSSID, sgnlpts  # make it internal: self.signal_cache[BSSID] = json.dumps(resp)
 
     def getSignalPointsForUniqId(self, UniqId, scanner):
         # TRXSignalPoint, et, al.
@@ -154,6 +154,12 @@ class Trilaterator(threading.Thread):
         return location
 
     def run(self):
+        # not sure how I plan to use this. trilat only one
+        # seems not as useful as a grooup, so perhaps this
+        # should be a list if items? Also, whhat to do about
+        # symbology? How does this fit into other things
+        # geoloocated? this might be threaded, might not;
+        # ...what's happening?
         self.set_target('SOME_BSSID_HERE')
         self.get_initial_location()
         BSSID, sgnlPts = self.getSignalPointsForBSSID(self.target)  # get the list of sp for BSSID_TARGeT
