@@ -560,6 +560,16 @@ function animate(coordinate) {
                     }
                 });
             }
+
+            if (_signals.net.length > 0) {
+                _signals.net.forEach(function(cell) {
+                    if (!cell.is_mute && cell.tracked) {
+                        console.log('NET: ' +  cell);
+                        // (NEW SYMBOL for networked instances; moving or static)
+                        // createPoint(source, sgnl.id, sgnlPt, p_signal_color, sgnlStrength, cell);
+                    }
+                });
+            }
             */
 
             map.render();
