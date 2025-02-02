@@ -56,6 +56,10 @@ class WifiWorker:
                 "tests"         : [x for x in self.test_results]
         }
 
+    # IDEA: probability that signal is mobile as
+    #  opposed to stationary; features may be
+    #  location, signal_cache, Vendor, Quality?
+
     def process_cell(self, cell):
         """ update static fields, tests"""
 
