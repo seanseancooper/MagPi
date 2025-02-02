@@ -4,8 +4,8 @@ import cv2 as cv
 import numpy as np
 from decimal import *
 from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
-from sklearn.metrics import euclidean_distances, pairwise_distances
-from sklearn.metrics.pairwise import paired_distances
+from sklearn.metrics import euclidean_distances, pairwise_distances, pairwise_kernels
+from sklearn.metrics.pairwise import paired_distances, cosine_similarity
 
 from src.cam.Showxating.lib.utils import is_in_range, is_inside, getAggregatedRect, getRectsFromContours
 from src.config import readConfig
@@ -113,9 +113,10 @@ class FrameObjektTracker:
         '''
         # self._frame_SSIM = 0.0
         try:
-            # TODO: see metrics of pairwise_distances
             # return the distances between the row vectors of X and Y
             self._frame_delta = np.mean(pairwise_distances(X, Y))
+            # return the mean similarity of X and Y
+            # self._frame_delta = np.mean(cosine_similarity(X, Y))
             self._frame_deltas.append(self._frame_delta)
 
             self._frame_MSE = np.sum((X - Y) ** 2)
@@ -146,7 +147,7 @@ class FrameObjektTracker:
               f"\to.avg_loc: {str(o.avg_loc)}"
               f"\to.rect:{str(o.rect).ljust(10, ' ')}"
 
-              f"\to.fd_in_range: {o.wall_pass}"
+              f"\to.fd_in_range: {o.fd}"
               f"\to.inside_rect: {o.inside_rect}"
 
               f"\to.close: {o.close}"
