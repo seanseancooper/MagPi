@@ -130,17 +130,17 @@
 
         function loadTab(event, tabName){
 
-            var i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tabcontent");
+            var i, module_tab, tablinks;
+            module_tab = document.getElementsByClassName("module_tab");
 
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
+            for (i = 0; i < module_tab.length; i++) {
+                module_tab[i].style.display = "none";
             }
 
             // Get all elements with class="tablinks" and remove the class "active"
-            tablinks = document.getElementsByClassName("tab_button");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            tab_button = document.getElementsByClassName("tab_button");
+            for (i = 0; i < tab_button.length; i++) {
+                tab_button[i].className = tab_button[i].className.replace(" active", "");
             }
 
             // Show the current tab, and add an "active" class to the button that opened the tab
@@ -155,10 +155,25 @@
 
         function replace_data(){
             // use foreach...
-            scanner.replaceData();
+            wifi.replaceData();
             tracked.replaceData();
             ghosts.replaceData();
         }
+
+        const dataLoaderLoading = "&nbsp;";
+
+        function colorUniqId(data, splt){
+            var parts = data.split(splt);
+            var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
+            var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
+            var B = (parseInt(parts[4], 16) + parseInt(parts[5], 16)) % 255;
+            return [R,G,B];
+        };
+
+        function averageColor([R,G,B]){
+            let avg = R+G+B/3;
+            return (avg > 128)? "00,00,00": "255,255,255";
+        };
 
         /*
         a draggable bar would be nice to have!
@@ -204,9 +219,9 @@
     </div>
 
     <div id="tabs" style="height:30px">
-        <button id="scanner_tab_scanner" class="tab_button" onclick="loadTab(event, 'wifi_scanner')">WIFI 00:00:00</button>
-        <button id="scanner_tab_tracked" class="tab_button" onclick="loadTab(event, 'wifi_tracked')">99 WIFI TRACKED</button>
-        <button id="scanner_tab_ghosts" class="tab_button" onclick="loadTab(event, 'wifi_ghosts')">99 WIFI GHOSTS</button>
+        <button id="scanner_tab_scanner" class="tab_button" onclick="loadTab(event, 'wifi')">WIFI</button>
+        <button id="scanner_tab_tracked" class="tab_button" onclick="loadTab(event, 'tracked')">TRACKED</button>
+        <button id="scanner_tab_ghosts" class="tab_button" onclick="loadTab(event, 'ghosts')">GHOSTS</button>
     </div>
 
     <div id="scanner_filters" style="" class="scanner_filters">

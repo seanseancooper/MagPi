@@ -1,8 +1,4 @@
-{% if container %}
 <div id="tracked" class="module_tab" style="position:relative;display:none;">
-{% else %}
-<div id="tracked" class="module_tab" style="position:relative;display:block;">
-{% endif %}
     <script>
         var tracked = new Tabulator("#tracked", {
             ajaxURL:"http://wifi.localhost:5006/tracked",                   // request URI

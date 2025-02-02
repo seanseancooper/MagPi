@@ -1,8 +1,4 @@
-{% if container %}
 <div id="ghosts" class="module_tab" style="position:relative;display:none;">
-{% else %}
-<div id="ghosts" class="module_tab" style="position:relative;display:block;">
-{% endif %}
     <script>
         var ghosts = new Tabulator("#ghosts", {
             ajaxURL:"http://wifi.localhost:5006/ghosts",                    // request URI
