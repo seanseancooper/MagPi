@@ -1,3 +1,6 @@
+import threading
+import time
+
 import cv2 as cv
 import numpy as np
 import json
@@ -92,6 +95,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self.has_motion = False
         self.had_motion = False
         self.throttle = None
+        self.trap_motion = False
 
         self.cropped_frame = None                       #
         self.cropped_reference = None                   #
@@ -179,7 +183,39 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             f[self._max_height, self._max_width] = cv.cvtColor(t, cv.COLOR_GRAY2BGR)
             self.hold_threshold -= 1
 
+    def trap(self, f, reset):
+        """ crop area, with symbology & labels """
+
+        if self.trap_motion:
+            if self.has_motion:
+
+                def _snap(plugin, f):
+
+                    # trap for human forms using mediapipe.
+                    # these take a fragment of the input
+                    # frame, so they'll need refactor
+
+                    # plugin.pre_mediapipe(f)
+                    # plugin.post_mediapipe(f)
+
+                    writer = ImageWriter("CAMManager")
+                    writer.write_trapped("CAM_TRAP", self.plugin_config.get('outfile_path', '../_out'), f)
+
+                    # if self.tracked get the label and either log
+                    # the trapped thing to an event list, or mark
+                    # it as trapped in an event list. We want to be
+                    # able to read a running list of past events as
+                    # relates to motion and image captures
+                    # AT MINIMUM THIS SHOULD HAVE THE LABEL ON THE IMAGE
+
+                _snap(self, f[self._max_height, self._max_width])
+
+                self.trap_motion = False      # unset trap_motion
+                if reset:
+                    self.trap_motion = True   # reset trap_motion
+
     def cam_snap(self):
+        """ unaltered frame, no processing or symbology """
 
         def _snap(f):
             if f is not None:
@@ -192,11 +228,18 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         return "OK"
 
     def print_frame(self, frame, f_id):
+        """ FOR ITEMS TRACKED/MOVING.
+            unaltered frame, no processing or symbology
+            associated to a 'label' for future reference.
+            BEST?? IMAGE....
+            get histogram here ...
+            seen_things[hist] = labeled_image_ref -> filesystem location of this image
+        """
 
         def _snap(f):
             if f is not None:
                 writer = ImageWriter("CAMManager")
-                writer.write("CAM_SNAP", f, f_id)
+                writer.write("CAM_PRNT", f, f_id)
 
         _snap(frame)
 
@@ -228,6 +271,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                                                   landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
 
                 draw_pose(f, self._result_T)
+                # label as 'human' motion
 
     def process_contours(self, frame, contours, hier):
 
@@ -249,9 +293,10 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                     print_analytics(self, frame, cnt, hier)
 
                     if self.plugin_config['write_all_frames']:
-                        self.print_frame(frame, self.frame_id)
+                        self.print_frame(frame, self.frame_id)  # <-- memorize moving things
 
-            self.post_mediapipe(frame)
+            self.trap(frame, False)
+            # self.post_mediapipe(frame)
 
             if self.had_motion != self.has_motion is True:
                 if self.throttle.handle('motion'):
@@ -277,7 +322,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                 ret, reference = self.plugin_capture.capture.read()
 
             if ret:
-                self.pre_mediapipe(frame)
+                # self.pre_mediapipe(frame)
                 self.cropped_frame = frame[self._max_height, self._max_width]
                 self.cropped_reference = reference[self._max_height, self._max_width]
 
