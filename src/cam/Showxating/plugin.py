@@ -1,6 +1,5 @@
 import os
 import threading
-
 import logging.handlers
 from datetime import datetime, timedelta
 
@@ -38,7 +37,7 @@ class ShowxatingPlugin(object):
         self.frame_period = None
         self.frame_shape = None
 
-        self.streamservice = None
+        self.streamservice = None  # from CAMManager now
         self.plugin_thread = None
         self.is_alive = False
 
@@ -67,17 +66,19 @@ class ShowxatingPlugin(object):
                 self.streamservice.RequestHandlerClass.src = frame
                 self.streamservice.RequestHandlerClass.majic_color = self.majic_color
 
-    def process_frame(self, frame):
-        return frame
+    # def process_frame(self, frame):
+    #     return frame
 
-    def get_frame(self):
-        return self.frame
+    @staticmethod
+    def process_frame(frame):
+        """"method that processes frames from the capture."""
+        raise RuntimeError('Must be implemented by subclasses.')
 
     def stream_direct(self):
         """Video streaming generator function."""
         yield b'--jpgboundary\r\n'
         while self.is_alive:
-            f = self.get_frame()
+            f = self.plugin_capture.get_frame()
 
             import cv2 as cv
             params = (cv.IMWRITE_JPEG_QUALITY, 100)
@@ -112,7 +113,7 @@ class ShowxatingPlugin(object):
                 self.elapsed = self.updated - self.created
 
                 self.frame = self.process_frame(frame)
-                self.stream(frame)
+                self.stream(self.frame)
 
         except ValueError:
             print(f"no frame!!")
@@ -124,6 +125,6 @@ class ShowxatingPlugin(object):
         self.is_alive = True
 
         self.plugin_thread = threading.Thread(target=self._plugin, name='BVPlugin')
-        self.plugin_thread.daemon = True
+        # self.plugin_thread.daemon = True
         self.plugin_thread.start()
 
