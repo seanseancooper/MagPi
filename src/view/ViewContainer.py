@@ -199,6 +199,11 @@ class ViewContainerTab:
         self.created = datetime.now()
         self.updated = datetime.now()
         self.elapsed = timedelta()
+
+        # hostname <-- not everything would be xxx.localhost
+        # port <--  this should be the NET 'control port'
+        # mac address <-- validate this matches shat we expect.
+
         self.module = module
         self.tab = tab
         self.timeout = timeout
