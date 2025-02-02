@@ -19,7 +19,7 @@ class ShowxatingCapture:
         self.plugin_config = config
         self.capture = None
         self.capture_name = name
-        self.capture_param_capture_src = src
+        self.src = src
 
         self.capture_frame_rate = 0.0
         self.capture_output_show_stats = False
@@ -35,7 +35,7 @@ class ShowxatingCapture:
     def init_capture(self):
 
         def initialize():
-            self.capture = cv.VideoCapture(self.capture_param_capture_src)
+            self.capture = cv.VideoCapture(self.src)
             if not self.capture.isOpened():
                 cam_logger.warning(cv.getBuildInformation())
 
@@ -44,15 +44,15 @@ class ShowxatingCapture:
         else:
             while self.capture is None:
                 # camera capture (0)
-                if isinstance(self.capture_param_capture_src, int):
+                if isinstance(self.src, int):
                     initialize()
                 # test mp4
-                elif 'http' not in self.capture_param_capture_src:
+                elif 'http' not in self.src:
                     initialize()
                 # wifi connected camera over http
-                elif 'http' in self.capture_param_capture_src:
+                elif 'http' in self.src:
                     try:
-                        elements = str(self.capture_param_capture_src).lstrip("http://").split("/")
+                        elements = str(self.src).lstrip("http://").split("/")
                         try:
                             conn = http.client.HTTPConnection(elements[0])
                             conn.request("GET", "/" + elements[1])
@@ -82,6 +82,9 @@ class ShowxatingCapture:
         R, G, B = pix[x, y]
         return (R + 128) % 255, (G + 128) % 255, (B + 128) % 255
 
+    def get_frame(self):
+        return self.frame
+
     def run(self):
 
         self.init_capture()
@@ -106,7 +109,7 @@ class ShowxatingCapture:
                 self.statistics['capture_frame_rate'] = self.capture_frame_rate
                 self.statistics['capture_frame_period'] = round(time.monotonic() - proc_start, 4)
 
-                if self.plugin_config['capture_sleep_time'] > 0.0:
+                if self.plugin_config['capture_sleep_time'] > 0.0:  # not for use on 'live' streams
                     z = self.plugin_config['capture_sleep_time'] - self.statistics['capture_frame_period']
                     time.sleep(z)
 
@@ -125,8 +128,8 @@ class ShowxatingCapture:
                     logger_root.debug(stats)
 
                 self.f_id += 1
-                self.event.set()  # send signal to clients
                 yield frame
+                self.frame = frame
 
             else:
                 cam_logger.warning(f"{self.capture_name} capture returned NO REF!")
