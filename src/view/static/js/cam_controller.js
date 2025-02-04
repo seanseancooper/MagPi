@@ -201,3 +201,24 @@ function cam_snap(){
         }
     };
 };
+
+function cam_trap(){
+    //  creates still image of current view
+    const xhttp = new XMLHttpRequest();
+    xhttp.open("POST", "{{ url_for('.index')}}trap");
+    setsHeaders(xhttp);
+    xhttp.send();
+
+    xhttp.onload = function() {
+        const resp = xhttp.response;
+        var trapButton = document.getElementById('trap_button_text');
+
+        if (resp == "OK"){
+            trapButton.classList.value = "trap_button_text";
+            trapButton.innerHTML = "!";
+            setTimeout(function() {
+                snapButton.innerHTML = "&#129700;";
+            }, 250);
+        }
+    };
+};
