@@ -32,6 +32,11 @@ def cam_snap():
     return camMgr.plugin.cam_snap()
 
 
+@cam_bp.route("/trap", methods=['POST'], subdomain='cam')
+def cam_trap():
+    return camMgr.plugin.cam_trap()
+
+
 @cam_bp.route("/view/<direction>", methods=['GET', 'POST'], subdomain='cam')
 def cam_direction(direction):
     return camMgr.cam_reload(direction)
