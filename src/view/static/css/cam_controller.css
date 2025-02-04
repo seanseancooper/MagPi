@@ -17,6 +17,7 @@ canvas {
     border-radius:3px;
     color:#333;
     background-color:#999;
+
 }
 
 .videodiv {
@@ -47,12 +48,12 @@ canvas {
 
 .cam_button_box {
     position:relative;
-    width:106px;
-    height:33px;
+    float: left;
     border-style:solid;
     border-width:2px;
     border-radius:5px;
-    padding: 3px 3px 3px 3px;
+    padding:2px;
+    margin:2px;
 }
 
 .multi_button_text {
@@ -64,13 +65,14 @@ canvas {
 }
 
 .cam_info_box {
-    position:absolute;
+	float: left;
     width:275px;
     height:33px;
     border-style:solid;
     border-width:2px;
     border-radius:5px;
-    padding: 3px 3px 3px 3px;
+    padding:2px;
+    margin:2px;
 }
 
 .cam_slider_outputs{
@@ -86,23 +88,26 @@ canvas {
 }
 
 .cam_checkbox_box {
-    position:absolute;
+    position:relative;
+    float:left;
     width:22px;
-    height:39px;
+    height:38px;
     border-style:solid;
     border-width:2px;
     border-radius:5px;
-    //padding: 3px 3px 3px 3px;
+    margin:2px;
 }
 
 .cam_slider_box {
-    position:absolute;
+    position:relative;
+    float: left;
     width:104px;
     height:36x;
     border-style:solid;
     border-width:2px;
     border-radius:5px;
-    padding: 3px 3px 3px 3px;
+    padding:2px;
+    margin:2px;
 }
 
 

@@ -219,9 +219,32 @@
 
             if (resp == "OK"){
                 snapButton.classList.value = "snap_button_text";
-                snapButton.innerHTML = "x";
+                snapButton.innerHTML = "&#128248;";
                 setTimeout(function() {
-                    snapButton.innerHTML = "+";
+                    snapButton.innerHTML = "&#128247;";
+                }, 250);
+            }
+        };
+    };
+
+    function cam_trap(){
+        //  trap still image of current view
+        const xhttp = new XMLHttpRequest();
+        xhttp.open("POST", "http://cam.{{ cam_host }}:{{ cam_port }}/trap");
+        setsHeaders(xhttp);
+        xhttp.setRequestHeader('TARGET', 'cam');
+
+        xhttp.send();
+
+        xhttp.onload = function() {
+            const resp = xhttp.response;
+            var trapButton = document.getElementById('trap_button_text');
+
+            if (resp == "OK"){
+                trapButton.classList.value = "trap_button_text";
+                trapButton.innerHTML = "!";
+                setTimeout(function() {
+                    snapButton.innerHTML = "&#129700;";
                 }, 250);
             }
         };
@@ -280,40 +303,45 @@
     </script>
     {% endif %}
 
-    <div id="cam_button_box" style="left:5px;top:5px;color: rgb{{ plugin.majic_color }}" class="cam_button_box">
-       <button id="fore_aft_button" class="cam_button" value="AFT" onClick="fore_aft(this);">
-            <span id="fore_aft_button_text" style="" class="fore_aft_button_text">A</span>
-        </button>
-        <button id="multi_button" class="cam_button" value="OFF" data-action="" data-target="CAM" onClick="cam_multibutton(this);">
-            <span id="multi_button_text" style="left:-1px;" class="multi_button_text">OFF</span>
-        </button>
-        <button id="snap_button" class="cam_button"  value="SNAP" data-action="" data-target="CAM" onClick="cam_snap();">
-            <span id="snap_button_text" style="" class="snap_button_text">+</span>
-        </button>
-    </div>
-
-    <div id="cam_info_box" style="left:125px;top:5px;color: rgb{{ plugin.majic_color }}" class="cam_info_box">
-        <div id="cam_slider_outputs" style="top:-2px;" class="cam_slider_outputs">
-            ∆:&nbsp;<span id="cam_slider_threshold_output">-000</span>&nbsp;|&nbsp;
-            ∞:&nbsp;<span id="cam_checkbox_hold_threshold_output">OFF</span>&nbsp;|&nbsp;
-            ⊞:&nbsp;<span id="cam_slider_krnl_output">000</span>&nbsp;|&nbsp;
-            ƒ:&nbsp;<span id="cam_slider_f_limit_output">00</span>&nbsp;|&nbsp;
-            %:&nbsp;<span id="cam_slider_frm_delta_pcnt_output">000.00</span>
-            <br>
-            <span id="crop_output" class="cam_slider_crop_stats">x:0 y:0 w:0 h:0</span>
+    <div style="padding: 5px 5px 5px 5px;">
+        <div id="cam_button_box" style="color: rgb{{ plugin.majic_color }};" class="cam_button_box">
+           <button id="fore_aft_button" class="cam_button" value="AFT" onClick="fore_aft(this);">
+                <span id="fore_aft_button_text" style="" class="fore_aft_button_text">A</span>
+            </button>
+            <button id="multi_button" class="cam_button" value="OFF" data-action="" data-target="CAM" onClick="cam_multibutton(this);">
+                <span id="multi_button_text" style="" class="multi_button_text">OFF</span>
+            </button>
+            <button id="snap_button" class="cam_button"  value="SNAP" data-action="" data-target="CAM" onClick="cam_snap();">
+                <span id="snap_button_text" style="" class="snap_button_text">&#128247;</span>
+            </button>
+            <button id="trap_button" class="cam_button"  value="TRAP" data-action="" data-target="CAM" onClick="cam_trap();">
+                <span id="trap_button_text" style="" class="trap_button_text">&#129700;</span>
+            </button>
         </div>
-    </div>
 
-    <div style="left:415px;top:5px;color: rgb{{ plugin.majic_color }}" class="cam_checkbox_box">
-        <input id="cam_checkbox_hold_threshold_input" style="top:2px;left:-2px;" type="checkbox" {{ 'checked' if plugin.show_threshold is true }} data-action="" data-target="cam" onChange="handleCheckBox(this);"/>
-        <br>&nbsp;&nbsp;∞
-    </div>
-    <div style="left:446px;top:5px;color: rgb{{ plugin.majic_color }}" class="cam_slider_box">
-        <input id="cam_slider_threshold_input" class="cam_slider" type="range" min="-100" max="100" step="1" value="0" data-action="" data-target="cam" onChange="handleSlider(this);"/>
-        <input id="cam_slider_krnl_input" class="cam_slider" type="range" min="1" max="128" step="2" value="9" data-action="" data-target="cam" onChange="handleGridSlider(this);"/>
-    </div>
-    <div style="left:565px;top:5px;color: rgb{{ plugin.majic_color }}" class="cam_slider_box">
-        <input id="cam_slider_f_limit_input" class="cam_slider" type="range" min="1" max="60" step="1" value="2" data-action="" data-target="cam" onChange="handleSlider(this);"/>
-        <input id="cam_slider_frm_delta_pcnt_input" class="cam_slider" type="range" min="0.00" max="100.00" step="0.01" value="50.00" data-action="" data-target="cam" onChange="handleSlider(this);"/>
+        <div id="cam_info_box" style="color: rgb{{ plugin.majic_color }};" class="cam_info_box">
+            <div id="cam_slider_outputs" style="top:-2px;" class="cam_slider_outputs">
+                ∆:&nbsp;<span id="cam_slider_threshold_output">-000</span>&nbsp;|&nbsp;
+                ∞:&nbsp;<span id="cam_checkbox_hold_threshold_output">OFF</span>&nbsp;|&nbsp;
+                ⊞:&nbsp;<span id="cam_slider_krnl_output">000</span>&nbsp;|&nbsp;
+                ƒ:&nbsp;<span id="cam_slider_f_limit_output">00</span>&nbsp;|&nbsp;
+                %:&nbsp;<span id="cam_slider_frm_delta_pcnt_output">000.00</span>
+                <br>
+                <span id="crop_output" class="cam_slider_crop_stats">x:0 y:0 w:0 h:0</span>
+            </div>
+        </div>
+
+        <div style="color: rgb{{ plugin.majic_color }};" class="cam_checkbox_box">
+            <input id="cam_checkbox_hold_threshold_input" style="top:2px;left:-2px;" type="checkbox" {{ 'checked' if plugin.show_threshold is true }} data-action="" data-target="cam" onChange="handleCheckBox(this);"/>
+            <br>&nbsp;&nbsp;∞
+        </div>
+        <div style="color: rgb{{ plugin.majic_color }};" class="cam_slider_box">
+            <input id="cam_slider_threshold_input" class="cam_slider" type="range" min="-100" max="100" step="1" value="0" data-action="" data-target="cam" onChange="handleSlider(this);"/>
+            <input id="cam_slider_krnl_input" class="cam_slider" type="range" min="1" max="128" step="2" value="9" data-action="" data-target="cam" onChange="handleGridSlider(this);"/>
+        </div>
+        <div style="color: rgb{{ plugin.majic_color }};" class="cam_slider_box">
+            <input id="cam_slider_f_limit_input" class="cam_slider" type="range" min="1" max="60" step="1" value="2" data-action="" data-target="cam" onChange="handleSlider(this);"/>
+            <input id="cam_slider_frm_delta_pcnt_input" class="cam_slider" type="range" min="0.00" max="100.00" step="0.01" value="50.00" data-action="" data-target="cam" onChange="handleSlider(this);"/>
+        </div>
     </div>
 </div>
