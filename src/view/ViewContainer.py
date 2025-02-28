@@ -200,9 +200,9 @@ class ViewContainerTab:
         self.updated = datetime.now()
         self.elapsed = timedelta()
 
-        # hostname <-- not everything would be xxx.localhost
-        # port <--  this should be the NET 'control port'
-        # mac address <-- validate this matches shat we expect.
+        # hostname <-- not everything will be xxx.localhost
+        # port <--  NET 'control port'
+        # mac address <-- authentication
 
         self.module = module
         self.tab = tab
