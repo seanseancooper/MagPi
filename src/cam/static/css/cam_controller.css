@@ -17,7 +17,6 @@ canvas {
     border-radius:3px;
     color:#333;
     background-color:#999;
-
 }
 
 .videodiv {
@@ -48,7 +47,7 @@ canvas {
 
 .cam_button_box {
     position:relative;
-    float: left;
+    float:left;
     border-style:solid;
     border-width:2px;
     border-radius:5px;
