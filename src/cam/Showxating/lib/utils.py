@@ -207,16 +207,3 @@ def agglomerative_cluster(contours, threshold_distance=40.0):
 
     return current_contours
 
-
-# def write_imagecache(self, o, frame):
-#
-#     if o.prev_tag is not None:
-#
-#         if len(o.contours) > 2:
-#             cv.imwrite(os.path.join(self.imagecache, o.tag + '.jpeg'), frame)
-#
-#         if o.aa < self.o_cache_map.get(o.prev_tag).aa:
-#             cv.imwrite(os.path.join(self.imagecache, o.tag + '.jpeg'), frame)
-#
-#     if np.all(o.hierarchy == np.array([[[-1, -1, -1, -1]]])):
-#         cv.imwrite(os.path.join(self.imagecache, o.tag + '.jpeg'), o.wall)
