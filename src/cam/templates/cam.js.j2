@@ -11,8 +11,8 @@
 {% set streaming_host = config['PLUGIN']['streaming_host'] %}
 {% set streaming_port = config['PLUGIN']['streaming_port'] %}
 
-<link rel="stylesheet" href="{{ url_for('.static', filename='css/cropper.css') }}">
-<link rel="stylesheet" href="{{ url_for('.static', filename='css/cam_controller.css') }}">
+<link rel="stylesheet" href="http://cam.{{ cam_host }}:{{ cam_port }}/static/css/cropper.css">
+<link rel="stylesheet" href="http://cam.{{ cam_host }}:{{ cam_port }}/static/css/cam_controller.css">
 <script>
     function setsHeaders(xhttp) {
         xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
@@ -249,6 +249,29 @@
             }
         };
     };
+
+    function cam_alert(){
+        //  toggle audio alerts
+        const xhttp = new XMLHttpRequest();
+        xhttp.open("POST", "http://cam.{{ cam_host }}:{{ cam_port }}/alert");
+        setsHeaders(xhttp);
+        xhttp.setRequestHeader('TARGET', 'cam');
+
+        xhttp.send();
+
+        xhttp.onload = function() {
+            const resp = xhttp.response;
+            var trapButton = document.getElementById('alert_button_text');
+
+            if (resp == "OK"){
+                trapButton.classList.value = "alert_button_text";
+                trapButton.innerHTML = "*";
+                setTimeout(function() {
+                    snapButton.innerHTML = "!!";
+                }, 250);
+            }
+        };
+    };
 </script>
 
 {% if container %}
@@ -304,18 +327,22 @@
     {% endif %}
 
     <div style="padding: 5px 5px 5px 5px;">
+
         <div id="cam_button_box" style="color: rgb{{ plugin.majic_color }};" class="cam_button_box">
-           <button id="fore_aft_button" class="cam_button" value="AFT" onClick="fore_aft(this);">
+            <button id="fore_aft_button" class="cam_button" value="AFT" onClick="fore_aft(this);">
                 <span id="fore_aft_button_text" style="" class="fore_aft_button_text">A</span>
             </button>
             <button id="multi_button" class="cam_button" value="OFF" data-action="" data-target="CAM" onClick="cam_multibutton(this);">
                 <span id="multi_button_text" style="" class="multi_button_text">OFF</span>
             </button>
-            <button id="snap_button" class="cam_button"  value="SNAP" data-action="" data-target="CAM" onClick="cam_snap();">
+            <button id="snap_button" class="cam_button" value="SNAP" data-action="" data-target="CAM" onClick="cam_snap();">
                 <span id="snap_button_text" style="" class="snap_button_text">&#128247;</span>
             </button>
-            <button id="trap_button" class="cam_button"  value="TRAP" data-action="" data-target="CAM" onClick="cam_trap();">
+            <button id="trap_button" class="cam_button" value="TRAP" data-action="" data-target="CAM" onClick="cam_trap();">
                 <span id="trap_button_text" style="" class="trap_button_text">&#129700;</span>
+            </button>
+            <button id="alert_button" class="cam_button" value="ALERT" data-action="" data-target="CAM" onClick="cam_alert();">
+                <span id="alert_button_text" style="" class="alert_button_text">!</span>
             </button>
         </div>
 
