@@ -238,6 +238,7 @@ class WifiScanner(threading.Thread):
                       f"{len(self.parsed_signals)} signals, "
                       f"{len(self.tracked_signals)} tracked, "
                       f"{len(self.ghost_signals)} ghosts")
+
                 self.polling_count += 1
                 time.sleep(self.config.get('SCAN_TIMEOUT', 5))
             else:
