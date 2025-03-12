@@ -271,7 +271,10 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                                                   landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
 
                 draw_pose(f, self._result_T)
-                # label as 'human' motion
+
+                # IDEA: MEDIAPIPE OFFLINE PROCESSING
+                # person detection: use mediapipe pose to label as 'human' motion.
+                # find+magnify faces: use mediapipe face to find the heads ROI, then magnify it.
 
     def process_contours(self, frame, contours, hier):
 
@@ -288,6 +291,11 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                     self.tracked = self.tracker.track_objects(self.frame_id, frame, cnt, hier, wall, rect)
 
                     if self.tracked:
+                        # IDEA: NEW OFFLINE PROCESSING FEATURES
+                        # event list --> push events, labels and image refs to elastic
+                        # vehicle id: available in a model?
+                        # license plate reader: is this available in a model?
+
                         print_tracked(self, frame, rect)
                         print_symbology(self, frame, rect)
                     print_analytics(self, frame, cnt, hier)
