@@ -12,6 +12,10 @@
                 row.getElement().style.backgroundColor = "#999999";
             },
 
+            dependencies:{
+                datetime: luxon,
+            },
+
             columns:[
                 {field:"tracked", width:102, formatter: function(cell, formatterParams) {
                     var data = cell.getRow().getData();
@@ -44,9 +48,14 @@
                 {title:"Sec.", field:"Encryption", formatter: "tickCross", width:30},
                 {title:"Vendor", field:"Vendor", width:100},
                 {title:"Elapsed", field:"elapsed", width:75},
-                {title:"Created", field:"created", width:75},
-                {title:"Last", field:"updated", width:75},
-
+                {title:"Created", field:"created", width:75, formatter:"datetime", formatterParams:{
+                    outputFormat:"HH:mm:ss",
+                    invalidPlaceholder:"--:--:--",
+                }},
+                {title:"updated", field:"updated", width:75, formatter:"datetime", formatterParams:{
+                    outputFormat:"HH:mm:ss",
+                    invalidPlaceholder:"--:--:--",
+                }},
             ],
         });
     </script>

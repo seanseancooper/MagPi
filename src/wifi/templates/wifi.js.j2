@@ -88,6 +88,10 @@
                 row.getElement().style = "height:24px";
             },
 
+            dependencies:{
+                datetime: luxon,
+            },
+
             persistence:{
                 sort: true,                                         //persist column sorting
                 filter: true,                                       //persist filters
@@ -129,9 +133,14 @@
                 {title:"Sec.", field:"Encryption", formatter: "tickCross", width:30},
                 {title:"Vendor", field:"Vendor", width:100},
                 {title:"Elapsed", field:"elapsed", width:75},
-                {title:"Created", field:"created", width:75},
-                {title:"Last", field:"updated", width:75},
-
+                {title:"Created", field:"created", width:75, formatter:"datetime", formatterParams:{
+                    outputFormat:"HH:mm:ss",
+                    invalidPlaceholder:"--:--:--",
+                }},
+                {title:"Updated", field:"updated", width:75, formatter:"datetime", formatterParams:{
+                    outputFormat:"HH:mm:ss",
+                    invalidPlaceholder:"--:--:--",
+                }},
             ],
         });
     </script>

@@ -7,6 +7,10 @@
             dataLoaderLoading:dataLoaderLoading,                            // change "Loading" message to "&nbsp;"
             index:"BSSID",                                                  // use BSSID as index
 
+            dependencies:{
+                datetime: luxon,
+            },
+
             rowFormatter:function(row){
                 row.getElement().style = "height:24px";
                 if(row.getData().tracked == true){
@@ -46,9 +50,14 @@
                 {title:"Sec.", field:"Encryption", formatter: "tickCross", width:30},
                 {title:"Vendor", field:"Vendor", width:100},
                 {title:"Elapsed", field:"elapsed", width:75},
-                {title:"Created", field:"created", width:75},
-                {title:"Last", field:"updated", width:75},
-
+                {title:"Created", field:"created", width:75, formatter:"datetime", formatterParams:{
+                    outputFormat:"HH:mm:ss",
+                    invalidPlaceholder:"--:--:--",
+                }},
+                {title:"Updated", field:"updated", width:75, formatter:"datetime", formatterParams:{
+                    outputFormat:"HH:mm:ss",
+                    invalidPlaceholder:"--:--:--",
+                }},
             ],
         });
     </script>
