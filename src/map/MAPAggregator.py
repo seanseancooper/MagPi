@@ -32,6 +32,7 @@ class MAPAggregator(threading.Thread):
         self.module_data = defaultdict(dict)
 
         self.iteration = 0
+        self.elastic = None
 
     def stop(self):
         print(f'stopping.')
@@ -50,6 +51,8 @@ class MAPAggregator(threading.Thread):
             self.modules.append(mod)
             readConfig(os.path.basename(module_config), self.module_configs[mod])
 
+        self.elastic = ElasticSearchIntegration()
+        self.elastic.init()
 
     def register_modules(self):
         """ discover 'live' module REST contexts """
@@ -72,6 +75,8 @@ class MAPAggregator(threading.Thread):
             data = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
             if data.ok:
                 self.module_data[mod] = data.json()
+                if self.elastic:
+                    self.elastic.push(self.module_data[mod])
         except Exception as e:
             map_logger.warning(f'Data Aggregator Warning [{mod}]! {e}')
 
@@ -95,6 +100,244 @@ class MAPAggregator(threading.Thread):
                 except KeyError: pass  # 'missing' is fine.
 
             time.sleep(self.config.get('AGGREGATOR_TIMEOUT', .5))
+
+
+class ElasticSearchIntegration:
+
+    # Install Docker:
+    #   docker network create elastic
+    #   docker pull docker.elastic.co/elasticsearch/elasticsearch:8.17.2
+    #   docker pull docker.elastic.co/kibana/kibana:8.17.2
+
+    # docker run --name es01 --net elastic -p 9200:9200 -it -m 1GB docker.elastic.co/elasticsearch/elasticsearch:8.17.2
+    # docker run --name kib01 --net elastic -p 5601:5601 docker.elastic.co/kibana/kibana:8.17.2
+
+    # https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # ✅ Elasticsearch security features have been automatically configured!
+    # ✅ Authentication is enabled and cluster connections are encrypted.
+    #
+    # ℹ️  Password for the elastic user (reset with `bin/elasticsearch-reset-password -u elastic`):
+    #   L**_NQ*00Wbbpx24wWqN
+    #
+    # ℹ️  HTTP CA certificate SHA-256 fingerprint:
+    #   9022782a7780c081f54194ce37726141fa7f77157d4b7a42565037aceda242d7
+    #
+    # ℹ️  Configure Kibana to use this cluster:
+    # • Run Kibana and click the configuration link in the terminal when Kibana starts.
+    # • Copy the following enrollment token and paste it into Kibana in your browser (valid for the next 30 minutes):
+    #   eyJ2ZXIiOiI4LjE0LjAiLCJhZHIiOlsiMTcyLjE4LjAuMjo5MjAwIl0sImZnciI6IjkwMjI3ODJhNzc4MGMwODFmNTQxOTRjZTM3NzI2MTQxZmE3Zjc3MTU3ZDRiN2E0MjU2NTAzN2FjZWRhMjQyZDciLCJrZXkiOiI2MGMtZ3BVQm9CcDdGcUc3aWlVTzpNS3ZtU0I5eFJBMjZhQk0xMWUtY0t3In0=
+    #
+    # ℹ️ Configure other nodes to join this cluster:
+    # • Copy the following enrollment token and start new Elasticsearch nodes with `bin/elasticsearch --enrollment-token <token>` (valid for the next 30 minutes):
+    #   eyJ2ZXIiOiI4LjE0LjAiLCJhZHIiOlsiMTcyLjE4LjAuMjo5MjAwIl0sImZnciI6IjkwMjI3ODJhNzc4MGMwODFmNTQxOTRjZTM3NzI2MTQxZmE3Zjc3MTU3ZDRiN2E0MjU2NTAzN2FjZWRhMjQyZDciLCJrZXkiOiI3VWMtZ3BVQm9CcDdGcUc3aWlYNzppX1pQR0lYS1I4LWNNY0pCbk9rZ0tRIn0=
+    #
+    #   If you're running in Docker, copy the enrollment token and run:
+    #   `docker run -e "ENROLLMENT_TOKEN=<token>" docker.elastic.co/elasticsearch/elasticsearch:8.17.2`
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    # regenerate credentials
+    #   docker exec -it es01 /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic
+    #   docker exec -it es01 /usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana
+
+    # We recommend storing the elastic password as an environment variable in your shell. Example:
+    #   export ELASTIC_PASSWORD="L**_NQ*00Wbbpx24wWqN"
+
+    # https://www.elastic.co/guide/en/elasticsearch/reference/current/security-basic-setup.html
+    # https://www.elastic.co/guide/en/elasticsearch/reference/current/security-basic-setup-https.html
+
+    # copy cert to local machine:
+    # docker cp es01:/usr/share/elasticsearch/config/certs/http_ca.crt .
+
+    # https://www.elastic.co/guide/en/enterprise-search-clients/python/current/connecting.html#connect-self-hosted
+    # https://www.elastic.co/guide/en/kibana/current/asset-tracking-tutorial.html
+
+    def __init__(self):
+        self.client = None
+        self.operations = []
+        self.index_requests = []
+        self.signals_requests = []
+
+    def init(self):
+
+        from elasticsearch import Elasticsearch
+        from getpass import getpass
+
+        # ELASTIC_CLOUD_ID = getpass("Elastic Cloud ID: ")
+        # ELASTIC_API_KEY = getpass("Elastic Api Key: ")
+
+        ELASTIC_PASSWORD = "L**_NQ*00Wbbpx24wWqN"
+
+        # Create the client instance
+        self.client = Elasticsearch(
+                "https://localhost:9200",
+                ca_certs="/Users/scooper/PycharmProjects/MagPi/src/map/lib/http_ca.crt",
+                basic_auth=("elastic", ELASTIC_PASSWORD)
+                # cloud_id=ELASTIC_CLOUD_ID,
+                # api_key=ELASTIC_API_KEY,
+        )
+
+        if self.client:
+            print(f'self.client.info(): {self.client.info()}')
+
+    def push(self, data):
+
+        # valid ways of moving the data:
+        # - do ETL on JSON: extract worker and signals in MapAggregator component; push to Elastic.  [BLOCKING?]
+        #
+        # + Have the workers DUMP THE DATA ON EXIT (worker.stop() dumps only tracked items)); THEN push to Elastic.
+
+        #       DECORATE append_to_outfile in wifi_utils. have this be the elastic integration point.
+        #       [NOCARE, ONLY TRACKED ITEMS (+), includes 4/6 (not files) and solves 'when?']
+        #       indexes can be managed atomically. we can programmatically expunge signals and keep workers.
+
+        # - signals and workers use methods to make client calls in real-time; push to Elastic. [BLOCKING?, maintainence]
+        # - tight coupling to tracked objects; push to Elastic. [WHEN PUSHED? WHAT IS USEFUL ABOUT NON-TRACKED ITEMS?]
+
+        # > use a logstash http_polling connector and a mapping; poll module endpoints; pull to Elastic.
+        # - import files; pull to Elastic.
+        #
+        # A. IS THE CODE BLOCKING?
+        # B. What if Elastic is 'offline'; how does this affect the following use cases?
+        #       Module users, real-time (signals): not affected unless code is blocking!
+        #       Apparatus Users, real-time (map+signals)
+        #           OFFLINE  ANYWAY:
+        #               Ingest processes, continuity of data. availability, stability of components, decoupling
+        #               Kibana dashboards are offline, but not affecting module/apparatus users...
+        #               ML predictions, offline analysis
+        #       Maintainability
+        #
+        # Which is fastest and easiest to implement, so we can discover mistakes fast and correct them?
+        #
+        # ETC, Which offers the most downstream flexibility if needed to change.
+        # {"message": "", "48:9B:D5:F7:E2:C0": {"SSID": "CCOB_Library", "BSSID": "48:9B:D5:F7:E2:C0", "created": "13:47:44", "updated": "14:40:37", "elapsed": "00:52:05", "Vendor": "Extreme Networks Headquarters", "Channel": 1, "Frequency": 1281, "Signal": -99, "Quality": 24, "Encryption": false, "is_mute": false, "tracked": true, "signal_cache": [{"datetime": "2025-03-04 14:40:13.226561", "id": "54827a9e-49fc-482b-a46c-97f8262dccff", "lon": -105.068295, "lat": 39.916938, "sgnl": -99}, {"datetime": "2025-03-04 14:40:17.974622", "id": "f0a9b88b-78a2-48f3-ba16-708ffe507ad3", "lon": -105.068486, "lat": 39.916797, "sgnl": -99}, {"datetime": "2025-03-04 14:40:22.764689", "id": "1176761b-9e3c-434b-8e8d-58c1be094650", "lon": -105.068668, "lat": 39.916763, "sgnl": -99}, {"datetime": "2025-03-04 14:40:32.639993", "id": "573c5000-e9c6-4a05-87b9-41305449f3b1", "lon": -105.06867, "lat": 39.916891, "sgnl": -99}, {"datetime": "2025-03-04 14:40:37.499255", "id": "72dcbdbf-8d6c-4d20-9ac2-da809864e0c8", "lon": -105.068617, "lat": 39.916906, "sgnl": -99}], "tests": []}}
+
+        # if it doesn't exist, create a single index for all workers
+
+        class JSONParser:
+            def __init__(self, data):
+                self.data = data
+                self.worker_data = {}
+                self.signal_data = {}
+                self._parse()
+
+            def _parse(self):
+                self.worker_data = self.data
+                self.signal_data = self.worker_data['signal_cache']
+
+                # add this data to the worker as a 'vector'.
+                self.worker_data.pop('signal_cache')  # remove the signal cache
+
+            def get_worker_data(self):
+                return self.worker_data
+
+            def get_signal_data(self):
+                return self.signal_data
+
+        worker_index_mapping = f'''
+        PUT /workers
+        {{
+          "mappings": {{
+            "properties": {{
+              "id": {{ "type": "keyword" }},
+              "SSID": {{ "type": "keyword" }},
+              "BSSID": {{ "type": "keyword" }},
+              "created": {{ "type": "date", "format": "yyyy-MM-dd HH:mm:ss" }},
+              "updated": {{ "type": "date", "format": "yyyy-MM-dd HH:mm:ss" }},
+              "elapsed": {{ "type": "date", "format": "HH:mm:ss" }},
+              "Vendor": {{ "type": "keyword" }},
+              "Channel": {{ "type": "integer" }},
+              "Frequency": {{ "type": "integer" }},
+              "Signal": {{ "type": "integer" }},
+              "Quality": {{ "type": "integer" }},
+              "Encryption": {{ "type": "boolean" }},
+              "is_mute": {{ "type": "boolean" }},
+              "tracked": {{ "type": "boolean" }}
+            }}
+          }}
+        }}
+        '''
+        self.index_requests.append(worker_index_mapping)
+
+        for _ in data:
+
+            parser = JSONParser(_)
+
+            worker_data = parser.get_worker_data()
+            signal_data = parser.get_signal_data()
+            print(f"worker_{worker_data['id']}:", worker_data)
+
+            # create the index for the worker
+            worker_insert = f'''
+            POST /workers/_doc/worker_{worker_data['id']}
+            {{
+              "id": "{worker_data['id']}",
+              "SSID": "{worker_data['SSID']}",
+              "BSSID": "{worker_data['BSSID']}",
+              "created": "{worker_data['created']}",
+              "updated": "{worker_data['updated']}",
+              "elapsed": "{worker_data['elapsed']}",
+              "Vendor": "{worker_data['Vendor']}",
+              "Channel": {worker_data['Channel']},
+              "Frequency": {worker_data['Frequency']},
+              "Signal": {worker_data['Signal']},
+              "Quality": {worker_data['Quality']},
+              "Encryption": {str(worker_data['Encryption']).lower()},
+              "is_mute": {str(worker_data['is_mute']).lower()},
+              "tracked": {str(worker_data['tracked']).lower()}
+            }}
+            '''
+            self.index_requests.append(worker_insert)
+
+            # create the signal_cache index for the worker
+            signal_index = f"worker_{worker_data['id']}_signals"
+            print(f"{signal_index}:", signal_data)
+
+            signals_index_mapping = f'''
+            PUT /{signal_index}
+            {{
+              "mappings": {{
+                "properties": {{
+                  "created": {{ "type": "date", "format": "yyyy-MM-dd HH:mm:ss" }},
+                  "id": {{ "type": "keyword" }},
+                  "worker_id": {{ "type": "keyword" }},
+                  "location": {{ "type": "geo_point" }},
+                  "sgnl": {{ "type": "integer" }}
+                }}
+              }}
+            }}
+            '''
+            self.signals_requests.append(signals_index_mapping)
+
+            # for each record insert a SignalPoint
+            for signal in signal_data:
+
+                signalpoint_insert = f'''
+                POST /{signal_index}/_doc/{signal['id']}
+                {{
+                  "created": "{signal['created']}",
+                  "id": "{str(signal['id'])}",
+                  "worker_id": "{signal['worker_id']}",
+                  "location": "{signal['lat']}, {signal['lon']}",
+                  "sgnl": {signal['sgnl']}
+                }}
+                '''
+                self.signals_requests.append(signalpoint_insert)
+
+        # make this optional: Write to files
+        with open('./index_requests.json', 'w') as f:
+            f.write("\n".join(self.index_requests))
+
+        with open('./signals_requests.json', 'w') as f:
+            print(os.path.abspath('.'))
+            f.write("\n".join(self.signals_requests))
+
+        print("✅ data set saved to ElasticSearch!")
+
+        # try:
+        #     self.client.bulk(operations=self.operations)
+        # except Exception as e:
+        #     print(f'bulk import failed. {e}')
 
 
 if __name__ == '__main__':
