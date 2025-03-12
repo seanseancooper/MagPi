@@ -17,7 +17,7 @@ from src.wifi.WifiWorker import WifiWorker
 
 import logging
 
-# IDEA: pubsub these signals
+# IDEA: pub/sub these signals
 wifi_signals = Namespace()
 wifi_started = wifi_signals.signal('WIFI START')
 wifi_updated = wifi_signals.signal('WIFI UPDATED')
@@ -47,6 +47,7 @@ class WifiScanner(threading.Thread):
         self.tracked_signals = []               # parsed_signals currently being tracked.
         self.ghost_signals = []                 # signals no longer received, but tracked -- 'ghost' signals
         self.signal_cache = defaultdict(list)   # a mapping of lists of SignalPoint for all signals received.
+        self.signal_cache_max = 160             # max size of these lists of SignalPoint. overridden via config
 
         self.blacklist = {}                     # ignored signals
         self.sort_order = "Signal"              # sort order for printed output; consider not support printing.
@@ -87,6 +88,7 @@ class WifiScanner(threading.Thread):
         self.blacklist = self.config['BLACKLIST']
         self.DEBUG = self.config['DEBUG']
         self.OUTDIR = self.config['OUTFILE_PATH']
+        self.signal_cache_max = self.config.get('SIGNAL_CACHE_MAX', self.signal_cache_max)
 
         # IDEA: worker append itself when created.
         [self.workers.append(WifiWorker(BSSID)) for BSSID in self.searchmap.keys()]
@@ -117,24 +119,22 @@ class WifiScanner(threading.Thread):
         cell = [_ for _ in self.parsed_signals if _['BSSID'] == bssid][0]
         return cell
 
-    def make_signalpoint(self, bssid, signal):
-        sgnlPt = WifiSignalPoint(bssid, self.longitude, self.latitude, signal)
+    def make_signalpoint(self, worker_id, bssid, signal):
+        sgnlPt = WifiSignalPoint(worker_id, bssid, self.longitude, self.latitude, signal)
         self.signal_cache[bssid].append(sgnlPt)
 
-        def manage_signal_cache(_bssid):
-            while len(self.signal_cache[_bssid]) >= self.config['SIGNAL_CACHE_MAX']:
-                self.signal_cache[_bssid].pop(0)
+        while len(self.signal_cache[bssid]) >= self.signal_cache_max:
+            self.signal_cache[bssid].pop(0)
 
-        manage_signal_cache(bssid)
-
-        return sgnlPt
-
-    def update_sgnl_dynamics(self, sgnl, worker, fmt):
+    def update_sgnl_dynamics(self, sgnl, worker):
         """ update sgnl data map with current info from worker """
+        sgnl['id'] = worker.id
         sgnl['Signal'] = worker.signal
-        sgnl['created'] = format_time(worker.created, fmt)
-        sgnl['updated'] = format_time(worker.updated, fmt)
-        sgnl['elapsed'] = format_delta(worker.elapsed, fmt)
+
+        # this is formatting for luxon.js, but is not clean.
+        sgnl['created'] = format_time(worker.created, "%Y-%m-%d %H:%M:%S")
+        sgnl['updated'] = format_time(worker.updated, "%Y-%m-%d %H:%M:%S")
+        sgnl['elapsed'] = format_delta(worker.elapsed, self.config.get('TIME_FORMAT', "%H:%M:%S"))
 
         sgnl['is_mute'] = worker.is_mute
         sgnl['tracked'] = worker.tracked
@@ -143,10 +143,8 @@ class WifiScanner(threading.Thread):
 
     def update(self, bssid, _signals):
         """ put bssid associated signal data into a map as an element in a list of _signals """
-        worker = self.get_worker(bssid)
-        sgnl = worker.get()
-        self.update_sgnl_dynamics(sgnl, worker, self.config.get('TIMER_FORMAT', "%H:%M:%S"))
-        _signals.append(sgnl)
+        self.update_sgnl_dynamics(self.get_worker(bssid).get(), self.get_worker(bssid))
+        _signals.append(self.get_worker(bssid).get())
 
     def update_ghosts(self):
         """ find, load and update ghosts """
@@ -157,7 +155,7 @@ class WifiScanner(threading.Thread):
         def update_ghost(item):
             self.get_worker(item).signal = -99
             self.get_worker(item).updated = datetime.now()
-            self.make_signalpoint(str(item), self.get_worker(item).signal)
+            self.make_signalpoint(self.get_worker(item).id, self.get_worker(item).bssid, self.get_worker(item).signal)
 
         [update_ghost(item) for item in self.ghost_signals]
 
@@ -166,10 +164,9 @@ class WifiScanner(threading.Thread):
 
     def get_parsed_signals(self):
         """ updates and returns ALL parsed SIGNALS """
-        fmt = self.config.get('TIME_FORMAT', "%H:%M:%S")
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
-        [self.update_sgnl_dynamics(sgnl, self.get_worker(sgnl['BSSID']), fmt) for sgnl in self.parsed_signals]
+        [self.update_sgnl_dynamics(sgnl, self.get_worker(sgnl['BSSID'])) for sgnl in self.parsed_signals]
 
         return self.parsed_signals
 
