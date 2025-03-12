@@ -177,8 +177,8 @@ class ElasticSearchIntegration:
                 # api_key=ELASTIC_API_KEY,
         )
 
-        if self.client:
-            print(f'self.client.info(): {self.client.info()}')
+        # if self.client:
+        #     print(f'self.client.info(): {self.client.info()}')
 
     def push(self, data):
 
