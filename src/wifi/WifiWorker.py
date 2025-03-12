@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 import logging
 from src.wifi.lib.wifi_utils import append_to_outfile
-from src.lib.utils import format_time, format_delta
 
 logger_root = logging.getLogger('root')
 wifi_logger = logging.getLogger('wifi_logger')
@@ -13,9 +12,9 @@ class WifiWorker:
     def __init__(self, bssid):
         self.config = {}
         self.scanner = None
-
-        self.bssid = bssid
-        self.ssid = ''
+        self.id = ''                    # filled if match(), based on BSSID; marks 'SignalPoint'.
+        self.bssid = bssid              # MAC ADDRESS. used in object lookups and coloring UI
+        self.ssid = ''                  # Human readable name of Wifi access point.
 
         self.vendor = ''
         self.channel = ''
@@ -39,11 +38,12 @@ class WifiWorker:
         self.DEBUG = False
 
     def get(self):
-        return {"SSID"          : self.ssid,
+        return {"id"            : self.id,
+                "SSID"          : self.ssid,
                 "BSSID"         : self.bssid,
-                "created"       : format_time(self.created, "%H:%M:%S"),
-                "updated"       : format_time(self.updated, "%H:%M:%S"),
-                "elapsed"       : format_delta(self.elapsed, "%H:%M:%S"),
+                "created"       : str(self.created),
+                "updated"       : str(self.updated),
+                "elapsed"       : str(self.elapsed),
                 "Vendor"        : self.vendor,
                 "Channel"       : self.channel,
                 "Frequency"     : self.frequency,
@@ -108,11 +108,12 @@ class WifiWorker:
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
         self.tracked = self.bssid in self.scanner.tracked_signals
-        self.scanner.make_signalpoint(self.bssid, int(sgnl.get('Signal', -99)))
+        self.scanner.make_signalpoint(self.id, self.bssid, int(sgnl.get('Signal', -99)))
 
     def match(self, cell):
-        """ process the matching BSSID and return data in it as a 'cell' """
+        """ match BSSID, derive the 'id' and set mute status """
         if self.bssid.upper() == cell['BSSID'].upper():
+            self.id = str(self.bssid).replace(':', '').lower()
             self.process_cell(cell)
             self.auto_unmute()
 
@@ -122,7 +123,7 @@ class WifiWorker:
         return mute(self)
 
     def auto_unmute(self):
-        ''' this is the polled function to UNMUTE signals AUTOMATICALLY after the MUTE_TIME. '''
+        """ polled function to UNMUTE signals AUTOMATICALLY after the MUTE_TIME. """
         if self.config['MUTE_TIME'] > 0:
             if datetime.now() - self.updated > timedelta(seconds=self.config['MUTE_TIME']):
                 self.is_mute = False
@@ -154,9 +155,9 @@ class WifiWorker:
 
     def stop(self):
         if self.tracked:
-            append_to_outfile(self.config, self.get())
+            append_to_outfile(self, self.config, self.get())
 
     def run(self):
-        ''' match a BSSID and populate data '''
+        """ match a BSSID and populate data """
         [self.match(sgnl) for sgnl in self.scanner.parsed_signals]
 
