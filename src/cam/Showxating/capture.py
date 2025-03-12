@@ -105,6 +105,7 @@ class ShowxatingCapture:
 
                 self.capture_frame_rate = round(self.f_id / (time.monotonic() - frame_start), 2)
 
+                # TOdO: add src and other attributes of the capture
                 self.statistics['capture_start_time'] = start_time
                 self.statistics['capture_frame_rate'] = self.capture_frame_rate
                 self.statistics['capture_frame_period'] = round(time.monotonic() - proc_start, 4)
