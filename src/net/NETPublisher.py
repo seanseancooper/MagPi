@@ -68,3 +68,61 @@
 #
 #
 
+import queue
+import threading
+import time
+from PIL import Image
+import io
+import base64
+
+
+# Producer function
+def producer(q, image_path):
+    try:
+        with open(image_path, "rb") as image_file:
+            image_data = image_file.read()
+        q.put(base64.b64encode(image_data).decode('utf-8'))
+        print(f"Produced image: {image_path}")
+    except FileNotFoundError:
+        print(f"Error: Image file not found at {image_path}")
+
+
+# Consumer function
+def consumer(q):
+    while True:
+        image_data_base64 = q.get()
+        if image_data_base64 is None:
+            break
+        image_data = base64.b64decode(image_data_base64)
+
+        try:
+            image = Image.open(io.BytesIO(image_data))
+            image.save("received_image.jpg")
+            print("Consumed and saved image: received_image.jpg")
+        except Exception as e:
+            print(f"Error processing image: {e}")
+        q.task_done()
+
+
+# Create a queue
+q = queue.Queue()
+
+# Create producer and consumer threads
+producer_thread = threading.Thread(target=producer, args=(q, "example.jpg"))
+consumer_thread = threading.Thread(target=consumer, args=(q,))
+
+# Start the threads
+producer_thread.start()
+consumer_thread.start()
+
+# Wait for the producer to finish
+producer_thread.join()
+
+# Add a sentinel value to signal the consumer to exit
+q.put(None)
+
+# Wait for the consumer to finish
+consumer_thread.join()
+q.join()
+
+print("Done!")
