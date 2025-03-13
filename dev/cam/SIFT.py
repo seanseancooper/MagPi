@@ -17,7 +17,7 @@ keypoints_reference, descriptors_reference = sift.detectAndCompute(gray_referenc
 descriptors_reference = descriptors_reference.astype(np.float32)
 
 # Initialize the camera or video stream
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 # Select ROI on the reference image
 bbox = cv2.selectROI('Select ROI', reference_image, fromCenter=False, showCrosshair=True)
