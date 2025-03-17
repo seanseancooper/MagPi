@@ -3,6 +3,8 @@ import json
 import glob
 from src.config import CONFIG_PATH, readConfig
 import xml.etree.ElementTree as ET
+from src.lib.utils import format_time
+from datetime import datetime
 
 
 class cat_scanlists:
@@ -42,7 +44,8 @@ class cat_scanlists:
                     for scanned in self.data:
                         for worker in scanned:
                             try:
-                                # A LIST OF MAPS
+
+                                # LIST OF MAPS
                                 # [
                                 #  {
                                 #   "SSID": "DIRECT-xy2852C1-",
@@ -72,11 +75,10 @@ class cat_scanlists:
                                 #  },
 
                                 self.mapped_workers[worker['BSSID']] = worker
-                            except Exception as e:
-                                print(f'not enough data? {worker} : {e}')
+                            except Exception:
+
                                 try:
-                                    # not enough data; an early 'record'
-                                    # A MAP OF MAPS
+                                    # an early 'record' A MAP OF MAPS
                                     # {
                                     #     "00:54:AF:A4:C0:F7": {
                                     #         "ssid"      : "HotspotC0F7",
@@ -84,11 +86,19 @@ class cat_scanlists:
                                     #         "return_all": true
                                     #     }
                                     # },
-                                    self.mapped_workers[worker] = worker
-                                except Exception as e:
-                                    print(f'bad data? {worker} : {e}')
+                                    worker_bssid = [k for k in worker][0]
+                                    worker_data = worker[worker_bssid]
+                                    self.mapped_workers[worker_bssid] = worker_data
+                                except Exception:
+                                    # another earlier structure?
+                                    # '00:54:AF:8F:D9:26': {
+                                    # 'ssid': 'HotspotD926',
+                                    # 'tests': {},
+                                    # 'return_all': True
+                                    # }
                                     try:
-                                        key, value = list(worker.items())[0]
+                                        key = worker
+                                        value = worker_data
                                         self.mapped_workers[key] = value
                                     except Exception as e:
                                         print(f'skipped worker {worker} : {e}')
@@ -102,18 +112,20 @@ class cat_scanlists:
 
         print(f'processed {self.scanlist_total} scanlists. mapped {len(self.mapped_workers)} signals ', end='')
 
-    def write(self):
+    def write(self, add_signals=False):
         with open(self.output_file, 'w') as f:
             f.write('[\n')
+            self.mapped_workers.pop('message')
 
             for _id in sorted(self.mapped_workers):
                 try:
                     record = self.mapped_workers[_id]
+
                     out = {
-                         "id"           : record.get('id'),
-                         "SSID"         : record.get('SSID'),
+                         "id"           : record.get('id', _id.replace(':', '').lower()),
+                         "SSID"         : record.get('SSID', record.get('ssid')),
                          "BSSID"        : _id,
-                         "created"      : record.get('created'),
+                         "created"      : record.get('created', format_time(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')),
                          "updated"      : record.get('updated'),
                          "elapsed"      : record.get('elapsed'),
                          "Vendor"       : record.get('Vendor', self.get_vendor(_id)),
@@ -124,8 +136,8 @@ class cat_scanlists:
                          "Encryption"   : record.get('Encryption'),
                          "is_mute"      : record.get('is_mute', False),
                          "tracked"      : record.get('tracked', True),
-                         # "signal_cache" : [x for x in record.get('signal_cache', [])],
-                         # "tests"        : [x for x in record.get('tests', [x for x in record.get('results', [])])]
+                         "signal_cache" : [x for x in record.get('signal_cache', [])] if add_signals is True else [],
+                         "tests"        : [x for x in record.get('tests', [x for x in record.get('results', [])])]  if add_signals is True else []
                     }
 
                     f.write(json.dumps(out, indent=2) + ',\n')
