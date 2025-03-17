@@ -110,9 +110,9 @@ class cat_scanlists:
                 except Exception as e:
                     print(f'skipped scanlist {scanlist} {e}')
 
-        print(f'processed {self.scanlist_total} scanlists. mapped {len(self.mapped_workers)} signals ', end='')
+        print(f'processed {self.scanlist_total} scanlists.', end='')
 
-    def write(self, add_signals=False):
+    def write(self, add_signals=True):
         with open(self.output_file, 'w') as f:
             f.write('[\n')
             self.mapped_workers.pop('message')
@@ -140,12 +140,19 @@ class cat_scanlists:
                          "tests"        : [x for x in record.get('tests', [x for x in record.get('results', [])])]  if add_signals is True else []
                     }
 
-                    f.write(json.dumps(out, indent=2) + ',\n')
+                    f.write(json.dumps(out, indent=2))
                     self.total += 1
+
+                    if self.total < len(self.mapped_workers):
+                        f.write(',\n')
+                    else:
+                        f.write('\n')
+
                 except AttributeError as a:
                     print(f'omitted {record} {a}')
             f.write(']\n')
-        print(f'added {self.total} records.')
+
+        print(f' mapped {self.total} signals for {len(self.mapped_workers)} records.')
 
 
 if __name__ == "__main__":
