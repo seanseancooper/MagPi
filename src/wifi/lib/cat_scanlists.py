@@ -1,9 +1,7 @@
-import os
 import json
 import glob
-from src.config import CONFIG_PATH, readConfig
-import xml.etree.ElementTree as ET
 from src.lib.utils import format_time
+from src.wifi.lib.wifi_utils import vendorsMacs_XML, proc_vendors
 from datetime import datetime
 
 
@@ -14,22 +12,18 @@ class cat_scanlists:
         self.scanlist_archive = scanlist_archive
         self.output_file = output_file
         self.data = []
-        self.config = {}
         self.vendors = {}
         self.mapped_workers = {}
         self.skipped = []
-        self.scanlist_stats = {}
         self.total = 0
         self.scanlist_total = 0
 
-        def proc_vendors(vendor):
-            self.vendors[vendor.attrib["mac_prefix"]] = vendor.attrib["vendor_name"]
+        [proc_vendors(vendor, self.vendors) for vendor in vendorsMacs_XML.getroot()]
 
-        readConfig('wifi.json', self.config)
-        vendorsMacs_XML = ET.parse(os.path.join(CONFIG_PATH, self.config['VENDORMACS_FILE']))
-        [proc_vendors(vendor) for vendor in vendorsMacs_XML.getroot()]
-
-    def get_vendor(self, bssid):
+    def _get_vendor(self, bssid):
+        """ a custom implementation get_vendor() for this class that takes a bssid.
+            note it's '_'; not intended to be used elsewhere, and it initializes
+            inside this class """
         try:
             return self.vendors[bssid[0:8]]
         except KeyError:
@@ -44,7 +38,6 @@ class cat_scanlists:
                     for scanned in self.data:
                         for worker in scanned:
                             try:
-
                                 # LIST OF MAPS
                                 # [
                                 #  {
@@ -76,7 +69,6 @@ class cat_scanlists:
 
                                 self.mapped_workers[worker['BSSID']] = worker
                             except Exception:
-
                                 try:
                                     # an early 'record' A MAP OF MAPS
                                     # {
@@ -90,52 +82,54 @@ class cat_scanlists:
                                     worker_data = worker[worker_bssid]
                                     self.mapped_workers[worker_bssid] = worker_data
                                 except Exception:
-                                    # another earlier structure?
+                                    # another earlier structure, naked JSON map
                                     # '00:54:AF:8F:D9:26': {
                                     # 'ssid': 'HotspotD926',
                                     # 'tests': {},
                                     # 'return_all': True
                                     # }
                                     try:
-                                        key = worker
+                                        key = [k for k in worker][0]
                                         value = worker_data
                                         self.mapped_workers[key] = value
                                     except Exception as e:
-                                        print(f'skipped worker {worker} : {e}')
+                                        print(f'skipped worker {e}')
                                         self.skipped.append(worker)
-
 
                     self.scanlist_total += 1
                     print(f'ingested list {self.scanlist_total} {scanlist}')
+
                 except Exception as e:
                     print(f'skipped scanlist {scanlist} {e}')
 
         print(f'processed {self.scanlist_total} scanlists.', end='')
 
-    def write(self, add_signals=True):
+    def write(self, add_signals=False):
         with open(self.output_file, 'w') as f:
             f.write('[\n')
-            self.mapped_workers.pop('message')
 
             for _id in sorted(self.mapped_workers):
                 try:
                     record = self.mapped_workers[_id]
 
                     out = {
-                         "id"           : record.get('id', _id.replace(':', '').lower()),
+                         "id"           : _id.replace(':', '').lower(),
                          "SSID"         : record.get('SSID', record.get('ssid')),
                          "BSSID"        : _id,
-                         "created"      : record.get('created', format_time(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')),
-                         "updated"      : record.get('updated'),
-                         "elapsed"      : record.get('elapsed'),
-                         "Vendor"       : record.get('Vendor', self.get_vendor(_id)),
+
+                         "created"      : record.get('created', format_time(datetime.now(), '%Y-%m-%d %H:%M:%S')),
+                         "updated"      : record.get('updated', format_time(datetime.now(), '%Y-%m-%d %H:%M:%S')),
+                         "elapsed"      : record.get('elapsed', '00:00:00'),
+
+                         "Vendor"       : record.get('Vendor', self._get_vendor(_id)),
                          "Channel"      : record.get('Channel'),
                          "Frequency"    : record.get('Frequency'),
                          "Signal"       : record.get('Signal'),
                          "Quality"      : record.get('Quality'),
                          "Encryption"   : record.get('Encryption'),
-                         "is_mute"      : record.get('is_mute', False),
-                         "tracked"      : record.get('tracked', True),
+
+                         "is_mute"      : False,
+                         "tracked"      : True,
                          "signal_cache" : [x for x in record.get('signal_cache', [])] if add_signals is True else [],
                          "tests"        : [x for x in record.get('tests', [x for x in record.get('results', [])])]  if add_signals is True else []
                     }
@@ -156,11 +150,12 @@ class cat_scanlists:
 
 
 if __name__ == "__main__":
-    archive = '/Users/scooper/PycharmProjects/MagPi/dev/wifi/scanlist_archive'
+    # archive = '/Users/scooper/PycharmProjects/MagPi/dev/wifi/scanlist_archive'
+    archive = '/Users/scooper/PycharmProjects/MagPi/_out'
     output = '/Users/scooper/PycharmProjects/MagPi/dev/wifi/training_data/scanlists_out.json'
 
     cat = cat_scanlists(archive, output)
 
     cat.read()
-    cat.write()
+    cat.write(add_signals=True)
 
