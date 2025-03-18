@@ -7,7 +7,8 @@
 import pika
 import json
 import numpy as np
-from src.cam.Showxating.lib import FrameObjekt
+from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
+from src.cam.Showxating.lib.FrameObjektEncoder import ObjektEncoder
 from datetime import datetime
 import threading
 import logging
@@ -17,45 +18,46 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s [%(levelname)s] - %(message)s')
 
 
-class Encoder(threading.Thread):
-    """Encoder class to process FrameObjekt data in a separate thread."""
-    def __init__(self, frame_obj):
-        super().__init__()
-        self.frame_obj = frame_obj
-
-    def run(self):
-        """Process FrameObjekt data."""
-        try:
-            logging.info(f"Processing frame {self.frame_obj.f_id}")
-            # Simulate processing delay
-            print("\n[Processing FrameObjekt]")
-            print(self.frame_obj.get())
-            logging.info(f"Frame {self.frame_obj.f_id} processed successfully")
-        except Exception as e:
-            logging.error(f"Failed to process frame {self.frame_obj.f_id}: {e}")
-
+# class ObjektEncoder(threading.Thread):
+#     """Encoder class to process FrameObjekt data in a separate thread."""
+#     def __init__(self, frame_obj):
+#         super().__init__()
+#         self.frame_obj = frame_obj
+#
+#     def run(self):
+#         """Process FrameObjekt data."""
+#         try:
+#             logging.info(f"Processing frame {self.frame_obj.f_id}")
+#             # Simulate processing delay
+#             print("\n[Processing FrameObjekt]")
+#             print(self.frame_obj.get())
+#             logging.info(f"Frame {self.frame_obj.f_id} processed successfully")
+#         except Exception as e:
+#             logging.error(f"Failed to process frame {self.frame_obj.f_id}: {e}")
+#
 
 def dict_to_frameobjekt(data):
     """Convert dictionary back to FrameObjekt."""
     frame_obj = FrameObjekt.create(data['f_id'])
     frame_obj.timestamp = datetime.fromisoformat(data['timestamp'])
     frame_obj.tag = data['tag']
-    frame_obj.isNew = data['isNew']
-    frame_obj.skip = data['skip']
-    frame_obj.contours = np.array(data['contours']) if data['contours'] is not None else None
-    frame_obj.hierarchy = np.array(data['hierarchy']) if data['hierarchy'] is not None else None
-    frame_obj.prev_tag = data['prev_tag']
-    frame_obj.contour_id = data['contour_id']
+
+    # frame_obj.contours = np.array(data['contours']) if data['contours'] is not None else None
+    # frame_obj.hierarchy = np.array(data['hierarchy']) if data['hierarchy'] is not None else None
+    # frame_obj.prev_tag = data['prev_tag']
+    # frame_obj.contour_id = data['contour_id']
     frame_obj.curr_dist = data['curr_dist']
-    frame_obj.distances = np.array(data['distances'])
+    # frame_obj.distances = np.array(data['distances'])
     frame_obj.fd = data['fd']
     frame_obj.fd_mean = data['fd_mean']
-    frame_obj.delta_range = data['delta_range']
+    # frame_obj.delta_range = data['delta_range']
     frame_obj.hist_delta = data['hist_delta']
+    # frame_obj.f_hist = data['f_hist']
+    frame_obj.w_hist = data['w_hist']
     frame_obj.rect = tuple(data['rect']) if data['rect'] else None
     frame_obj.avg_loc = np.array(data['avg_loc'])
     frame_obj.dist_mean = data['dist_mean']
-    frame_obj.wall = np.array(data['wall']) if data['wall'] is not None else None
+    # frame_obj.wall = np.array(data['wall']) if data['wall'] is not None else None
     frame_obj.close = data['close']
     frame_obj.inside_rect = data['inside_rect']
     frame_obj.hist_pass = data['hist_pass']
@@ -70,7 +72,7 @@ def callback(ch, method, properties, body):
         frame_obj = dict_to_frameobjekt(data)
 
         # Start encoder thread to process frame
-        encoder = Encoder(frame_obj)
+        encoder = ObjektEncoder(frame_obj)
         encoder.start()
 
         # Acknowledge message after processing starts
