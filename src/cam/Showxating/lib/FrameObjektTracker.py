@@ -183,7 +183,7 @@ class FrameObjektTracker:
         # does this histogram match the previous one?
         # euclidean distance of the wall histograms
         # observation: this goes negative periodically
-        o.hist_delta = self.get_histogram_delta(self.tracked.get(o.prev_tag).wall, wall, rectangle)
+        o.hist_delta = self.get_histogram_delta(o, self.tracked.get(o.prev_tag).wall, wall, rectangle)
         o.hist_pass = not Decimal.from_float(o.hist_delta).is_signed()
 
         # does this wall match the previous one?
@@ -286,7 +286,7 @@ class FrameObjektTracker:
 
         return labeled
 
-    def get_histogram_delta(self, frame, wall, rectangle):
+    def get_histogram_delta(self, o,  frame, wall, rectangle):
         from src.cam.Showxating.ShowxatingHistogramPlugin import ShowxatingHistogramPlugin
 
         hist_plugin = ShowxatingHistogramPlugin()
@@ -301,6 +301,9 @@ class FrameObjektTracker:
 
         f_hist = hist_plugin.get_histogram(frame, rectangle)
         w_hist = hist_plugin.get_histogram(wall, rectangle)
+
+        o.f_hist = f_hist
+        o.w_hist = w_hist
 
         hist_plugin.normalize_channels(f_hist)
         hist_plugin.normalize_channels(w_hist)
