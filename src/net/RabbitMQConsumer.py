@@ -10,31 +10,12 @@ import numpy as np
 from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
 from src.cam.Showxating.lib.FrameObjektEncoder import ObjektEncoder
 from datetime import datetime
-import threading
 import logging
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s [%(levelname)s] - %(message)s')
 
-
-# class ObjektEncoder(threading.Thread):
-#     """Encoder class to process FrameObjekt data in a separate thread."""
-#     def __init__(self, frame_obj):
-#         super().__init__()
-#         self.frame_obj = frame_obj
-#
-#     def run(self):
-#         """Process FrameObjekt data."""
-#         try:
-#             logging.info(f"Processing frame {self.frame_obj.f_id}")
-#             # Simulate processing delay
-#             print("\n[Processing FrameObjekt]")
-#             print(self.frame_obj.get())
-#             logging.info(f"Frame {self.frame_obj.f_id} processed successfully")
-#         except Exception as e:
-#             logging.error(f"Failed to process frame {self.frame_obj.f_id}: {e}")
-#
 
 def dict_to_frameobjekt(data):
     """Convert dictionary back to FrameObjekt."""

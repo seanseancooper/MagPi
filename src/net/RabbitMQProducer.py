@@ -6,8 +6,6 @@
 
 import pika
 import json
-import numpy as np
-from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
 import logging
 
 # Configure logging

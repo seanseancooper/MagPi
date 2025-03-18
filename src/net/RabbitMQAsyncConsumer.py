@@ -6,8 +6,6 @@
 
 import pika
 import json
-# from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
-from src.cam.Showxating.lib.FrameObjektEncoder import ObjektEncoder
 from RabbitMQConsumer import ObjektEncoder, dict_to_frameobjekt
 
 import logging
