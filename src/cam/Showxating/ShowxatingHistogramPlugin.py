@@ -60,7 +60,8 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
             def get_hist(f):
                 if self.library == 'cv':
                     # images, channels, mask, histSize, ranges[, hist[, accumulate]]
-                    return cv.calcHist([f], [0], None, [self.bins], [0, 256], accumulate=False)
+                    # return cv.calcHist([f], [0], None, [self.bins], [0, 256], accumulate=False)
+                    return cv.calcHist([f], [0, 1, 2], None, [self.bins, self.bins, self.bins], [0, 256, 0, 256, 0, 256])
                 else:
                     # If channel_axis is not set, the histogram is computed on the flattened image.
                     return exposure.histogram(f, nbins=self.bins, channel_axis=0)
