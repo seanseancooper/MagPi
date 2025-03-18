@@ -18,7 +18,7 @@ vendors = {}
 vendorsMacs_XML = ET.parse(os.path.join(CONFIG_PATH, config['VENDORMACS_FILE']))
 
 
-def proc_vendors(vendor):
+def proc_vendors(vendor, vendors):
     vendors[vendor.attrib["mac_prefix"]] = vendor.attrib["vendor_name"]
 
 
@@ -38,7 +38,7 @@ def get_vendor(cell):
         return "no cell!"
 
 
-[proc_vendors(vendor) for vendor in vendorsMacs_XML.getroot()]
+[proc_vendors(vendor, vendors) for vendor in vendorsMacs_XML.getroot()]
 
 
 def get_timing(cell):
