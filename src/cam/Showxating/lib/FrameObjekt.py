@@ -22,14 +22,20 @@ class FrameObjekt:
         self.contour_id = None                                          # [string: object tracking] id of source contour
         self.curr_dist = 0                                              # [int32: object tracking] euclidean_distance wrt previous mean x, y location
         self.distances = np.zeros(shape=[1, 1], dtype=np.float64)       # [list([1,1]): object location] of previous euclidean_distances wrt previous mean x, y locations.
-        self.fd = float()                                               # [float: reporting] euclidean_distance wrt previous frame analysis area
-        self.fd_mean = float()
-        self.delta_range = float()
-        self.hist_delta = float()                                       # [float: reporting] histogram distance wrt previous frame analysis area
-        self.rect = None                                                # [tuple {x, y, w, h}: object segmentation] bounding rects of contours in this frame
-        self.avg_loc = np.ndarray(shape=[2, ], dtype=np.int32)          # [tuple {x,y}: object segmentation] mean x, y location of *this* contour
-        self.dist_mean = float()                                        # mean of self.distances
+        self.fd = 0.0                                                   # [0.0: reporting] euclidean_distance wrt previous frame analysis area
+        self.fd_mean = 0.0
+        self.delta_range = 0.0
 
+        self.f_hist = None                                              # histogram of frame
+        self.w_hist = None                                              # histogram of wall, filled in by FrameObjectTracker
+
+        self.hist_delta = 0.0                                           # [0.0: reporting] histogram distance wrt previous frame analysis area
+        self.rect = None                                                # [tuple {x, y, w, h}: object segmentation] bounding rects of contours in this frame
+        self.avg_loc = np.array([0, 0], dtype=np.int32)                 # [tuple {x,y}: object segmentation] mean x, y location of *this* contour
+        self.dist_mean = 0.0                                            # mean of self.distances
+
+        self.lat = 0.0
+        self.lon = 0.0
         self.wall = None                                                # [ndarray: container] image of processed area in this frame
 
         self.close = None                                               # [boolean: reporting] is this mean location with the bounds of the contour?
@@ -39,8 +45,7 @@ class FrameObjekt:
 
     @staticmethod
     def create(f_id):
-        o = FrameObjekt(f_id)
-        return o
+        return FrameObjekt(f_id)
 
     @staticmethod
     def create_tag(f_id):
@@ -50,13 +55,11 @@ class FrameObjekt:
     def get(self):
         return {'f_id'          : self.f_id,
                 'tag'           : str(self.tag),
-
                 'fd'            : self.fd,
                 'fd_mean'       : self.fd_mean,
-                'avg_loc'       : str(self.avg_loc),
+                'avg_loc'       : str(self.avg_loc),  # self.avg_loc.tolist()
                 'dist_mean'     : self.dist_mean,
                 'rect'          : str(self.rect),
-
                 'close'         : self.close,
                 'inside_rect'   : self.inside_rect is True,
                 'hist_pass'     : self.hist_pass,
