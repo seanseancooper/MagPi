@@ -5,6 +5,8 @@ import cv2 as cv
 import numpy as np
 import json
 
+from src.cam.Showxating.lib.FrameObjektEncoder import ObjektEncoder
+from src.net.RabbitMQProducer import RabbitMQProducer
 from src.cam.Showxating.plugin import ShowxatingPlugin
 from src.cam.Showxating.lib.ImageWriter import ImageWriter
 from src.cam.Showxating.lib.FrameObjektTracker import FrameObjektTracker
@@ -291,7 +293,11 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                     self.tracked = self.tracker.track_objects(self.frame_id, frame, cnt, hier, wall, rect)
 
                     if self.tracked:
-                        # IDEA: NEW OFFLINE PROCESSING FEATURES
+                        # push the FrameObjekts in self.tracked to MQ for offline processing
+                        rmq = RabbitMQProducer()
+                        [rmq.send_frameobjekt(o) for o in self.tracked.values()]
+
+                        # OFFLINE PROCESSING FEATURES
                         # event list --> push events, labels and image refs to elastic
                         # vehicle id: available in a model?
                         # license plate reader: is this available in a model?
