@@ -6,8 +6,10 @@
 
 import pika
 import json
-from RabbitMQConsumer import ObjektEncoder, dict_to_frameobjekt
-
+import numpy as np
+from datetime import datetime
+from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
+from src.cam.Showxating.lib.FrameObjektEncoder import ObjektEncoder
 import logging
 
 # Configure logging
@@ -26,6 +28,34 @@ class Consumer:
         """Callback function for processing messages."""
         try:
             data = json.loads(body)
+
+            def dict_to_frameobjekt(data):
+                """Convert dictionary back to FrameObjekt."""
+                frame_obj = FrameObjekt.create(data['f_id'])
+                frame_obj.timestamp = datetime.fromisoformat(data['timestamp'])
+                frame_obj.tag = data['tag']
+
+                # frame_obj.contours = np.array(data['contours']) if data['contours'] is not None else None
+                # frame_obj.hierarchy = np.array(data['hierarchy']) if data['hierarchy'] is not None else None
+                # frame_obj.prev_tag = data['prev_tag']
+                # frame_obj.contour_id = data['contour_id']
+                frame_obj.curr_dist = data['curr_dist']
+                # frame_obj.distances = np.array(data['distances'])
+                frame_obj.fd = data['fd']
+                frame_obj.fd_mean = data['fd_mean']
+                # frame_obj.delta_range = data['delta_range']
+                frame_obj.hist_delta = data['hist_delta']
+                # frame_obj.f_hist = data['f_hist']
+                frame_obj.w_hist = data['w_hist']
+                frame_obj.rect = tuple(data['rect']) if data['rect'] else None
+                frame_obj.avg_loc = np.array(data['avg_loc'])
+                frame_obj.dist_mean = data['dist_mean']
+                # frame_obj.wall = np.array(data['wall']) if data['wall'] is not None else None
+                frame_obj.close = data['close']
+                frame_obj.inside_rect = data['inside_rect']
+                frame_obj.hist_pass = data['hist_pass']
+                frame_obj.wall_pass = data['wall_pass']
+                return frame_obj
 
             frame_obj = dict_to_frameobjekt(data)
 
