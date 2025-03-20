@@ -1,7 +1,7 @@
 import pika
 import json
 import logging
-from .__init__ import frameobjekt_to_dict
+from src.net.lib.net_utils import frameobjekt_to_dict
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -95,7 +95,6 @@ class RabbitMQAsyncProducer:
             logging.info(f"Sent frame {frame_obj.f_id} successfully")
         except Exception as e:
             logging.error(f"Failed to send frame {frame_obj.f_id}: {e}")
-
 
     def run(self):
             """Start the asynchronous producer."""

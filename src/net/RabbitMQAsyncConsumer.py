@@ -1,6 +1,6 @@
 import pika
 import json
-from .__init__ import dict_to_frameobjekt
+from src.net.lib.net_utils import dict_to_frameobjekt
 from src.cam.Showxating.lib.FrameObjektEncoder import ObjektEncoder
 import logging
 
