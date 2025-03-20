@@ -1,9 +1,5 @@
-from collections import defaultdict
-
 import cv2 as cv
-import numpy as np
 from skimage import exposure
-from sklearn.metrics.pairwise import euclidean_distances, paired_distances
 from src.cam.Showxating.plugin import ShowxatingPlugin
 
 import logging.handlers
@@ -17,9 +13,9 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
     def __init__(self):
         super().__init__()
         self.f_id = 0
-        self._kz = (3,3)
+        self._kz = (3, 3)
         self.library = ''
-        self.bins = 32
+        self.bins = 12                          # 12??
         self.rectangle = []
         self.compare_method = None
         self.norm_type = None
@@ -61,6 +57,7 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
                 if self.library == 'cv':
                     # images, channels, mask, histSize, ranges[, hist[, accumulate]]
                     # return cv.calcHist([f], [0], None, [self.bins], [0, 256], accumulate=False)
+                    # return cv.calcHist([f], [0, 1, 2], None, [self.bins, self.bins, self.bins], [0, 256, 0, 256, 0, 256])
                     return cv.calcHist([f], [0, 1, 2], None, [self.bins, self.bins, self.bins], [0, 256, 0, 256, 0, 256])
                 else:
                     # If channel_axis is not set, the histogram is computed on the flattened image.
