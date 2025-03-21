@@ -141,9 +141,10 @@ class ElasticSearchIntegration:
         except Exception as e:
             print(f'bulk import failed. {e}')
 
-        with open('./index_requests.json', 'w') as f:
+        # Save index requests for debugging
+        print(os.path.abspath('.'))
+        with open('/Users/scooper/PycharmProjects/MagPi/src/net/index_requests.json', 'w') as f:
             f.write("\n".join(self.index_requests))
 
-        with open('./signals_requests.json', 'w') as f:
-            print(os.path.abspath('.'))
+        with open('/Users/scooper/PycharmProjects/MagPi/src/net/signals_requests.json', 'w') as f:
             f.write("\n".join(self.signals_requests))
