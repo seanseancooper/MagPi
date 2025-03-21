@@ -6,37 +6,38 @@ import numpy as np
 def frameobjekt_to_dict(f_obj):
     """Convert FrameObjekt to a serializable dictionary."""
     return {
-        'f_id       ': f_obj.f_id,
-        'timestamp  ': f_obj.timestamp.isoformat(),
-        'tag        ': f_obj.tag,
+        'f_id'              : f_obj.f_id,
+        'created'           : f_obj.created.isoformat(),
+        'tag'               : f_obj.tag,
 
-        # 'contours': f_obj.contours.tolist() if f_obj.contours is not None else None,
-        # 'hierarchy': f_obj.hierarchy.tolist() if f_obj.hierarchy is not None else None,
-        # 'prev_tag': f_obj.prev_tag,
-        # 'contour_id': f_obj.contour_id,
-        'curr_dist  ': f_obj.curr_dist,
-        # 'distances': f_obj.distances.tolist(),
-        'fd         ': f_obj.fd,
-        'fd_mean    ': f_obj.fd_mean,
-        # 'delta_range': f_obj.delta_range,
-        'hist_delta ': f_obj.hist_delta,
-        # 'f_hist': f_obj.f_hist,
-        'w_hist     ': f_obj.w_hist.tolist() if f_obj.w_hist is not None else [[[]]],  # DBUG this needs to be an array, so this isn't the right way to process this
-        'rect       ': f_obj.rect,
-        'avg_loc    ': f_obj.avg_loc.tolist(),
-        'dist_mean  ': f_obj.dist_mean,
-        # 'wall': f_obj.wall.tolist() if f_obj.wall is not None else None,
-        'close      ': str(f_obj.close),
-        'inside_rect': str(f_obj.inside_rect),
-        'hist_pass  ': str(f_obj.hist_pass),
-        'wall_pass  ': str(f_obj.wall_pass)
+        # 'contours'        : f_obj.contours.tolist() if f_obj.contours is not None else None,
+        # 'hierarchy'       : f_obj.hierarchy.tolist() if f_obj.hierarchy is not None else None,
+        # 'prev_tag'        : f_obj.prev_tag,
+        # 'contour_id'      : f_obj.contour_id,
+        'curr_dist'         : f_obj.curr_dist,
+        # 'distances'       : f_obj.distances.tolist(),
+        'fd'                : f_obj.fd,
+        'fd_mean'           : f_obj.fd_mean,
+        # 'delta_range'     : f_obj.delta_range,
+        'hist_delta'        : f_obj.hist_delta,
+        # 'f_hist'          : f_obj.f_hist,
+        'w_hist'            : f_obj.w_hist.tolist() if f_obj.w_hist is not None else [],  # DBUG this needs to be an array, so this isn't the right way to process this
+        'rect'              : f_obj.rect,
+        'avg_loc'           : f_obj.avg_loc.tolist(),
+        'dist_mean'         : f_obj.dist_mean,
+        # 'wall'            : f_obj.wall.tolist() if f_obj.wall is not None else None,
+        'close'             : str(f_obj.close),
+        'inside_rect'       : str(f_obj.inside_rect),
+        'hist_pass'         : str(f_obj.hist_pass),
+        'wall_pass'         : str(f_obj.wall_pass)
     }
 
 
 def dict_to_frameobjekt(data):
     """Convert dictionary back to FrameObjekt."""
     frame_obj = FrameObjekt.create(data['f_id'])
-    frame_obj.timestamp = datetime.fromisoformat(data['timestamp'])
+    frame_obj.f_id = data['f_id']
+    frame_obj.created = datetime.fromisoformat(data['created'])
     frame_obj.tag = data['tag']
 
     # frame_obj.contours = np.array(data['contours']) if data['contours'] is not None else None
