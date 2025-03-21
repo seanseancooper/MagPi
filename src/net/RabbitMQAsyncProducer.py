@@ -26,17 +26,6 @@ class RabbitMQAsyncProducer:
     def on_queue_declared(self, _):
         """Callback when the queue is declared."""
         logging.info("Queue declared, ready to publish messages.")
-        # from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
-        # import numpy as np
-
-        # Example: Send a test FrameObjekt
-        # frame_obj = FrameObjekt.create(f_id=1)
-        # frame_obj.tag = FrameObjekt.create_tag(frame_obj.f_id)
-        # frame_obj.avg_loc = np.array([100, 200])
-        # frame_obj.fd = 12.5
-        #
-        # Publish message
-        # self.publish_message(frame_obj)
 
     def on_connection_open(self, connection):
         """Callback when the connection is opened."""
@@ -51,36 +40,6 @@ class RabbitMQAsyncProducer:
         logging.error(f"Connection error: {error_message}")
 
     def publish_message(self, frame_obj):
-
-        # def frameobjekt_to_dict(f_obj):
-        #     """Convert FrameObjekt to a serializable dictionary."""
-        #     return {
-        #         'f_id': f_obj.f_id,
-        #         'timestamp': f_obj.timestamp.isoformat(),
-        #         'tag': f_obj.tag,
-        #
-        #         # 'contours': f_obj.contours.tolist() if f_obj.contours is not None else None,
-        #         # 'hierarchy': f_obj.hierarchy.tolist() if f_obj.hierarchy is not None else None,
-        #         # 'prev_tag': f_obj.prev_tag,
-        #         # 'contour_id': f_obj.contour_id,
-        #         'curr_dist': f_obj.curr_dist,
-        #         # 'distances': f_obj.distances.tolist(),
-        #         'fd': f_obj.fd,
-        #         'fd_mean': f_obj.fd_mean,
-        #         # 'delta_range': f_obj.delta_range,
-        #         'hist_delta': f_obj.hist_delta,
-        #         # 'f_hist': f_obj.f_hist,
-        #         'w_hist': f_obj.w_hist.tolist() if f_obj.w_hist is not None else [[[]]],  # DBUG this needs to be an array, so this isn't the right way to process this
-        #         'rect': f_obj.rect,
-        #         'avg_loc': f_obj.avg_loc.tolist(),
-        #         'dist_mean': f_obj.dist_mean,
-        #         # 'wall': f_obj.wall.tolist() if f_obj.wall is not None else None,
-        #         'close': str(f_obj.close),
-        #         'inside_rect': str(f_obj.inside_rect),
-        #         'hist_pass': str(f_obj.hist_pass),
-        #         'wall_pass': str(f_obj.wall_pass)
-        #     }
-
         """Publish a message to the queue."""
         try:
             message = json.dumps(frameobjekt_to_dict(frame_obj))
