@@ -27,15 +27,15 @@
 			"PLUGIN": {
 				"debug": false,
 				"capture_sleep_time": 0.0,
-				"capture_output_show_stats": false,
+				"capture_output_show_stats": true,
 				"capture_output_log_stats": false,
 				"capture_majic_pixel": [10, 110],
 
 				"FORE_VIDEO_URL_" : "http://10.99.77.1/blackvue_live.cgi",
 				"AFT_VIDEO_URL_" : "http://10.99.77.1/blackvue_live.cgi?direction=R",
-				"FORE_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPiExternal/rsrc/cam/training_data/test_movies/cam.mp4",
-				"AFT_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPiExternal/rsrc/cam/training_data/test_movies/cam.mp4",
-				"FORWARD_TEST_URL" : 0,
+				"FORE_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPi/dev/cam/training_data/test_movies/cam.mp4",
+				"AFT_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPi/dev/cam/training_data/test_movies/cam.mp4",
+				"FORWARD_TEST_URL" : "",
 
 				"plugin_process_frames": true,
 				"krnl": 17,
@@ -60,7 +60,7 @@
 					"f_limit": 3,
 					"f_delta_pcnt": 1.0,
 					"l_delta_pcnt": 0.5,
-					"d_range": 90.00,
+					"d_range": 2.00,
 					"contour_limit": 2
 				},
 				"tokenbucket": {
