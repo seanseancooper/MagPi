@@ -1,4 +1,8 @@
+from datetime import datetime
+
 from elasticsearch import Elasticsearch
+from src.config import CONFIG_PATH, readConfig
+
 import os
 
 
@@ -11,19 +15,25 @@ class ElasticSearchIntegration:
         self.signals_requests = []
         self.worker_index_mapping = None
         self.signals_index_mapping = None
+        self.config = {}
 
     def init(self):
-        ELASTIC_PASSWORD = "L**_NQ*00Wbbpx24wWqN"
-        self.client = Elasticsearch(
-                "https://localhost:9200",
-                ca_certs="/Users/scooper/PycharmProjects/MagPi/src/map/lib/http_ca.crt",
-                basic_auth=("elastic", ELASTIC_PASSWORD)
-        )
+        readConfig('net.json', self.config)
+        try:
+            self.client = Elasticsearch(
+                    self.config['ELASTIC_HOST'],
+                    ca_certs=self.config['ELASTIC_CERT'],
+                    basic_auth=(self.config['ELASTIC_USERNAME'], self.config['ELASTIC_PASSWORD'])
+            )
+        except ConnectionRefusedError:
+            pass
 
         if self.client:
             print(f"Connected to Elasticsearch: {self.client.info()}")
+        else:
+            exit(0)
 
-        # Worker index mapping (Version 2)
+        # Worker index mapping (Version 3)
         self.worker_index_mapping = {
             "mappings": {
                 "properties": {
@@ -31,7 +41,7 @@ class ElasticSearchIntegration:
                     "SSID"        : {"type": "keyword"},
                     "BSSID"       : {"type": "keyword"},
                     "created"     : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
-                    "updated"     : {"type": "date"},
+                    "updated"     : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
                     "elapsed"     : {"type": "date"},
                     "Vendor"      : {"type": "keyword"},
                     "Channel"     : {"type": "integer"},
@@ -41,6 +51,7 @@ class ElasticSearchIntegration:
                     "Encryption"  : {"type": "boolean"},
                     "is_mute"     : {"type": "boolean"},
                     "tracked"     : {"type": "boolean"},
+                    # DO NOT INDEX SIGNAL CACHE HERE. UPDATE!
                     "signal_cache": {
                         "type"      : "nested",
                         "properties": {
@@ -69,42 +80,73 @@ class ElasticSearchIntegration:
             }
         }
 
-    def process(self, data):
-        # Create worker index
+    def process_workers(self, data):
+        # Create worker index (if needed)
         self.client.indices.create(index='workers', body=self.worker_index_mapping, ignore=400)
         self.index_requests.append(f"PUT /workers {self.worker_index_mapping}")
 
         for item in data:
             parser = WifiWorkerParser(item)
             worker_data = parser.get_worker_data()
-            signal_data = parser.get_signal_data()
 
             # Insert worker data
             worker_index = f"worker_{worker_data['id']}"
+
+            # transform created, updated representations to have a timezone
+            worker_created_time = datetime.strptime(worker_data['created'], self.config['DATETIME_FORMAT'])
+            worker_data['created'] = worker_created_time.astimezone().isoformat()
+
+            worker_updated_time = datetime.strptime(worker_data['updated'], self.config['DATETIME_FORMAT'])
+            worker_data['updated'] = worker_updated_time.astimezone().isoformat()
+
             worker_doc = {
                 **worker_data,
-                "signal_cache": [
-                    {
-                        "created"  : signal["created"],
-                        "id"       : signal["id"],
-                        "worker_id": signal["worker_id"],
-                        "location" : {"lat": signal["lat"], "lon": signal["lon"]},
-                        "sgnl"     : signal["sgnl"]
-                    } for signal in signal_data
-                ]
             }
 
-            # Index worker document
-            self.client.index(index=worker_index, id=worker_data['id'], document=worker_doc)
+            # Indexes worker document if needed. Otherwise UPDATE.
+            self.client.index(index=worker_index, id=worker_data['id'], document=worker_doc, ignore=400)
             self.index_requests.append(f"POST /workers/_doc/{worker_data['id']} {worker_doc}")
 
-            # Create signal index (if needed)
+            # Create signal index if needed
             signals_index = f"{worker_data['id']}_signals"
             self.client.indices.create(index=signals_index, body=self.signals_index_mapping, ignore=400)
             self.signals_requests.append(f"PUT /{signals_index} {self.signals_index_mapping}")
 
-            # Insert signal data
-            for signal in signal_data:
+    def process_signals(self, data):
+
+        for item in data:
+            parser = WifiWorkerParser(item)
+            worker_data = parser.get_worker_data()
+            signal_data = parser.get_signal_data()
+
+            # UPDATE worker data
+            worker_index = f"worker_{worker_data['id']}"
+            worker_doc = {
+                **worker_data,
+                # "signal_cache": [
+                #     {
+                #         "created"  : signal["created"],
+                #         "id"       : signal["id"],
+                #         "worker_id": signal["worker_id"],
+                #         "location" : {"lat": signal["lat"], "lon": signal["lon"]},
+                #         "sgnl"     : signal["sgnl"]
+                #     } for signal in signal_data
+                # ]
+            }
+
+            # UPDATE; I don't need the whole doc, just the updated and elapsed time.
+            self.client.update(index=worker_index, id=worker_data['id'], doc=worker_doc, ignore=400)
+
+            # Create signal index if needed
+            signals_index = f"{worker_data['id']}_signals"
+
+            # Insert the LAST ITEM from signal data, if it's new -- it's added
+            for signal in signal_data[:-1]:
+
+                # transform created representation to have a timezone
+                signal_created_time = datetime.strptime(signal['created'], self.config['DATETIME_FORMAT'])
+                signal['created'] = signal_created_time.astimezone().isoformat()
+
                 signal_doc = {
                     "created"  : signal["created"],
                     "id"       : signal["id"],
@@ -112,26 +154,27 @@ class ElasticSearchIntegration:
                     "location" : {"lat": signal["lat"], "lon": signal["lon"]},
                     "sgnl"     : signal["sgnl"]
                 }
-                self.client.index(index=signals_index, id=signal["id"], document=signal_doc)
+                self.client.index(index=signals_index, id=signal["id"], document=signal_doc, ignore=400)
                 self.signals_requests.append(f"POST /{signals_index}/_doc/{signal['id']} {signal_doc}")
 
     def push(self, data):
         try:
-            self.process(data)
-            print("Data imported successfully.")
+            self.process_workers(data)
+            self.process_signals(data)
+            print(f"Data pushed successfully.")
         except Exception as e:
-            print(f"Bulk import failed: {e}")
+            print(f"Data push failed: {e}")
 
         # Save index requests for debugging
-        print(os.path.abspath('.'))
-        with open('/Users/scooper/PycharmProjects/MagPi/src/net/index_requests.json', 'w') as f:
+        print(f"Exports located @ {self.config['OUTFILE_PATH']}")
+        with open(os.path.abspath('.') + "/" + self.config['OUT_FILE'], 'x') as f:
             f.write("\n".join(self.index_requests))
 
-        with open('/Users/scooper/PycharmProjects/MagPi/src/net/signals_requests.json', 'w') as f:
-            f.write("\n".join(self.signals_requests))
+        # with open('/Users/scooper/PycharmProjects/MagPi/src/net/signals_requests.json', 'w') as f:
+        #     f.write("\n".join(self.signals_requests))
 
 
-# Sample parser (mockup)
+
 class WifiWorkerParser:
     def __init__(self, data):
         self.data = data

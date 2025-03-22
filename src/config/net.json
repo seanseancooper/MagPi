@@ -1,0 +1,58 @@
+{
+	"SCANNER": [
+		{
+			"DEBUG": false
+		},
+		{
+			"SERVER_NAME": "localhost:5006"
+		},
+		{
+			"TEMPLATE_FOLDER": "templates"
+		},
+		{
+			"STATIC_FOLDER": "static"
+		},
+		{
+			"ELASTIC_HOST": "https://localhost:9200"
+		},
+		{
+			"ELASTIC_CERT": "/Users/scooper/PycharmProjects/MagPi/src/map/lib/http_ca.crt"
+		},
+		{
+			"ELASTIC_USERNAME": "elastic"
+		},
+		{
+			"ELASTIC_PASSWORD": "L**_NQ*00Wbbpx24wWqN"
+		},
+		{
+			"SCAN_TIMEOUT": 0.5
+		},
+		{
+			"VIEW_TIMEOUT": 30
+		},
+		{
+			"GPS_ENDPOINT": "http://gps.localhost:5004/position"
+		},
+		{
+			"TOKENS": 2
+		},
+		{
+			"DATE_FORMAT": "%Y-%m-%d"
+		},
+		{
+			"TIME_FORMAT": "%H:%M:%S"
+		},
+		{
+			"TIMER_FORMAT": "%H:%M:%S"
+		},
+		{
+			"DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S"
+		},
+		{
+			"OUTFILE_PATH": "../../_out"
+		},
+		{
+			"OUT_FILE": "index_requests.json"
+		}
+	]
+}
