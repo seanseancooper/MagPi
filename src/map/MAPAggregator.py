@@ -53,7 +53,7 @@ class MAPAggregator(threading.Thread):
             readConfig(os.path.basename(module_config), self.module_configs[mod])
 
         self.elastic = ElasticSearchIntegration()
-        self.elastic.init()
+        self.elastic.configure()
 
     def register_modules(self):
         """ discover 'live' module REST contexts """
@@ -78,6 +78,7 @@ class MAPAggregator(threading.Thread):
                 self.module_data[mod] = data.json()
                 if self.elastic:
                     self.elastic.push(self.module_data[mod])
+                    # self.elastic.pull(mod)
         except Exception as e:
             map_logger.warning(f'Data Aggregator Warning [{mod}]! {e}')
 
