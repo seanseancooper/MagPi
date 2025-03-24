@@ -122,6 +122,9 @@ class WifiWorker:
         # SIGNAL: MUTE/UNMUTE
         return mute(self)
 
+    def signal_vec(self):
+        yield [pt.getSgnl() for pt in self.scanner.signal_cache[self.bssid]][self.cache_max:]
+
     def auto_unmute(self):
         """ polled function to UNMUTE signals AUTOMATICALLY after the MUTE_TIME. """
         if self.config['MUTE_TIME'] > 0:
