@@ -1,4 +1,5 @@
 import os
+import json
 
 from src.net.lib.WifiWorkerParser import WifiWorkerParser
 
@@ -13,7 +14,7 @@ class ElasticSearchIntegration:
         self.worker_index_mapping = None
         self.signals_index_mapping = None
 
-    def init(self):
+    def configure(self):
 
         from elasticsearch import Elasticsearch
         # from getpass import getpass
@@ -148,3 +149,13 @@ class ElasticSearchIntegration:
 
         with open('/Users/scooper/PycharmProjects/MagPi/src/net/signals_requests.json', 'w') as f:
             f.write("\n".join(self.signals_requests))
+
+
+if __name__ == '__main__':
+
+    e = ElasticSearchIntegration()
+    e.configure()
+
+    with open('sample_dataset.json', 'r') as f:
+        data = json.load(f)
+        e.push(data)
