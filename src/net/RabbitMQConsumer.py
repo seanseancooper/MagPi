@@ -7,7 +7,7 @@
 import pika
 import json
 from src.net.lib.net_utils import dict_to_frameobjekt
-from src.cam.Showxating.lib.FrameObjektEncoder import ObjektEncoder
+from src.cam.Showxating.lib.FrameObjektEncoder import FrameObjektEncoder
 import logging
 
 # Configure logging
@@ -31,7 +31,7 @@ class RabbitMQConsumer:
             frame_obj = dict_to_frameobjekt(data)
 
             # Start encoder thread to process frame
-            encoder = ObjektEncoder(frame_obj)
+            encoder = FrameObjektEncoder(frame_obj)
             encoder.start()
 
             # Acknowledge message after processing starts
