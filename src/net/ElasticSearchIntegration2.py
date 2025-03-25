@@ -112,14 +112,8 @@ class ElasticSearchIntegration:
         TimeDelta = timedelta(hours=6)
         TZObject = timezone(TimeDelta, name="MST")
 
-        # delta and TZ
+        # modify delta and TZ
         sgnl["created"] = sgnl_created_time.astimezone(TZObject).isoformat()
-
-        # no delta
-        # sgnl["created"] = sgnl_created_time.astimezone().isoformat()
-
-        # no timezone
-        # sgnl["created"] = sgnl_created_time.isoformat()
 
         return {
             "created"  : sgnl["created"],
