@@ -9,7 +9,7 @@ class FrameObjekt:
 
         # metadata
         self.f_id = f_id                                                # frame id when created.
-        self.timestamp = datetime.now()                                 # not used yet
+        self.created = datetime.now()                                   # not used yet
         self.tag = None                                                 # [deprecate this in favor of using the f_id, portable] string unique identifier for this frame
         self.isNew = True                                               # boolean is the id a NEW id or derived from f[-1]
         self.skip = False                                               # [is this logical to have, useful or relevant?] should this frame be skipped in tagging f[+1]
@@ -60,6 +60,8 @@ class FrameObjekt:
                 'avg_loc'       : str(self.avg_loc),  # self.avg_loc.tolist()
                 'dist_mean'     : self.dist_mean,
                 'rect'          : str(self.rect),
+                'lat'           : self.lat,
+                'lon'           : self.lon,
                 'close'         : self.close,
                 'inside_rect'   : self.inside_rect is True,
                 'hist_pass'     : self.hist_pass,
