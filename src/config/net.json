@@ -42,7 +42,16 @@
 			                    "Encryption"  : {"type": "boolean"},
 			                    "is_mute"     : {"type": "boolean"},
 			                    "tracked"     : {"type": "boolean"},
-
+								"signal_cache": {
+									"type"      : "nested",
+									"properties": {
+										"created"  : {"type": "date"},
+										"id"       : {"type": "keyword"},
+										"worker_id": {"type": "keyword"},
+										"location" : {"type": "geo_point"},
+										"sgnl"     : {"type": "integer"}
+									}
+								},
 			                    "tests"       : {"type": "keyword"}
 			                }
 			            }
