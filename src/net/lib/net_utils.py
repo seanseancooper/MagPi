@@ -26,6 +26,8 @@ def frameobjekt_to_dict(f_obj):
         'avg_loc'           : f_obj.avg_loc.tolist(),
         'dist_mean'         : f_obj.dist_mean,
         # 'wall'            : f_obj.wall.tolist() if f_obj.wall is not None else None,
+        'lat'               : f_obj.lat,
+        'lon'               : f_obj.lon,
         'close'             : str(f_obj.close),
         'inside_rect'       : str(f_obj.inside_rect),
         'hist_pass'         : str(f_obj.hist_pass),
@@ -56,6 +58,8 @@ def dict_to_frameobjekt(data):
     frame_obj.avg_loc = np.array(data['avg_loc'])
     frame_obj.dist_mean = data['dist_mean']
     # frame_obj.wall = np.array(data['wall']) if data['wall'] is not None else None
+    frame_obj.lat = data['lat']
+    frame_obj.lon = data['lon']
     frame_obj.close = data['close']
     frame_obj.inside_rect = data['inside_rect']
     frame_obj.hist_pass = data['hist_pass']
