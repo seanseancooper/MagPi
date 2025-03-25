@@ -51,6 +51,8 @@ class ElasticSearchIntegration:
             # only updates:
             "updated": worker_data['updated'],
             "elapsed": worker_data['elapsed'],
+            "is_mute": worker_data['is_mute'],
+            "tracked": worker_data['tracked'],
             "signal_cache": self.get_doc(signal_data[-1])
         }
 
