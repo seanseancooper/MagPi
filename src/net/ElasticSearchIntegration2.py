@@ -1,23 +1,25 @@
-from datetime import datetime
-
-from elasticsearch import Elasticsearch
-from src.config import CONFIG_PATH, readConfig
-
 import os
+import json
+from datetime import datetime, timedelta, timezone
+from elasticsearch import Elasticsearch
+from src.config import readConfig
 
 
 class ElasticSearchIntegration:
 
     def __init__(self):
+
         self.client = None
-        self.operations = []
         self.index_requests = []
         self.signals_requests = []
         self.worker_index_mapping = None
         self.signals_index_mapping = None
+        self._seen = []
         self.config = {}
 
-    def init(self):
+        # get the current TZ and set it in this class.
+
+    def configure(self):
         readConfig('net.json', self.config)
         try:
             self.client = Elasticsearch(
@@ -28,89 +30,104 @@ class ElasticSearchIntegration:
         except ConnectionRefusedError:
             pass
 
+        self.worker_index_mapping = self.config['WORKER_INDEX_MAPPING']
+        self.signals_index_mapping = self.config['SIGNALS_INDEX_MAPPING']
+
         if self.client:
             print(f"Connected to Elasticsearch: {self.client.info()}")
+
+            # Create workers index
+            self.client.indices.create(index='workers', body=self.worker_index_mapping, ignore=400)
+            self.index_requests.append(f"PUT /workers {self.worker_index_mapping}")
+
         else:
             exit(0)
 
-        # Worker index mapping (Version 3)
-        self.worker_index_mapping = {
-            "mappings": {
-                "properties": {
-                    "id"          : {"type": "keyword"},
-                    "SSID"        : {"type": "keyword"},
-                    "BSSID"       : {"type": "keyword"},
-                    "created"     : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
-                    "updated"     : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
-                    "elapsed"     : {"type": "date"},
-                    "Vendor"      : {"type": "keyword"},
-                    "Channel"     : {"type": "integer"},
-                    "Frequency"   : {"type": "integer"},
-                    "Signal"      : {"type": "integer"},
-                    "Quality"     : {"type": "integer"},
-                    "Encryption"  : {"type": "boolean"},
-                    "is_mute"     : {"type": "boolean"},
-                    "tracked"     : {"type": "boolean"},
-                    # DO NOT INDEX SIGNAL CACHE HERE. UPDATE!
-                    "signal_cache": {
-                        "type"      : "nested",
-                        "properties": {
-                            "created"  : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
-                            "id"       : {"type": "keyword"},
-                            "worker_id": {"type": "keyword"},
-                            "location" : {"type": "geo_point"},
-                            "sgnl"     : {"type": "integer"}
-                        }
-                    },
-                    "tests"       : {"type": "keyword"}
-                }
-            }
+
+    def update_worker(self, worker_data, signal_data):
+
+        worker_index = f"worker_{worker_data['id']}"
+
+        # transform updated representation to have a timezone
+        worker_updated_time = datetime.strptime(worker_data['updated'], self.config['DATETIME_FORMAT'])
+        worker_data['updated'] = worker_updated_time.astimezone().isoformat()
+
+        worker_doc = {
+            # only updates:
+            "updated": worker_data['updated'],
+            "elapsed": worker_data['elapsed'],
+            "signal_cache": self.get_doc(signal_data[-1])
         }
 
-        # Signal cache index mapping (Version 2)
-        self.signals_index_mapping = {
-            "mappings": {
-                "properties": {
-                    "created"  : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
-                    "id"       : {"type": "keyword"},
-                    "worker_id": {"type": "keyword"},
-                    "location" : {"type": "geo_point"},
-                    "sgnl"     : {"type": "integer"}
-                }
-            }
-        }
+        self.client.update(index=worker_index, id=worker_data['id'], doc=worker_doc, ignore=400)
 
     def process_workers(self, data):
-        # Create worker index (if needed)
-        self.client.indices.create(index='workers', body=self.worker_index_mapping, ignore=400)
-        self.index_requests.append(f"PUT /workers {self.worker_index_mapping}")
 
         for item in data:
             parser = WifiWorkerParser(item)
             worker_data = parser.get_worker_data()
+            signal_data = parser.get_signal_data()
 
-            # Insert worker data
-            worker_index = f"worker_{worker_data['id']}"
+            if worker_data['id'] in self._seen:
+                self.update_worker(worker_data, signal_data)
+            else:
+                # Insert worker data
+                worker_id = worker_data['id']
+                worker_index = f"worker_{worker_id}"
 
-            # transform created, updated representations to have a timezone
-            worker_created_time = datetime.strptime(worker_data['created'], self.config['DATETIME_FORMAT'])
-            worker_data['created'] = worker_created_time.astimezone().isoformat()
+                # TimeDelta = timedelta(hours=6)
+                # TZObject = timezone(TimeDelta, name="MST")
 
-            worker_updated_time = datetime.strptime(worker_data['updated'], self.config['DATETIME_FORMAT'])
-            worker_data['updated'] = worker_updated_time.astimezone().isoformat()
+                # transform created, updated representations to have a timezone
+                worker_created_time = datetime.strptime(worker_data['created'], self.config['DATETIME_FORMAT'])
+                worker_data['created'] = worker_created_time.astimezone().isoformat()
 
-            worker_doc = {
-                **worker_data,
-            }
+                worker_updated_time = datetime.strptime(worker_data['updated'], self.config['DATETIME_FORMAT'])
+                worker_data['updated'] = worker_updated_time.astimezone().isoformat()
 
-            # Indexes worker document if needed. Otherwise UPDATE.
-            self.client.index(index=worker_index, id=worker_data['id'], document=worker_doc, ignore=400)
-            self.index_requests.append(f"POST /workers/_doc/{worker_data['id']} {worker_doc}")
+                worker_doc = {
+                    **worker_data,
+                    # "signal_cache": [self.get_doc(signal) for signal in signal_data]
+                    # "signal_cache": [signal for signal in signal_data]
+                }
 
-            # Create signal index if needed
-            signals_index = f"{worker_data['id']}_signals"
-            self.client.indices.create(index=signals_index, body=self.signals_index_mapping, ignore=400)
-            self.signals_requests.append(f"PUT /{signals_index} {self.signals_index_mapping}")
+                # not this?
+                # self.index_requests.append(f"PUT /{worker_index} {self.worker_index_mapping}")
+
+                # Indexes worker document if needed, otherwise UPDATE the record.
+                self.client.index(index=worker_index, id=worker_id, document=worker_doc, ignore=400)
+                # self.index_requests.append(f"POST /workers/_doc/{worker_data['id']} {worker_doc}")  # used by file, but wrong
+                # self.index_requests.append(f"POST /{worker_index}/_doc/{worker_data['id']} {worker_doc}")  # new
+
+                # Create signal index
+                signals_index = f"{worker_data['id']}_signals"
+                self.client.indices.create(index=signals_index, body=self.signals_index_mapping)
+                # self.signals_requests.append(f"PUT /{signals_index} {self.signals_index_mapping}")
+
+    @staticmethod
+    def get_doc(sgnl):
+
+        # transform created representations to have a timezone
+        sgnl_created_time = datetime.strptime(sgnl["created"], "%Y-%m-%d %H:%M:%S")
+        TimeDelta = timedelta(hours=6)
+        TZObject = timezone(TimeDelta, name="MST")
+
+        # delta and TZ
+        sgnl["created"] = sgnl_created_time.astimezone(TZObject).isoformat()
+
+        # no delta
+        # sgnl["created"] = sgnl_created_time.astimezone().isoformat()
+
+        # no timezone
+        # sgnl["created"] = sgnl_created_time.isoformat()
+
+        return {
+            "created"  : sgnl["created"],
+            "id"       : sgnl["id"],
+            "worker_id": sgnl["worker_id"],
+            "location" : {"lat": sgnl["lat"], "lon": sgnl["lon"]},
+            "sgnl"     : sgnl["sgnl"]
+        }
 
     def process_signals(self, data):
 
@@ -119,43 +136,22 @@ class ElasticSearchIntegration:
             worker_data = parser.get_worker_data()
             signal_data = parser.get_signal_data()
 
-            # UPDATE worker data
-            worker_index = f"worker_{worker_data['id']}"
-            worker_doc = {
-                **worker_data,
-                # "signal_cache": [
-                #     {
-                #         "created"  : signal["created"],
-                #         "id"       : signal["id"],
-                #         "worker_id": signal["worker_id"],
-                #         "location" : {"lat": signal["lat"], "lon": signal["lon"]},
-                #         "sgnl"     : signal["sgnl"]
-                #     } for signal in signal_data
-                # ]
-            }
-
-            # UPDATE; I don't need the whole doc, just the updated and elapsed time.
-            self.client.update(index=worker_index, id=worker_data['id'], doc=worker_doc, ignore=400)
-
             # Create signal index if needed
             signals_index = f"{worker_data['id']}_signals"
 
-            # Insert the LAST ITEM from signal data, if it's new -- it's added
-            for signal in signal_data[:-1]:
+            def _index(idx, sgnl):
+                """ index, signalpoint """
 
-                # transform created representation to have a timezone
-                signal_created_time = datetime.strptime(signal['created'], self.config['DATETIME_FORMAT'])
-                signal['created'] = signal_created_time.astimezone().isoformat()
+                signal_doc = self.get_doc(sgnl)
+                self.client.index(index=idx, id=sgnl["id"], document=signal_doc)
+                self.signals_requests.append(f"POST /{idx}/_doc/{sgnl['id']} {signal_doc}")
 
-                signal_doc = {
-                    "created"  : signal["created"],
-                    "id"       : signal["id"],
-                    "worker_id": signal["worker_id"],
-                    "location" : {"lat": signal["lat"], "lon": signal["lon"]},
-                    "sgnl"     : signal["sgnl"]
-                }
-                self.client.index(index=signals_index, id=signal["id"], document=signal_doc, ignore=400)
-                self.signals_requests.append(f"POST /{signals_index}/_doc/{signal['id']} {signal_doc}")
+            if worker_data['id'] in self._seen:
+                _index(signals_index, signal_data[-1])
+            else:
+                for signal in signal_data:
+                    _index(signals_index, signal)
+                self._seen.append(worker_data['id'])
 
     def push(self, data):
         try:
@@ -166,16 +162,22 @@ class ElasticSearchIntegration:
             print(f"Data push failed: {e}")
 
         # Save index requests for debugging
-        print(f"Exports located @ {self.config['OUTFILE_PATH']}")
-        with open(os.path.abspath('.') + "/" + self.config['OUT_FILE'], 'x') as f:
-            f.write("\n".join(self.index_requests))
+        # print(f"Export located @ {self.config['OUTFILE_PATH']}")
+        # with open(os.path.abspath(self.config['OUTFILE_PATH']) + "/" + self.config['OUT_FILE'], 'w') as f:
+        #     f.write("\n".join(self.index_requests))
 
         # with open('/Users/scooper/PycharmProjects/MagPi/src/net/signals_requests.json', 'w') as f:
         #     f.write("\n".join(self.signals_requests))
 
+    def pull(self, mod='wifi'):
+        # get current list of elastic worker_id indexes from elastic (less 201s)
+        # get boolean signal id: is item in list?
+        # run queries and get data.
+        pass
 
 
 class WifiWorkerParser:
+
     def __init__(self, data):
         self.data = data
 
@@ -211,3 +213,12 @@ class WifiWorkerParser:
             for signal in self.data.get("signal_cache", [])
         ]
 
+
+if __name__ == '__main__':
+
+    e = ElasticSearchIntegration()
+    e.configure()
+
+    with open('sample_dataset.json', 'r') as f:
+        data = json.load(f)
+        e.push(data)
