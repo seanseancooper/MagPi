@@ -6,7 +6,7 @@ import time
 from datetime import datetime, timedelta
 import requests
 
-from src.net.ElasticSearchIntegration2 import ElasticSearchIntegration
+from src.net.ElasticSearchIntegration import ElasticSearchIntegration
 
 from src.config import CONFIG_PATH, readConfig
 import logging
