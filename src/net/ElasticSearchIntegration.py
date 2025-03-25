@@ -36,7 +36,7 @@ class ElasticSearchIntegration:
             # Create workers index, ignore warning that it exists.
             self.client.indices.create(index='workers', body=self.worker_index_mapping, ignore=400)
         else:
-            print(f"Failed too connect Elasticsearch. It is online?")
+            print(f"Failed to connect Elasticsearch. It is online?")
             exit(0)
 
     def update_worker(self, worker_data, signal_data):
@@ -73,9 +73,6 @@ class ElasticSearchIntegration:
                 worker_id = worker_data['id']
                 worker_index = f"worker_{worker_id}"
 
-                # TimeDelta = timedelta(hours=6)
-                # TZObject = timezone(TimeDelta, name="MST")
-
                 # transform created, updated representations to have a timezone
                 worker_created_time = datetime.strptime(worker_data['created'], self.config['DATETIME_FORMAT'])
                 worker_data['created'] = worker_created_time.astimezone().isoformat()
@@ -104,8 +101,11 @@ class ElasticSearchIntegration:
 
         # transform created representations to have a timezone
         sgnl_created_time = datetime.strptime(sgnl["created"], "%Y-%m-%d %H:%M:%S")
+
+        # not in here, make configurable/automatic.
         TimeDelta = timedelta(hours=6)
         TZObject = timezone(TimeDelta, name="MST")
+
         sgnl["created"] = sgnl_created_time.astimezone(TZObject).isoformat()
 
         return {
@@ -135,11 +135,12 @@ class ElasticSearchIntegration:
 
             if worker_data['id'] in self._seen:
                 _index(signals_index, signal_data[-1])
+                print(f"updating signals for: {worker_data['SSID']} [{worker_data['id']}]")
             else:
                 for signal in signal_data:
                     _index(signals_index, signal)
                 self._seen.append(worker_data['id'])
-                print(f"updating signals for: {worker_data['SSID']} [{worker_data['id']}]")
+                print(f"ingesting signals for: {worker_data['SSID']} [{worker_data['id']}]")
 
     def push(self, data):
         try:
