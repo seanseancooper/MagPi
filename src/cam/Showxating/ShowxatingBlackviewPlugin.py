@@ -1,12 +1,13 @@
-import threading
-import time
-
 import cv2 as cv
 import numpy as np
+
 import json
 
-from src.cam.Showxating.lib.FrameObjektEncoder import ObjektEncoder
+from src.net.RabbitMQAsyncProducer import RabbitMQAsyncProducer
 from src.net.RabbitMQProducer import RabbitMQProducer
+from pika.exceptions import AMQPConnectionError
+
+
 from src.cam.Showxating.plugin import ShowxatingPlugin
 from src.cam.Showxating.lib.ImageWriter import ImageWriter
 from src.cam.Showxating.lib.FrameObjektTracker import FrameObjektTracker
@@ -116,6 +117,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self._result_T = None  # medipipe result
 
         self.tracker = FrameObjektTracker()
+        self.rmq = None
+
         self.tracked = {}
 
     def get(self):
@@ -147,6 +150,12 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                                     )
         self.krnl = self.plugin_config.get('krnl', 10.0)
         self.threshold = self.plugin_config.get('threshold', 10.0)
+
+        try:
+            self.rmq = RabbitMQProducer()
+            # self.rmq = mq.create()
+        except AMQPConnectionError:
+            pass
 
     def sets_hold_threshold(self, value):
         if value is True:
@@ -293,14 +302,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                     self.tracked = self.tracker.track_objects(self.frame_id, frame, cnt, hier, wall, rect)
 
                     if self.tracked:
-                        # push the FrameObjekts in self.tracked to MQ for offline processing
-                        rmq = RabbitMQProducer()
-                        [rmq.send_frameobjekt(o) for o in self.tracked.values()]
-
-                        # OFFLINE PROCESSING FEATURES
-                        # event list --> push events, labels and image refs to elastic
-                        # vehicle id: available in a model?
-                        # license plate reader: is this available in a model?
+                        if self.rmq:  # filter this self.tracked.values() if o.f_id > 0, use rmq as flag.
+                            [self.rmq.publish_message(o) for o in self.tracked.values() if o.f_id > 0]
 
                         print_tracked(self, frame, rect)
                         print_symbology(self, frame, rect)
@@ -310,7 +313,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                         self.print_frame(frame, self.frame_id)  # <-- memorize moving things
 
             self.trap(frame, False)
-            # self.post_mediapipe(frame)
+            # self.post_mediapipe(frame)  # do this with mq....
 
             if self.had_motion != self.has_motion is True:
                 if self.throttle.handle('motion'):
