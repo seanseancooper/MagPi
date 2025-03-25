@@ -86,6 +86,9 @@
 		},
 		{
 			"MULTIBUTTON_ALL": [true, true, "OFF"]
+		},
+		{
+			"GPS_ENDPOINT": "http://gps.localhost:5004/position"
 		}
 	]
 }
