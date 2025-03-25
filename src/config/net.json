@@ -26,49 +26,49 @@
 		},
 		{
 			"WORKER_INDEX_MAPPING": {
-			            "mappings": {
-			                "properties": {
-			                    "id"          : {"type": "keyword"},
-			                    "SSID"        : {"type": "keyword"},
-			                    "BSSID"       : {"type": "keyword"},
-			                    "created"     : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
-			                    "updated"     : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
-			                    "elapsed"     : {"type": "date"},
-			                    "Vendor"      : {"type": "keyword"},
-			                    "Channel"     : {"type": "integer"},
-			                    "Frequency"   : {"type": "integer"},
-			                    "Signal"      : {"type": "integer"},
-			                    "Quality"     : {"type": "integer"},
-			                    "Encryption"  : {"type": "boolean"},
-			                    "is_mute"     : {"type": "boolean"},
-			                    "tracked"     : {"type": "boolean"},
-								"signal_cache": {
-									"type"      : "nested",
-									"properties": {
-										"created"  : {"type": "date"},
-										"id"       : {"type": "keyword"},
-										"worker_id": {"type": "keyword"},
-										"location" : {"type": "geo_point"},
-										"sgnl"     : {"type": "integer"}
-									}
-								},
-			                    "tests"       : {"type": "keyword"}
-			                }
-			            }
-			        }
+				"mappings": {
+					"properties": {
+						"id"          : {"type": "keyword"},
+						"SSID"        : {"type": "keyword"},
+						"BSSID"       : {"type": "keyword"},
+						"created"     : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
+						"updated"     : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
+						"elapsed"     : {"type": "date"},
+						"Vendor"      : {"type": "keyword"},
+						"Channel"     : {"type": "integer"},
+						"Frequency"   : {"type": "integer"},
+						"Signal"      : {"type": "integer"},
+						"Quality"     : {"type": "integer"},
+						"Encryption"  : {"type": "boolean"},
+						"is_mute"     : {"type": "boolean"},
+						"tracked"     : {"type": "boolean"},
+						"signal_cache": {
+							"type"      : "nested",
+							"properties": {
+								"created"  : {"type": "date"},
+								"id"       : {"type": "keyword"},
+								"worker_id": {"type": "keyword"},
+								"location" : {"type": "geo_point"},
+								"sgnl"     : {"type": "integer"}
+							}
+						},
+						"tests"       : {"type": "keyword"}
+					}
+				}
+			}
 		},
 		{
 			"SIGNALS_INDEX_MAPPING": {
-			            "mappings": {
-			                "properties": {
-			                    "created"  : {"type": "date"},
-			                    "id"       : {"type": "keyword"},
-			                    "worker_id": {"type": "keyword"},
-			                    "location" : {"type": "geo_point"},
-			                    "sgnl"     : {"type": "integer"}
-			                }
-			            }
-			        }
+				"mappings": {
+					"properties": {
+						"created"  : {"type": "date"},
+						"id"       : {"type": "keyword"},
+						"worker_id": {"type": "keyword"},
+						"location" : {"type": "geo_point"},
+						"sgnl"     : {"type": "integer"}
+					}
+				}
+			}
 		},
 		{
 			"SCAN_TIMEOUT": 0.5
