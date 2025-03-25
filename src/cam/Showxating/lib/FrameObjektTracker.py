@@ -9,6 +9,7 @@ from sklearn.metrics.pairwise import paired_distances, cosine_similarity
 
 from src.cam.Showxating.lib.utils import is_in_range, is_inside, getAggregatedRect, getRectsFromContours
 from src.config import readConfig
+from src.lib.utils import get_location
 
 import logging
 cam_logger = logging.getLogger('cam_logger')
@@ -41,6 +42,9 @@ class FrameObjektTracker:
 
         self.fd_mean = float()              # mean of ALL differences between ALL SEEN frames -- no f_limit.
         self.d_range = 90.00                # offset +/- allowed difference; frm_delta_pcnt * fd_mean
+
+        self.latitude = 0.0                 # current latitude of objekts in *this* frame
+        self.longitude = 0.0                # current longitude of objekts in *this* frame
 
     def get(self):
         return {
@@ -150,6 +154,8 @@ class FrameObjektTracker:
               f"\to.fd_in_range: {o.fd}"
               f"\to.inside_rect: {o.inside_rect}"
 
+              f"\to.lat: {o.lat}"
+              f"\to.lon: {o.lon}"
               f"\to.close: {o.close}"
               f"\to.hist_pass: {o.hist_pass}"
               f"\to.wall_pass: {o.wall_pass}"
@@ -166,6 +172,9 @@ class FrameObjektTracker:
         o.rect = rectangle
         o.wall = wall
 
+        get_location(self)
+        o.lat = self.latitude
+        o.lon = self.longitude
         # oN.contour_id = self.contour_id
         o.avg_loc = self._ml
         return o
@@ -289,12 +298,20 @@ class FrameObjektTracker:
     def get_histogram_delta(self, o,  frame, wall, rectangle):
         from src.cam.Showxating.ShowxatingHistogramPlugin import ShowxatingHistogramPlugin
 
+        ''' .
+            in the FrameObjektEncoder there is commented code to do a histogram, and it worked.
+            I think it is better to do the histogram there, in an offline process, but 
+            this module, 'FrameObjektTracker' -- uses histograms!
+            
+            Doing it this way for now, but will consider moving this....
+        '''
+
         hist_plugin = ShowxatingHistogramPlugin()
         hist_plugin.plugin_name = 'histogramPlugin'
         hist_plugin.get_config()
         hist_plugin.f_id = self.f_id
-        hist_plugin._kz = (3, 3)  # self.kernel_sz
-        hist_plugin.library = 'cv'  # TODO: add to configurable
+        hist_plugin._kz = (3, 3)                            # self.kernel_sz
+        hist_plugin.library = 'cv'                          # TODO: add to configurable
         hist_plugin.rectangle = rectangle
         hist_plugin.compare_method = cv.HISTCMP_CORREL
         hist_plugin.norm_type = cv.NORM_MINMAX
@@ -302,10 +319,10 @@ class FrameObjektTracker:
         f_hist = hist_plugin.get_histogram(frame, rectangle)
         w_hist = hist_plugin.get_histogram(wall, rectangle)
 
-        o.f_hist = f_hist
-        o.w_hist = w_hist
+        o.f_hist = f_hist  # 3 channels; copy()? (unused)
+        o.w_hist = w_hist  # the one currently in use
 
-        hist_plugin.normalize_channels(f_hist)
+        hist_plugin.normalize_channels(f_hist)  # normalize in the usual way and compare
         hist_plugin.normalize_channels(w_hist)
 
         return hist_plugin.compare_hist(f_hist, w_hist)
