@@ -101,7 +101,7 @@ class ElasticSearchIntegration:
 
                 # Create signal index
                 signals_index = f"{worker_data['id']}_signals"
-                self.client.indices.create(index=signals_index, body=self.signals_index_mapping)
+                self.client.indices.create(index=signals_index, body=self.signals_index_mapping, ignore=400)
                 # self.signals_requests.append(f"PUT /{signals_index} {self.signals_index_mapping}")
 
     @staticmethod
