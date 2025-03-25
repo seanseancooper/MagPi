@@ -10,8 +10,8 @@ class ElasticSearchIntegration:
     def __init__(self):
 
         self.client = None
-        self.index_requests = []
-        self.signals_requests = []
+        # self.index_requests = []
+        # self.signals_requests = []
         self.worker_index_mapping = None
         self.signals_index_mapping = None
         self._seen = []
@@ -38,7 +38,6 @@ class ElasticSearchIntegration:
 
             # Create workers index
             self.client.indices.create(index='workers', body=self.worker_index_mapping, ignore=400)
-            self.index_requests.append(f"PUT /workers {self.worker_index_mapping}")
 
         else:
             exit(0)
@@ -96,13 +95,10 @@ class ElasticSearchIntegration:
 
                 # Indexes worker document if needed, otherwise UPDATE the record.
                 self.client.index(index=worker_index, id=worker_id, document=worker_doc, ignore=400)
-                # self.index_requests.append(f"POST /workers/_doc/{worker_data['id']} {worker_doc}")  # used by file, but wrong
-                # self.index_requests.append(f"POST /{worker_index}/_doc/{worker_data['id']} {worker_doc}")  # new
 
                 # Create signal index
                 signals_index = f"{worker_data['id']}_signals"
                 self.client.indices.create(index=signals_index, body=self.signals_index_mapping, ignore=400)
-                # self.signals_requests.append(f"PUT /{signals_index} {self.signals_index_mapping}")
 
     @staticmethod
     def get_doc(sgnl):
@@ -111,8 +107,6 @@ class ElasticSearchIntegration:
         sgnl_created_time = datetime.strptime(sgnl["created"], "%Y-%m-%d %H:%M:%S")
         TimeDelta = timedelta(hours=6)
         TZObject = timezone(TimeDelta, name="MST")
-
-        # modify delta and TZ
         sgnl["created"] = sgnl_created_time.astimezone(TZObject).isoformat()
 
         return {
@@ -138,7 +132,7 @@ class ElasticSearchIntegration:
 
                 signal_doc = self.get_doc(sgnl)
                 self.client.index(index=idx, id=sgnl["id"], document=signal_doc)
-                self.signals_requests.append(f"POST /{idx}/_doc/{sgnl['id']} {signal_doc}")
+                # self.signals_requests.append(f"POST /{idx}/_doc/{sgnl['id']} {signal_doc}")
 
             if worker_data['id'] in self._seen:
                 _index(signals_index, signal_data[-1])
