@@ -17,15 +17,13 @@ class ElasticSearchIntegration:
         self._seen = []
         self.config = {}
 
-        # get the current TZ and set it in this class.
-
     def configure(self):
         readConfig('net.json', self.config)
         try:
             self.client = Elasticsearch(
                     self.config['ELASTIC_HOST'],
                     ca_certs=self.config['ELASTIC_CERT'],
-                    basic_auth=(self.config['ELASTIC_USERNAME'], self.config['ELASTIC_PASSWORD'])
+                    basic_auth=(self.config['ELASTIC_USERNAME'], self.config['ELASTIC_PASSWORD']),
             )
         except ConnectionRefusedError:
             pass
@@ -35,13 +33,11 @@ class ElasticSearchIntegration:
 
         if self.client:
             print(f"Connected to Elasticsearch: {self.client.info()}")
-
-            # Create workers index
+            # Create workers index, ignore warning that it exists.
             self.client.indices.create(index='workers', body=self.worker_index_mapping, ignore=400)
-
         else:
+            print(f"Failed too connect Elasticsearch. It is online?")
             exit(0)
-
 
     def update_worker(self, worker_data, signal_data):
 
@@ -68,6 +64,7 @@ class ElasticSearchIntegration:
             signal_data = parser.get_signal_data()
 
             if worker_data['id'] in self._seen:
+                print(f"updating: {worker_data['SSID']} [{worker_data['id']}]")
                 self.update_worker(worker_data, signal_data)
             else:
                 # Insert worker data
@@ -86,14 +83,14 @@ class ElasticSearchIntegration:
 
                 worker_doc = {
                     **worker_data,
-                    # "signal_cache": [self.get_doc(signal) for signal in signal_data]
+                    "signal_cache": [self.get_doc(signal) for signal in signal_data]
                     # "signal_cache": [signal for signal in signal_data]
                 }
 
                 # not this?
                 # self.index_requests.append(f"PUT /{worker_index} {self.worker_index_mapping}")
 
-                # Indexes worker document if needed, otherwise UPDATE the record.
+                # Index worker document
                 self.client.index(index=worker_index, id=worker_id, document=worker_doc, ignore=400)
 
                 # Create signal index
@@ -140,6 +137,7 @@ class ElasticSearchIntegration:
                 for signal in signal_data:
                     _index(signals_index, signal)
                 self._seen.append(worker_data['id'])
+                print(f"updating signals for: {worker_data['SSID']} [{worker_data['id']}]")
 
     def push(self, data):
         try:
