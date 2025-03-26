@@ -38,9 +38,14 @@
                     width:140,
                 },
                 {title:"BSSID", field:"BSSID", width:120},
+                /*
                 {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, formatterParams:{
                     type:"line"}
                 },
+                */
+                {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, sorter:"array", sorterParams:{
+                    type:"length"
+                }},
 
                 {title:"db", field:"Signal", width:30},         // perhaps the last known strength?? an average??
                 {title:"Ch.", field:"Channel", width:50},
