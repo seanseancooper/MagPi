@@ -77,6 +77,6 @@ class FrameObjektEncoder(threading.Thread):
         # vehicle id: available in a model?
         # license plate reader: is this available in a model?
         print(f'encoded data {self.frame_obj.f_id}: {encoded_data}')
-        return encoded_data
+        # return encoded_data
 
 
