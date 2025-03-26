@@ -6,7 +6,7 @@ from src.view.ViewContainer import ViewContainer
 
 viewContainer = ViewContainer()
 # TODO: the config hasn't been read yet, how can these be configurable?
-non_config_files = ['arx.json', 'ebs.json', 'mot.json']
+non_config_files = ['arx.json', 'ebs.json', 'mot.json', 'net.json']
 viewContainer.configure('view.json', non_config_files=non_config_files)
 
 vc_bp = Blueprint(
