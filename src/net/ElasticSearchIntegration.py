@@ -2,6 +2,7 @@ import os
 import json
 from datetime import datetime, timedelta, timezone
 from elasticsearch import Elasticsearch
+from src.net.lib.net_utils import WifiWorkerParser as WifiWorkerParser
 from src.config import readConfig
 
 
@@ -72,6 +73,7 @@ class ElasticSearchIntegration:
                 # Insert worker data
                 worker_id = worker_data['id']
                 worker_index = f"worker_{worker_id}"
+                print(f"indexing: {worker_data['SSID']} [{worker_data['id']}]")
 
                 # transform created, updated representations to have a timezone
                 worker_created_time = datetime.strptime(worker_data['created'], self.config['DATETIME_FORMAT'])
@@ -165,49 +167,11 @@ class ElasticSearchIntegration:
         pass
 
 
-class WifiWorkerParser:
-
-    def __init__(self, data):
-        self.data = data
-
-    def get_worker_data(self):
-        return {
-            "id"        : self.data["id"],
-            "SSID"      : self.data["SSID"],
-            "BSSID"     : self.data["BSSID"],
-            "created"   : self.data["created"],
-            "updated"   : self.data["updated"],
-            "elapsed"   : self.data["elapsed"],
-            "Vendor"    : self.data["Vendor"],
-            "Channel"   : self.data["Channel"],
-            "Frequency" : self.data["Frequency"],
-            "Signal"    : self.data["Signal"],
-            "Quality"   : self.data["Quality"],
-            "Encryption": self.data["Encryption"],
-            "is_mute"   : self.data["is_mute"],
-            "tracked"   : self.data["tracked"],
-            "tests"     : self.data.get("tests", [])
-        }
-
-    def get_signal_data(self):
-        return [
-            {
-                "created"  : signal["created"],
-                "id"       : signal["id"],
-                "worker_id": signal["worker_id"],
-                "lat"      : signal["lat"],
-                "lon"      : signal["lon"],
-                "sgnl"     : signal["sgnl"]
-            }
-            for signal in self.data.get("signal_cache", [])
-        ]
-
-
 if __name__ == '__main__':
 
     e = ElasticSearchIntegration()
     e.configure()
 
-    with open('sample_dataset.json', 'r') as f:
+    with open('/Users/scooper/PycharmProjects/MagPi/dev/wifi/training_data/scanlists_out.json', 'r') as f:
         data = json.load(f)
         e.push(data)
