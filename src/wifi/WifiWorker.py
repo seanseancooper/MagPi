@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import logging
+from src.lib.utils import format_time, format_delta
 from src.wifi.lib.wifi_utils import append_to_outfile
 
 logger_root = logging.getLogger('root')
@@ -41,9 +42,9 @@ class WifiWorker:
         return {"id"            : self.id,
                 "SSID"          : self.ssid,
                 "BSSID"         : self.bssid,
-                "created"       : str(self.created),
-                "updated"       : str(self.updated),
-                "elapsed"       : str(self.elapsed),
+                "created"       : format_time(self.created, "%Y-%m-%d %H:%M:%S"),
+                "updated"       : format_time(self.updated, "%Y-%m-%d %H:%M:%S"),
+                "elapsed"       : format_delta(self.elapsed, "%H:%M:%S"),
                 "Vendor"        : self.vendor,
                 "Channel"       : self.channel,
                 "Frequency"     : self.frequency,
