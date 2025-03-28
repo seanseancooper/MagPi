@@ -1,0 +1,9 @@
+
+<!-- https://stackoverflow.com/questions/5867985/full-screen-iframe-with-a-height-of-100 -->
+{% if container %}
+<div id="net" class="module_tab" style="position:relative;display:none;">
+{% else %}
+<div id="net" class="module_tab" style="position:relative;display:block;">
+{% endif %}
+    <iframe src="http://localhost:5601/app/dashboards#/view/9356de6a-e03a-4482-ae21-46ffe2de6d79?embed=true&_g=(refreshInterval%3A(pause%3A!t%2Cvalue%3A60000)%2Ctime%3A(from%3Anow-1h%2Cto%3Anow))&show-query-input=true&show-time-filter=true" allow="geolocation" height="100%" width="100%"></iframe>
+</div>
