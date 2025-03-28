@@ -16,7 +16,7 @@
 			"ELASTIC_HOST": "https://localhost:9200"
 		},
 		{
-			"ELASTIC_CERT": "/Users/scooper/PycharmProjects/MagPi/src/map/lib/http_ca.crt"
+			"ELASTIC_CERT": "/Users/scooper/PycharmProjects/MagPi/src/net/lib/http_ca.crt"
 		},
 		{
 			"ELASTIC_USERNAME": "elastic"
