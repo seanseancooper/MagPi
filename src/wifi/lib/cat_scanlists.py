@@ -38,7 +38,7 @@ class cat_scanlists:
                     for scanned in self.data:
                         for worker in scanned:
                             try:
-                                # LIST OF MAPS
+                                # LIST OF MAPS: this is the current way a SignalPoint looks:
                                 # [
                                 #  {
                                 #   "SSID": "DIRECT-xy2852C1-",
@@ -69,8 +69,9 @@ class cat_scanlists:
 
                                 self.mapped_workers[worker['BSSID']] = worker
                             except Exception:
+
                                 try:
-                                    # an early 'record' A MAP OF MAPS
+                                    # an early 'signalpoint' arrays were structured as a MAP of MAPS:
                                     # {
                                     #     "00:54:AF:A4:C0:F7": {
                                     #         "ssid"      : "HotspotC0F7",
@@ -82,7 +83,7 @@ class cat_scanlists:
                                     worker_data = worker[worker_bssid]
                                     self.mapped_workers[worker_bssid] = worker_data
                                 except Exception:
-                                    # another earlier structure, naked JSON map
+                                    # handle even earlier structure, a naked JSON map.
                                     # '00:54:AF:8F:D9:26': {
                                     # 'ssid': 'HotspotD926',
                                     # 'tests': {},
@@ -112,25 +113,56 @@ class cat_scanlists:
                 try:
                     record = self.mapped_workers[_id]
 
+                    def process_sgnl(x):
+
+                        created = x.get("created")
+                        print(_id.replace(':','').lower()) #0071c2880e60
+                        return {
+                            "created": format_time(datetime.now(), '%Y-%m-%d %H:%M:%S'),
+                            "id": x['id'],
+                            "worker_id": _id.replace(':','').lower(),
+                            "lon": x['lon'],
+                            "lat": x['lat'],
+                            "sgnl": x['sgnl']
+                        }
+
+                        # example
+                        # {
+                        #     "created"  : "2025-03-17 19:30:57",
+                        #     "id"       : "5f79d7dc-22a1-4366-98f0-e8d4e891e8a6",
+                        #     "worker_id": "f46349cb1e15",
+                        #     "lon"      : -105.067778,
+                        #     "lat"      : 39.917303,
+                        #     "sgnl"     : -64
+                        # },
+
                     out = {
                          "id"           : _id.replace(':', '').lower(),
                          "SSID"         : record.get('SSID', record.get('ssid')),
                          "BSSID"        : _id,
 
-                         "created"      : record.get('created', format_time(datetime.now(), '%Y-%m-%d %H:%M:%S')),
-                         "updated"      : record.get('updated', format_time(datetime.now(), '%Y-%m-%d %H:%M:%S')),
+                         #
+                         # %H:%M:%S <-- if has signal cache, get date from first entry
+                         # %Y-%m-%d %H:%M:%S <-- OK
+                         # %Y-%m-%d %H:%M:%S.%f <-- format as OK
+
+                         # "created"      : record.get('created', format_time(datetime.now(), '%Y-%m-%d %H:%M:%S')),
+                         # "updated"      : record.get('updated', format_time(datetime.now(), '%Y-%m-%d %H:%M:%S')),
+                         "created"      : format_time(datetime.now(), '%Y-%m-%d %H:%M:%S'),
+                         "updated"      : format_time(datetime.now(), '%Y-%m-%d %H:%M:%S'),
                          "elapsed"      : record.get('elapsed', '00:00:00'),
 
                          "Vendor"       : record.get('Vendor', self._get_vendor(_id)),
-                         "Channel"      : record.get('Channel'),
-                         "Frequency"    : record.get('Frequency'),
-                         "Signal"       : record.get('Signal'),
-                         "Quality"      : record.get('Quality'),
-                         "Encryption"   : record.get('Encryption'),
+                         "Channel"      : record.get('Channel', '0'),
+                         "Frequency"    : record.get('Frequency', '0'),
+                         "Signal"       : record.get('Signal', '-99'),
+                         "Quality"      : record.get('Quality', '0'),
+                         "Encryption"   : record.get('Encryption', False),
 
                          "is_mute"      : False,
                          "tracked"      : True,
-                         "signal_cache" : [x for x in record.get('signal_cache', [])] if add_signals is True else [],
+                         # need to process x.datetime --> x.created
+                         "signal_cache" : [process_sgnl(x) for x in record.get('signal_cache', [])] if add_signals is True else [],
                          "tests"        : [x for x in record.get('tests', [x for x in record.get('results', [])])]  if add_signals is True else []
                     }
 
@@ -150,12 +182,12 @@ class cat_scanlists:
 
 
 if __name__ == "__main__":
-    # archive = '/Users/scooper/PycharmProjects/MagPi/dev/wifi/scanlist_archive'
-    archive = '/Users/scooper/PycharmProjects/MagPi/_out'
-    output = '/Users/scooper/PycharmProjects/MagPi/dev/wifi/training_data/scanlists_out.json'
-
+    # archive = '/Users/scooper/PycharmProjects/MagPi/_out'
+    # output = '/Users/scooper/PycharmProjects/MagPi/dev/wifi/training_data/scanlists_out.json'
+    archive = '/_out'
+    output = '/dev/wifi/training_data/scanlists_out.json'
     cat = cat_scanlists(archive, output)
 
     cat.read()
-    cat.write(add_signals=True)
+    cat.write(add_signals=False)
 
