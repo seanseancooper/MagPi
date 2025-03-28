@@ -51,10 +51,11 @@ class ElasticSearchIntegration:
         worker_doc = {
             # only updates:
             "updated": worker_data['updated'],
-            "elapsed": worker_data['elapsed'],
+            # "elapsed": worker_data['elapsed'],
             "is_mute": worker_data['is_mute'],
             "tracked": worker_data['tracked'],
-            "signal_cache": self.get_doc(signal_data[-1])
+            # "signal_cache": self.get_doc(signal_data[-1])
+            "signal_cache": [self.get_doc(signal) for signal in signal_data]
         }
 
         self.client.update(index=worker_index, id=worker_data['id'], doc=worker_doc, ignore=400)
