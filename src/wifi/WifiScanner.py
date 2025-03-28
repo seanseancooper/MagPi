@@ -182,6 +182,17 @@ class WifiScanner(threading.Thread):
         [self.update(item, _signals) for item in self.ghost_signals]
         return _signals
 
+    def cat_scanlists(self):
+        """ building an archive of signals to be indexed when schema is stable"""
+
+        from lib.cat_scanlists import cat_scanlists
+        archive = '/_out'
+        output = '/dev/wifi/training_data/scanlists_out.json'
+        cat = cat_scanlists(archive, output)
+
+        cat.read()
+        cat.write(add_signals=True)
+
     def stop(self):
         write_to_scanlist(self.config, self.get_tracked_signals())
         [worker.stop() for worker in self.workers]
