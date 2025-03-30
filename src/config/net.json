@@ -22,7 +22,7 @@
 			"ELASTIC_USERNAME": "elastic"
 		},
 		{
-			"ELASTIC_PASSWORD": "CsZjPgLIJZYz-clmMlty"
+			"ELASTIC_PASSWORD": "4rU=Bo7s0udFX*oaRm3U"
 		},
 		{
 			"WORKER_INDEX_MAPPING": {
@@ -33,7 +33,7 @@
 						"BSSID"       : {"type": "keyword"},
 						"created"     : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
 						"updated"     : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
-						"elapsed"     : {"type": "date"},
+						"elapsed"     : {"type": "date", "format": "HH:mm:ss"},
 						"Vendor"      : {"type": "keyword"},
 						"Channel"     : {"type": "integer"},
 						"Frequency"   : {"type": "integer"},
@@ -78,6 +78,12 @@
 		},
 		{
 			"GPS_ENDPOINT": "http://gps.localhost:5004/position"
+		},
+		{
+			"INDEX_TIMEDELTA": 6
+		},
+		{
+			"INDEX_TZ": "MST"
 		},
 		{
 			"TOKENS": 2

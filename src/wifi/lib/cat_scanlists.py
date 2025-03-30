@@ -1,9 +1,11 @@
 import json
 import glob
+import uuid
 from src.lib.utils import format_time
 from src.wifi.lib.wifi_utils import vendorsMacs_XML, proc_vendors
-from datetime import datetime
-
+from datetime import datetime, timedelta
+from src.config import readConfig
+from src.lib.utils import get_location
 
 class cat_scanlists:
 
@@ -17,7 +19,14 @@ class cat_scanlists:
         self.skipped = []
         self.total = 0
         self.scanlist_total = 0
+        self.config = {}
+        self.latitude = 0.0
+        self.longitude = 0.0
+        self.configure()
 
+    def configure(self):
+        readConfig('net.json', self.config)
+        get_location(self)
         [proc_vendors(vendor, self.vendors) for vendor in vendorsMacs_XML.getroot()]
 
     def _get_vendor(self, bssid):
@@ -103,7 +112,7 @@ class cat_scanlists:
                 except Exception as e:
                     print(f'skipped scanlist {scanlist} {e}')
 
-        print(f'processed {self.scanlist_total} scanlists.', end='')
+        print(f'{datetime.now().isoformat()} @ [{self.longitude}, {self.latitude}]: processed {self.scanlist_total} scanlists, ', end='')
 
     def write(self, add_signals=False):
         with open(self.output_file, 'w') as f:
@@ -113,58 +122,54 @@ class cat_scanlists:
                 try:
                     record = self.mapped_workers[_id]
 
-                    def process_sgnl(x):
+                    from dateutil.parser import parse
+                    c_created = parse(record.get('created')).strftime("%Y-%m-%d %H:%M:%S")
+                    c_updated = parse(record.get('updated')).strftime("%Y-%m-%d %H:%M:%S")
 
-                        created = x.get("created")
-                        print(_id.replace(':','').lower()) #0071c2880e60
-                        return {
-                            "created": format_time(datetime.now(), '%Y-%m-%d %H:%M:%S'),
-                            "id": x['id'],
-                            "worker_id": _id.replace(':','').lower(),
-                            "lon": x['lon'],
-                            "lat": x['lat'],
-                            "sgnl": x['sgnl']
-                        }
+                    record['id'] = _id.replace(':', '').lower()
+                    record['SSID'] = record.get('SSID', record.get('ssid'))
+                    record['BSSID'] = _id
 
-                        # example
-                        # {
-                        #     "created"  : "2025-03-17 19:30:57",
-                        #     "id"       : "5f79d7dc-22a1-4366-98f0-e8d4e891e8a6",
-                        #     "worker_id": "f46349cb1e15",
-                        #     "lon"      : -105.067778,
-                        #     "lat"      : 39.917303,
-                        #     "sgnl"     : -64
-                        # },
+                    record['created'] = c_created
+                    record['updated'] = c_updated
+                    record['elapsed'] = datetime.strptime(record.get('elapsed', "00:00:00").split('.')[0], "%H:%M:%S").time().strftime("%H:%M:%S")
+
+                    record['Channel'] = record.get('Channel') or 0
+                    record['Frequency'] = record.get('Frequency') or 0
+                    record['Signal'] = record.get('Signal') or -99
+                    record['Quality'] = record.get('Quality') or 0
 
                     out = {
-                         "id"           : _id.replace(':', '').lower(),
-                         "SSID"         : record.get('SSID', record.get('ssid')),
-                         "BSSID"        : _id,
-
-                         #
-                         # %H:%M:%S <-- if has signal cache, get date from first entry
-                         # %Y-%m-%d %H:%M:%S <-- OK
-                         # %Y-%m-%d %H:%M:%S.%f <-- format as OK
-
-                         # "created"      : record.get('created', format_time(datetime.now(), '%Y-%m-%d %H:%M:%S')),
-                         # "updated"      : record.get('updated', format_time(datetime.now(), '%Y-%m-%d %H:%M:%S')),
-                         "created"      : format_time(datetime.now(), '%Y-%m-%d %H:%M:%S'),
-                         "updated"      : format_time(datetime.now(), '%Y-%m-%d %H:%M:%S'),
-                         "elapsed"      : record.get('elapsed', '00:00:00'),
+                         "id"           : record['id'],
+                         "SSID"         : record['SSID'],
+                         "BSSID"        : record['BSSID'],
+                         "created"      : record.get('created', format_time(datetime.now(), '%Y-%m-%d %H:%M:%S')),
+                         "updated"      : record.get('updated', format_time(datetime.now(), '%Y-%m-%d %H:%M:%S')),
+                         "elapsed"      : record.get('elapsed'),
 
                          "Vendor"       : record.get('Vendor', self._get_vendor(_id)),
-                         "Channel"      : record.get('Channel', '0'),
-                         "Frequency"    : record.get('Frequency', '0'),
-                         "Signal"       : record.get('Signal', '-99'),
-                         "Quality"      : record.get('Quality', '0'),
-                         "Encryption"   : record.get('Encryption', False),
+                         "Channel"      : record['Channel'],
+                         "Frequency"    : record['Frequency'],
+                         "Signal"       : record['Signal'],
+                         "Quality"      : record['Quality'],
 
+                         "Encryption"   : record.get('Encryption', True),
                          "is_mute"      : False,
                          "tracked"      : True,
-                         # need to process x.datetime --> x.created
                          "signal_cache" : [process_sgnl(x) for x in record.get('signal_cache', [])] if add_signals is True else [],
                          "tests"        : [x for x in record.get('tests', [x for x in record.get('results', [])])]  if add_signals is True else []
                     }
+
+                    def process_sgnl(sgnl):
+
+                        return {
+                            "created": sgnl.get('created', record['created']),   # this should match the created date of the record
+                            "id": sgnl.get('id', str(uuid.uuid4())),
+                            "worker_id": record['id'],
+                            "lon": sgnl.get('lon', self.longitude),
+                            "lat": sgnl.get('lat', self.latitude),
+                            "sgnl": sgnl.get('sgnl', -99)
+                        }
 
                     f.write(json.dumps(out, indent=2))
                     self.total += 1
@@ -178,16 +183,16 @@ class cat_scanlists:
                     print(f'omitted {record} {a}')
             f.write(']\n')
 
-        print(f' mapped {self.total} signals for {len(self.mapped_workers)} records.')
+        print(f'mapped {self.total} signals for {len(self.mapped_workers)} records.')
 
 
 if __name__ == "__main__":
-    # archive = '/Users/scooper/PycharmProjects/MagPi/_out'
-    # output = '/Users/scooper/PycharmProjects/MagPi/dev/wifi/training_data/scanlists_out.json'
-    archive = '/_out'
-    output = '/dev/wifi/training_data/scanlists_out.json'
+    archive = '/Users/scooper/PycharmProjects/MagPi/dev/wifi/scanlist_archive/'
+    output = '/Users/scooper/PycharmProjects/MagPi/dev/wifi/training_data/scanlists_out.json'
+    # archive = '_out'
+    # output = 'dev/wifi/training_data/scanlists_out.json'
     cat = cat_scanlists(archive, output)
 
     cat.read()
-    cat.write(add_signals=False)
+    cat.write(add_signals=True)
 
