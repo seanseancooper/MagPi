@@ -3,7 +3,7 @@ import glob
 import uuid
 from src.lib.utils import format_time
 from src.wifi.lib.wifi_utils import vendorsMacs_XML, proc_vendors
-from datetime import datetime, timedelta
+from datetime import datetime
 from src.config import readConfig
 from src.lib.utils import get_location
 
@@ -41,77 +41,38 @@ class cat_scanlists:
     def read(self):
         for scanlist in sorted(glob.glob(self.scanlist_archive + "/*.json")):
             with open(scanlist, "r") as f:
-
                 try:
                     self.data.append(json.load(f))
                     for scanned in self.data:
+
+                        # for worker in scanned:
+                        #     # GOING FORWARD:
+                        #     self.mapped_workers[worker['BSSID']] = worker
+
                         for worker in scanned:
                             try:
-                                # LIST OF MAPS: this is the current way a SignalPoint looks:
-                                # [
-                                #  {
-                                #   "SSID": "DIRECT-xy2852C1-",
-                                #   "BSSID": "0E:61:27:28:52:C1",
-                                #   "created": "12:23:45",
-                                #   "updated": "16:44:57",
-                                #   "elapsed": "04:13:01",
-                                #   "Vendor": "UNKNOWN",
-                                #   "Channel": 165,
-                                #   "Frequency": -32751,
-                                #   "Signal": -99,
-                                #   "Quality": 20,
-                                #   "Encryption": true,
-                                #   "is_mute": false,
-                                #   "tracked": true,
-                                #   "signal_cache": [
-                                #    {
-                                #     "datetime": "2024-12-13 16:31:58.285970",
-                                #     "id": "73f1da2f-ba78-49cd-b9e9-24b3a1721ee7",
-                                #     "lon": -105.068433,
-                                #     "lat": 39.916845,
-                                #     "sgnl": -99
-                                #    }
-                                #   ],
-                                #   "tests": [],
-                                #   "results": []
-                                #  },
-
+                                # LIST OF MAPS: w/ current SignalPoint:
                                 self.mapped_workers[worker['BSSID']] = worker
                             except Exception:
-
                                 try:
-                                    # an early 'signalpoint' arrays were structured as a MAP of MAPS:
-                                    # {
-                                    #     "00:54:AF:A4:C0:F7": {
-                                    #         "ssid"      : "HotspotC0F7",
-                                    #         "tests"     : {},
-                                    #         "return_all": true
-                                    #     }
-                                    # },
+                                    # early 'signalpoint' array; a MAP of MAPS
                                     worker_bssid = [k for k in worker][0]
                                     worker_data = worker[worker_bssid]
                                     self.mapped_workers[worker_bssid] = worker_data
                                 except Exception:
-                                    # handle even earlier structure, a naked JSON map.
-                                    # '00:54:AF:8F:D9:26': {
-                                    # 'ssid': 'HotspotD926',
-                                    # 'tests': {},
-                                    # 'return_all': True
-                                    # }
+                                    # naked JSON map. 'BSSID': {[{}]}
                                     try:
                                         key = [k for k in worker][0]
                                         value = worker_data
+                                        # no created, updated; handled on write()
                                         self.mapped_workers[key] = value
                                     except Exception as e:
                                         print(f'skipped worker {e}')
                                         self.skipped.append(worker)
-
                     self.scanlist_total += 1
                     print(f'ingested list {self.scanlist_total} {scanlist}')
-
                 except Exception as e:
                     print(f'skipped scanlist {scanlist} {e}')
-
         print(f'{datetime.now().isoformat()} @ [{self.longitude}, {self.latitude}]: processed {self.scanlist_total} scanlists, ', end='')
 
     def write(self, add_signals=False):
@@ -123,8 +84,8 @@ class cat_scanlists:
                     record = self.mapped_workers[_id]
 
                     from dateutil.parser import parse
-                    c_created = parse(record.get('created')).strftime("%Y-%m-%d %H:%M:%S")
-                    c_updated = parse(record.get('updated')).strftime("%Y-%m-%d %H:%M:%S")
+                    c_created = parse(record.get('created') or format_time(datetime.now(), "%Y-%m-%d %H:%M:%S")).strftime("%Y-%m-%d %H:%M:%S")
+                    c_updated = parse(record.get('updated') or format_time(datetime.now(), "%Y-%m-%d %H:%M:%S")).strftime("%Y-%m-%d %H:%M:%S")
 
                     record['id'] = _id.replace(':', '').lower()
                     record['SSID'] = record.get('SSID', record.get('ssid'))
@@ -148,12 +109,12 @@ class cat_scanlists:
                          "elapsed"      : record.get('elapsed'),
 
                          "Vendor"       : record.get('Vendor', self._get_vendor(_id)),
-                         "Channel"      : record['Channel'],
-                         "Frequency"    : record['Frequency'],
-                         "Signal"       : record['Signal'],
-                         "Quality"      : record['Quality'],
+                         "Channel"      : int(record['Channel']),
+                         "Frequency"    : int(record['Frequency']),
+                         "Signal"       : int(record['Signal']),
+                         "Quality"      : int(record['Quality']),
 
-                         "Encryption"   : record.get('Encryption', True),
+                         "Encryption"   : bool(record.get('Encryption', True)),
                          "is_mute"      : False,
                          "tracked"      : True,
                          "signal_cache" : [process_sgnl(x) for x in record.get('signal_cache', [])] if add_signals is True else [],
@@ -183,7 +144,7 @@ class cat_scanlists:
                     print(f'omitted {record} {a}')
             f.write(']\n')
 
-        print(f'mapped {self.total} signals for {len(self.mapped_workers)} records.')
+        print(f'mapped {self.total} signals {add_signals} for {len(self.mapped_workers)} records.')
 
 
 if __name__ == "__main__":
