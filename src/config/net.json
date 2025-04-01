@@ -22,15 +22,15 @@
 			"ELASTIC_USERNAME": "elastic"
 		},
 		{
-			"ELASTIC_PASSWORD": "4rU=Bo7s0udFX*oaRm3U"
+			"ELASTIC_PASSWORD": "EnAfNe5Xo=rlbzn__HOK"
 		},
 		{
 			"WORKER_INDEX_MAPPING": {
 				"mappings": {
 					"properties": {
 						"id"          : {"type": "keyword"},
-						"SSID"        : {"type": "keyword"},
-						"BSSID"       : {"type": "keyword"},
+						"SSID"        : {"type": "wildcard"},
+						"BSSID"       : {"type": "wildcard"},
 						"created"     : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
 						"updated"     : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
 						"elapsed"     : {"type": "date", "format": "HH:mm:ss"},
@@ -45,7 +45,7 @@
 						"signal_cache": {
 							"type"      : "nested",
 							"properties": {
-								"created"  : {"type": "date"},
+								"created"  : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
 								"id"       : {"type": "keyword"},
 								"worker_id": {"type": "keyword"},
 								"location" : {"type": "geo_point"},
@@ -61,7 +61,7 @@
 			"SIGNALS_INDEX_MAPPING": {
 				"mappings": {
 					"properties": {
-						"created"  : {"type": "date"},
+						"created"  : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
 						"id"       : {"type": "keyword"},
 						"worker_id": {"type": "keyword"},
 						"location" : {"type": "geo_point"},
