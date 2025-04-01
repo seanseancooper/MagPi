@@ -1,8 +1,6 @@
-import os
 import json
 from datetime import datetime, timedelta, timezone
 from elasticsearch import Elasticsearch
-from src.lib.utils import time_traveller as tt
 from src.net.lib.net_utils import WifiWorkerParser as WifiWorkerParser
 from src.config import readConfig
 
@@ -12,11 +10,9 @@ class ElasticSearchIntegration:
     def __init__(self):
 
         self.client = None
-        # self.index_requests = []
-        # self.signals_requests = []
         self.worker_index_mapping = None
         self.signals_index_mapping = None
-        self.TZObject = None
+        self.tz = None
         self._seen = []
         self.config = {}
 
@@ -33,39 +29,38 @@ class ElasticSearchIntegration:
 
         self.worker_index_mapping = self.config['WORKER_INDEX_MAPPING']
         self.signals_index_mapping = self.config['SIGNALS_INDEX_MAPPING']
-
-        TimeDelta = timedelta(hours=self.config['INDEX_TIMEDELTA'])
-        self.TZObject = timezone(TimeDelta, name=self.config['INDEX_TZ'])
+        self.tz = timezone(timedelta(hours=self.config['INDEX_TIMEDELTA']), name=self.config['INDEX_TZ'])
 
         if self.client:
             print(f"Connected to Elasticsearch: {self.client.info()}")
             # Create workers index, ignore warning that it exists.
-            # self.client.indices.create(index='workers', body=self.worker_index_mapping, ignore=400)
+            self.client.indices.create(index='workers', body=self.worker_index_mapping, ignore=400)
         else:
-            print(f"Failed to connect Elasticsearch. It is online?")
-            exit(0)
+            print(f"Failed to connect to Elasticsearch. It is online?")
+            exit(1)
 
     def update_worker(self, worker_data, signal_data):
 
-        worker_index = f"worker_{worker_data['id']}"
-
-        # transform updated representation to have a timezone
+        # transform 'updated' representation to have a timezone
         worker_updated_time = datetime.strptime(worker_data['updated'], self.config['DATETIME_FORMAT'])
-        worker_data['updated'] = worker_updated_time.astimezone().isoformat()
+        worker_data['updated'] = worker_updated_time.astimezone(self.tz).isoformat()
 
-        worker_doc = {
-            # only updates:
+        updt_worker_doc = {
             "updated": worker_data['updated'],
             "elapsed": worker_data['elapsed'],
+
+            "Channel"  : int(worker_data['Channel']),
+            "Frequency": int(worker_data['Frequency']),
+            "Signal"   : int(worker_data['Signal']),
+            "Quality"  : int(worker_data['Quality']),
+
             "is_mute": worker_data['is_mute'],
-            "tracked": worker_data['tracked'],
             # "signal_cache": self.get_doc(signal_data[-1])
             "signal_cache": [self.get_doc(signal) for signal in signal_data]
         }
 
-        # _, worker_doc = tt(worker_doc, self.TZObject, self.config['DATETIME_FORMAT'])
-
-        self.client.update(index=worker_index, id=worker_data['id'], doc=worker_doc, ignore=400)
+        worker_index = f"worker_{worker_data['id']}"
+        self.client.update(index=worker_index, id=worker_data['id'], doc=updt_worker_doc, ignore=400)
 
     def process_workers(self, data):
 
@@ -83,21 +78,20 @@ class ElasticSearchIntegration:
 
                 # transform created, updated representations to have a timezone
                 worker_created_time = datetime.strptime(worker_data['created'], self.config['DATETIME_FORMAT'])
-                worker_data['created'] = worker_created_time.astimezone().isoformat()
+                worker_data['created'] = worker_created_time.astimezone(self.tz).isoformat()
 
                 worker_updated_time = datetime.strptime(worker_data['updated'], self.config['DATETIME_FORMAT'])
-                worker_data['updated'] = worker_updated_time.astimezone().isoformat()
+                worker_data['updated'] = worker_updated_time.astimezone(self.tz).isoformat()
 
                 worker_doc = {
                     **worker_data,
+                    "Channel"  : int(worker_data['Channel']),
+                    "Frequency": int(worker_data['Frequency']),
+                    "Signal"   : int(worker_data['Signal']),
+                    "Quality"  : int(worker_data['Quality']),
                     "signal_cache": [self.get_doc(signal) for signal in signal_data]
                     # "signal_cache": [signal for signal in signal_data]
                 }
-
-                # _, worker_doc = tt(worker_doc, self.TZObject, self.config['DATETIME_FORMAT'])
-
-                # not this?
-                # self.index_requests.append(f"PUT /{worker_index} {self.worker_index_mapping}")
 
                 # Index worker document
                 self.client.index(index=worker_index, id=worker_id, document=worker_doc, ignore=400)
@@ -110,15 +104,14 @@ class ElasticSearchIntegration:
 
         # transform created representations to have a timezone
         sgnl_created_time = datetime.strptime(sgnl["created"], "%Y-%m-%d %H:%M:%S")
-
-        sgnl["created"] = sgnl_created_time.astimezone(self.TZObject).isoformat()
+        sgnl["created"] = sgnl_created_time.astimezone(self.tz).isoformat()
 
         return {
             "created"  : sgnl["created"],
             "id"       : sgnl["id"],
             "worker_id": sgnl["worker_id"],
-            "location" : {"lat": sgnl["lat"], "lon": sgnl["lon"]},
-            "sgnl"     : sgnl["sgnl"]
+            "location" : {"lat": float(sgnl["lat"]), "lon": float(sgnl["lon"])},
+            "sgnl"     : int(sgnl["sgnl"])
         }
 
     def process_signals(self, data):
@@ -135,9 +128,7 @@ class ElasticSearchIntegration:
                 """ index, signalpoint """
 
                 signal_doc = self.get_doc(sgnl)
-                id = sgnl["id"]
-                self.client.index(index=idx, id=id, document=signal_doc)
-                # self.signals_requests.append(f"POST /{idx}/_doc/{sgnl['id']} {signal_doc}")
+                self.client.index(index=idx, id=sgnl["id"], document=signal_doc)
 
             if worker_data['id'] in self._seen:
                 _index(signals_index, signal_data[-1])
@@ -146,12 +137,13 @@ class ElasticSearchIntegration:
                 self._seen.append(worker_data['id'])
 
     def push(self, data):
+        """ method entrypoint for elastic indexing """
         try:
             self.process_workers(data)
             self.process_signals(data)
-            print(f"Data pushed successfully: {datetime.now().astimezone(self.TZObject).isoformat()}")
-        except Exception as e:
-            print(f"Data push failed: {e}")
+            print(f"Data pushed successfully: {datetime.now().astimezone(self.tz).isoformat()}")
+        except Exception as ex:
+            print(f"Data push failed: {ex}")
 
         # Save index requests for debugging
         # print(f"Export located @ {self.config['OUTFILE_PATH']}")
@@ -172,7 +164,7 @@ if __name__ == '__main__':
 
     e = ElasticSearchIntegration()
     e.configure()
-
+    # push 'training data' into elastic.
     with open('/Users/scooper/PycharmProjects/MagPi/dev/wifi/training_data/scanlists_out.json', 'r') as f:
         data = json.load(f)
         e.push(data)
