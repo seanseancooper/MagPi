@@ -152,19 +152,19 @@ class FrameObjektTracker:
               f"\to.avg_loc: {str(o.avg_loc)}"
               f"\to.rect:{str(o.rect).ljust(10, ' ')}"
 
-              f"\to.fd_in_range: {o.fd}"
+              f"\to.fd_in_range: {o.distance}"
               f"\to.inside_rect: {o.inside_rect}"
 
               f"\to.lat: {o.lat}"
               f"\to.lon: {o.lon}"
               f"\to.close: {o.close}"
-              f"\to.hist_pass: {o.hist_pass}"
-              f"\to.wall_pass: {o.wall_pass}"
+              f"\to.hist_pass: {o.HIST_pass}"
+              f"\to.wall_pass: {o.WALL_pass}"
 
               f"\tcurr_dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}"
               f"\tdist_mean: {str(o.dist_mean.__format__('.4f')).ljust(3, ' ')}"
 
-              f"\tfd_mean: {str(o.fd_mean.__format__('.4f')).ljust(10, ' ')}"
+              f"\tfd_mean: {str(o.distances_mean.__format__('.4f')).ljust(10, ' ')}"
               f"\thist_delta: {str(o.hist_delta.__format__('.4f')).ljust(10, ' ')}"
               f"\tMSE: {str(self._frame_MSE.__format__('.4f')).ljust(10, ' ')}")
 
@@ -194,7 +194,7 @@ class FrameObjektTracker:
         # euclidean distance of the wall histograms
         # observation: this goes negative periodically
         o.hist_delta = self.get_histogram_delta(o, self.tracked.get(o.prev_tag).wall, wall, rectangle)
-        o.hist_pass = not Decimal.from_float(o.hist_delta).is_signed()
+        o.HIST_pass = not Decimal.from_float(o.hist_delta).is_signed()
 
         # does this wall match the previous one?
         # pairwise distance to the previous wall image
@@ -202,10 +202,10 @@ class FrameObjektTracker:
         Y = self.make_grey_data(wall, rectangle)
         self.set_frame_delta(X, Y)
 
-        o.fd = self._frame_delta                            # delta of wall image to current f
-        o.fd_mean = np.mean(self._frame_deltas)
-        o.delta_range = self.f_delta_pcnt * o.fd_mean       # percentage of px difference
-        o.wall_pass = is_in_range(o.fd, o.fd_mean, self.d_range)
+        o.distance = self._frame_delta                            # delta of wall image to current f
+        o.distances_mean = np.mean(self._frame_deltas)
+        o.delta_range = self.f_delta_pcnt * o.distances_mean       # percentage of px difference
+        o.WALL_pass = is_in_range(o.distance, o.distances_mean, self.d_range)
 
     def label_locations(self, frame, wall, rectangle):
         """ find elements 'tag' by euclidean distance """
@@ -231,7 +231,7 @@ class FrameObjektTracker:
             o1.tag = o1.create_tag(self.f_id)
             self.get_stats(o1, wall, rectangle)
 
-            if o1.inside_rect and o1.hist_pass:
+            if o1.inside_rect and o1.HIST_pass:
                 # item following f0 item.
 
                 # back reference and merge the rects (n largest) and
@@ -241,7 +241,7 @@ class FrameObjektTracker:
                 o1.tag = f"{self.f_id}_{o1.prev_tag.split('_')[1]}"
                 self.print_frame(o1, "N1:")
 
-            if not o1.close and not o1.hist_pass and not o1.wall_pass:
+            if not o1.close and not o1.HIST_pass and not o1.WALL_pass:
                 # NEW 'interstitial' item
                 o1.tag = o1.create_tag(self.f_id)
                 self.print_frame(o1, "!N:")
@@ -271,14 +271,14 @@ class FrameObjektTracker:
             oN.tag = f"{self.f_id}_{oN.prev_tag.split('_')[1]}"
             self.get_stats(oN, wall, rectangle)
 
-            if oN.inside_rect and oN.hist_pass:
+            if oN.inside_rect and oN.HIST_pass:
                 # continuation of motion
                 # back reference and merge the rects (n largest) and take a pic of the merged area
                 # largest area wins.
 
                 self.print_frame(oN, "   ")
 
-            if not oN.close and not oN.hist_pass:
+            if not oN.close and not oN.HIST_pass:
                 # NEW 'interstitial' item
                 oN.tag = oN.create_tag(self.f_id)
                 self.print_frame(oN, "XN:")

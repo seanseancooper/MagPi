@@ -21,10 +21,12 @@ class FrameObjekt:
         self.prev_tag = ''                                              # [string: object tracking] tag of nearest FrameObjekt from the previous frame
         self.contour_id = None                                          # [string: object tracking] id of source contour
         self.curr_dist = 0                                              # [int32: object tracking] euclidean_distance wrt previous mean x, y location
+        self.distance = 0.0                                             # [0.0: reporting] euclidean_distance wrt previous frame analysis area
         self.distances = np.zeros(shape=[1, 1], dtype=np.float64)       # [list([1,1]): object location] of previous euclidean_distances wrt previous mean x, y locations.
-        self.fd = 0.0                                                   # [0.0: reporting] euclidean_distance wrt previous frame analysis area
-        self.fd_mean = 0.0
+        self.distances_mean = 0.0
         self.delta_range = 0.0
+
+
 
         self.f_hist = None                                              # histogram of frame
         self.w_hist = None                                              # histogram of wall, filled in by FrameObjectTracker
@@ -41,8 +43,19 @@ class FrameObjekt:
 
         self.close = None                                               # [boolean: reporting] is this mean location with the bounds of the contour?
         self.inside_rect = None
-        self.hist_pass = None
-        self.wall_pass = None
+
+        # exists, subs
+        self.HIST_pass = None
+        self.SIM_pass = None
+
+        # new
+        self.WALL_pass = None
+        self.MSE_pass = None
+        self.COS_pass = None
+
+        self.MSE_pass = None
+        self.COS_pass = None
+        self.SIM_pass = None
 
     @staticmethod
     def create(f_id):
@@ -56,8 +69,8 @@ class FrameObjekt:
     def get(self):
         return {'f_id'          : self.f_id,
                 'tag'           : str(self.tag),
-                'fd'            : self.fd,
-                'fd_mean'       : self.fd_mean,
+                'f_EUC'         : self.distance,
+                'f_EUCs_mean'   : self.distances_mean,
                 'avg_loc'       : str(self.avg_loc),  # self.avg_loc.tolist()
                 'dist_mean'     : self.dist_mean,
                 'rect'          : str(self.rect),
@@ -65,6 +78,6 @@ class FrameObjekt:
                 'lon'           : self.lon,
                 'close'         : self.close,
                 'inside_rect'   : self.inside_rect is True,
-                'hist_pass'     : self.hist_pass,
-                'wall_pass'     : self.wall_pass,
+                'HIST_pass'     : self.HIST_pass,
+                'WALL_pass'     : self.WALL_pass,
         }
