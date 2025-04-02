@@ -13,7 +13,7 @@ class FrameObjektEncoder(threading.Thread):
         super().__init__()
         self.frame_obj = frame_obj
         self.hash_histogram = True
-        self.precision = 8                      # TOOD: make config
+        self.precision = 8                      # TOOD: geohash precision, make config
         self.mm_scaler = MinMaxScaler()
         self.std_scaler = StandardScaler()
 
@@ -34,37 +34,44 @@ class FrameObjektEncoder(threading.Thread):
 
         numerical_features = np.array([
             [
-                self.frame_obj.fd,
-                self.frame_obj.fd_mean,
-                self.frame_obj.hist_delta,
-                self.frame_obj.dist_mean,
+                float(self.frame_obj.fd),
+                float(self.frame_obj.fd_mean),
+                float(self.frame_obj.hist_delta),
+                float(self.frame_obj.dist_mean),
             ]
         ])
 
         location_features = np.array([
             [
-                self.frame_obj.rect[0],
-                self.frame_obj.rect[1],
-                self.frame_obj.rect[2],
-                self.frame_obj.rect[3],
-                self.frame_obj.avg_loc[0],
-                self.frame_obj.avg_loc[1],
+                int(self.frame_obj.rect[0]),
+                int(self.frame_obj.rect[1]),
+                int(self.frame_obj.rect[2]),
+                int(self.frame_obj.rect[3]),
+                int(self.frame_obj.avg_loc[0]),
+                int(self.frame_obj.avg_loc[1]),
             ]
         ])
 
+        _s  = self.frame_obj.shape
+        rect_shape = [int(_s[1]), int(_s[0]), int(_s[1]), int(_s[0])]
+        loc_shape = [int(_s[1]), int(_s[0])]
+        rect_array = np.asarray(rect_shape)
+        loc_array = np.asarray(loc_shape)
+        encoded_rect = np.divide((np.asarray(self.frame_obj.rect)), rect_array)
+        encoded_avg_loc = np.divide((np.asarray(self.frame_obj.avg_loc)), loc_array)
+        print(encoded_rect, encoded_avg_loc)
+
         norm_numerical_features = self.mm_scaler.fit_transform(numerical_features)
         norm_location_features = self.mm_scaler.fit_transform(location_features)
-        # get this from gps or objekt?
         lat_lon_features = self.encode_lat_lon(self.frame_obj.lat, self.frame_obj.lon)
 
         hashed_histogram = None
-        if self.frame_obj.w_hist is not None:
+        if len(self.frame_obj.w_hist) > 0:
 
             histogram = np.array(self.frame_obj.w_hist)
             normalized = cv.normalize(histogram, histogram)
             flattened = normalized.flatten()
             color_histogram = flattened.tolist()
-            hashed_histogram = None
 
             if self.hash_histogram:
                 hashed_histogram = self.hash_color_histogram(color_histogram)
@@ -77,6 +84,20 @@ class FrameObjektEncoder(threading.Thread):
         # vehicle id: available in a model?
         # license plate reader: is this available in a model?
         print(f'encoded data {self.frame_obj.f_id}: {encoded_data}')
+        exit(0)
         # return encoded_data
 
+if __name__ == "__main__":
+
+    from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
+
+    frame_objects = [
+        FrameObjekt.create(1),
+        FrameObjekt.create(2),
+        FrameObjekt.create(3)
+    ]
+
+    for f in frame_objects:
+        encoder = FrameObjektEncoder(f)
+        encoder.run()
 
