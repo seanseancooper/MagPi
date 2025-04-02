@@ -10,7 +10,7 @@ from pika.exceptions import AMQPConnectionError
 
 from src.cam.Showxating.plugin import ShowxatingPlugin
 from src.cam.Showxating.lib.ImageWriter import ImageWriter
-from src.cam.Showxating.lib.FrameObjektTracker import FrameObjektTracker
+from src.cam.Showxating.lib.FrameObjektTrackerNoHist import FrameObjektTracker
 from src.cam.Showxating.lib.utils import draw_grid, draw_contours, wall_images, sortedContours, is_inside
 
 import logging
