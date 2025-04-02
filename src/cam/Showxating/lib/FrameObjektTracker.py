@@ -134,7 +134,8 @@ class FrameObjektTracker:
 
             # from skimage.metrics import structural_similarity as ssim
             # self._frame_SSIM = ssim(X, Y)
-            # self._frame_MSEs.append(self._frame_MSE)
+
+            self._frame_MSEs.append(self._frame_MSE)
 
         except Exception as e:
             # ssim(X, Y) Problem setting frame delta: win_size exceeds image extent.
@@ -295,14 +296,14 @@ class FrameObjektTracker:
 
         return labeled
 
-    def get_histogram_delta(self, o,  frame, wall, rectangle):
+    def get_histogram_delta(self, o, frame, wall, rectangle):
         from src.cam.Showxating.ShowxatingHistogramPlugin import ShowxatingHistogramPlugin
 
         ''' .
             in the FrameObjektEncoder there is commented code to do a histogram, and it worked.
             I think it is better to do the histogram there, in an offline process, but 
             this module, 'FrameObjektTracker' -- uses histograms!
-            
+
             Doing it this way for now, but will consider moving this....
         '''
 
