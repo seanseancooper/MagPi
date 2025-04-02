@@ -65,7 +65,7 @@ def print_tracked(p, f, rect):
             item = f'{o.contour_id}-{o.tag[-12:]} [{x},{y}]'
             pt = x, y
             # if rect and is_inside(pt, rect):
-            if rect and not o.hist_pass:
+            if rect and not o.HIST_pass:
                 # yellow dot: items being tracked
                 cv.putText(f, item, (x, (y + (i * 10))), cv.FONT_HERSHEY_PLAIN, .75, (0, 255, 255), 1)
                 cv.rectangle(f, (x, y), (x+5, y+5), (0, 255, 255), -1)

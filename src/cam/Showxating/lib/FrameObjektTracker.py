@@ -172,6 +172,7 @@ class FrameObjektTracker:
         o = FrameObjekt.create(self.f_id)
         o.rect = rectangle
         o.wall = wall
+        o.f_shape = wall.shape
 
         get_location(self)
         o.lat = self.latitude

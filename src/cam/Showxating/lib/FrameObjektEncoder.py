@@ -34,8 +34,8 @@ class FrameObjektEncoder(threading.Thread):
 
         numerical_features = np.array([
             [
-                float(self.frame_obj.fd),
-                float(self.frame_obj.fd_mean),
+                float(self.frame_obj.distance),
+                float(self.frame_obj.distances_mean),
                 float(self.frame_obj.hist_delta),
                 float(self.frame_obj.dist_mean),
             ]
@@ -52,7 +52,7 @@ class FrameObjektEncoder(threading.Thread):
             ]
         ])
 
-        _s  = self.frame_obj.shape
+        _s  = self.frame_obj.f_shape
         rect_shape = [int(_s[1]), int(_s[0]), int(_s[1]), int(_s[0])]
         loc_shape = [int(_s[1]), int(_s[0])]
         rect_array = np.asarray(rect_shape)

@@ -9,6 +9,7 @@ def frameobjekt_to_dict(f_obj):
         'f_id'              : f_obj.f_id,
         'created'           : f_obj.created.isoformat(),
         'tag'               : f_obj.tag,
+        'f_shape'           : f_obj.f_shape,
 
         # 'contours'        : f_obj.contours.tolist() if f_obj.contours is not None else None,
         # 'hierarchy'       : f_obj.hierarchy.tolist() if f_obj.hierarchy is not None else None,
@@ -16,8 +17,8 @@ def frameobjekt_to_dict(f_obj):
         # 'contour_id'      : f_obj.contour_id,
         'curr_dist'         : f_obj.curr_dist,
         # 'distances'       : f_obj.distances.tolist(),
-        'fd'                : f_obj.fd,
-        'fd_mean'           : f_obj.fd_mean,
+        'fd'                : f_obj.distance,
+        'fd_mean'           : f_obj.distances_mean,
         # 'delta_range'     : f_obj.delta_range,
         'hist_delta'        : f_obj.hist_delta,
         # 'f_hist'          : f_obj.f_hist,
@@ -28,10 +29,16 @@ def frameobjekt_to_dict(f_obj):
         # 'wall'            : f_obj.wall.tolist() if f_obj.wall is not None else None,
         'lat'               : f_obj.lat,
         'lon'               : f_obj.lon,
-        'close'             : str(f_obj.close),
-        'inside_rect'       : str(f_obj.inside_rect),
-        'hist_pass'         : str(f_obj.hist_pass),
-        'wall_pass'         : str(f_obj.wall_pass)
+        'close'             : bool(f_obj.close),
+        'inside_rect'       : bool(f_obj.inside_rect),
+
+        'HIST_pass'         : bool(f_obj.HIST_pass),
+        'SIM_pass'          : bool(f_obj.SIM_pass),
+
+        'WALL_pass'         : bool(f_obj.WALL_pass),
+        'MSE_pass'          : bool(f_obj.MSE_pass),
+        'COS_pass'          : bool(f_obj.COS_pass),
+
     }
 
 
@@ -39,6 +46,7 @@ def dict_to_frameobjekt(data):
     """Convert dictionary back to FrameObjekt."""
     frame_obj = FrameObjekt.create(data['f_id'])
     frame_obj.f_id = data['f_id']
+    frame_obj.f_shape = tuple(data['f_shape'])
     frame_obj.created = datetime.fromisoformat(data['created'])
     frame_obj.tag = data['tag']
 
@@ -48,8 +56,8 @@ def dict_to_frameobjekt(data):
     # frame_obj.contour_id = data['contour_id']
     frame_obj.curr_dist = data['curr_dist']
     # frame_obj.distances = np.array(data['distances'])
-    frame_obj.fd = data['fd']
-    frame_obj.fd_mean = data['fd_mean']
+    frame_obj.distance = data['fd']
+    frame_obj.distances_mean = data['fd_mean']
     # frame_obj.delta_range = data['delta_range']
     frame_obj.hist_delta = data['hist_delta']
     # frame_obj.f_hist = data['f_hist']
@@ -60,10 +68,14 @@ def dict_to_frameobjekt(data):
     # frame_obj.wall = np.array(data['wall']) if data['wall'] is not None else None
     frame_obj.lat = data['lat']
     frame_obj.lon = data['lon']
-    frame_obj.close = data['close']
-    frame_obj.inside_rect = data['inside_rect']
-    frame_obj.hist_pass = data['hist_pass']
-    frame_obj.wall_pass = data['wall_pass']
+    frame_obj.close = bool(data['close'])
+    frame_obj.inside_rect = bool(data['inside_rect'])
+    frame_obj.HIST_pass = bool(data['HIST_pass'])
+    frame_obj.SIM_pass = bool(data['SIM_pass'])
+
+    frame_obj.WALL_pass = bool(data['WALL_pass'])
+    frame_obj.MSE_pass = bool(data['MSE_pass'])
+    frame_obj.COS_pass = bool(data['COS_pass'])
     return frame_obj
 
 

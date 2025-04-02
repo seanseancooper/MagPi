@@ -39,7 +39,7 @@ class FrameObjekt:
         self.lat = 0.0
         self.lon = 0.0
         self.wall = None                                                # [ndarray: container] image of processed area in this frame
-        self.shape = None                                               # [ndarray: container] shape of current frame
+        self.f_shape = None                                             # [ndarray: container] shape of current frame
 
         self.close = None                                               # [boolean: reporting] is this mean location with the bounds of the contour?
         self.inside_rect = None
@@ -52,10 +52,6 @@ class FrameObjekt:
         self.WALL_pass = None
         self.MSE_pass = None
         self.COS_pass = None
-
-        self.MSE_pass = None
-        self.COS_pass = None
-        self.SIM_pass = None
 
     @staticmethod
     def create(f_id):
