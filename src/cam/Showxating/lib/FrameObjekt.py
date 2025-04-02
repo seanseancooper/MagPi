@@ -37,6 +37,7 @@ class FrameObjekt:
         self.lat = 0.0
         self.lon = 0.0
         self.wall = None                                                # [ndarray: container] image of processed area in this frame
+        self.shape = None                                               # [ndarray: container] shape of current frame
 
         self.close = None                                               # [boolean: reporting] is this mean location with the bounds of the contour?
         self.inside_rect = None

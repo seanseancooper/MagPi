@@ -129,7 +129,6 @@ class FrameObjektTracker:
             # def MSE(X, Y):
             #     n = X.shape[0] * Y.shape[1]
             #     return 1 / n * np.sum(np.square(X - Y))
-            #
             # self._frame_SSIM = MSE(X, Y)
 
             from skimage.metrics import structural_similarity as ssim
