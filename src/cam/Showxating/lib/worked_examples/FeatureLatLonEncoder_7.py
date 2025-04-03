@@ -3,7 +3,7 @@ import numpy as np
 import geohash
 import cv2
 import hashlib
-from FrameObjekt import FrameObjekt as FrameObjekt
+from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
 
 
 # Version 1.0: Initial implementation of encoding length, width, height, and color histogram
