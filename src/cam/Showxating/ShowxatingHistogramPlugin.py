@@ -16,7 +16,6 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
         self._kz = (3, 3)
         self.library = ''
         self.bins = 12                          # 12??
-        self.rectangle = []
         self.compare_method = None
         self.norm_type = None
         self.out_data = {}
@@ -29,7 +28,7 @@ class ShowxatingHistogramPlugin(ShowxatingPlugin):
 
     def get_histogram(self, item, rect):
 
-        x, y, w, h = self.rectangle = rect
+        x, y, w, h = rect
         f = item[y:y + h, x:x + w]
         self.out_data = {'b': [], 'g': [], 'r': []}
 
