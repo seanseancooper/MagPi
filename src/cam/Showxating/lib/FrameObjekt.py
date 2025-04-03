@@ -26,8 +26,6 @@ class FrameObjekt:
         self.distances_mean = 0.0
         self.delta_range = 0.0
 
-
-
         self.f_hist = None                                              # histogram of frame
         self.w_hist = None                                              # histogram of wall, filled in by FrameObjectTracker
 
@@ -43,12 +41,8 @@ class FrameObjekt:
 
         self.close = None                                               # [boolean: reporting] is this mean location with the bounds of the contour?
         self.inside_rect = None
-
-        # exists, subs
         self.HIST_pass = None
         self.SIM_pass = None
-
-        # new
         self.WALL_pass = None
         self.MSE_pass = None
         self.COS_pass = None
