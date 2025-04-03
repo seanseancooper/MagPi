@@ -43,6 +43,7 @@ class MAPController(threading.Thread):
             if routes.mapAgg.config['NODE_BUILD'] is True:
                 routes.node.build()
 
+            # start elastic instance/cluster docker container.
             routes.node.run()
             routes.mapAgg.run()
 
