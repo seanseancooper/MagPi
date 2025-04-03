@@ -121,6 +121,7 @@ class FrameObjektTracker:
             self._frame_delta = np.mean(pairwise_distances(X, Y))
             # return the mean similarity of X and Y
             # self._frame_delta = np.mean(cosine_similarity(X, Y))
+
             self._frame_deltas.append(self._frame_delta)
 
             self._frame_MSE = np.sum((X - Y) ** 2)
@@ -171,6 +172,8 @@ class FrameObjektTracker:
     def init_o(self, wall, rectangle):
         o = FrameObjekt.create(self.f_id)
         o.rect = rectangle
+        # put the wall on a temp filesystem and use the tag for the name
+        # put the wall in zmq or imagemq and use the tag for the name
         o.wall = wall
         o.f_shape = wall.shape
 
