@@ -154,21 +154,21 @@ class FrameObjektTracker:
             self.frame_MSEs.append(self.frame_MSE)
 
             from skimage.metrics import structural_similarity as ssim
-            (self.frame_SSIM, diff) = ssim(X, Y, full=True)
-            self.frame_SSIMs.append(self.frame_SSIM)
+
+            self.frame_SSIM = 0.0
+            if X.shape[0] > self.config['tracker']['ssim_win_size'] and X.shape[1] > self.config['tracker']['ssim_win_size']:
+                # skimage.metrics.structural_similarity(im1, im2, *, win_size=None, gradient=False, data_range=None, channel_axis=None, gaussian_weights=False, full=False, **kwargs)
+                (self.frame_SSIM, diff) = ssim(X, Y, win_size=self.config['tracker']['ssim_win_size'], full=True)
+                self.frame_SSIMs.append(self.frame_SSIM)
 
         except Exception as e:
-            # ssim(X, Y) Problem setting frame delta: win_size exceeds image extent.
-            # Either ensure that your images are at least 7x7; or pass win_size explicitly
-            # in the function call, with an odd value less than or equal to the smaller
-            # side of your images. If your images are multichannel (with color channels),
-            # set channel_axis to the axis number corresponding to the channels.
-
-            cam_logger.warning(f'FrameObjektTracker error while setting deltas: {e}')
+            cam_logger.warning(f'FrameObjektTracker error while setting deltas: {e}  {X.shape}, {Y.shape}')
 
     def init_o(self, wall, rectangle):
         o = FrameObjekt.create(self.f_id)
         o.rect = rectangle
+        # save the wall to the filesystem
+        # put the location of the wall in o.wall
         o.wall = wall
         o.f_shape = wall.shape
 
