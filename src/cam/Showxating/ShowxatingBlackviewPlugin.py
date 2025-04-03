@@ -310,7 +310,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                     print_analytics(self, frame, cnt, hier)
 
                     if self.plugin_config['write_all_frames']:
-                        self.print_frame(frame, self.frame_id)  # <-- memorize moving things
+                         self.print_frame(frame, self.frame_id)  # <-- memorize moving things
 
             self.trap(frame, False)
             # self.post_mediapipe(frame)  # do this with mq....
