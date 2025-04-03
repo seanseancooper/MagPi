@@ -14,3 +14,5 @@ net_bp = Blueprint(
 @net_bp.route('/', subdomain="net")
 def index():
     return render_template("net.html.j2", dashboardURL=config['ELASTIC_DASHBOARD_URL'])
+
+# note: there is *anticipated* to be an elasticc.pull() method.
