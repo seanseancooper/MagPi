@@ -35,7 +35,7 @@
 				"AFT_VIDEO_URL_" : "http://10.99.77.1/blackvue_live.cgi?direction=R",
 				"FORE_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPi/dev/cam/training_data/test_movies/cam.mp4",
 				"AFT_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPi/dev/cam/training_data/test_movies/cam.mp4",
-				"FORWARD_TEST_URL" : 0,
+				"FORWARD_TEST_URL" : "",
 
 				"plugin_process_frames": true,
 				"krnl": 17,
@@ -61,7 +61,8 @@
 					"f_delta_pcnt": 1.0,
 					"l_delta_pcnt": 0.5,
 					"d_range": 2.00,
-					"contour_limit": 2
+					"contour_limit": 2,
+					"ssim_win_size": 5
 				},
 				"tokenbucket": {
 					"tokens": 2,
