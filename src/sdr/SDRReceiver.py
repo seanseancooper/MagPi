@@ -1,47 +1,47 @@
-# Analyze the signals from an SDR stick; draw inferences from the EM field signals.
-# This requires 'antenna design' cycle; interested in specific frequencies...
-# Wifi
-# Bluetooth
-# RF Bands
-#
-# This requires 'hardware design' cycle; I've done this before with the 'SDR Radio'
-# I build in 2020, I know this is feasible. The question is (and always is...)
-# much amperage this hardware will draw...
-#
-# What is the RTL-SDR frequency range?
-#
-# This is dependent on the particular tuner variant used in the dongle, and the particular
-# implementation. Some dongles, like our RTL-SDR Blog V3 and V4 also have hardware
-# enhancements that enable reception below 24 MHz.
-#
-# Tuner 	                    Frequency range
-# Elonics E4000 	            52 – 2200 MHz with a gap from 1100 MHz to 1250 MHz (varies)
-# Rafael Micro R820T/2/R860 	24 – 1766 MHz (Can be improved to ~13 - 1864 MHz with experimental drivers)
-# Rafael Micro R828D
-# RTL-SDR Blog V4 Model:      24 - 1766 MHz. Other models may have a cutoff around 1 GHz.
-# Fitipower FC0013 	        22 – 1100 MHz
-# Fitipower FC0012 	        22 – 948.6 MHz
-# FCI FC2580 	                146 – 308 MHz and 438 – 924 MHz (gap in between)
-#
-# Table Source: Osmocom
-#
-# As you can see from the table, the Elonics E4000 and Rafael Micro R820T/2/R860 and R828D
-# dongles have the greatest frequency range.
-#
-# Would it be possible to access the Wifi native hardware?
-#
-# Frequency Analysis Chain:
-#     WIFI --*--> SDR |----> FFT
-#                     |----> HIST
-#                     |----> MFCC
-#                     |----> FREQ
-#
-#     * = provide frequency to SDR
-#
-# PLAN:
-# 0. Start with the SDR stick I have.
-# 1. Write ANALYSIS code using FM radio stations (known frequencies, locations, available)
-# 2. migrate to 'HackRF' or other better hardware, rewrite interface code.
+from rtlsdr import RtlSdr
+import numpy as np
+import matplotlib.pyplot as plt
+
+sdr = RtlSdr()
+sdr.sample_rate = 2.048e6 # Hz
+sdr.center_freq = 100e6   # Hz
+sdr.freq_correction = 60  # PPM
+sdr.gain = 'auto'
+
+print(len(sdr.read_samples(1024)))
+print(sdr.valid_gains_db)
+
+# RTL-SDR manual gain example
+# sdr.gain = 49.6
+# print(sdr.gain)
+
+fft_size = 512
+num_rows = 500
+x = sdr.read_samples(2048) # get rid of initial empty samples
+x = sdr.read_samples(fft_size*num_rows) # get all the samples we need for the spectrogram
+sdr.close()
+
+# spectrogram
+spectrogram = np.zeros((num_rows, fft_size))
+
+for i in range(num_rows):
+    spectrogram[i,:] = 10*np.log10(np.abs(np.fft.fftshift(np.fft.fft(x[i*fft_size:(i+1)*fft_size])))**2)
+
+extent = [(sdr.center_freq + sdr.sample_rate/-2)/1e6,
+            (sdr.center_freq + sdr.sample_rate/2)/1e6,
+            len(x)/sdr.sample_rate, 0]
+plt.imshow(spectrogram, aspect='auto', extent=extent)
+plt.xlabel("Frequency [MHz]")
+plt.ylabel("Time [s]")
+plt.show()
+
+
+# plt.plot(x.real)
+# plt.plot(x.imag)
+# plt.legend(["I", "Q"])
+# plt.savefig("../_images/rtlsdr-gain.svg", bbox_inches='tight')
+# plt.show()
+
 
 
 
