@@ -20,6 +20,7 @@ class TRXSerialRetriever(threading.Thread):
         super().__init__()
         self.DEBUG = False
         self.config = {}
+        self.worker_id = 'TRXSerialRetriever'
 
         self.device = None  # ioreg -r -c IOUSBHostDevice -l
         self.rate = 0
@@ -87,7 +88,7 @@ class TRXSerialRetriever(threading.Thread):
 
     def makeSignalPoint(self):
         get_location(self)
-        sgnl = TRXSignalPoint(self.worker_id, self.longitude, self.latitude, self.out)
+        sgnl = TRXSignalPoint(self.worker_id, self.longitude, self.latitude, 0.0, self.out)
 
         def manage_signal_cache():
             while len(self.signal_cache) >= self.config.get('SIGNAL_CACHE_MAX', 150):

@@ -1,3 +1,6 @@
+from collections import defaultdict
+from datetime import datetime, timedelta
+
 import numpy as np
 from src.lib.utils import format_time
 from src.lib.SignalPoint import SignalPoint
@@ -80,10 +83,43 @@ class TRXSignalPoint(SignalPoint):
     This class encapsulates audio data for analysis and can switch between intermittent and continuous signal processing.
     """
 
-    def __init__(self, worker_id, lon, lat, sgnl, signal_data=None, audio_data=None, signal_type="intermittent", sr=44100):
+    def __init__(self, worker_id, lon, lat, sgnl, attributes, signal_data=None, audio_data=None, signal_type="intermittent", sr=44100):
         super().__init__(lon, lat, sgnl)
         self._worker_id = worker_id
         self._signal_type = signal_type
+
+        self.created = datetime.now()   # when signal was found
+        self.updated = datetime.now()   # when signal was last reported
+        self.elapsed = timedelta()      # time signal has been tracked.
+
+        self.tracked = False
+        self.is_mute = False
+        self.attributes = defaultdict(dict)
+        #   ALPHATAG: name of system broadcasting
+        #   COMP_DATE: ??
+        #   COMP_TIME: ??
+        #   FREQ1: responding frequency?
+        #   FREQ2: initial freq?
+        # INFO
+        #   OBJECT_ID: system object broadcasting
+        # OTHER_TEXT
+        #   RID1
+        #   RID2
+        #   SCAN_DATE: replaced date
+        #   SCAN_TIME: replaced time
+        #   SITE: broadcast site
+        # SQ_MODE
+        # SQ_VALUE
+        #   SYSTEM: Broadcaster
+        #   TGID1
+        #   TGID2
+        #   TSYS_ID
+        #   TSYS_TYPE: broadcast system TYPE
+        #   TYPE: broadcast type
+
+        def aggregate(k,v):
+            self.attributes[k] = v
+        [aggregate(k, str(v)) for k, v in attributes.items()]
 
         self._signal_data = signal_data  # Raw signal data (could be radio data or audio data)
         self._audio_data = audio_data  # Raw audio data (if present)
@@ -91,7 +127,7 @@ class TRXSignalPoint(SignalPoint):
         self._frequency_features = None
 
         # If the signal is intermittent, set sr and process as intermittent
-        if self._signal_type == "intermittent":
+        if self._signal_type == "intermittent" and signal_data is not None:
             self._frequency_features = self.compute_frequency_features(signal_data, self._sr)
         # add  'interstitial' signals? hmmm....
         elif self._signal_type == "continuous" and audio_data is not None:
@@ -128,6 +164,11 @@ class TRXSignalPoint(SignalPoint):
                         np.log2(np.abs(np.fft.fft(audio_data)) / np.sum(np.abs(np.fft.fft(audio_data))))))
         }
         return audio_features
+
+    def update(self, tracked):
+        self.updated = datetime.now()
+        self.elapsed = self.updated - self._created
+        self.tracked = tracked
 
     def get(self):
         """
