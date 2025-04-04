@@ -35,6 +35,8 @@ class ARXRecorder(threading.Thread):
         self.updated = datetime.now()
         self.elapsed = timedelta()              # elapsed time since created
 
+        self._worker_id = 'ARXRecorder'
+
         self._stream = None
         self.thread = None
         self.recording = self.previously_recording = False
