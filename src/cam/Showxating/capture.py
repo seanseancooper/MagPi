@@ -6,8 +6,6 @@ from PIL import Image
 import logging
 import http.client
 
-from src.cam.Showxating.lib.CaptureEvent import CaptureEvent
-
 cam_logger = logging.getLogger('cam_logger')
 logger_root = logging.getLogger('root')
 
@@ -30,7 +28,6 @@ class ShowxatingCapture:
         self.statistics = {}
         self.frame = None
         self.last_access = 0
-        self.event = CaptureEvent()
 
     def init_capture(self):
 
