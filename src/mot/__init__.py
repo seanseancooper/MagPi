@@ -3,5 +3,5 @@ from src.lib.rest_server import RESTServer as RESTServer
 
 if __name__ == '__main__':
     m = MOTController()
-    RESTServer(c.create_app()).run()
+    RESTServer(m.create_app()).run()
     m.run()
