@@ -3,6 +3,10 @@ from decimal import Decimal
 
 import cv2 as cv
 import numpy as np
+from sklearn.tree import DecisionTreeRegressor
+
+
+
 from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
 from sklearn.metrics import euclidean_distances, pairwise_distances, pairwise_kernels
 from sklearn.metrics.pairwise import paired_distances, cosine_similarity
@@ -77,6 +81,8 @@ class FrameObjektTracker:
 
         self.latitude = 0.0                 # current latitude
         self.longitude = 0.0                # current longitude
+
+        self.decision_tree = DecisionTreeRegressor()
 
     def get(self):
         return {
@@ -167,8 +173,7 @@ class FrameObjektTracker:
     def init_o(self, wall, rectangle):
         o = FrameObjekt.create(self.f_id)
         o.rect = rectangle
-        # save the wall to the filesystem
-        # put the location of the wall in o.wall
+        # put the wall on a temp filesystem and use the tag for the name
         o.wall = wall
         o.f_shape = wall.shape
 
@@ -335,6 +340,39 @@ class FrameObjektTracker:
             labeled.append(o)
 
         return labeled
+
+    # def label_locations(self, frame, wall, rectangle):
+    #     labeled = []
+    #
+    #     # Collect past tracked objects for training
+    #     if self.tracked:
+    #         training_data = np.array([[obj.rect[0], obj.rect[1], obj.rect[2], obj.rect[3], obj.lat, obj.lon] for obj in
+    #                                   self.tracked.values()])
+    #         training_labels = [obj.tag for obj in self.tracked.values()]
+    #
+    #         from sklearn.preprocessing import LabelEncoder
+    #         label_encoder = LabelEncoder()
+    #         numeric_labels = label_encoder.fit_transform(training_labels)
+    #         self.decision_tree.fit(training_data, numeric_labels)
+    #         # self.decision_tree.fit(training_data, training_labels)
+    #
+    #     o = self.init_o(wall, rectangle)
+    #     features = np.array([[o.rect[0], o.rect[1], o.rect[2], o.rect[3], o.lat, o.lon]])
+    #
+    #     if self.tracked:
+    #         prediction = self.decision_tree.predict(features)
+    #     else:
+    #         prediction = ["NEW"]
+    #
+    #     if prediction[0] == "CONT":
+    #         o.tag = o.prev_tag if hasattr(o, 'prev_tag') else f"{self.f_id}_{o.prev_tag.split('_')[1]}"
+    #         # predicted_label = label_encoder.inverse_transform(self.decision_tree.predict(features).astype(int))
+    #     else:
+    #         o.tag = o.create_tag(self.f_id)
+    #
+    #     labeled.append(o)
+    #
+    #     return labeled
 
     def track_objects(self, f_id, frame, contour, hierarchy, wall, rectangle):
         """

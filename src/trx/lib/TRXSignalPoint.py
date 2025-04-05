@@ -1,11 +1,7 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
-
-import numpy as np
-from src.lib.utils import format_time
 from src.lib.SignalPoint import SignalPoint
-from python_speech_features import mfcc
-
+from src.lib.utils import format_time
 
 # class TRXSignalPoint(SignalPoint):
 #     """ discrete class to encapsulate a signal captured at a point.
@@ -76,7 +72,6 @@ from python_speech_features import mfcc
 #             "attributes": self.attributes
 #         }
 
-
 class TRXSignalPoint(SignalPoint):
     """
     Class to handle intermittent or continuous radio frequency signals.
@@ -86,84 +81,56 @@ class TRXSignalPoint(SignalPoint):
     def __init__(self, worker_id, lon, lat, sgnl, attributes, signal_data=None, audio_data=None, signal_type="intermittent", sr=44100):
         super().__init__(lon, lat, sgnl)
         self._worker_id = worker_id
-        self._signal_type = signal_type
+        self._signal_type = signal_type         # continuous || intermittent
 
-        self.created = datetime.now()   # when signal was found
-        self.updated = datetime.now()   # when signal was last reported
-        self.elapsed = timedelta()      # time signal has been tracked.
-
+        self.updated = datetime.now()           # when signal was last reported
+        self.elapsed = timedelta()              # time signal has been tracked.
         self.tracked = False
         self.is_mute = False
-        self.attributes = defaultdict(dict)
-        #   ALPHATAG: name of system broadcasting
-        #   COMP_DATE: ??
-        #   COMP_TIME: ??
-        #   FREQ1: responding frequency?
-        #   FREQ2: initial freq?
-        # INFO
-        #   OBJECT_ID: system object broadcasting
-        # OTHER_TEXT
-        #   RID1
-        #   RID2
-        #   SCAN_DATE: replaced date
-        #   SCAN_TIME: replaced time
-        #   SITE: broadcast site
-        # SQ_MODE
-        # SQ_VALUE
-        #   SYSTEM: Broadcaster
-        #   TGID1
-        #   TGID2
-        #   TSYS_ID
-        #   TSYS_TYPE: broadcast system TYPE
-        #   TYPE: broadcast type
-
-        def aggregate(k,v):
-            self.attributes[k] = v
-        [aggregate(k, str(v)) for k, v in attributes.items()]
-
-        self._signal_data = signal_data  # Raw signal data (could be radio data or audio data)
-        self._audio_data = audio_data  # Raw audio data (if present)
+        self.attributes = defaultdict(dict)     # see aggregate
+        self._signal_data = signal_data         # Raw signal data (could be radio data or audio data)
+        self._audio_data = audio_data           # Raw audio data (if present)
         self._sr = sr
         self._frequency_features = None
 
+        def aggregate(k,v):
+            #   ALPHATAG: name of system broadcasting
+            #   COMP_DATE: ??
+            #   COMP_TIME: ??
+            #   FREQ1: responding frequency?
+            #   FREQ2: initial freq?
+            # INFO
+            #   OBJECT_ID: system object broadcasting
+            # OTHER_TEXT
+            #   RID1
+            #   RID2
+            #   SCAN_DATE: replaced date
+            #   SCAN_TIME: replaced time
+            #   SITE: broadcast site
+            # SQ_MODE
+            # SQ_VALUE
+            #   SYSTEM: Broadcaster
+            #   TGID1
+            #   TGID2
+            #   TSYS_ID
+            #   TSYS_TYPE: broadcast system TYPE
+            #   TYPE: broadcast type
+            self.attributes[k] = v
+        [aggregate(k, str(v)) for k, v in attributes.items()]
+
         # If the signal is intermittent, set sr and process as intermittent
         if self._signal_type == "intermittent" and signal_data is not None:
-            self._frequency_features = self.compute_frequency_features(signal_data, self._sr)
+            from src.arx.lib.ARXAudioencoder import compute_frequency_features
+            self._frequency_features = compute_frequency_features(signal_data, self._sr)
         # add  'interstitial' signals? hmmm....
         elif self._signal_type == "continuous" and audio_data is not None:
             # If continuous, set sr and use audio data and compute frequency features (similar to ARXSignalPoint)
-            self._frequency_features = self.compute_audio_frequency_features(audio_data, self._sr)
+            from src.arx.lib.ARXAudioencoder import compute_audio_frequency_features
+            self._frequency_features = compute_audio_frequency_features(audio_data, self._sr)
 
-    def compute_audio_frequency_features(self, audio_data, sampling_rate):
-        """
-        Compute audio-specific frequency features (e.g., MFCC) from raw audio data.
-        """
-        mfcc_features = mfcc(audio_data, samplerate=sampling_rate, numcep=13)
-
-        # Frequency features
-        # DB: decibels
-        # SFDR: Spurious free dynamic range
-        # SINAD: Signal-to-noise-and-distortion ratio
-        # ENOB: Effective number of bits
-        # SNR: Signal-to-noise ratio
-        # THD: Total harmonic distortion
-        # THD + N: Total harmonic distortion plus noise
-        # Spectral Flatness
-        # Spectral Contrast
-        # chromanance
-        # tempo
-        # rhythm
-        # zero-crossings
-
-
-        audio_features = {
-            "mfcc"            : mfcc_features.mean(axis=0).tolist(),
-            "dominant_freq"   : float(np.argmax(np.abs(np.fft.fft(audio_data)))),
-            "spectral_entropy": float(
-                -np.sum((np.abs(np.fft.fft(audio_data)) / np.sum(np.abs(np.fft.fft(audio_data)))) *
-                        np.log2(np.abs(np.fft.fft(audio_data)) / np.sum(np.abs(np.fft.fft(audio_data))))))
-        }
-        return audio_features
+    def set_audio_data(self, audio_data, sampling_rate):
+        self._audio_data = audio_data  # Set audio data dynamically
+        self._sr = sampling_rate  # Set the sampling rate dynamically
 
     def update(self, tracked):
         self.updated = datetime.now()
