@@ -139,7 +139,7 @@ class NaiveBayesClassifier(threading.Thread):
         n, d = X.shape
 
         # add one positive and negative example to avoid division by zero ("plus-one smoothing")
-        X = np.concatenate([X, np.ones((2, d, q)), np.zeros((2, d, q))])
+        X = np.concatenate([X, np.ones((2, d, n)), np.zeros((2, d, n))])
         Y = np.concatenate([Y, [-1, 1, -1, 1]])
 
         # take the mean of all of the elements in X that have the same index
