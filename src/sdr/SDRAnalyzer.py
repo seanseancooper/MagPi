@@ -25,11 +25,14 @@ class SDRAnalyzer:
         self.sdr.gain = gain_value
         print(self.sdr.gain)
 
-    def generate_spectrogram(self, fft_size=512, num_rows=500):
+    def generate_data(self, fft_size=512, num_rows=500):
         """Generate and display a spectrogram from the SDR data."""
         x = self.read_samples(2048)  # get rid of initial empty samples
         x = self.read_samples(fft_size * num_rows)  # get all the samples we need for the spectrogram
         self.sdr.close()
+        return x
+
+    def generate_spectrogram(self, x, fft_size=512, num_rows=500):
 
         spectrogram = np.zeros((num_rows, fft_size))
         for i in range(num_rows):
@@ -56,17 +59,23 @@ class SDRAnalyzer:
         plt.plot(x.real)
         plt.plot(x.imag)
         plt.legend(["I", "Q"])
-        plt.savefig("../_images/rtlsdr-gain.svg", bbox_inches='tight')
+        plt.savefig("./rtlsdr-gain.svg", bbox_inches='tight')
         plt.show()
 
-# Example usage:
-sdr_analyzer = SDRAnalyzer()
-sdr_analyzer.print_device_info()
+if __name__ == '__main__':
+    sdr_analyzer = SDRAnalyzer()
+    sdr_analyzer.set_gain(49.6)
 
-# Uncomment to set gain and analyze data
-# sdr_analyzer.set_gain(49.6)
-# sdr_analyzer.generate_spectrogram()
-# sdr_analyzer.plot_psd(x)  # Pass your signal data here
-# sdr_analyzer.plot_iq_data(x)  # Pass your signal data here
+    fft_size=512
+    num_rows=500
+    sdr_analyzer.print_device_info()
+    x = sdr_analyzer.generate_data(
+            fft_size=fft_size,
+            num_rows=num_rows
+    )
+
+    sdr_analyzer.generate_spectrogram(x, fft_size=fft_size, num_rows=num_rows)
+    sdr_analyzer.plot_psd(x)
+    # sdr_analyzer.plot_iq_data(x)  # Pass your signal data here
 
 
