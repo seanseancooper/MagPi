@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  trxusb:
+    build:
+      context: .
+      dockerfile: trxdocker
+    container_name: trxusb
+    devices:
+      - /dev/bus/usb/001/002  # Update this path to your actual USB device
+    group_add:
+      - "${USB_GID}"  # Set in .env or shell
+    environment:
+      - PYTHONUNBUFFERED=1
+    stdin_open: true
+    tty: true

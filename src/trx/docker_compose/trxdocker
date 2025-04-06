@@ -1,0 +1,36 @@
+FROM python:3.11-slim
+
+# Set non-root user details
+ARG USER=trxuser
+ARG UID=1001
+ARG GID=1001
+
+# Create user and install system deps
+RUN groupadd -g $GID $USER && \
+    useradd -u $UID -g $GID -m $USER && \
+    apt-get update && apt-get install -y \
+    libusb-1.0-0 \
+    usbutils \
+    libsndfile1 \
+    ffmpeg \
+    build-essential \
+    libatlas-base-dev \
+    libasound2-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up work directory
+WORKDIR /app
+COPY . /app
+
+# Install Python packages
+RUN pip install --no-cache-dir \
+    numpy \
+    scipy \
+    python_speech_features \
+    geohash2 \
+    librosa
+
+# Switch to non-root user
+USER $USER
+
+CMD ["python", "TRXUSBRetriever.py"]
