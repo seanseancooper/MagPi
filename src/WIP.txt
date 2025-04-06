@@ -1,0 +1,70 @@
+ARX:
+    ARXAudioEncoder output formatting
+    ARXAudioEncoder mq path
+    project-keyword-spotter integration
+    Elasticsearch mappings
+    data persist?
+
+BLU:
+    NOT STARTED
+
+CAM:
+    compare FrameObjektTracker/FrameObjektTrackerNoHist output
+        GPT:    discrepancies by FrameObjekt
+                duplicated
+                missed
+    FrameObjektEncoder Elasticsearch mappings
+
+CAN:
+    NOT STARTED
+
+CONFIG:
+    move config into modules?
+
+EBS:
+    COMPLETE
+
+GPS:
+    GPS via hardware
+    GPT: GPS via javascript
+
+LIB:
+
+MAP:
+    hyperspectral imaging
+    aggregator refresh; look at acching and consistency
+
+MOT:
+    NEVER STARTED
+
+NET:
+    FrameObjektEncoder mq path
+    FrameObjektEncoder output formatting
+
+PSX:
+    GPT: NOT STARTED
+
+SDR:
+    Capture AND persist signals
+    use ARXAudioEncoder via MQ
+    Elasticsearch mappings
+
+TRX:
+    GPT: fix TRXUSBRetriever connection via serial
+    Elasticsearch mappings
+
+VIEW:
+    Integrate elastic/Kibana
+
+WIFI:
+    WifiSignalPoint to Elastic mappings. Dense vvectors, nested data
+    post processing features
+    dashboards (read serialized json output on filesystem)
+
+DOCKER:
+    Elasticsearch https
+    compose.yaml
+    Rabbit MQ startup
+    node processes.
+
+
