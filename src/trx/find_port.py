@@ -81,13 +81,14 @@ def main():
         "-l", "--list",
         dest="list",
         action="store_true",
-        help="List USB Serial devices currently connected"
+        help="List USB Serial devices currently connected",
+        default=True
     )
     parser.add_argument(
         "-s", "--serial",
         dest="serial",
         help="Only show devices with the indicated serial number",
-        default=None,
+        default=None
     )
     parser.add_argument(
         "-n", "--vendor",
@@ -108,7 +109,7 @@ def main():
         dest="verbose",
         action="store_true",
         help="Turn on verbose messages",
-        default=False
+        default=True
     )
     parser.add_argument(
         "--vid",
