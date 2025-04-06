@@ -1,8 +1,9 @@
 from flask import Blueprint, redirect, jsonify
 
 from src.trx.TRXUSBRetriever import TRXUSBRetriever
+from src.trx.TRXSerialRetriever import TRXSerialRetriever
 
-trxRet = TRXUSBRetriever()
+trxRet = TRXSerialRetriever()
 trxRet.configure('trx.json')
 
 trx_bp = Blueprint(
