@@ -12,7 +12,7 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
-			"TEST_FILE": "TEST_FILE.csv"
+			"TEST_FILE": ""
 		},
 		{
 			"TEST_FILE_TIME_MAX": 300
@@ -36,6 +36,9 @@
 			"STOPBITS": "serial.STOPBITS_ONE"
 		},
 		{
+			"USB_POLL_INTERVAL": 1
+		},
+		{
 			"BYTESIZE": "serial.EIGHTBITS"
 		},
 		{
@@ -52,6 +55,12 @@
 		},
 		{
 			"DATE_FORMAT": "%m/%d/%Y"
+		},
+		{
+			"VENDOR_ID": "0x2a59"
+		},
+		{
+			"PRODUCT_ID": "0x10"
 		},
 		{
 			"TIME_FORMAT": "%H:%M:%S"
