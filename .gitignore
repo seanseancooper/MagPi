@@ -1,4 +1,5 @@
 /dev/
+/logs/
 /src/cam/Showxating/lib/contours_clustering.py
 /src/cam/Showxating/lib/FeatureLatLonEncoder_7.py
 /src/cam/Showxating/lib/FeatureLatLonHistEncoder.py
