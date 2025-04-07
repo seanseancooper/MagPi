@@ -5,7 +5,18 @@ import cv2 as cv
 import numpy as np
 from sklearn.tree import DecisionTreeRegressor
 
-
+# class sklearn.tree.DecisionTreeRegressor(*,
+# criterion='squared_error',
+# splitter='best',
+# max_depth=None,
+# min_samples_split=2,
+# min_samples_leaf=1,
+# min_weight_fraction_leaf=0.0,
+# max_features=None,
+# random_state=None,
+# max_leaf_nodes=None,
+# min_impurity_decrease=0.0,
+# ccp_alpha=0.0)
 
 from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
 from sklearn.metrics import euclidean_distances, pairwise_distances, pairwise_kernels
@@ -20,6 +31,7 @@ cam_logger = logging.getLogger('cam_logger')
 speech_logger = logging.getLogger('speech_logger')
 
 def print_frame(o, origin):
+
     print(
 
             f"{o.f_id}"
@@ -52,9 +64,9 @@ class FrameObjektTracker:
         self.f_id = 0                       # current frame id
         self.config = {}
 
-        self.f_limit = 2                    # max age of frames in o_cache_map.
-        self.f_delta_pcnt = 0.50            # 0..1 percentage of delta between current/previous f over all pixels
-        self.l_delta_pcnt = 0.50            # 0..1 percentage of delta between the current/previous mean locations
+        self.f_limit = 30                  # max age of frames in o_cache_map.
+        self.f_delta_pcnt = 0.5            # 0..1 percentage of delta between current/previous f over all pixels
+        self.l_delta_pcnt = 0.2            # 0..1 percentage of delta between the current/previous mean locations
 
         self.contour_limit = None           # number of contours evaluated by plugin in each pass
         self.contour_id = None              # ????
@@ -177,9 +189,9 @@ class FrameObjektTracker:
         o.wall = wall
         o.f_shape = wall.shape
 
-        get_location(self)
-        o.lat = self.latitude
-        o.lon = self.longitude
+        # get_location(self)
+        o.lat = 0.0 # self.latitude
+        o.lon = 0.0 # self.longitude
 
         # oN.contour_id = self.contour_id
         o.avg_loc = self.ml
@@ -214,45 +226,7 @@ class FrameObjektTracker:
 
         o.SIM_pass = self.frame_SSIM > 0.1
 
-    # IDEA: Use a Regression Tree to discern the object's actual label based on frame MSE or SSIM:
-
-    # Scikit-learn provides a linear regression solver, which is demonstrated below.
-    #
-    # from sklearn.linear_model import LinearRegression
-    #
-    # # Set parameter to False since intercept is already included in X (constant dim)
-    # clf = LinearRegression(fit_intercept=False)
-    # clf.fit(X, y)
-    # w_sklearn = clf.coef_
-
-    # Scikit-learn also provides an implementation of Regression Trees (and Decision Tree Classifiers).
-    # The usage is pretty straight-forward: define the regression tree with the impurity function
-    # (and other settings), fit to the training set, and evaluate on any dataset.
-    #
-    # from sklearn.tree import DecisionTreeRegressor, plot_tree
-    #
-    # t0 = time.time()
-    # tree = DecisionTreeRegressor(
-    #         criterion='mse',  # Impurity function = Mean Squared Error (squared loss)
-    #         splitter='best',  # Take the best split
-    #         max_depth=None,  # Expand the tree to the maximum depth possible
-    # )
-    # tree.fit(xTrSpiral, yTrSpiral)
-    # t1 = time.time()
-    #
-    # tr_err = np.mean((tree.predict(xTrSpiral) - yTrSpiral) ** 2)
-    # te_err = np.mean((tree.predict(xTeSpiral) - yTeSpiral) ** 2)
-    #
-    # print("Elapsed time: %.2f seconds" % (t1 - t0))
-    # print("Training RMSE : %.2f" % tr_err)
-    # print("Testing  RMSE : %.2f \n" % te_err)
-
-    # Scikit-learn also provides a tree plotting function, which is again quite simple to use.
-    # This is extremely useful while debugging a decision tree.
-    # fig, ax = plt.subplots(figsize=(20, 20))
-    # _ = plot_tree(tree, ax=ax, precision=2, feature_names=[f'$[\mathbf{{x}}]_{i + 1}$' for i in range(2)], filled=True)
-
-    def label_locations(self, frame, wall, rectangle):
+    def label_locations(self, frame, wall, rectangle, stats):
         """ find elements 'tag' by euclidean distance """
 
         labeled = []
@@ -274,7 +248,7 @@ class FrameObjektTracker:
             o1.prev_tag = str(list(self.tracked.keys())[0])
 
             o1.tag = o1.create_tag(self.f_id)
-            self.get_stats(o1, wall, rectangle)
+            # self.get_stats(o1, wall, rectangle)
 
             if o1.inside_rect and o1.SIM_pass:
                 # item following f0 item.
@@ -294,40 +268,83 @@ class FrameObjektTracker:
             labeled.append(o1)
 
         if len(p_ml) > 1:
-            # CONTINUATION or NEW?
+
+            # oN = self.init_o(wall, rectangle)
+            #
+            # # get the mean location of the distances identified in the previous frame
+            # oN.distances = [euclidean_distances(
+            #         np.array([self.ml], dtype=int),
+            #         np.array([p_ml[j]], dtype=int).reshape(1, -1))
+            #     for j in np.arange(len(p_ml)) if p_ml[j] is not None]
+            #
+            # oN.dist_mean = np.mean(oN.distances)
+            #
+            # # the item in the array representing
+            # # the minimum euclidean distance to
+            # # the current location
+            # idx = np.argmin(oN.distances)
+            #
+            # oN.curr_dist = float(oN.distances[idx])                       # distance from last location
+            # oN.prev_tag = str(list(self.tracked.keys())[idx])             # 'target' tag; may not be the right tag
+            #
+            # oN.tag = f"{self.f_id}_{oN.prev_tag.split('_')[1]}"
+            # self.get_stats(oN, wall, rectangle)
+            #
+            # if oN.inside_rect and oN.SIM_pass:
+            #     # continuation of motion
+            #     # back reference and merge the rects (n largest) and take a pic of the merged area
+            #     # largest area wins.
+            #     print_frame(oN, "   ")
+            #
+            # if not oN.close and not oN.SIM_pass:
+            #     # NEW 'interstitial' item
+            #     oN.tag = oN.create_tag(self.f_id)
+            #     print_frame(oN, "XN:")
+
+            # IDEA: Use a Regression Tree to discern the object's label based on position
+
+            from sklearn.preprocessing import LabelEncoder
+            label_encoder = LabelEncoder()
+
             oN = self.init_o(wall, rectangle)
+            features = np.array([[    oN.rect[0], oN.rect[1], oN.rect[2], oN.rect[3], oN.avg_loc[0], oN.avg_loc[1]    ]])
 
-            # get the mean location of the distances identified in the previous frame
-            oN.distances = [euclidean_distances(
-                    np.array([self.ml], dtype=int),
-                    np.array([p_ml[j]], dtype=int).reshape(1, -1))
-                for j in np.arange(len(p_ml)) if p_ml[j] is not None]
+            # Collect past tracked objects for training
+            if self.tracked:
+                # why no local stats for delta?!
+                # these are not the right features. location based, deltas, distances, histgrams/hist-deltas, booleans.
+                # this is a regression problem; what does the CART tree need? do normalize of data.
+                # include latency [o.frame_rate, o.frame_period]
+                training_data = np.array([[    o.rect[0], o.rect[1], o.rect[2], o.rect[3], o.avg_loc[0], o.avg_loc[1]    ] for o in self.tracked.values()])
+                training_labels = [o.tag for o in self.tracked.values()]
 
-            oN.dist_mean = np.mean(oN.distances)
+                numeric_labels = label_encoder.fit_transform(training_labels)
+                self.decision_tree.fit(training_data, numeric_labels)
+                # self.decision_tree.fit(training_data, training_labels)
 
-            # the item in the array representing
-            # the minimum euclidean distance to
-            # the current location
-            idx = np.argmin(oN.distances)
+            if self.tracked:
+                prediction = self.decision_tree.predict(features)[0]  # Now it's a continuous value
+            else:
+                prediction = None
 
-            oN.curr_dist = float(oN.distances[idx])                       # distance from last location
-            oN.prev_tag = str(list(self.tracked.keys())[idx])             # 'target' tag; may not be the right tag
+            if prediction is not None:
+                threshold = 7.0
 
-            oN.tag = f"{self.f_id}_{oN.prev_tag.split('_')[1]}"
-            self.get_stats(oN, wall, rectangle)
+                if prediction > threshold:
+                    oN.tag = oN.create_tag(self.f_id)  # Assign a new tag if prediction exceeds threshold
+                    print(f"NEW TAG: {prediction} tag: {oN.tag}")
+                else:
+                    # a new tag based on the predicted tag; this is now the *index* of the tag
+                    predicted_tag = label_encoder.inverse_transform(self.decision_tree.predict(features).astype(int))[0]
+                    oN.tag = f"{self.f_id}_{predicted_tag.split('_')[1]}"
+                    oN.prev_tag = predicted_tag
+                    self.get_stats(oN, wall, rectangle)
+                    # print(f"prediction: {prediction} predicted_tag: {predicted_tag}")
 
-            if oN.inside_rect and oN.SIM_pass:
-                # continuation of motion
-                # back reference and merge the rects (n largest) and take a pic of the merged area
-                # largest area wins.
-
-                print_frame(oN, "   ")
-
-            if not oN.close and not oN.SIM_pass:
-                # NEW 'interstitial' item
+            else:
                 oN.tag = oN.create_tag(self.f_id)
-                print_frame(oN, "XN:")
 
+            print_frame(oN, "oN:")
             labeled.append(oN)
 
         if not labeled:
@@ -341,40 +358,7 @@ class FrameObjektTracker:
 
         return labeled
 
-    # def label_locations(self, frame, wall, rectangle):
-    #     labeled = []
-    #
-    #     # Collect past tracked objects for training
-    #     if self.tracked:
-    #         training_data = np.array([[obj.rect[0], obj.rect[1], obj.rect[2], obj.rect[3], obj.lat, obj.lon] for obj in
-    #                                   self.tracked.values()])
-    #         training_labels = [obj.tag for obj in self.tracked.values()]
-    #
-    #         from sklearn.preprocessing import LabelEncoder
-    #         label_encoder = LabelEncoder()
-    #         numeric_labels = label_encoder.fit_transform(training_labels)
-    #         self.decision_tree.fit(training_data, numeric_labels)
-    #         # self.decision_tree.fit(training_data, training_labels)
-    #
-    #     o = self.init_o(wall, rectangle)
-    #     features = np.array([[o.rect[0], o.rect[1], o.rect[2], o.rect[3], o.lat, o.lon]])
-    #
-    #     if self.tracked:
-    #         prediction = self.decision_tree.predict(features)
-    #     else:
-    #         prediction = ["NEW"]
-    #
-    #     if prediction[0] == "CONT":
-    #         o.tag = o.prev_tag if hasattr(o, 'prev_tag') else f"{self.f_id}_{o.prev_tag.split('_')[1]}"
-    #         # predicted_label = label_encoder.inverse_transform(self.decision_tree.predict(features).astype(int))
-    #     else:
-    #         o.tag = o.create_tag(self.f_id)
-    #
-    #     labeled.append(o)
-    #
-    #     return labeled
-
-    def track_objects(self, f_id, frame, contour, hierarchy, wall, rectangle):
+    def track_objects(self, f_id, frame, contour, hierarchy, wall, rectangle, stats):
         """
         LEARNINGS:
         Not all moving things should be tracked; this is very sensitive to minute
@@ -397,8 +381,8 @@ class FrameObjektTracker:
             return np.mean(np.array([x, y]), axis=1, dtype=int)
 
         self.ml = get_mean_location(contour)
-
-        for o in self.label_locations(frame, wall, rectangle):
+        # pass statistics here so they can be used by CART trees
+        for o in self.label_locations(frame, wall, rectangle, stats):
 
             # this is one of a group of sorted
             # contours; it could be the first
