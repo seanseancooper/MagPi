@@ -66,7 +66,7 @@ class ObjectEncoder:
         """
         # Extract numerical features from FrameObjekt
         numerical_features = np.array([
-            [obj.distance, obj.distances_mean, obj.dist_mean]
+            [obj.distance, obj.distances_mean]
             for obj in frame_objects
         ])
 
