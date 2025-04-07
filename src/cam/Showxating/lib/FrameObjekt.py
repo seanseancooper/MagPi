@@ -11,8 +11,6 @@ class FrameObjekt:
         self.f_id = f_id                                                # frame id when created.
         self.created = datetime.now()                                   # not used yet
         self.tag = None                                                 # [deprecate this in favor of using the f_id, portable] string unique identifier for this frame
-        self.isNew = True                                               # boolean is the id a NEW id or derived from f[-1]
-        self.skip = False                                               # [is this logical to have, useful or relevant?] should this frame be skipped in tagging f[+1]
 
         # frame data:
         # features [remove unused things, decide when things are used]
@@ -21,10 +19,12 @@ class FrameObjekt:
         self.prev_tag = None                                            # [string: object tracking] tag of nearest FrameObjekt from the previous frame
         self.contour_id = None                                          # [string: object tracking] id of source contour
         self.curr_dist = 0                                              # [int32: object tracking] euclidean_distance wrt previous mean x, y location
+
+
         self.distance = 0.0                                             # [0.0: reporting] euclidean_distance wrt previous frame analysis area
         self.distances = np.zeros(shape=[1, 1], dtype=np.float64)       # [list([1,1]): object location] of previous euclidean_distances wrt previous mean x, y locations.
         self.distances_mean = 0.0
-        self.dist_mean = 0.0                                            # mean of self.distances
+
         self.delta_range = 0.0
 
         self.f_hist = None                                              # histogram of frame
@@ -41,11 +41,12 @@ class FrameObjekt:
 
         self.close = None                                               # [boolean: reporting] is this mean location with the bounds of the contour?
         self.inside_rect = None
-        self.HIST_pass = None
-        self.SIM_pass = None
-        self.WALL_pass = None
-        self.MSE_pass = None
-        self.COS_pass = None
+        self.hist_pass = None                                           # filled during offline processing
+
+        self.ssim_pass = None
+        self.wall_pass = None
+        self.mse_pass = None
+        self.cosim_pass = None
 
         self.frame_rate = 0.0
         self.frame_period = 0.0
@@ -62,15 +63,14 @@ class FrameObjekt:
     def get(self):
         return {'f_id'          : self.f_id,
                 'tag'           : str(self.tag),
-                'f_EUC'         : self.distance,
-                'f_EUCs_mean'   : self.distances_mean,
+                'distance'      : self.distance,
                 'avg_loc'       : str(self.avg_loc),  # self.avg_loc.tolist()
-                'dist_mean'     : self.dist_mean,
+                'distances_mean': self.distances_mean,
                 'rect'          : str(self.rect),
                 'lat'           : self.lat,
                 'lon'           : self.lon,
                 'close'         : self.close,
                 'inside_rect'   : self.inside_rect is True,
-                'HIST_pass'     : self.HIST_pass,
-                'WALL_pass'     : self.WALL_pass,
+                'HIST_pass'     : self.hist_pass,
+                'WALL_pass'     : self.wall_pass,
         }

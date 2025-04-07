@@ -32,12 +32,12 @@ def frameobjekt_to_dict(f_obj):
         'close'             : bool(f_obj.close),
         'inside_rect'       : bool(f_obj.inside_rect),
 
-        'HIST_pass'         : bool(f_obj.HIST_pass),
-        'SIM_pass'          : bool(f_obj.SIM_pass),
+        'hist_pass'         : bool(f_obj.hist_pass),
+        'ssim_pass'         : bool(f_obj.ssim_pass),
 
-        'WALL_pass'         : bool(f_obj.WALL_pass),
-        'MSE_pass'          : bool(f_obj.MSE_pass),
-        'COS_pass'          : bool(f_obj.COS_pass),
+        'wall_pass'         : bool(f_obj.wall_pass),
+        'mse_pass'          : bool(f_obj.mse_pass),
+        'cosim_pass'        : bool(f_obj.cosim_pass),
 
     }
 
@@ -70,12 +70,12 @@ def dict_to_frameobjekt(data):
     frame_obj.lon = data['lon']
     frame_obj.close = bool(data['close'])
     frame_obj.inside_rect = bool(data['inside_rect'])
-    frame_obj.HIST_pass = bool(data['HIST_pass'])
-    frame_obj.SIM_pass = bool(data['SIM_pass'])
+    frame_obj.hist_pass = bool(data['hist_pass'])
+    frame_obj.ssim_pass = bool(data['ssim_pass'])
 
-    frame_obj.WALL_pass = bool(data['WALL_pass'])
-    frame_obj.MSE_pass = bool(data['MSE_pass'])
-    frame_obj.COS_pass = bool(data['COS_pass'])
+    frame_obj.wall_pass = bool(data['wall_pass'])
+    frame_obj.mse_pass = bool(data['mse_pass'])
+    frame_obj.cosim_pass = bool(data['cosim_pass'])
     return frame_obj
 
 

@@ -159,13 +159,12 @@ class FrameObjektTracker:
               f"\to.lat: {o.lat}"
               f"\to.lon: {o.lon}"
               f"\to.close: {o.close}"
-              f"\to.hist_pass: {o.HIST_pass}"
-              f"\to.wall_pass: {o.WALL_pass}"
+              f"\to.hist_pass: {o.hist_pass}"
+              f"\to.wall_pass: {o.wall_pass}"
 
               f"\tcurr_dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}"
-              f"\tdist_mean: {str(o.dist_mean.__format__('.4f')).ljust(3, ' ')}"
+              f"\tdistances_mean: {str(o.distances_mean.__format__('.4f')).ljust(3, ' ')}"
 
-              f"\tfd_mean: {str(o.distances_mean.__format__('.4f')).ljust(10, ' ')}"
               f"\thist_delta: {str(o.hist_delta.__format__('.4f')).ljust(10, ' ')}"
               f"\tMSE: {str(self._frame_MSE.__format__('.4f')).ljust(10, ' ')}")
 
@@ -198,7 +197,7 @@ class FrameObjektTracker:
         # euclidean distance of the wall histograms
         # observation: this goes negative periodically
         o.hist_delta = self.get_histogram_delta(o, self.tracked.get(o.prev_tag).wall, wall, rectangle)
-        o.HIST_pass = not Decimal.from_float(o.hist_delta).is_signed()
+        o.hist_pass = not Decimal.from_float(o.hist_delta).is_signed()
 
         # does this wall match the previous one?
         # pairwise distance to the previous wall image
@@ -209,7 +208,7 @@ class FrameObjektTracker:
         o.distance = self._frame_delta                            # delta of wall image to current f
         o.distances_mean = np.mean(self._frame_deltas)
         o.delta_range = self.f_delta_pcnt * o.distances_mean       # percentage of px difference
-        o.WALL_pass = is_in_range(o.distance, o.distances_mean, self.d_range)
+        o.wall_pass = is_in_range(o.distance, o.distances_mean, self.d_range)
 
     def label_locations(self, frame, wall, rectangle):
         """ find elements 'tag' by euclidean distance """
@@ -227,7 +226,7 @@ class FrameObjektTracker:
                     np.array([p_ml[0]], dtype=int).reshape(1, -1)
             )
 
-            o1.dist_mean = np.mean(o1.distances)
+            o1.distances_mean = np.mean(o1.distances)
 
             o1.curr_dist = int(o1.distances[0])
             o1.prev_tag = str(list(self.tracked.keys())[0])
@@ -235,7 +234,7 @@ class FrameObjektTracker:
             o1.tag = o1.create_tag(self.f_id)
             self.get_stats(o1, wall, rectangle)
 
-            if o1.inside_rect and o1.HIST_pass:
+            if o1.inside_rect and o1.hist_pass:
                 # item following f0 item.
 
                 # back reference and merge the rects (n largest) and
@@ -245,7 +244,7 @@ class FrameObjektTracker:
                 o1.tag = f"{self.f_id}_{o1.prev_tag.split('_')[1]}"
                 self.print_frame(o1, "N1:")
 
-            if not o1.close and not o1.HIST_pass and not o1.WALL_pass:
+            if not o1.close and not o1.hist_pass and not o1.wall_pass:
                 # NEW 'interstitial' item
                 o1.tag = o1.create_tag(self.f_id)
                 self.print_frame(o1, "!N:")
@@ -262,7 +261,7 @@ class FrameObjektTracker:
                     np.array([p_ml[j]], dtype=int).reshape(1, -1))
                 for j in np.arange(len(p_ml)) if p_ml[j] is not None]
 
-            oN.dist_mean = np.mean(oN.distances)
+            oN.distances_mean = np.mean(oN.distances)
 
             # the item in the array representing
             # the minimum euclidean distance to
@@ -275,14 +274,14 @@ class FrameObjektTracker:
             oN.tag = f"{self.f_id}_{oN.prev_tag.split('_')[1]}"
             self.get_stats(oN, wall, rectangle)
 
-            if oN.inside_rect and oN.HIST_pass:
+            if oN.inside_rect and oN.hist_pass:
                 # continuation of motion
                 # back reference and merge the rects (n largest) and take a pic of the merged area
                 # largest area wins.
 
                 self.print_frame(oN, "   ")
 
-            if not oN.close and not oN.HIST_pass:
+            if not oN.close and not oN.hist_pass:
                 # NEW 'interstitial' item
                 oN.tag = oN.create_tag(self.f_id)
                 self.print_frame(oN, "XN:")
@@ -292,7 +291,7 @@ class FrameObjektTracker:
         if not labeled:
             # f 0
             o = self.init_o(wall, rectangle)
-            o.close = is_in_range(o.curr_dist, o.dist_mean, self.l_delta_pcnt * o.dist_mean)
+            o.close = is_in_range(o.curr_dist, o.distances_mean, self.l_delta_pcnt * o.distances_mean)
             o.inside_rect = is_inside(o.avg_loc, o.rect)
             o.tag = o.create_tag(self.f_id)
             self.print_frame(o, "N0:")

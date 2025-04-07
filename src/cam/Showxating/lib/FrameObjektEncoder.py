@@ -54,7 +54,6 @@ class FrameObjektEncoder(threading.Thread):
                 float(self.frame_obj.distance),
                 float(self.frame_obj.distances_mean),
                 float(self.frame_obj.hist_delta),
-                float(self.frame_obj.dist_mean),
             ]
         ])
 
