@@ -299,10 +299,17 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                 wall, rect = wall_images(frame.copy(), cnt)
 
                 if self.has_analysis or self.has_symbols:
-                    self.tracked = self.tracker.track_objects(self.frame_id, frame, cnt, hier, wall, rect)
+                    # pass latency relate plugin.statistics to the tracker:
+                    stats = {
+                        "frame_rate": self.frame_rate,
+                        "frame_period": self.frame_period,
+                        "frame_shape": self.frame_shape
+                    }
+
+                    self.tracked = self.tracker.track_objects(self.frame_id, frame, cnt, hier, wall, rect, stats)
 
                     if self.tracked:
-                        if self.rmq:  # filter this self.tracked.values() if o.f_id > 0, use rmq as flag.
+                        if self.rmq:
                             [self.rmq.publish_message(o) for o in self.tracked.values() if o.f_id > 0]
 
                         print_tracked(self, frame, rect)
