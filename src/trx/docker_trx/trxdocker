@@ -7,8 +7,12 @@ ARG GID=1001
 
 # Create user and install system deps
 RUN groupadd -g $GID $USER && \
-    useradd -u $UID -g $GID -m $USER && \
-    apt-get update && apt-get install -y \
+    useradd -u $UID -g $GID -m $USER
+
+# Install apt dependencies
+RUN apt-get update && apt-get install -y \
+    sudo \
+    udev \
     libusb-1.0-0 \
     usbutils \
     libsndfile1 \
@@ -18,9 +22,9 @@ RUN groupadd -g $GID $USER && \
     libasound2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Set up work directory
+# copy module to app
 WORKDIR /app
-COPY . /app
+COPY /Users/scooper/PycharmProjects/MagPi/src/trx /app
 
 # Install Python packages
 RUN pip install --no-cache-dir \
@@ -33,4 +37,5 @@ RUN pip install --no-cache-dir \
 # Switch to non-root user
 USER $USER
 
-CMD ["python", "TRXUSBRetriever.py"]
+# start the controller/retriever
+# CMD ["python", "TRXUSBRetriever.py"]
