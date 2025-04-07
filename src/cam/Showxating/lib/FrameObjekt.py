@@ -18,12 +18,13 @@ class FrameObjekt:
         # features [remove unused things, decide when things are used]
         self.contours = None                                            # [tuple of ndarray(n, 1, 2): object tracking] ALL contours in this frame
         self.hierarchy = None                                           # [ndarray  1, n, 4: unused] ordering of the contours in this frame  (UNUSED)
-        self.prev_tag = ''                                              # [string: object tracking] tag of nearest FrameObjekt from the previous frame
+        self.prev_tag = None                                            # [string: object tracking] tag of nearest FrameObjekt from the previous frame
         self.contour_id = None                                          # [string: object tracking] id of source contour
         self.curr_dist = 0                                              # [int32: object tracking] euclidean_distance wrt previous mean x, y location
         self.distance = 0.0                                             # [0.0: reporting] euclidean_distance wrt previous frame analysis area
         self.distances = np.zeros(shape=[1, 1], dtype=np.float64)       # [list([1,1]): object location] of previous euclidean_distances wrt previous mean x, y locations.
         self.distances_mean = 0.0
+        self.dist_mean = 0.0                                            # mean of self.distances
         self.delta_range = 0.0
 
         self.f_hist = None                                              # histogram of frame
@@ -32,7 +33,6 @@ class FrameObjekt:
         self.hist_delta = 0.0                                           # [0.0: reporting] histogram distance wrt previous frame analysis area
         self.rect = None                                                # [tuple {x, y, w, h}: object segmentation] bounding rects of contours in this frame
         self.avg_loc = np.array([0, 0], dtype=np.int32)                 # [tuple {x,y}: object segmentation] mean x, y location of *this* contour
-        self.dist_mean = 0.0                                            # mean of self.distances
 
         self.lat = 0.0
         self.lon = 0.0
@@ -46,6 +46,9 @@ class FrameObjekt:
         self.WALL_pass = None
         self.MSE_pass = None
         self.COS_pass = None
+
+        self.frame_rate = 0.0
+        self.frame_period = 0.0
 
     @staticmethod
     def create(f_id):
