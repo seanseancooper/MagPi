@@ -101,13 +101,13 @@ class ARXEncoder:
         self._sampling_rate = sampling_rate
         self._frequency_features = None
         if audio_data is not None and sampling_rate is not None:
-            self._frequency_features = self.compute_audio_frequency_features(audio_data, sampling_rate)
+            self._frequency_features = self.compute_audio_frequency_features()
 
     def set_audio_data(self, audio_data, sampling_rate):
         """Set the audio data and sampling rate, and compute the frequency features."""
         self._audio_data = audio_data
         self._sampling_rate = sampling_rate
-        self._frequency_features = self.compute_audio_frequency_features(audio_data, sampling_rate)
+        self._frequency_features = self.compute_audio_frequency_features()
 
     def get_audio_data(self):
         """Get the audio data."""
@@ -121,9 +121,9 @@ class ARXEncoder:
         """Get the computed frequency features."""
         return self._frequency_features
 
-    def compute_audio_frequency_features(self, audio_data, sampling_rate):
+    def compute_audio_frequency_features(self):
         """Compute frequency features for the given audio data."""
-        return self.extract_audio_features(audio_data, sampling_rate)
+        return self.extract_audio_features(self._audio_data, self._sampling_rate)
 
 
 
