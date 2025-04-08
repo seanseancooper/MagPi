@@ -1,4 +1,5 @@
 from src.lib.SignalPoint import SignalPoint
+from src.lib.Signal import Signal
 from src.arx.lib.ARXAudioEncoder import ARXEncoder
 
 
@@ -32,6 +33,6 @@ class ARXSignalPoint(SignalPoint):
         """
         Mutator method for raw audio data.
         """
-        self._audio_data = audio_data
+        self._audio_data = Signal(self._sampling_rate, audio_data)
         arx = ARXEncoder(self._audio_data, self._sampling_rate)
         self._frequency_features = arx.compute_audio_frequency_features()

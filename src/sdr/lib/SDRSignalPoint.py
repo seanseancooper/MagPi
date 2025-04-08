@@ -9,9 +9,11 @@ class SDRSignalPoint(SignalPoint):
     def __init__(self, worker_id, lon, lat, sgnl, audio_data=None, array_data=None, sampling_rate=None):
         super().__init__(lon, lat, sgnl)
         self._worker_id = worker_id
+
         self._audio_data = audio_data
-        self._array_data = array_data
         self._sampling_rate = sampling_rate
+        self._array_data = array_data
+
         self._frequency_features = None
 
         if audio_data is not None and sampling_rate is not None:

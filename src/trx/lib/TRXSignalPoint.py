@@ -1,7 +1,9 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
+
+from src.lib.Signal import Signal
 from src.lib.SignalPoint import SignalPoint
-from src.arx.lib.ARXAudioEncoder import ARXEncoder
+from src.arx.lib.ARXAudioEncoder import ARXEncoder  # remove this dependency; make TRXEncoder process data locally
 from src.lib.utils import format_time
 
 class TRXSignalPoint(SignalPoint):
@@ -19,11 +21,12 @@ class TRXSignalPoint(SignalPoint):
         self.elapsed = timedelta()              # time signal has been tracked.
         self.tracked = False
         self.is_mute = False
-        self.attributes = defaultdict(dict)     # see aggregate
+
         self._signal_data = signal_data         # Raw signal data (from SDR)?
         self._audio_data = audio_data           # Raw audio data
+        self._sampling_rate = sr                # need a default, a config, and ability to ad hoc change
+        self._text_data = defaultdict(dict)     # see aggregate
 
-        self._sr = sr                           # need a default, a config, and ability to ad hoc change
         self._frequency_features = None
 
         #   ALPHATAG: name of system broadcasting
@@ -49,22 +52,33 @@ class TRXSignalPoint(SignalPoint):
         #   TYPE: broadcast type
 
         def aggregate(k,v):
-            self.attributes[k] = v
+            self._text_data[k] = v
+
         [aggregate(k, str(v)) for k, v in attributes.items()]
 
-        # If the signal is intermittent, set sr and process as intermittent
-        if self._signal_type == "intermittent" and signal_data is not None:
-            arx = ARXEncoder(signal_data, self._sr)
+        # If the signal is discrete, set sr and process as intermittent
+        if self._signal_type == "discrete" and signal_data is not None:
+            arx = ARXEncoder(signal_data, self._sampling_rate)
             past_signals = []   #  wrong: this is for an array of signal strengths!
             self._frequency_features = arx.compute_frequency_features(past_signals)
         elif self._signal_type == "continuous" and audio_data is not None:
             # If continuous, set sr and use audio data and compute frequency features (similar to ARXSignalPoint)
-            arx = ARXEncoder(audio_data, self._sr)
+            arx = ARXEncoder(audio_data, self._sampling_rate)
             self._frequency_features = arx.compute_audio_frequency_features()
 
-    def set_audio_data(self, audio_data, sampling_rate):
-        self._audio_data = audio_data  # Set audio data dynamically
-        self._sr = sampling_rate  # Set the sampling rate dynamically
+    def get_audio_data(self):
+        """
+        Accessor method for raw audio data.
+        """
+        return self._audio_data
+
+    def set_audio_data(self, audio_data):
+        """
+        Mutator method for raw audio data.
+        """
+        self._audio_data = Signal(self._sampling_rate, audio_data)
+        arx = ARXEncoder(self._audio_data, self._sampling_rate)
+        self._frequency_features = arx.compute_audio_frequency_features()
 
     def update(self, tracked):
         self.updated = datetime.now()
@@ -82,6 +96,8 @@ class TRXSignalPoint(SignalPoint):
             "sgnl"              : self._sgnl,
             "signal_type"       : self._signal_type,
             "signal_data"       : self._signal_data,
+            "audio_data"        : self._audio_data.tolist() if self._audio_data is not None else None,
+            "text_data"         : self._text_data,
             "frequency_features": self._frequency_features,
-            "audio_data"        : self._audio_data.tolist() if self._audio_data is not None else None
+
         }
