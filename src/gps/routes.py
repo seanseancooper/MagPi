@@ -35,12 +35,12 @@ def gps_stats():
 
     # placeholder; this should already be a map called stats in s. I want to be able to add to that map adhoc.
     stats = {
-        'created': format_time(gpsRet.created, "%H:%M:%S"),
-        'updated': format_time(gpsRet.updated, "%H:%M:%S"),
-        'elapsed': format_delta(gpsRet.elapsed, "%H:%M:%S"),
-        'polling_count': gpsRet.polling_count,
-        'latitude': gpsRet.result['lat'],
-        'longitude': gpsRet.result['lon']
+        'created'       : format_time(gpsRet.created, "%H:%M:%S"),
+        'updated'       : format_time(gpsRet.updated, "%H:%M:%S"),
+        'elapsed'       : format_delta(gpsRet.elapsed, "%H:%M:%S"),
+        'polling_count' : gpsRet.polling_count,
+        'lat'           : gpsRet.result['lat'],
+        'lon'           : gpsRet.result['lon']
     }
     return jsonify(stats)
 

@@ -69,7 +69,7 @@ class ObjectEncoder:
         normalized_features = self.scaler.fit_transform(numerical_features)
 
         # Encode latitude and longitude using geohashing
-        lat_lon_features = [self.encode_lat_lon(obj['latitude'], obj['longitude']) for obj in objects]
+        lat_lon_features = [self.encode_lat_lon(obj['lat'], obj['lon']) for obj in objects]
 
         # Capture frame and extract color histogram
         frame = self.capture_frame_from_camera()
@@ -85,9 +85,9 @@ class ObjectEncoder:
 
 # Example usage
 objects = [
-    {'length': 5.2, 'width': 2.5, 'height': 1.8, 'latitude': 40.7128, 'longitude': -74.0060},
-    {'length': 3.1, 'width': 1.2, 'height': 2.2, 'latitude': 34.0522, 'longitude': -118.2437},
-    {'length': 4.3, 'width': 2.0, 'height': 1.5, 'latitude': 51.5074, 'longitude': -0.1278}
+    {'length': 5.2, 'width': 2.5, 'height': 1.8, 'lat': 40.7128, 'lon': -74.0060},
+    {'length': 3.1, 'width': 1.2, 'height': 2.2, 'lat': 34.0522, 'lon': -118.2437},
+    {'length': 4.3, 'width': 2.0, 'height': 1.5, 'lat': 51.5074, 'lon': -0.1278}
 ]
 
 encoder = ObjectEncoder()

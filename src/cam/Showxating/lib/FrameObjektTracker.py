@@ -21,30 +21,30 @@ class FrameObjektTracker:
     def __init__(self):
         super().__init__()
         self.f_id = 0                       # current frame id
-        self.config = {}
-
         self.f_limit = 2                    # max age of frames in o_cache_map.
         self.f_delta_pcnt = 0.50            # 0..1 percentage of delta between current/previous f over all pixels
+        self.f_delta_mean = float()              # mean of ALL differences between ALL SEEN frames -- no f_limit.
+        self.delta_range = 90.00                # offset +/- allowed difference; frm_delta_pcnt * fd_mean
         self.l_delta_pcnt = 0.50            # 0..1 percentage of delta between the current/previous mean locations
 
         self.contour_limit = None           # number of contours evaluated by plugin in each pass
         self.contour_id = None              # ????
 
         self.tracked = {}                   # mapping of FrameObjekts over last 'f_limit' frames.
-        self._ml = []                       # list of (x,y) location of contour in self.contours
-        self._frame_delta = float()         # euclidean distance between the current and previous frames
-        self._frame_deltas = []             # list of previous distances over last f_limit frames
+        self.mean_xy = []                       # list of (x,y) location of contour in self.contours
 
-        self._frame_MSE = float()
-        self._frame_MSEs = []
+        self.e_distance = float()         # euclidean distance between the current and previous frames
+        self.e_distances = []             # list of previous distances over last f_limit frames
+
+        self.mse = float()
+        self.mse_cache = []
 
         # self._frame_SSIM = float()
 
-        self.fd_mean = float()              # mean of ALL differences between ALL SEEN frames -- no f_limit.
-        self.d_range = 90.00                # offset +/- allowed difference; frm_delta_pcnt * fd_mean
+        self.lat = 0.0                 # current latitude of objekts in *this* frame
+        self.lon = 0.0                # current longitude of objekts in *this* frame
 
-        self.latitude = 0.0                 # current latitude of objekts in *this* frame
-        self.longitude = 0.0                # current longitude of objekts in *this* frame
+        self.config = {}
 
     def get(self):
         return {
@@ -75,7 +75,7 @@ class FrameObjektTracker:
 
             self.f_delta_pcnt = float(self.config['tracker']['f_delta_pcnt'])
             self.l_delta_pcnt = float(self.config['tracker']['l_delta_pcnt'])
-            self.d_range = float(self.config['tracker']['d_range'])
+            self.delta_range = float(self.config['tracker']['d_range'])
 
             self.contour_limit = int(self.config['tracker'].get('contour_limit', None))
             if self.contour_limit == 0:
@@ -118,14 +118,14 @@ class FrameObjektTracker:
         # self._frame_SSIM = 0.0
         try:
             # return the distances between the row vectors of X and Y
-            self._frame_delta = np.mean(pairwise_distances(X, Y))
+            self.e_distance = np.mean(pairwise_distances(X, Y))
             # return the mean similarity of X and Y
             # self._frame_delta = np.mean(cosine_similarity(X, Y))
 
-            self._frame_deltas.append(self._frame_delta)
+            self.e_distances.append(self.e_distance)
 
-            self._frame_MSE = np.sum((X - Y) ** 2)
-            self._frame_MSE /= float(X.shape[0] * Y.shape[1])
+            self.mse = np.sum((X - Y) ** 2)
+            self.mse /= float(X.shape[0] * Y.shape[1])
 
             # def MSE(X, Y):
             #     n = X.shape[0] * Y.shape[1]
@@ -136,7 +136,7 @@ class FrameObjektTracker:
             # from skimage.metrics import structural_similarity as ssim
             # self._frame_SSIM = ssim(X, Y)
 
-            self._frame_MSEs.append(self._frame_MSE)
+            self.mse_cache.append(self.mse)
 
         except Exception as e:
             # ssim(X, Y) Problem setting frame delta: win_size exceeds image extent.
@@ -153,7 +153,6 @@ class FrameObjektTracker:
               f"\to.avg_loc: {str(o.avg_loc)}"
               f"\to.rect:{str(o.rect).ljust(10, ' ')}"
 
-              f"\to.fd_in_range: {o.distance}"
               f"\to.inside_rect: {o.inside_rect}"
 
               f"\to.lat: {o.lat}"
@@ -162,11 +161,11 @@ class FrameObjektTracker:
               f"\to.hist_pass: {o.hist_pass}"
               f"\to.wall_pass: {o.wall_pass}"
 
-              f"\tcurr_dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}"
+              f"\tdistance: {str(o.distance.__format__('.4f')).ljust(3, ' ')}"
               f"\tdistances_mean: {str(o.distances_mean.__format__('.4f')).ljust(3, ' ')}"
 
               f"\thist_delta: {str(o.hist_delta.__format__('.4f')).ljust(10, ' ')}"
-              f"\tMSE: {str(self._frame_MSE.__format__('.4f')).ljust(10, ' ')}")
+              f"\tMSE: {str(self.mse.__format__('.4f')).ljust(10, ' ')}")
 
     def init_o(self, wall, rectangle):
         o = FrameObjekt.create(self.f_id)
@@ -177,17 +176,17 @@ class FrameObjektTracker:
         o.f_shape = wall.shape
 
         get_location(self)
-        o.lat = self.latitude
-        o.lon = self.longitude
+        o.lat = self.lat
+        o.lon = self.lon
         # oN.contour_id = self.contour_id
-        o.avg_loc = self._ml
+        o.avg_loc = self.mean_xy
         return o
 
     def get_stats(self, o, wall, rectangle):
 
         # is the current distance within a range of the
         # median of distances for the last thing with a tag?
-        o.close = is_in_range(o.curr_dist, max(o.rect[2], o.rect[3]), self.l_delta_pcnt * max(o.rect[1], o.rect[2]))
+        o.close = is_in_range(o.distance, max(o.rect[2], o.rect[3]), self.l_delta_pcnt * max(o.rect[1], o.rect[2]))
 
         # is the current ml inside the current rect? THIS SHOULD ALWAYS BE TRUE
         # if so -- this is MY RECTANGLE, otherwise ths  is indicative of some other contour.
@@ -205,10 +204,10 @@ class FrameObjektTracker:
         Y = self.make_grey_data(wall, rectangle)
         self.set_frame_delta(X, Y)
 
-        o.distance = self._frame_delta                            # delta of wall image to current f
-        o.distances_mean = np.mean(self._frame_deltas)
+        o.distance = self.e_distance                            # delta of wall image to current f
+        o.distances_mean = np.mean(self.e_distances)
         o.delta_range = self.f_delta_pcnt * o.distances_mean       # percentage of px difference
-        o.wall_pass = is_in_range(o.distance, o.distances_mean, self.d_range)
+        o.wall_pass = is_in_range(o.distance, o.distances_mean, self.delta_range)
 
     def label_locations(self, frame, wall, rectangle):
         """ find elements 'tag' by euclidean distance """
@@ -222,7 +221,7 @@ class FrameObjektTracker:
             o1 = self.init_o(wall, rectangle)
 
             o1.distances = euclidean_distances(
-                    np.array([self._ml], dtype=int),
+                    np.array([self.mean_xy], dtype=int),
                     np.array([p_ml[0]], dtype=int).reshape(1, -1)
             )
 
@@ -257,7 +256,7 @@ class FrameObjektTracker:
 
             # get the mean location of the distances identified in the previous frame
             oN.distances = [euclidean_distances(
-                    np.array([self._ml], dtype=int),
+                    np.array([self.mean_xy], dtype=int),
                     np.array([p_ml[j]], dtype=int).reshape(1, -1))
                 for j in np.arange(len(p_ml)) if p_ml[j] is not None]
 
@@ -345,7 +344,7 @@ class FrameObjektTracker:
         self.f_id = f_id
         self.contour_id = str(uuid.uuid4()).split('-')[0]
 
-        self._ml = self.get_mean_location(contour)
+        self.mean_xy = self.get_mean_location(contour)
 
         for o in self.label_locations(frame, wall, rectangle):
 

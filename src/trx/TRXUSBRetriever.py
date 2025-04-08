@@ -73,8 +73,8 @@ class TRXUSBRetriever(threading.Thread):
         self.updated = datetime.now()
         self.elapsed = timedelta()
 
-        self.latitude = 0.0
-        self.longitude = 0.0
+        self.lat = 0.0
+        self.lon = 0.0
 
         self.retrieving = False
 
@@ -83,7 +83,7 @@ class TRXUSBRetriever(threading.Thread):
 
     def make_signalpoint(self):
         get_location(self)
-        sgnl = TRXSignalPoint(self.worker_id, self.longitude, self.latitude, 0.0, self.out)
+        sgnl = TRXSignalPoint(self.worker_id, self.lon, self.lat, 0.0, self.out)
 
         while len(self.signal_cache) >= self.config.get('SIGNAL_CACHE_MAX', 150):
             self.signal_cache.pop(0)

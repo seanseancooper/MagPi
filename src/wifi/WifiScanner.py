@@ -58,8 +58,8 @@ class WifiScanner(threading.Thread):
         self.elapsed = timedelta()              # elapsed time since created
         self.polling_count = 0                  # iterations in this run.
 
-        self.latitude = 0.0                     # this lat; used in SignalPoint creation
-        self.longitude = 0.0                    # this lon; used in SignalPoint creation
+        self.lat = 0.0                     # this lat; used in SignalPoint creation
+        self.lon = 0.0                    # this lon; used in SignalPoint creation
 
         self._OUTFILE = None
         self.OUTDIR = None
@@ -120,7 +120,7 @@ class WifiScanner(threading.Thread):
         return cell
 
     def make_signalpoint(self, worker_id, bssid, signal):
-        sgnlPt = WifiSignalPoint(worker_id, bssid, self.longitude, self.latitude, signal)
+        sgnlPt = WifiSignalPoint(worker_id, bssid, self.lon, self.lat, signal)
         self.signal_cache[bssid].append(sgnlPt)
 
         while len(self.signal_cache[bssid]) >= self.signal_cache_max:

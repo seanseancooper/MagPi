@@ -18,7 +18,6 @@ class FrameObjekt:
         self.hierarchy = None                                           # [ndarray  1, n, 4: unused] ordering of the contours in this frame  (UNUSED)
         self.prev_tag = None                                            # [string: object tracking] tag of nearest FrameObjekt from the previous frame
         self.contour_id = None                                          # [string: object tracking] id of source contour
-        self.curr_dist = 0                                              # [int32: object tracking] euclidean_distance wrt previous mean x, y location
 
 
         self.distance = 0.0                                             # [0.0: reporting] euclidean_distance wrt previous frame analysis area

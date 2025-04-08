@@ -97,8 +97,8 @@ def get_location(locator):
     try:
         resp = requests.get(locator.config.get('GPS_ENDPOINT', 'http://gps.localhost:5004/position'))
         position = json.loads(resp.text)
-        locator.latitude = position.get('LATITUDE', position.get('lat'))
-        locator.longitude = position.get('LONGITUDE', position.get('lon'))
+        locator.lat = position.get('LATITUDE', position.get('lat'))
+        locator.lon = position.get('LONGITUDE', position.get('lon'))
     except Exception as e:
         speech_logger.warning(f"GPS Error")
         gps_logger.warning(f"GPS Retrieval Error: {e}")

@@ -30,8 +30,8 @@ class GPSRetriever(threading.Thread):
         self.updated = datetime.now()
         self.elapsed = timedelta
         self.polling_count = 0
-        self.latitude = 0.0
-        self.longitude = 0.0
+        self.lat = 0.0
+        self.lon = 0.0
 
     def get(self):
         return f"GPSRetriever: {self.result} config: {self.config}"

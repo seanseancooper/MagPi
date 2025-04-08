@@ -20,8 +20,8 @@ class cat_scanlists:
         self.total = 0
         self.scanlist_total = 0
         self.config = {}
-        self.latitude = 0.0
-        self.longitude = 0.0
+        self.lat = 0.0
+        self.lon = 0.0
         self.configure()
 
     def configure(self):
@@ -73,7 +73,7 @@ class cat_scanlists:
                     print(f'ingested list {self.scanlist_total} {scanlist}')
                 except Exception as e:
                     print(f'skipped scanlist {scanlist} {e}')
-        print(f'{datetime.now().isoformat()} @ [{self.longitude}, {self.latitude}]: processed {self.scanlist_total} scanlists, ', end='')
+        print(f'{datetime.now().isoformat()} @ [{self.lon}, {self.lat}]: processed {self.scanlist_total} scanlists, ', end='')
 
     def write(self, add_signals=False):
         with open(self.output_file, 'w') as f:
@@ -127,8 +127,8 @@ class cat_scanlists:
                             "created": sgnl.get('created', record['created']),   # this should match the created date of the record
                             "id": sgnl.get('id', str(uuid.uuid4())),
                             "worker_id": record['id'],
-                            "lon": sgnl.get('lon', self.longitude),
-                            "lat": sgnl.get('lat', self.latitude),
+                            "lon": sgnl.get('lon', self.lon),
+                            "lat": sgnl.get('lat', self.lat),
                             "sgnl": sgnl.get('sgnl', -99)
                         }
 

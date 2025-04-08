@@ -32,8 +32,8 @@ class TRXSerialRetriever(threading.Thread):
         self.stopbits = 1
 
         self.polling_count = 0
-        self.latitude = 0.0
-        self.longitude = 0.0
+        self.lat = 0.0
+        self.lon = 0.0
 
     def __str__(self):
         return f"TRXRetriever: {self.worker_id}"
@@ -74,7 +74,7 @@ class TRXSerialRetriever(threading.Thread):
     def make_signal_point(self):
         get_location(self)
         sgnl = TRXSignalPoint(
-            self.worker_id, self.longitude, self.latitude, 0.0, self.out
+            self.worker_id, self.lon, self.lat, 0.0, self.out
         )
 
         while len(self.signal_cache) >= self.config.get('SIGNAL_CACHE_MAX', 150):

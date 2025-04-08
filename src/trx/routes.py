@@ -64,14 +64,14 @@ def trx_stats():
     from src.lib.utils import format_time, format_delta
 
     stats = {
-        'created': format_time(trxRet.created, "%H:%M:%S"),
-        'updated': format_time(trxRet.updated, "%H:%M:%S"),
-        'elapsed': format_delta(trxRet.elapsed, "%H:%M:%S"),
-        'polling_count': trxRet.polling_count,
-        'latitude': trxRet.latitude,
-        'longitude': trxRet.longitude,
-        # 'workers': len(trxRet.workers),  implementation based
-        'tracked': len(trxRet.tracked_signals),
+        'created'       : format_time(trxRet.created, "%H:%M:%S"),
+        'updated'       : format_time(trxRet.updated, "%H:%M:%S"),
+        'elapsed'       : format_delta(trxRet.elapsed, "%H:%M:%S"),
+        'polling_count' : trxRet.polling_count,
+        'lat'           : trxRet.lat,
+        'lon'           : trxRet.lon,
+        # 'workers'     : len(trxRet.workers),  implementation based
+        'tracked'       : len(trxRet.tracked_signals),
     }
     return jsonify(stats)
 

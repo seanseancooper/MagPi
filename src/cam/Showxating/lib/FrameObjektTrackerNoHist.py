@@ -209,7 +209,7 @@ class FrameObjektTracker:
 
         # is the current distance within a range of the
         # median of distances for the last thing with a tag?
-        o.close = is_in_range(o.curr_dist, max(o.rect[2], o.rect[3]), self.l_delta_pcnt * max(o.rect[1], o.rect[2]))
+        o.close = is_in_range(o.distance, max(o.rect[2], o.rect[3]), self.l_delta_pcnt * max(o.rect[1], o.rect[2]))
 
         o.inside_rect = is_inside(o.avg_loc, o.rect)                            # is the ml inside rect?
         o.delta_range = self.f_delta_pcnt * o.distances_mean                    # percentage of px difference
@@ -219,8 +219,6 @@ class FrameObjektTracker:
         o.wall_pass = is_in_range(o.distance, o.distances_mean, self.delta_range)
         o.mse_pass = self.mse > 0.0
         o.cosim_pass = self.cosim > 0.0
-
-
 
     def label_locations(self, frame, wall, rectangle, stats):
         """ find elements 'tag' by euclidean distance """
