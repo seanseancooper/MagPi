@@ -1,7 +1,4 @@
-from datetime import datetime
 import pika
-import json
-
 from pika.exceptions import AMQPConnectionError
 
 import logging
@@ -50,13 +47,7 @@ class RabbitMQAsyncConsumer:
         try:
             if body:
                 self.data = str(body.decode())
-
                 self.channel.basic_ack(delivery_tag=method.delivery_tag)
-
-                # created_time = datetime.fromisoformat(self.data['created'])
-                # time_diff = (datetime.now() - created_time).total_seconds()
-                # logging.info(f"Received time_diff={time_diff:.6f}s")
-                # logging.info(f"Received {self.data}")
                 return self.data
 
         except Exception as e:

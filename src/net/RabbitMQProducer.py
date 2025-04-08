@@ -3,10 +3,8 @@
 # Uses pika for RabbitMQ communication.
 # Message persistence enabled for reliability.
 # Logging added for better monitoring and debugging.
-from datetime import datetime
 
 import pika
-import json
 import logging
 
 
@@ -21,13 +19,10 @@ class RabbitMQProducer:
     def publish_message(self, message):
         """Send FrameObjekt data to RabbitMQ."""
         try:
-            # dictObject['created'] = datetime.now().isoformat()
-            # message = json.dumps(dictObject)
             self.channel.basic_publish(
                 exchange='',
                 routing_key=self.queue,
                 body=message,
-                # body=bytes(dictObject, encoding='latin-1'),
                 properties=pika.BasicProperties(
                         delivery_mode=2  # Make message persistent
                 )
