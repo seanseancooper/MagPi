@@ -48,7 +48,7 @@ def print_frame(o, origin):
             f"\to.mse_pass: {o.mse_pass}"
             f"\to.cosim_pass: {o.cosim_pass}"
             
-            f"\tcurr_dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}"
+            f"\tdistance: {str(o.distance.__format__('.4f')).ljust(3, ' ')}"
             f"\tdistances_mean: {str(o.distances_mean.__format__('.4f')).ljust(3, ' ')}"
             
 
