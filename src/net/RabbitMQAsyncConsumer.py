@@ -57,9 +57,7 @@ class RabbitMQAsyncConsumer:
             encoder = FrameObjektEncoder(frame_obj)
             encoder.start()
 
-            # Acknowledge message after processing starts
             self.channel.basic_ack(delivery_tag=method.delivery_tag)
-            # logging.info(f"Acknowledged frame {frame_obj.f_id}")
 
             created_time = datetime.fromisoformat(frame_obj['created'])
             time_diff = (datetime.now() - created_time).total_seconds()

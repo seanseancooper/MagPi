@@ -4,6 +4,8 @@ from imagezmq import ImageHub
 from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
 from datetime import datetime
 
+from src.cam.Showxating.lib.FrameObjektEncoder import FrameObjektEncoder
+
 logging.basicConfig(level=logging.INFO)
 
 class Consumer:
@@ -17,6 +19,10 @@ class Consumer:
 
             frame_objekt = FrameObjekt.create(metadata['f_id'])
             frame_objekt.wall = frame
+
+            # Start encoder thread to process frame
+            encoder = FrameObjektEncoder(frame_objekt)
+            encoder.start()
 
             created_time = datetime.fromisoformat(metadata['created'])
             time_diff = (datetime.now() - created_time).total_seconds()
