@@ -25,6 +25,9 @@ class ARXSignalPoint(SignalPoint):
     def get_signal_type(self):
         return self._signal_type
 
+    def get_sampling_rate(self):
+        return self._sampling_rate
+
     def get_audio_data(self):
         return self._audio_data
 
