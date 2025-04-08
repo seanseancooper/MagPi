@@ -143,7 +143,13 @@
 			"TOKENS": 2
 		},
 		{
+			"MQ_TRX_RETRIEVER": "TRXUSBRetriever"
+		},
+		{
 			"MQ_WIFI_RETRIEVER": "MacOSAirportWifiRetriever"
+		},
+		{
+			"MQ_WIFI_QUEUE": "wifi_queue"
 		},
 		{
 			"INTERFACE": "wlan0"

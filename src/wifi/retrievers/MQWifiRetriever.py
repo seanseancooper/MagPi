@@ -23,7 +23,7 @@ class MQWifiRetriever(threading.Thread):
         self.config = {}
         self.interface = None
 
-        self.consumer = RabbitMQAsyncConsumer('wifi_queue')  # make configurablev
+        self.consumer = RabbitMQAsyncConsumer('wifi_queue')
 
         self.stats = {}                         # new, not yet used
         self.parsed_signals = []                # signals represented as a list of dictionaries.
