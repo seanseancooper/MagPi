@@ -1,4 +1,3 @@
-import json
 import threading
 from datetime import datetime, timedelta
 from contextlib import contextmanager
@@ -49,7 +48,7 @@ class MQWifiScanner(threading.Thread):
         self.retriever = golden_retriever()
         self.retriever.configure(config_file)
 
-        self.producer = RabbitMQProducer('wifi_queue')
+        self.producer = RabbitMQProducer('wifi_queue') # make configurable
 
     def parse_signals(self, readlines):
         self.parsed_signals = self.retriever.get_parsed_cells(readlines)
@@ -58,13 +57,11 @@ class MQWifiScanner(threading.Thread):
     def run(self):
 
         self.created = datetime.now()
-        speech_logger.info('mq wifi scanner started')
+        speech_logger.info('MQ WiFi scanner started')
 
         while True:
             scanned = self.retriever.scan_wifi()
             if len(scanned) > 0:
-                # self.parse_signals(scanned)
-                # [self.producer.publish_message(m) for m in self.parsed_signals]
                 self.producer.publish_message(scanned)
 
 if __name__ == '__main__':

@@ -1,15 +1,10 @@
-import subprocess
 import threading
 
 from src.wifi.MQWifiScanner import MQWifiScanner
-from src.wifi.lib.wifi_utils import get_vendor, get_timing
 import xml
 import xml.etree.ElementTree as ET
 import xml.parsers.expat
 from xml.parsers.expat import ExpatError
-
-from src.wifi.lib.iw_parse import get_name, get_quality, get_channel, get_frequency, \
-    get_encryption, get_address, get_signal_level, get_noise_level, get_bit_rates, get_mode
 
 from src.config import readConfig
 from src.net.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
@@ -28,7 +23,7 @@ class MQWifiRetriever(threading.Thread):
         self.config = {}
         self.interface = None
 
-        self.consumer = RabbitMQAsyncConsumer('wifi_queue')
+        self.consumer = RabbitMQAsyncConsumer('wifi_queue')  # make configurablev
 
         self.stats = {}                         # new, not yet used
         self.parsed_signals = []                # signals represented as a list of dictionaries.
@@ -46,6 +41,7 @@ class MQWifiRetriever(threading.Thread):
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
+
         self.SIGNAL_DEBUG = self.config.get('XML_SIGNAL_DEBUG')
         self.DATA_DEBUG = self.config.get('XML_DATA_DEBUG')
         self.PARSE_DEBUG = self.config.get('XML_PARSE_DEBUG')
@@ -54,51 +50,33 @@ class MQWifiRetriever(threading.Thread):
         self.FOUNDCELL_DEBUG = self.config.get('XML_FOUNDCELL_DEBUG')
         self.APPEND_DEBUG = self.config.get('XML_APPEND_DEBUG')
         self.PARSEDCELL_DEBUG = self.config.get('XML_PARSEDCELL_DEBUG')
-
         self.DEBUG = self.config.get('DEBUG')
 
         self.start_scanner()
-        t = threading.Thread(target=self.consumer.run, daemon=True)
-        t.start()
+        self.start_consumer()
 
-
-
-    def start_scanner(self):
+    @staticmethod
+    def start_scanner():
         scanner = MQWifiScanner()
         scanner.configure('net.json')
         t = threading.Thread(target=scanner.run, daemon=True)
         t.start()
 
+    def start_consumer(self):
+        t = threading.Thread(target=self.consumer.run, daemon=True)
+        t.start()
 
     def scan_wifi(self):
         """ scan configured wifi interface using iwlist """
-        # TODO: mock this with a file
         try:
             return self.consumer.data or []
-
         except Exception as e:
             wifi_logger.error(f"[{__name__}]: Exception: {e}")
 
     def parse_signals(self, readlines):
         """ parse signals from iwlist """
 
-        rules = {
-            "SSID"      : get_name,
-            "Quality"   : get_quality,
-            "Channel"   : get_channel,
-            "Frequency" : get_frequency,
-            "Encryption": get_encryption,
-            "BSSID"     : get_address,
-            "Signal"    : get_signal_level,
-            "Noise"     : get_noise_level,
-            "BitRates"  : get_bit_rates,
-            "Mode"      : get_mode,
-            "Last"      : get_timing,
-            "Vendor"    : get_vendor,
-        }
-
-        self.parsed_signals = self.get_parsed_cells(readlines, rules=rules)
-
+        self.parsed_signals = self.get_parsed_cells(readlines)
 
     def process_xml(self, xml_data):
         _elements = {}
@@ -143,7 +121,6 @@ class MQWifiRetriever(threading.Thread):
         if self.ROOT_DEBUG:
             wifi_logger.debug(f"[{__name__}]: ROOT: >> {root}")
         return root
-
 
     def get_parsed_cells(self, airport_data):
         """ Parses MacOS airport output into a list of networks
