@@ -36,17 +36,17 @@ def print_frame(o, origin):
             f"{o.f_id}"
             f"\t{origin}"
             f"\t{o.tag}"
+
             f"\to.avg_loc: {str(o.avg_loc)}"
             f"\to.rect:{str(o.rect).ljust(10, ' ')}"
-            
-            f"\to.fd_in_range: {o.distance}"
-            f"\to.inside_rect: {o.inside_rect}"
-            
+                        
             f"\to.lat: {o.lat}"
             f"\to.lon: {o.lon}"
-            f"\to.close: {o.close}"
-            f"\to.SIM_pass: {o.ssim_pass}"
-            f"\to.WALL_pass: {o.wall_pass}"
+
+            f"\to.ssim_pass: {o.ssim_pass}"
+            f"\to.wall_pass: {o.wall_pass}"
+            f"\to.mse_pass: {o.mse_pass}"
+            f"\to.cosim_pass: {o.cosim_pass}"
             
             f"\tcurr_dist: {str(o.curr_dist.__format__('.4f')).ljust(3, ' ')}"
             f"\tdistances_mean: {str(o.distances_mean.__format__('.4f')).ljust(3, ' ')}"
@@ -240,7 +240,7 @@ class FrameObjektTracker:
 
             o1.distances_mean = np.mean(o1.distances)
 
-            o1.curr_dist = int(o1.distances[0])
+            o1.distance = int(o1.distances[0])
             o1.prev_tag = str(list(self.tracked.keys())[0])
 
             o1.tag = o1.create_tag(self.f_id)
@@ -345,7 +345,7 @@ class FrameObjektTracker:
         if not labeled:
             # f 0
             o = self.init_o(wall, rectangle)
-            o.close = is_in_range(o.curr_dist, o.distances_mean, self.l_delta_pcnt * o.distances_mean)
+            o.close = is_in_range(o.distance, o.distances_mean, self.l_delta_pcnt * o.distances_mean)
             o.inside_rect = is_inside(o.avg_loc, o.rect)
             o.tag = o.create_tag(self.f_id)
             print_frame(o, "N0:")

@@ -228,7 +228,7 @@ class FrameObjektTracker:
 
             o1.distances_mean = np.mean(o1.distances)
 
-            o1.curr_dist = int(o1.distances[0])
+            o1.distance = int(o1.distances[0])
             o1.prev_tag = str(list(self.tracked.keys())[0])
 
             o1.tag = o1.create_tag(self.f_id)
@@ -268,7 +268,7 @@ class FrameObjektTracker:
             # the current location
             idx = np.argmin(oN.distances)
 
-            oN.curr_dist = float(oN.distances[idx])                       # distance from last location
+            oN.distance = float(oN.distances[idx])                       # distance from last location
             oN.prev_tag = str(list(self.tracked.keys())[idx])             # 'target' tag; may not be the right tag
 
             oN.tag = f"{self.f_id}_{oN.prev_tag.split('_')[1]}"
@@ -291,7 +291,7 @@ class FrameObjektTracker:
         if not labeled:
             # f 0
             o = self.init_o(wall, rectangle)
-            o.close = is_in_range(o.curr_dist, o.distances_mean, self.l_delta_pcnt * o.distances_mean)
+            o.close = is_in_range(o.distance, o.distances_mean, self.l_delta_pcnt * o.distances_mean)
             o.inside_rect = is_inside(o.avg_loc, o.rect)
             o.tag = o.create_tag(self.f_id)
             self.print_frame(o, "N0:")
