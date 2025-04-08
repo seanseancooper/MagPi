@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pika
 import json
 
@@ -59,6 +61,10 @@ class RabbitMQAsyncConsumer:
             self.channel.basic_ack(delivery_tag=method.delivery_tag)
             # logging.info(f"Acknowledged frame {frame_obj.f_id}")
 
+            created_time = datetime.fromisoformat(frame_obj['created'])
+            time_diff = (datetime.now() - created_time).total_seconds()
+
+            logging.info(f"Received {frame_obj['f_id']}, time_diff={time_diff:.6f}s")
         except Exception as e:
             logging.error(f"Failed to process message: {e}")
 
