@@ -143,6 +143,39 @@
 			"TOKENS": 2
 		},
 		{
+			"MQ_WIFI_RETRIEVER": "MacOSAirportWifiRetriever"
+		},
+		{
+			"INTERFACE": "wlan0"
+		},
+		{
+			"DOCTYPE": "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\t\t\t\t<plist version=\"1.0\">\t\t<array></array>\t\t</plist>"
+		},
+		{
+			"XML_SIGNAL_DEBUG": false
+		},
+		{
+			"XML_DATA_DEBUG": false
+		},
+		{
+			"XML_PARSE_DEBUG": false
+		},
+		{
+			"XML_ROOT_DEBUG": false
+		},
+		{
+			"XML_ELEMENT_DEBUG": false
+		},
+		{
+			"XML_FOUNDCELL_DEBUG": false
+		},
+		{
+			"XML_APPEND_DEBUG": false
+		},
+		{
+			"XML_PARSEDCELL_DEBUG": false
+		},
+		{
 			"DATE_FORMAT": "%Y-%m-%d"
 		},
 		{

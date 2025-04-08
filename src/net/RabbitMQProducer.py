@@ -3,33 +3,35 @@
 # Uses pika for RabbitMQ communication.
 # Message persistence enabled for reliability.
 # Logging added for better monitoring and debugging.
+from datetime import datetime
 
 import pika
 import json
 import logging
-from src.net.lib.net_utils import frameobjekt_to_dict
 
 
 class RabbitMQProducer:
 
-    def __init__(self):
+    def __init__(self, queue):
         self.connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
         self.channel = self.connection.channel()
-        self.channel.queue_declare(queue='frame_queue', durable=True)
+        self.queue = queue
+        self.channel.queue_declare(queue=self.queue, durable=True)
 
-    def publish_message(self, frame_obj):
+    def publish_message(self, message):
         """Send FrameObjekt data to RabbitMQ."""
         try:
-            message = json.dumps(frameobjekt_to_dict(frame_obj))
+            # dictObject['created'] = datetime.now().isoformat()
+            # message = json.dumps(dictObject)
             self.channel.basic_publish(
                 exchange='',
-                routing_key='frame_queue',
-                body=bytes(message, encoding='utf_8'),
+                routing_key=self.queue,
+                body=message,
+                # body=bytes(dictObject, encoding='latin-1'),
                 properties=pika.BasicProperties(
                         delivery_mode=2  # Make message persistent
                 )
             )
-            # logging.info(f"Sent frame {frame_obj.f_id} successfully")
+            logging.info(f"Sent message successfully")
         except Exception as e:
-            logging.error(f"Failed to send frame {frame_obj.f_id}: {e}")
-
+            logging.error(f"Failed to send message: {e}")

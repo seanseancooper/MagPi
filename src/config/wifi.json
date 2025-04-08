@@ -13,7 +13,7 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
-			"RETRIEVER": "MacOSAirportWifiRetriever"
+			"RETRIEVER": "MQWifiRetriever"
 		},
 		{
 			"INTERFACE": "wlan0"

@@ -1,12 +1,9 @@
 from datetime import datetime
-
 import pika
 import json
 
 from pika.exceptions import AMQPConnectionError
 
-from src.net.lib.net_utils import dict_to_frameobjekt
-from src.cam.Showxating.lib.FrameObjektEncoder import FrameObjektEncoder
 import logging
 
 # Configure logging
@@ -17,9 +14,11 @@ logging.basicConfig(level=logging.INFO,
 class RabbitMQAsyncConsumer:
     """RabbitMQ Consumer using SelectConnection (async)."""
 
-    def __init__(self):
+    def __init__(self, queue):
         self.connection = None
         self.channel = None
+        self.queue = queue
+        self.data = None
 
     def on_channel_open(self, channel):
         """Callback when the channel is successfully opened."""
@@ -27,14 +26,14 @@ class RabbitMQAsyncConsumer:
 
         # Declare queue to ensure it exists
         self.channel = channel
-        channel.queue_declare(queue='frame_queue', durable=True, callback=self.on_queue_declared)
+        channel.queue_declare(queue=self.queue, durable=True, callback=self.on_queue_declared)
 
     def on_queue_declared(self, _):
         """Callback after queue declaration."""
         logging.info("Queue declared, starting consumption...")
 
         # Start consuming messages from the queue
-        self.channel.basic_consume(queue='frame_queue', on_message_callback=self.on_message)
+        self.channel.basic_consume(queue=self.queue, on_message_callback=self.on_message)
 
     def on_connection_open(self, connection):
         """Callback when the connection is successfully opened."""
@@ -49,20 +48,17 @@ class RabbitMQAsyncConsumer:
     def on_message(self, channel, method, properties, body):
         """Callback function for processing messages."""
         try:
-            data = json.loads(body)
+            if body:
+                self.data = str(body.decode())
 
-            frame_obj = dict_to_frameobjekt(data)
+                self.channel.basic_ack(delivery_tag=method.delivery_tag)
 
-            # Start encoder thread to process frame
-            encoder = FrameObjektEncoder(frame_obj)
-            encoder.start()
+                # created_time = datetime.fromisoformat(self.data['created'])
+                # time_diff = (datetime.now() - created_time).total_seconds()
+                # logging.info(f"Received time_diff={time_diff:.6f}s")
+                # logging.info(f"Received {self.data}")
+                return self.data
 
-            self.channel.basic_ack(delivery_tag=method.delivery_tag)
-
-            created_time = datetime.fromisoformat(frame_obj['created'])
-            time_diff = (datetime.now() - created_time).total_seconds()
-
-            logging.info(f"Received {frame_obj['f_id']}, time_diff={time_diff:.6f}s")
         except Exception as e:
             logging.error(f"Failed to process message: {e}")
 
@@ -84,5 +80,5 @@ class RabbitMQAsyncConsumer:
             self.connection.close()
 
 if __name__ == "__main__":
-    consumer = RabbitMQAsyncConsumer()
+    consumer = RabbitMQAsyncConsumer('wifi_queue')
     consumer.run()

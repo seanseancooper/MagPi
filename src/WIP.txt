@@ -1,16 +1,16 @@
 ARX:
     ARXAudioEncoder output formatting
-    ARXAudioEncoder mq path
-    project-keyword-spotter integration
+    ARXAudioEncoder MQ: which one?
+    project-keyword-spotter integration? feasible, alt. solution
     Elasticsearch mappings
-    data persist?
+    data persistence?
 
 BLU:
     NOT STARTED
 
 CAM:
-    compare FrameObjektTracker/FrameObjektTrackerNoHist output
-        GPT:    FrameObjekt: MSE & comparison of CART trees
+    automate FrameObjektTracker output analysis.
+    start encoding frames using FrameObjektEncoder
     FrameObjektEncoder Elasticsearch mappings
 
 CAN:
@@ -20,96 +20,16 @@ CONFIG:
     move config into modules?
 
 EBS:
-    COMPLETE
+    COMPLETED FOR NOW.
 
 GPS:
     GPS via hardware
-    GPT: GPS via JS
-        > Create a nodejs module called 'js_ret' that provides the current GPS position via HTTP as JSON.
-        > I use OpenLayers to get position information.
-            use the Geolocation library from 'ol/Geolocation.js' as the source of the latitude and longitude.
-            Here is JS code to get the information and put it in jsCoords:
-
-                const geolocation = new Geolocation({
-                    // enableHighAccuracy must be set to true to have the heading value.
-                    trackingOptions: {
-                        enableHighAccuracy: true,
-                    },
-                    projection: view.getProjection(),
-                });
-
-                geolocation.setTracking(true);
-
-                geolocation.on('change', function (evt) {
-                    const coordJS = geolocation.getPosition();
-                    var jsCoords = toLonLat(coordJS);
-                });
-
-        > Use this nodejs code as the model for serving HTTP responses as JSON:
-
-                const http = require('http');
-
-                const requestListener = (req, res)=>{
-                  console.log("Request is Incoming");
-
-                  const responseData = {
-                      message:"Hello, GFG Learner",
-                    articleData:{
-                        articleName: "How to send JSON response from NodeJS",
-                        category:"NodeJS",
-                        status: "published"
-                    },
-                    endingMessage:"Visit Geeksforgeeks.org for more"
-                  }
-
-                  const jsonContent = JSON.stringify(responseData);
-                  res.end(jsonContent);
-                };
-
-                const server = http.createServer(requestListener);
-
-                server.listen(3000,'localhost', function(){
-                    console.log("Server is Listening at Port 3000!");
-                });
-
-        > The produced JSON should look like this {"lon": longitude, "lat": latitude} where
-        longitude & latitude are the current longitude & latitude.
-
-        > create a 'package.json' for this node module, named 'app.js', using the following JSON as the model. Replace germane values as needed:
-
-            {
-              "name": "downloads",
-              "version": "1.0.0",
-              "description": "retrieve and publish JS lat/lon data",
-              "main": "index.js",
-              "scripts": {
-                "test": "echo \"Error: no test specified\" && exit 1"
-              },
-              "author": "",
-              "license": ""
-            }
-
-        > resolve any JS dependencies needed to integrate OpenLayers code into a nodejs environment. List changes
-        needed to resolve conflicts as comments in the code. Here is the directory structure:
-
-        map/
-            lib/
-                src/
-                    node_modules/
-                        js_ret/
-                            app.js
-                            package.json
-                    index.html
-                    main.js
-                    package.json
-                static
-                    assets
-                    indexx.html
+    implement GPS via JS
 
 LIB:
 
 MAP:
-    aggregator refresh; look at caching and consistency
+    mapaggregator refresh; read from rabbitMQ, not REST
     hyperspectral imaging: BLOCKED DUE TO ENVIRONMENT
     Elastic Integration: can I pull() data from Elastic and put it on the existing map component?
 
@@ -117,30 +37,32 @@ MOT:
     NEVER STARTED; may go away....
 
 NET:
-    FrameObjektEncoder: mq path, who needs data from it?
-    ARXEncoder: mq path, who needs data from it?
+    FrameObjektEncoder: imageZMQ
+    ARXEncoder: zeromq
     WifiSignalPoint Elastic mappings. Dense vectors, nested data
 
 PSX:
     GPT: NOT STARTED. Use Pyshark
 
 SDR:
-    Capture signals to disrete arrays:
-    SDRSignal & SDRSignalPoint:
-        SignalPoint proccessing via MQ
-        ARXAudioEncoder via MQ
+    Capture signals to discrete arrays
+    SignalPoint processing via MQ! not a local method. offline proccessing...
+    ARXAudioEncoder via MQ! not a local method. offline proccessing...
     Elasticsearch mappings
 
 TRX:
-    GPT: fix TRXUSBRetriever, TRXSerialRetriever
-    TRXSignalPoint processing; variable types.
+    TRXUSBRetriever docker solution cont'd
+    produce internal maps over rabbitMQ
+    TRXSerialRetriever may be kaput on Mac?
     TRXSignalPoint Elasticsearch mappings
 
 VIEW:
-    Integrate Kibana
+    Integrate Kibana: blocker is elastic https
+    Integrate SDR: jupyterlite w/ matplotlib inline + custom javascript vertical waterfall served via node.
 
 WIFI:
-    post processing WifiSignalPoint features using SignalPoint methods
+    refactor retrieval out, and produce internal maps over rabbitMQ
+    refactor to read ALL SignalPoint types from MQ
 
 DOCKER:
     compose.yaml

@@ -1,7 +1,6 @@
 import pika
 import json
 import logging
-from src.net.lib.net_utils import frameobjekt_to_dict
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -14,6 +13,7 @@ class RabbitMQAsyncProducer:
     def __init__(self):
         self.connection = None
         self.channel = None
+        self.queue = None
 
     def on_channel_open(self, channel):
         """Callback when the channel is opened."""
@@ -21,7 +21,7 @@ class RabbitMQAsyncProducer:
         self.channel = channel
 
         # Declare queue to ensure it exists
-        self.channel.queue_declare(queue='frame_queue', durable=True, callback=self.on_queue_declared)
+        self.channel.queue_declare(queue=self.queue, durable=True, callback=self.on_queue_declared)
 
     def on_queue_declared(self, _):
         """Callback when the queue is declared."""
@@ -39,21 +39,21 @@ class RabbitMQAsyncProducer:
         """Callback when a connection error occurs."""
         logging.error(f"Connection error: {error_message}")
 
-    def publish_message(self, frame_obj):
-        """Publish a message to the queue."""
+    def publish_message(self, dictObject):
+        """Publish a message (dictionary) to the queue."""
         try:
-            message = json.dumps(frameobjekt_to_dict(frame_obj))
+            message = json.dumps(dictObject)
             self.channel.basic_publish(
                 exchange='',
-                routing_key='frame_queue',
+                routing_key=self.queue,
                 body=message,
                 properties=pika.BasicProperties(
                     delivery_mode=2  # Make message persistent
                 )
             )
-            logging.info(f"Sent frame {frame_obj.f_id} successfully")
+            logging.info(f"Sent message successfully")
         except Exception as e:
-            logging.error(f"Failed to send frame {frame_obj.f_id}: {e}")
+            logging.error(f"Failed to send message: {e}")
 
     def run(self):
             """Start the asynchronous producer."""
