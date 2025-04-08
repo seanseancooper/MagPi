@@ -14,7 +14,7 @@ class SignalPoint(object):
         self._id = uuid.uuid4()
         self._lon = lon
         self._lat = lat
-        self._sgnl = sgnl
+        self._sgnl = sgnl               # a discrete value
         self._frequency_features = None
 
     def getId(self):
@@ -33,11 +33,8 @@ class SignalPoint(object):
     def get_geohash(self, precision=7):
         return geohash.encode(self._lat, self._lon, precision=precision)
 
-    def normalize_signal(self):
-        return [(self._sgnl + 100) / 100.0]  # Normalizing from [-100, 0] → [0, 1]
-
-
-
+    def normalize_signal(self, sgnl):
+        return [(sgnl + 100) / 100.0]  # Normalizing from [-100, 0] → [0, 1]
 
     def compute_fft_features(self, signal_values, sampling_rate=1):
 

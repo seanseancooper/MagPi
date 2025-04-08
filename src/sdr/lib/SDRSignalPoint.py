@@ -1,11 +1,16 @@
 import numpy as np
 from src.lib.utils import format_time
 from src.lib.SignalPoint import SignalPoint
+from src.lib.Signal import Signal
 import librosa
 from librosa import feature
 
 
 class SDRSignalPoint(SignalPoint):
+    """
+    Class to handle SDR signals. This class is designed to hold raw numpy array data and/or 'audible'
+    audio data from an SDR, and compute audio frequency features.
+    """
     def __init__(self, worker_id, lon, lat, sgnl, audio_data=None, array_data=None, sampling_rate=None):
         super().__init__(lon, lat, sgnl)
         self._worker_id = worker_id
@@ -14,10 +19,13 @@ class SDRSignalPoint(SignalPoint):
         self._sampling_rate = sampling_rate
         self._array_data = array_data
 
-        self._frequency_features = None
+        self._audio_frequency_features = None
 
         if audio_data is not None and sampling_rate is not None:
-            self._frequency_features = self.compute_audio_frequency_features(audio_data, sampling_rate)
+            self._audio_frequency_features = self.compute_audio_frequency_features(audio_data, sampling_rate)
+
+        if array_data is not None:
+            self._array_frequency_features = self.compute_array_features(array_data)
 
     def get(self):
         data = {
@@ -37,15 +45,21 @@ class SDRSignalPoint(SignalPoint):
             data["frequency_features"] = self._frequency_features
         return data
 
-    def set_audio_data(self, audio_data, sampling_rate):
-        """Set the audio data and sampling rate, and compute the frequency features."""
-        self._audio_data = audio_data
-        self._sampling_rate = sampling_rate
-        self._frequency_features = self.compute_audio_frequency_features(audio_data, sampling_rate)
+    def set_audio_data(self, audio_data):
+        self._audio_data = Signal(self._sampling_rate, audio_data)
+        signal = Signal(self._sampling_rate, self._audio_data)
+        self._frequency_features = self.compute_audio_frequency_features(signal._data, signal._sr)
 
     def get_audio_data(self):
-        """Get the audio data."""
         return self._audio_data
+
+    def set_array_data(self, array_data):
+        """Set the array data."""
+        self._array_data = array_data
+
+    def get_array_data(self):
+        """Get the array data."""
+        return self._array_data
 
     def get_sampling_rate(self):
         """Get the sampling rate."""
@@ -58,6 +72,10 @@ class SDRSignalPoint(SignalPoint):
     def compute_audio_frequency_features(self, audio_data, sampling_rate):
         """Compute frequency features for the given audio data."""
         return self.extract_audio_features(audio_data, sampling_rate)
+
+    def compute_array_features(self, array_data):
+        """Compute fft features for the given audio data."""
+        return self.compute_fft_features((self.normalize_signal(s) for s in array_data))
 
     @staticmethod
     def extract_audio_features(audio_data, sampling_rate):
@@ -85,11 +103,3 @@ class SDRSignalPoint(SignalPoint):
             "mfcc": mfccs,
             "chroma": chroma
         }
-
-    def set_array_data(self, array_data):
-        """Set the array data."""
-        self._array_data = array_data
-
-    def get_array_data(self):
-        """Get the array data."""
-        return self._array_data
