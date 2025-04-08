@@ -1,28 +1,15 @@
 import uuid
-from decimal import Decimal
 
 import cv2 as cv
 import numpy as np
+from sklearn.preprocessing import LabelEncoder
 from sklearn.tree import DecisionTreeRegressor
-
-# class sklearn.tree.DecisionTreeRegressor(*,
-# criterion='squared_error',
-# splitter='best',
-# max_depth=None,
-# min_samples_split=2,
-# min_samples_leaf=1,
-# min_weight_fraction_leaf=0.0,
-# max_features=None,
-# random_state=None,
-# max_leaf_nodes=None,
-# min_impurity_decrease=0.0,
-# ccp_alpha=0.0)
 
 from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
 from sklearn.metrics import euclidean_distances, pairwise_distances, pairwise_kernels
 from sklearn.metrics.pairwise import paired_distances, cosine_similarity
 
-from src.cam.Showxating.lib.utils import is_in_range, is_inside, getAggregatedRect, getRectsFromContours
+from src.cam.Showxating.lib.utils import is_in_range, is_inside
 from src.config import readConfig
 from src.lib.utils import get_location
 
@@ -53,7 +40,6 @@ def print_frame(o, origin):
             
 
     )
-
 
 class FrameObjektTracker:
 
@@ -87,7 +73,7 @@ class FrameObjektTracker:
         self.lat = 0.0                      # current latitude
         self.lon = 0.0                      # current longitude
 
-        self.decision_tree = DecisionTreeRegressor()
+        self.decision_tree = None
         self.config = {}
 
     def get(self):
@@ -263,41 +249,19 @@ class FrameObjektTracker:
 
         if len(p_ml) > 1:
 
-            # oN = self.init_o(wall, rectangle)
-            #
-            # # get the mean location of the distances identified in the previous frame
-            # oN.distances = [euclidean_distances(
-            #         np.array([self.ml], dtype=int),
-            #         np.array([p_ml[j]], dtype=int).reshape(1, -1))
-            #     for j in np.arange(len(p_ml)) if p_ml[j] is not None]
-            #
-            # oN.distances_mean = np.mean(oN.distances)
-            #
-            # # the item in the array representing
-            # # the minimum euclidean distance to
-            # # the current location
-            # idx = np.argmin(oN.distances)
-            #
-            # oN.curr_dist = float(oN.distances[idx])                       # distance from last location
-            # oN.prev_tag = str(list(self.tracked.keys())[idx])             # 'target' tag; may not be the right tag
-            #
-            # oN.tag = f"{self.f_id}_{oN.prev_tag.split('_')[1]}"
-            # self.get_stats(oN, wall, rectangle)
-            #
-            # if oN.inside_rect and oN.SIM_pass:
-            #     # continuation of motion
-            #     # back reference and merge the rects (n largest) and take a pic of the merged area
-            #     # largest area wins.
-            #     print_frame(oN, "   ")
-            #
-            # if not oN.close and not oN.SIM_pass:
-            #     # NEW 'interstitial' item
-            #     oN.tag = oN.create_tag(self.f_id)
-            #     print_frame(oN, "XN:")
-
-            # IDEA: Use a Regression Tree to discern the object's label based on position
-
-            from sklearn.preprocessing import LabelEncoder
+            # class sklearn.tree.DecisionTreeRegressor(*,
+            # criterion='squared_error',
+            # splitter='best',
+            # max_depth=None,
+            # min_samples_split=2,
+            # min_samples_leaf=1,
+            # min_weight_fraction_leaf=0.0,
+            # max_features=None,
+            # random_state=None,
+            # max_leaf_nodes=None,
+            # min_impurity_decrease=0.0,
+            # ccp_alpha=0.0)
+            self.decision_tree = DecisionTreeRegressor()
             label_encoder = LabelEncoder()
 
             oN = self.init_o(wall, rectangle)
@@ -305,16 +269,16 @@ class FrameObjektTracker:
 
             # Collect past tracked objects for training
             if self.tracked:
-                # why no local stats for delta?!
                 # these are not the right features. location based, deltas, distances, histgrams/hist-deltas, booleans.
                 # this is a regression problem; what does the CART tree need? do normalize of data.
                 # include latency [o.frame_rate, o.frame_period]
+
+
                 training_data = np.array([[    o.rect[0], o.rect[1], o.rect[2], o.rect[3], o.avg_loc[0], o.avg_loc[1]    ] for o in self.tracked.values()])
                 training_labels = [o.tag for o in self.tracked.values()]
 
                 numeric_labels = label_encoder.fit_transform(training_labels)
                 self.decision_tree.fit(training_data, numeric_labels)
-                # self.decision_tree.fit(training_data, training_labels)
 
             if self.tracked:
                 prediction = self.decision_tree.predict(features)[0]  # it's a continuous value
@@ -361,7 +325,6 @@ class FrameObjektTracker:
         Objects can suddenly appear or appear to change *size* if the frame drags
         due to network latency. Back referencing frames needs a cache.
         """
-
         self.f_id = f_id
         self.contour_id = str(uuid.uuid4()).split('-')[0]
 
