@@ -15,10 +15,9 @@ def frameobjekt_to_dict(f_obj):
         # 'hierarchy'       : f_obj.hierarchy.tolist() if f_obj.hierarchy is not None else None,
         # 'prev_tag'        : f_obj.prev_tag,
         # 'contour_id'      : f_obj.contour_id,
-        'curr_dist'         : f_obj.curr_dist,
-        # 'distances'       : f_obj.distances.tolist(),
-        'fd'                : f_obj.distance,
-        'fd_mean'           : f_obj.distances_mean,
+        'distance'          : f_obj.distance,
+        'distances'         : f_obj.distances.tolist(),
+        'distances_mean'    : f_obj.distances_mean,
         # 'delta_range'     : f_obj.delta_range,
         'hist_delta'        : f_obj.hist_delta,
         # 'f_hist'          : f_obj.f_hist,
@@ -54,10 +53,9 @@ def dict_to_frameobjekt(data):
     # frame_obj.hierarchy = np.array(data['hierarchy']) if data['hierarchy'] is not None else None
     # frame_obj.prev_tag = data['prev_tag']
     # frame_obj.contour_id = data['contour_id']
-    frame_obj.curr_dist = data['curr_dist']
-    # frame_obj.distances = np.array(data['distances'])
-    frame_obj.distance = data['fd']
-    frame_obj.distances_mean = data['fd_mean']
+    frame_obj.distance = data['distance']
+    frame_obj.distances = np.array(data['distances'])
+    frame_obj.distances_mean = data['distances_mean']
     # frame_obj.delta_range = data['delta_range']
     frame_obj.hist_delta = data['hist_delta']
     # frame_obj.f_hist = data['f_hist']
