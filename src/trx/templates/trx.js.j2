@@ -51,19 +51,19 @@
                 }},
 
                 /*
-                {title:"TYPE", field:"attributes.TYPE", cellClick:function(e, cell){
+                {title:"TYPE", field:"text_data.TYPE", cellClick:function(e, cell){
                     var data = cell.getRow().getData();
                     const trgt = 'trx';
 
                     function muteGroup(item, trgt) {
                         var mutables = [];
-                        cellVal = data.attributes.TYPE;
+                        cellVal = data.text_data.TYPE;
 
                         Object.entries(data.attributes).forEach(([key, value]) => {
                             console.log(`${key} ${value}`);
 
                             var column = cell.getColumn();
-                            var columnField = column.getField().replace('attributes.','');
+                            var columnField = column.getField().replace('text_data.','');
 
                             if (cellVal != null && key == columnField && value == cellVal){
                                 mutables.push(item);
@@ -79,29 +79,29 @@
 
 
                     if (muteGroup(data.id, trgt)) {
-                        return "<div id='mute_button_" + data.id + "' style='background-color:#F00;' class='' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">" +  data.attributes.TYPE + "</div>";
+                        return "<div id='mute_button_" + data.id + "' style='background-color:#F00;' class='' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">" +  data.text_data.TYPE + "</div>";
                     } else {
-                        return "<div id='mute_button_" + data.id + "' style='background-color:#FFF;' class='' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">" +  data.attributes.TYPE + "</div>";
+                        return "<div id='mute_button_" + data.id + "' style='background-color:#FFF;' class='' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">" +  data.text_data.TYPE + "</div>";
                     }
                 },  width:60},
 
                 */
-                {title:"TYPE", field:"attributes.TYPE", width:60},
+                {title:"TYPE", field:"text_data.TYPE", width:60},
                 /**/
-                {title:"TSYS_TYPE", field:"attributes.TSYS_TYPE", width:40},
-                {title:"TSYS_ID", field:"attributes.TSYS_ID", width:90},
+                {title:"TSYS_TYPE", field:"text_data.TSYS_TYPE", width:40},
+                {title:"TSYS_ID", field:"text_data.TSYS_ID", width:90},
 
-                {title:"SYSTEM", field:"attributes.SYSTEM", width:120},
-                {title:"SITE", field:"attributes.SITE", width:120},
-                {title:"ALPHATAG", field:"attributes.ALPHATAG", width:140},
+                {title:"SYSTEM", field:"text_data.SYSTEM", width:120},
+                {title:"SITE", field:"text_data.SITE", width:120},
+                {title:"ALPHATAG", field:"text_data.ALPHATAG", width:140},
 
-                {title:"TGID1", field:"attributes.TGID1", width:70},
-                {title:"TGID2", field:"attributes.TGID2", width:70},
-                {title:"RID1", field:"attributes.RID1", width:70},
-                {title:"RID2", field:"attributes.RID2", width:70},
+                {title:"TGID1", field:"text_data.TGID1", width:70},
+                {title:"TGID2", field:"text_data.TGID2", width:70},
+                {title:"RID1", field:"text_data.RID1", width:70},
+                {title:"RID2", field:"text_data.RID2", width:70},
 
-                {title:"FREQ1", field:"attributes.FREQ1", width:80},
-                {title:"FREQ2", field:"attributes.FREQ2", width:80}
+                {title:"FREQ1", field:"text_data.FREQ1", width:80},
+                {title:"FREQ2", field:"text_data.FREQ2", width:80}
 
             ],
         });
