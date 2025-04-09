@@ -4,6 +4,7 @@ from src.lib.SignalPoint import SignalPoint
 from src.lib.Signal import Signal
 import librosa
 from librosa import feature
+import glob
 
 
 class SDRSignalPoint(SignalPoint):
@@ -21,17 +22,18 @@ class SDRSignalPoint(SignalPoint):
 
         self._audio_frequency_features = None
 
-        self.is_mute = None
-        self.tracked = None
+        self.is_mute = False
+        self.tracked = False
 
-        self.record = None        
-        self.analyze = None        
-        self.demux = None        
-        self.decode = None        
-        self.filter = None        
-        self.block = None        
-        self.label = None        
-        self.test = None
+        self.ctrl_record = False
+        self.ctrl_analyze = False
+        self.ctrl_demux = False
+        self.ctrl_decode = False
+        self.ctrl_filter = False
+        self.ctrl_block = False
+        self.ctrl_label = False
+        self.ctrl_test = False
+        self.control_fields = [f for f in dir(self) if f.startswith("ctrl_")]
 
         self.text_attributes = {}
 
@@ -86,7 +88,15 @@ class SDRSignalPoint(SignalPoint):
 
     def get_attribute(self, attr_key):
         return self.text_attributes[attr_key]
-        
+
+    def set_control_field(self, attr_field, attr_field_value):
+        if attr_field in self.control_fields:
+            self.__setattr__(attr_field, attr_field_value)
+
+    def get_control_field(self, attr_field):
+        if attr_field in self.control_fields:
+            return self.__getattribute__(attr_field)
+
     def get_sampling_rate(self):
         """Get the sampling rate."""
         return self._sr
