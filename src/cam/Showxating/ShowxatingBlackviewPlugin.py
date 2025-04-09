@@ -152,7 +152,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self.threshold = self.plugin_config.get('threshold', 10.0)
 
         try:
-            self.rmq = RabbitMQProducer()
+            self.rmq = RabbitMQProducer('frame_queue')
             # self.rmq = mq.create()
         except AMQPConnectionError:
             pass
