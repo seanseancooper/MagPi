@@ -47,7 +47,7 @@ class FrameObjektTracker:
     def __init__(self):
         super().__init__()
         self.f_id = 0                       # current frame id
-        self.f_limit = 30                   # max age of frames in o_cache_map.
+        self.f_limit = 5                    # max age of frames in o_cache_map.
         self.f_delta_pcnt = 0.5             # 0..1 percentage of delta between current/previous f over all pixels
         self.f_delta_mean = float()         # InCORRECT!: mean of ALL differences between ALL SEEN frames -- no f_limit.
         self.delta_range = 90.00            # offset +/- allowed difference; frm_delta_pcnt * fd_mean
