@@ -16,7 +16,7 @@ class SDRSignalPoint(SignalPoint):
         self._worker_id = worker_id
 
         self._audio_data = audio_data
-        self._sampling_rate = sampling_rate
+        self._sr = sampling_rate
         self._array_data = array_data
 
         self._audio_frequency_features = None
@@ -37,7 +37,7 @@ class SDRSignalPoint(SignalPoint):
             "sgnl": self._sgnl,
         }
         if self._audio_data is not None:
-            data["audio_sampling_rate"] = self._sampling_rate
+            data["audio_sampling_rate"] = self._sr
             data["audio_data"] = self._audio_data.tolist()  # Assuming audio data is a numpy array
         if self._array_data is not None:
             data["array_data"] = self._array_data.tolist()  # Assuming array data is a numpy array
@@ -46,8 +46,8 @@ class SDRSignalPoint(SignalPoint):
         return data
 
     def set_audio_data(self, audio_data):
-        self._audio_data = Signal(self._sampling_rate, audio_data)
-        signal = Signal(self._sampling_rate, self._audio_data)
+        self._audio_data = audio_data
+        signal = Signal(audio_data, self._id, sr=self._sr)
         self._frequency_features = self.compute_audio_frequency_features(signal._data, signal._sr)
 
     def get_audio_data(self):
@@ -63,7 +63,7 @@ class SDRSignalPoint(SignalPoint):
 
     def get_sampling_rate(self):
         """Get the sampling rate."""
-        return self._sampling_rate
+        return self._sr
 
     def get_frequency_features(self):
         """Get the computed frequency features."""

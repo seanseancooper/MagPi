@@ -1,10 +1,8 @@
-from collections import defaultdict
 from datetime import datetime, timedelta
 import numpy as np
 import librosa
 from librosa import feature
 
-from src.arx.lib.ARXSignalPoint import ARXSignalPoint
 from src.lib.Signal import Signal
 from src.lib.SignalPoint import SignalPoint
 from src.lib.utils import format_time
@@ -18,7 +16,7 @@ class TRXSignalPoint(SignalPoint):
     This class encapsulates audio data for analysis and can switch between intermittent and continuous signal processing.
     """
 
-    def __init__(self, worker_id, lon, lat, sgnl, attributes, signal_data=None, audio_data=None, signal_type="object", sr=44100):
+    def __init__(self, worker_id, lon, lat, sgnl, text_data, signal_data=None, audio_data=None, signal_type="object", sr=44100):
         super().__init__(lon, lat, sgnl)
         self._worker_id = worker_id
         self._signal_type = signal_type         # continuous || intermittent
@@ -28,14 +26,14 @@ class TRXSignalPoint(SignalPoint):
         self.tracked = False
         self.is_mute = False
 
-        self.t_attributes = {}                  # object (default): text from hardware, see aggregate(k, v)
+        self.text_attributes = {}               # object (default): text from hardware, see aggregate(k, v)
         self._signal_data = signal_data         # discrete: signal data (vector)
         self._audio_data = audio_data           # continuous: audio data (numpy array)
-        self._sampling_rate = sr                # need a default, a config, and ability to ad hoc change
+        self._sr = sr                           # need config, and ability to ad hoc change
 
         self._frequency_features = None
 
-        if attributes is not None:
+        if text_data is not None:
             #   ALPHATAG: name of system broadcasting
             #   COMP_DATE: ??
             #   COMP_TIME: ??
@@ -58,8 +56,8 @@ class TRXSignalPoint(SignalPoint):
             #   TSYS_TYPE: broadcast system TYPE
             #   TYPE: broadcast type
             def aggregate(k, v):
-                self.t_attributes[k] = v
-            [aggregate(k, str(v)) for k, v in attributes.items()]
+                self.text_attributes[k] = v
+            [aggregate(k, str(v)) for k, v in text_data.items()]
 
         elif self._signal_type == "discrete" and self._signal_data is not None:
             # an array of discrete floats or int; extract_signal_strength_features
@@ -67,7 +65,7 @@ class TRXSignalPoint(SignalPoint):
 
         elif self._signal_type == "continuous" and self._audio_data is not None:
             # set sr, make Signal. use audio data and extract_audio_features
-            signal = Signal(self._sampling_rate, self._audio_data)
+            signal = Signal(audio_data, self._id, sr=self._sr)
             self._frequency_features = self.extract_audio_features(signal.get_data(), signal.get_sr())
 
     def get_audio_data(self):
@@ -80,8 +78,8 @@ class TRXSignalPoint(SignalPoint):
         """
         Mutator method for raw audio data.
         """
-        self._audio_data = Signal(self._sampling_rate, audio_data)
-        self._frequency_features = self.extract_audio_features(audio_data, self._sampling_rate)
+        self._audio_data = Signal(audio_data, self._id, sr=self._sr)
+        self._frequency_features = self.extract_audio_features(audio_data, self._sr)
 
     def update(self, tracked):
         self.updated = datetime.now()
@@ -107,7 +105,7 @@ class TRXSignalPoint(SignalPoint):
 
             "signal_data"       : [_ for _ in self._signal_data] if self._signal_data is not None else None,
             "audio_data"        : self._audio_data.tolist() if self._audio_data is not None else None,
-            "text_data"         : {k: v for k, v in self.t_attributes.items()},
+            "text_data"         : {k: v for k, v in self.text_attributes.items()},
 
             "frequency_features": self._frequency_features,
         }

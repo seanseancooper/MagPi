@@ -1,16 +1,15 @@
 import uuid
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 class Signal:
     """
     Generic class to encapsulate a signal and  ad hoc map of attributes
     """
-    def __init__(self, sr, data):
-
+    def __init__(self, data, signalpoint_id, sr=1):
         self._created = datetime.now()   # when signal was found
-        self._id = uuid.uuid4()
+        self._id = signalpoint_id
         self._sr = sr                   # sampling rate of signal (see also 'attribute')
         self._data = data               # [ndarray: container] data of T (is immutable)
 
@@ -21,7 +20,8 @@ class Signal:
             "name": None,
             "fs_path": None,
             "id": self._id,
-            "type": type(data),
+            "signal_type": None,
+            "d_type": type(data),
             "channels": None,
             "sr": self._sr,
             "tag": None
