@@ -20,12 +20,12 @@ class TRXSerialRetriever(threading.Thread):
         self.workers = []
         self.tracked_signals = {}
         self.out = None
-        self.device = None
 
         self.created = datetime.now()
         self.updated = datetime.now()
         self.elapsed = timedelta()
 
+        self.device = None
         self.rate = 115200
         self.parity = None
         self.bytesize = 8

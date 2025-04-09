@@ -155,7 +155,6 @@ class TRXUSBRetriever(threading.Thread):
     def add(self, uniqId):
 
         try:
-
             def find(f):
                 return [sgnl for sgnl in self.signal_cache if str(sgnl._id) == f][0]
 
