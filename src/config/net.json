@@ -146,6 +146,9 @@
 			"MQ_TRX_RETRIEVER": "TRXUSBRetriever"
 		},
 		{
+			"MQ_TRX_QUEUE": "trx_queue"
+		},
+		{
 			"MQ_WIFI_RETRIEVER": "MacOSAirportWifiRetriever"
 		},
 		{
