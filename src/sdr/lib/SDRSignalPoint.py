@@ -4,7 +4,6 @@ from src.lib.SignalPoint import SignalPoint
 from src.lib.Signal import Signal
 import librosa
 from librosa import feature
-import glob
 
 
 class SDRSignalPoint(SignalPoint):
@@ -37,8 +36,8 @@ class SDRSignalPoint(SignalPoint):
 
         self.text_attributes = {}
 
-        if audio_data is not None and sr is not None:
-            self._audio_frequency_features = self.compute_audio_frequency_features(audio_data, sr)
+        # if audio_data is not None and sr is not None:
+        #     self._audio_frequency_features = self.compute_audio_frequency_features(audio_data, sr)
 
         if array_data is not None:
             self._array_frequency_features = self.compute_array_features(array_data)
@@ -64,7 +63,7 @@ class SDRSignalPoint(SignalPoint):
     def set_audio_data(self, audio_data):
         self._audio_data = audio_data
         signal = Signal(audio_data, self._id, sr=self._sr)
-        self._frequency_features = self.compute_audio_frequency_features(signal._data, signal._sr)
+        self._frequency_features = self.compute_audio_frequency_features(signal.get_data(), signal.get_sr())
 
     def get_audio_data(self):
         return self._audio_data
@@ -111,12 +110,17 @@ class SDRSignalPoint(SignalPoint):
 
     def compute_array_features(self, array_data):
         """Compute fft features for the given audio data."""
-        return self.compute_fft_features((self.normalize_signal(s) for s in array_data))
+        return self.compute_fft_features([self.normalize_signal(s) for s in array_data])
 
     @staticmethod
     def extract_audio_features(audio_data, sampling_rate):
         if len(audio_data) < 2:
             return {}
+
+        # librosa deals with arrays of floats, the SDR puts arrays of complex numbers.
+        # either convert the structure:
+        # or use a different library:
+
 
         zcr = float(np.mean(librosa.feature.zero_crossing_rate(audio_data)))
         centroid = float(np.mean(librosa.feature.spectral_centroid(y=audio_data, sr=sampling_rate)))

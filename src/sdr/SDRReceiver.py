@@ -1,4 +1,5 @@
 from rtlsdr import RtlSdr
+from src.sdr.lib.SDRSignalPoint import SDRSignalPoint
 
 class SDRReceiver:
 
@@ -10,6 +11,7 @@ class SDRReceiver:
         self.sdr.freq_correction = freq_correction
         self.sdr.gain = gain
         self.data = None
+        self.signalpoint = None
 
     def get_sample_rate(self):
         return self.sdr.sample_rate
@@ -30,6 +32,17 @@ class SDRReceiver:
         x = self.read_samples(2048)  # get rid of initial empty samples
         x = self.read_samples(fft_size * num_rows)  # get all the samples we need for the spectrogram
         self.sdr.close()
+
+        # testing SDRSignalPoint
+        self.signalpoint = SDRSignalPoint(
+                'worker_id',
+                0.0,  # lat
+                0.0,  # lon
+                0.0,  # sgnl
+                array_data=x,
+                audio_data=x,
+                sr=self.sdr.sample_rate)
+
         return x
 
     def read_samples(self, num_samples=2048):

@@ -1,4 +1,3 @@
-from rtlsdr import RtlSdr
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -20,7 +19,7 @@ class SDRAnalyzer:
     def generate_spectrogram(self, data):
         spectrogram = np.zeros((self.num_rows, self.fft_size))
         for i in range(self.num_rows):
-            spectrogram[i, :] = 10 * np.log10(np.abs(np.fft.fftshift(np.fft.fft(x[i * self.fft_size:(i + 1) * self.fft_size]))) ** 2)
+            spectrogram[i, :] = 10 * np.log10(np.abs(np.fft.fftshift(np.fft.fft(data[i * self.fft_size:(i + 1) * self.fft_size]))) ** 2)
 
         extent = [(self.center_freq + self._sr / -2) / 1e6,
                   (self.center_freq + self._sr / 2) / 1e6,
