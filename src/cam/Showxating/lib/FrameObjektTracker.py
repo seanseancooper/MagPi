@@ -23,6 +23,7 @@ def print_frame(o, origin):
             f"{o.f_id}"
             f"\t{origin}"
             f"\t{o.tag}"
+            f"\t{o.prev_tag}"
 
             f"\to.avg_loc: {str(o.avg_loc)}"
             f"\to.rect:{str(o.rect).ljust(10, ' ')}"
@@ -30,13 +31,13 @@ def print_frame(o, origin):
             f"\to.lat: {o.lat}"
             f"\to.lon: {o.lon}"
 
-            f"\to.ssim_pass: {o.ssim_pass}"
-            f"\to.wall_pass: {o.wall_pass}"
-            f"\to.mse_pass: {o.mse_pass}"
-            f"\to.cosim_pass: {o.cosim_pass}"
+            # f"\to.ssim_pass: {o.ssim_pass}"
+            # f"\to.wall_pass: {o.wall_pass}"
+            # f"\to.mse_pass: {o.mse_pass}"
+            # f"\to.cosim_pass: {o.cosim_pass}"
             
-            f"\tdistance: {str(o.distance.__format__('.4f')).ljust(3, ' ')}"
-            f"\tdistances_mean: {str(o.distances_mean.__format__('.4f')).ljust(3, ' ')}"
+            # f"\tdistance: {str(o.distance.__format__('.4f')).ljust(3, ' ')}"
+            # f"\tdistances_mean: {str(o.distances_mean.__format__('.4f')).ljust(3, ' ')}"
             
 
     )
