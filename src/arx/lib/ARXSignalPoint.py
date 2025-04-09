@@ -7,15 +7,16 @@ from src.arx.lib.ARXAudioEncoder import ARXEncoder
 class ARXSignalPoint(SignalPoint):
     """
     Class to encapsulate ARXRecorder recordings. This class holds audio data
-    as a Signal() and computes the frequency features using ARXEncoder.
+    as a Signal() with a default sampling rate of 48Khz.
+    Computes frequency features using ARXEncoder.
     """
-    def __init__(self, worker_id, lon, lat, sgnl, audio_data=None):
+    def __init__(self, worker_id, lon, lat, sgnl, audio_data=None, sr=48000):
         super().__init__(lon, lat, sgnl)
         self._worker_id = worker_id or 'ARXRecorder'
         self._signal_type = 'continuous'
-        self._audio_data = audio_data                   # Raw numpy array, not a Signal?
-        self._sr = 44100
-        self._frequency_features = None
+        self._audio_data = audio_data                   # potentially a LIST of Signal
+        self._sr = sr
+        self._frequency_features = None                 # potentially a mapping of features
 
         if audio_data is not None:
             # Compute frequency features for the audio data

@@ -21,6 +21,5 @@ class WifiSignalPoint(SignalPoint):
             "bssid"             : self._bssid,
             "lon"               : self._lon,
             "lat"               : self._lat,
-            "sgnl"              : self._sgnl,
-            "frequency_features": self._frequency_features,
+            "sgnl"              : self._sgnl
         }

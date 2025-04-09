@@ -8,12 +8,12 @@ class Signal:
     Generic class to encapsulate a signal and  ad hoc map of attributes
     """
     def __init__(self, data, signalpoint_id, sr=1):
-        self._created = datetime.now()   # when signal was found
-        self._id = signalpoint_id
+        self._created = datetime.now()  # when signal was created (differs from SignalPoint.created)
+        self._id = signalpoint_id       # id of asocciated Signalpoint
         self._sr = sr                   # sampling rate of signal (see also 'attribute')
         self._data = data               # [ndarray: container] data of T (is immutable)
 
-        self.attributes = defaultdict   # ad hoc map of signal attributes
+        self.attributes = {}            # ad hoc map of signal attributes
 
         self.attributes.update({             # ad hoc map of signal attributes
             "source": None,             # these are some ideas for defaults

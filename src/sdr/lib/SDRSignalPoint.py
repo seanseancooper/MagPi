@@ -11,18 +11,18 @@ class SDRSignalPoint(SignalPoint):
     Class to handle SDR signals. This class is designed to hold raw numpy array data and/or 'audible'
     audio data from an SDR, and compute audio frequency features.
     """
-    def __init__(self, worker_id, lon, lat, sgnl, audio_data=None, array_data=None, sampling_rate=None):
+    def __init__(self, worker_id, lon, lat, sgnl, array_data=None, audio_data=None, sr=48000):
         super().__init__(lon, lat, sgnl)
         self._worker_id = worker_id
 
         self._audio_data = audio_data
-        self._sr = sampling_rate
+        self._sr = sr
         self._array_data = array_data
 
         self._audio_frequency_features = None
 
-        if audio_data is not None and sampling_rate is not None:
-            self._audio_frequency_features = self.compute_audio_frequency_features(audio_data, sampling_rate)
+        if audio_data is not None and sr is not None:
+            self._audio_frequency_features = self.compute_audio_frequency_features(audio_data, sr)
 
         if array_data is not None:
             self._array_frequency_features = self.compute_array_features(array_data)
