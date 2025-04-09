@@ -21,6 +21,20 @@ class SDRSignalPoint(SignalPoint):
 
         self._audio_frequency_features = None
 
+        self.is_mute = None
+        self.tracked = None
+
+        self.record = None        
+        self.analyze = None        
+        self.demux = None        
+        self.decode = None        
+        self.filter = None        
+        self.block = None        
+        self.label = None        
+        self.test = None
+
+        self.text_attributes = {}
+
         if audio_data is not None and sr is not None:
             self._audio_frequency_features = self.compute_audio_frequency_features(audio_data, sr)
 
@@ -61,6 +75,18 @@ class SDRSignalPoint(SignalPoint):
         """Get the array data."""
         return self._array_data
 
+    def set_attributes(self, attributes):
+        if attributes is not None:
+            def aggregate(k, v):
+                self.text_attributes[k] = v
+            [aggregate(k, str(v)) for k, v in attributes.items()]
+
+    def set_attribute(self, attr_key, attr_value):
+        self.text_attributes[attr_key] = attr_value
+
+    def get_attribute(self, attr_key):
+        return self.text_attributes[attr_key]
+        
     def get_sampling_rate(self):
         """Get the sampling rate."""
         return self._sr
