@@ -13,7 +13,7 @@ from src.trx.lib.TRXSignalPoint import TRXSignalPoint
 class TRXSerialRetriever(threading.Thread):
     def __init__(self):
         super().__init__()
-        self.DEBUG = False
+        self.DEBUG = True
         self.config = {}
         self.worker_id = 'TRXSerialRetriever'
         self.signal_cache = []
@@ -92,8 +92,58 @@ class TRXSerialRetriever(threading.Thread):
     def get_scanned(self):
         return [sgnl.get() for sgnl in self.signal_cache]
 
+    def get_tracked(self):
+        return [sgnl for sgnl in self.tracked_signals]
+
     def get_scan(self):
         return self.out
+
+    def mute(self, uniqId):
+        from src.lib.utils import mute
+
+        def find(f):
+            return [sgnl for sgnl in self.signal_cache if str(sgnl._id) == f][0]
+
+        sgnl = find(uniqId)
+        # SIGNAL: MUTE/UNMUTE
+        return mute(sgnl)
+
+    def auto_unmute(self, sgnl):
+        ''' this is the polled function to UNMUTE signals AUTOMATICALLY after the MUTE_TIME. '''
+        if self.config['MUTE_TIME'] > 0:
+            if datetime.now() - sgnl.updated > timedelta(seconds=self.config['MUTE_TIME']):
+                sgnl.is_mute = False
+                # SIGNAL: AUTO UNMUTE
+
+    def add(self, uniqId):
+
+        try:
+
+            def find(f):
+                return [sgnl for sgnl in self.signal_cache if str(sgnl._id) == f][0]
+
+            sgnl = find(uniqId)
+            sgnl.tracked = True
+            self.tracked_signals.update({uniqId: sgnl})
+
+            # SIGNAL: ADDED ITEM
+            return True
+        except IndexError:
+            return False  # not in tracked_signals
+
+    def remove(self, uniqId):
+        _copy = self.tracked_signals.copy()
+        self.tracked_signals.clear()
+
+        def find(f):
+            return [sgnl for sgnl in self.signal_cache if str(sgnl._id) == f][0]
+
+        sgnl = find(uniqId)
+        sgnl.tracked = False
+
+        [self.add(remaining) for remaining in _copy if remaining != uniqId]
+        # SIGNAL: REMOVED ITEM
+        return True
 
     def run(self):
         self.configure('trx.json')
@@ -178,7 +228,8 @@ class TRXSerialRetriever(threading.Thread):
         except serial.SerialException as e:
             print(f'[ERROR] Serial communication failed: {e}')
 
-
+    def stop(self):
+        print("[USB] Retriever stopping...")
 
 if __name__ == '__main__':
     retriever = TRXSerialRetriever()
