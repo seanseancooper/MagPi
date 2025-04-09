@@ -11,9 +11,8 @@ wifi_logger = logging.getLogger('wifi_logger')
 
 class TRXWorker:
     """
-    TRXWorker: match a radio frequency from the TRX-1 when it
-    broadcasts. This is different than wifi, because it
-    is an 'intermittant' signal, not continous.
+    TRXWorker: match a radio frequency from the TRX-1 when it receives. These are 'intermittent'
+    signals, not continuous ones.
     """
 
     def __init__(self, freq):
@@ -24,7 +23,6 @@ class TRXWorker:
         self.ALPHATAG = None
 
         self.attributes = defaultdict(dict)
-
 
         self.created = datetime.now()   # when signal was found
         self.updated = datetime.now()   # when signal was last reported
@@ -50,8 +48,8 @@ class TRXWorker:
 
                 "is_mute"       : str(self.is_mute),
                 "tracked"       : str(self.tracked),
-                "signal_cache"  : [pt for pt in self.retriever.signal_cache[self.freq]][self.cache_max:],
-                "tests"         : [x for x in self.test_results]
+                # "signal_cache"  : [pt for pt in self.retriever.signal_cache[self.freq]][self.cache_max:],
+                # "tests"         : [x for x in self.test_results]
         }
 
     def process_cell(self, sgnl):
@@ -63,32 +61,7 @@ class TRXWorker:
         self.attributes = sgnl.text_attributes.copy()
         self.ALPHATAG = self.attributes['ALPHATAG']
 
-        def test(cell):
-            # IDEA: use this as an entrypoint to a discrete test in a test
-            # framework that would return T or F.
-            # worker emits [test] & [result] separately, these should be together [{test:result}].
-            try:
-                tests = self.retriever.tracked_signals[self.freq]['tests']
-                # return all results or only ones that passed?
-                self.return_all = self.retriever.tracked_signals[self.freq]['return_all']
-
-                [[self.results.append(eval(str(v.strip() + t_v.strip()))) for t_k, t_v in tests.items() if k == t_k] for k, v in cell.items()]
-
-                while len(self.results) > len(tests):
-                    self.results.pop(0)
-
-                self.test_results = zip(tests, self.results)
-
-                # if self.return_all:
-                #     return all(self.results)
-                # else:
-                #     return any(self.results)
-            except KeyError:
-                return True  # no test, np
-
-            return True
-
-        return sgnl if test(sgnl) else None
+        return sgnl
 
     def update(self):
         """ updates *dynamic* fields"""
