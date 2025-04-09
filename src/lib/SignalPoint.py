@@ -7,7 +7,7 @@ import geohash
 
 class SignalPoint(object):
     """
-    Base class to handle spatio-temporal properties and frequency feature extraction.
+    Base class to handle spatio-temporal properties and frequency feature extraction of a Signal.
     """
     def __init__(self, lon, lat, sgnl):
         self._created = datetime.now()

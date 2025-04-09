@@ -4,8 +4,7 @@ from src.lib.SignalPoint import SignalPoint
 
 class WifiSignalPoint(SignalPoint):
     """
-    Class to encapsulate a signal captured at a point.
-    A list of this type is assumed to be attributed to a specific BSSID.
+    Class to encapsulate a Wifi signal captured at a point.
     The 'id' field uniquely represents a specific point.
     The 'worker_id' is derived from the BSSID of the AP that produced it.
     """
@@ -23,4 +22,5 @@ class WifiSignalPoint(SignalPoint):
             "lon"               : self._lon,
             "lat"               : self._lat,
             "sgnl"              : self._sgnl,
+            "frequency_features": self._frequency_features,
         }

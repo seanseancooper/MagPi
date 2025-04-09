@@ -15,7 +15,6 @@ class TRXSignalPoint(SignalPoint):
     Class to handle intermittent or continuous radio frequency signals.
     This class encapsulates audio data for analysis and can switch between intermittent and continuous signal processing.
     """
-
     def __init__(self, worker_id, lon, lat, sgnl, text_data, signal_data=None, audio_data=None, signal_type="object", sr=44100):
         super().__init__(lon, lat, sgnl)
         self._worker_id = worker_id
@@ -87,9 +86,6 @@ class TRXSignalPoint(SignalPoint):
         self.tracked = tracked
 
     def get(self):
-        """
-        Return a dictionary of the TRX signal data, including frequency features, active intervals, and audio analysis.
-        """
         return {
             "created"           : format_time(self._created, "%Y-%m-%d %H:%M:%S.%f"),
             "id"                : str(self._id),

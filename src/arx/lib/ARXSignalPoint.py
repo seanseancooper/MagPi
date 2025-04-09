@@ -1,3 +1,4 @@
+from src.lib.utils import format_time
 from src.lib.SignalPoint import SignalPoint
 from src.lib.Signal import Signal
 from src.arx.lib.ARXAudioEncoder import ARXEncoder
@@ -5,13 +6,12 @@ from src.arx.lib.ARXAudioEncoder import ARXEncoder
 
 class ARXSignalPoint(SignalPoint):
     """
-    Class to handle ARXRecorder recordings. This class encapsulates the raw audio data as a Signal()
-    and computes the frequency features using ARXEncoder.
+    Class to encapsulate ARXRecorder recordings. This class holds audio data
+    as a Signal() and computes the frequency features using ARXEncoder.
     """
     def __init__(self, worker_id, lon, lat, sgnl, audio_data=None):
         super().__init__(lon, lat, sgnl)
-
-        self._worker_id = worker_id
+        self._worker_id = worker_id or 'ARXRecorder'
         self._signal_type = 'continuous'
         self._audio_data = audio_data                   # Raw numpy array, not a Signal?
         self._sr = 44100
@@ -35,3 +35,15 @@ class ARXSignalPoint(SignalPoint):
         self._audio_data = Signal(audio_data, self._id, sr=self._sr) # was a raw numpy array, now a Signal?
         arx = ARXEncoder(self._audio_data, self._sr)
         self._frequency_features = arx.compute_audio_frequency_features()
+
+    def get(self):
+        return {
+            "created"           : format_time(self._created, "%Y-%m-%d %H:%M:%S.%f"),
+            "id"                : str(self._id),
+            "worker_id"         : self._worker_id,
+            "signal_type"       : self._signal_type,
+            "lon"               : self._lon,
+            "lat"               : self._lat,
+            "audio_data"        : self._audio_data.tolist() if self._audio_data is not None else None,
+            "frequency_features": self._frequency_features,
+        }
