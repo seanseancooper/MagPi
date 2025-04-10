@@ -1,2 +1,0 @@
-# we are not decrypting encrypted data, but a PyShark
-# module is something that could be added
