@@ -1,11 +1,9 @@
-import cv2 as cv
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 from sklearn.tree import DecisionTreeRegressor
 
 from src.cam.lib.FrameObjekt import FrameObjekt
 from sklearn.metrics import euclidean_distances
-
 
 from src.cam.lib.utils import is_in_range, is_inside
 from src.config import readConfig
@@ -150,11 +148,6 @@ class FrameObjektTracker(object):
             self.get_stats(o1)
 
             if o1.inside and None:
-                # item following f0 item.
-                # back reference and merge the rects (n largest) and
-                # take a pic of the merged area (use frame)
-                # largest area wins.
-
                 o1.tag = f"{self.f_id}_{o1.prev_tag.split('_')[1]}"
                 print_frame(o1, "N1:")
 
