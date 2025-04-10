@@ -5,7 +5,7 @@ from src.config import readConfig
 
 import logging
 
-from src.net.RabbitMQProducer import RabbitMQProducer
+from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
 
 logger_root = logging.getLogger('root')
 wifi_logger = logging.getLogger('wifi_logger')

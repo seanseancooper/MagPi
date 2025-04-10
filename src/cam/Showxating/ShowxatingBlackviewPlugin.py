@@ -3,15 +3,14 @@ import numpy as np
 
 import json
 
-from src.net.RabbitMQAsyncProducer import RabbitMQAsyncProducer
-from src.net.RabbitMQProducer import RabbitMQProducer
+from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
 from pika.exceptions import AMQPConnectionError
 
 
 from src.cam.Showxating.plugin import ShowxatingPlugin
 from src.cam.Showxating.lib.ImageWriter import ImageWriter
 from src.cam.Showxating.lib.FrameObjektTracker import FrameObjektTracker
-from src.cam.Showxating.lib.utils import draw_grid, draw_contours, wall_images, sortedContours, is_inside
+from src.cam.Showxating.lib.utils import draw_contours, wall_images, sortedContours
 
 import logging
 

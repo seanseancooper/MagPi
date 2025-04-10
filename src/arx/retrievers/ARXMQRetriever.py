@@ -1,7 +1,7 @@
 import threading
 
 from src.config import readConfig
-from src.net.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
+from src.net.rabbitMQ.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
 from src.arx.MQARXHelper import MQARXHelper
 
 import logging

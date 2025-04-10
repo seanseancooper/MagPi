@@ -4,7 +4,7 @@ import threading
 from src.trx.MQTRXProducer import MQTRXProducer
 
 from src.config import readConfig
-from src.net.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
+from src.net.rabbitMQ.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
 
 import logging
 

@@ -7,7 +7,7 @@ import xml.parsers.expat
 from xml.parsers.expat import ExpatError
 
 from src.config import readConfig
-from src.net.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
+from src.net.rabbitMQ.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
 
 import logging
 

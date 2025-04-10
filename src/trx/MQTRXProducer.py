@@ -5,7 +5,7 @@ from src.config import readConfig
 
 import logging
 
-from src.net.RabbitMQProducer import RabbitMQProducer
+from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
 from src.trx.TRXWorker import TRXWorker
 
 logger_root = logging.getLogger('root')
