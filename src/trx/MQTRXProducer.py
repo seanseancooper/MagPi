@@ -9,13 +9,13 @@ from src.net.RabbitMQProducer import RabbitMQProducer
 from src.trx.TRXWorker import TRXWorker
 
 logger_root = logging.getLogger('root')
-wifi_logger = logging.getLogger('wifi_logger')
+trx_logger = logging.getLogger('trx_logger')
 speech_logger = logging.getLogger('speech_logger')
 
 
-class MQTRXScanner(threading.Thread):
+class MQTRXProducer(threading.Thread):
 
-    """ TRX Scanner class; poll the serial/USB for signals. """
+    """ MQTRXProducer class; poll the serial/USB for signals. """
     def __init__(self):
         super().__init__()
 
@@ -52,7 +52,7 @@ class MQTRXScanner(threading.Thread):
                 mod = getattr(mod, comp)
             return mod
         except AttributeError as e:
-            wifi_logger.fatal(f'no retriever found {e}')
+            trx_logger.fatal(f'no retriever found {e}')
             exit(1)
 
     def config_worker(self, worker):
@@ -65,16 +65,6 @@ class MQTRXScanner(threading.Thread):
             -self.config.get('SIGNAL_CACHE_MAX', 150)
         )
 
-    # def get_worker(self, freq):
-    #     for worker in self.workers:
-    #         if worker.freq == freq:
-    #             return worker
-    #     new_worker = TRXWorker(freq)
-    #     self.config_worker(new_worker)
-    #     self.workers.append(new_worker)
-    #     new_worker.run()
-    #     return new_worker
-
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
@@ -84,9 +74,9 @@ class MQTRXScanner(threading.Thread):
 
         self.device = self.config['DEVICE']
         self.rate = self.config['RATE']
-        self.parity = eval(self.config['PARITY'])
-        self.bytesize = eval(self.config['BYTESIZE'])
-        self.stopbits = eval(self.config['STOPBITS'])
+        self.parity = self.config['PARITY']
+        self.bytesize = self.config['BYTESIZE']
+        self.stopbits = self.config['STOPBITS']
 
         for freq in self.tracked_signals.keys():
             worker = TRXWorker(freq)
@@ -99,7 +89,7 @@ class MQTRXScanner(threading.Thread):
     def run(self):
 
         self.created = datetime.now()
-        speech_logger.info('MQ TRX scanner started')
+        trx_logger.info('MQ TRX scanner started')
 
         t = threading.Thread(target=self.retriever.run)
         t.start()
@@ -110,6 +100,6 @@ class MQTRXScanner(threading.Thread):
                 self.producer.publish_message(scanned)
 
 if __name__ == '__main__':
-    scanner = MQTRXScanner()
-    scanner.configure('net.json')
+    scanner = MQTRXProducer()
+    scanner.configure('trx.json')
     scanner.run()

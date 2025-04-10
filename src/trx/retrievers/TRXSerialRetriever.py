@@ -62,9 +62,9 @@ class TRXSerialRetriever(threading.Thread):
         readConfig(config_file, self.config)
         self.device = self.config['DEVICE']
         self.rate = self.config['RATE']
-        self.parity = eval(self.config['PARITY'])
-        self.bytesize = eval(self.config['BYTESIZE'])
-        self.stopbits = eval(self.config['STOPBITS'])
+        self.parity = self.config['PARITY']
+        self.bytesize = self.config['BYTESIZE']
+        self.stopbits = self.config['STOPBITS']
 
         for freq in self.tracked_signals.keys():
             worker = TRXWorker(freq)

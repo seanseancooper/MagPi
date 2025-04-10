@@ -24,6 +24,12 @@
 			"SIGNAL_CACHE_MAX": 300
 		},
 		{
+			"MQ_TRX_RETRIEVER": "TRXUSBRetriever"
+		},
+		{
+			"MQ_TRX_QUEUE": "trx_queue"
+		},
+		{
 			"DEVICE": "/dev/cu.URT1"
 		},
 		{

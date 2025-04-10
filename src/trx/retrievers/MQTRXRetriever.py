@@ -1,7 +1,7 @@
 from datetime import datetime
 import threading
 
-from src.trx.MQTRXScanner import MQTRXScanner
+from src.trx.MQTRXProducer import MQTRXProducer
 
 from src.config import readConfig
 from src.net.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
@@ -15,7 +15,7 @@ trx_logger = logging.getLogger('trx_logger')
 
 
 class MQTRXRetriever(threading.Thread):
-    """ MQ Wifi Retriever class """
+    """ MQ TRX Retriever class """
     def __init__(self):
         super().__init__()
 
@@ -24,7 +24,8 @@ class MQTRXRetriever(threading.Thread):
         self.workers = []
         self.tracked_signals = {}
 
-        self.consumer = RabbitMQAsyncConsumer('trx_queue')  # make configurablev
+        self.scanner = None  # make configurable
+        self.consumer = None  # make configurable
 
         self.device = None
         self.rate = 115200
@@ -65,19 +66,20 @@ class MQTRXRetriever(threading.Thread):
             -self.config.get('SIGNAL_CACHE_MAX', 150)
         )
 
-    @staticmethod
-    def start_scanner():
-        scanner = MQTRXScanner()
-        scanner.configure('net.json')
-        t = threading.Thread(target=scanner.run, daemon=True)
+    def start_scanner(self):
+        self.scanner = MQTRXProducer()
+        self.scanner.configure('net.json')
+        t = threading.Thread(target=self.scanner.run, daemon=True)
         t.start()
 
     def start_consumer(self):
+        self.consumer = RabbitMQAsyncConsumer('trx_queue')  # make configurable
         t = threading.Thread(target=self.consumer.run, daemon=True)
         t.start()
 
     def scan_trx(self):
         """ scan trx interface"""
+        trx_logger.info('MQ TRX retriever started')
         try:
             return self.consumer.data or []
         except Exception as e:
