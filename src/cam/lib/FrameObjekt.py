@@ -8,8 +8,8 @@ class FrameObjekt:
     def __init__(self, f_id):
 
         # features
-        self.f_id = f_id                                                # frame id when created.
-        self.created = datetime.now()                                   # not used yet
+        self.f_id = f_id                                                # frame 'id'
+        self.created = datetime.now()                                   # when created.
         self.tag = None                                                 # [deprecate this in favor of using the f_id, portable] string unique identifier for this frame
         self.prev_tag = None                                            # [string: object tracking] tag of nearest FrameObjekt from the previous frame
 
@@ -31,7 +31,6 @@ class FrameObjekt:
         self.delta_range = 0.0
         self.hist_delta = 0.0                                           # [0.0: reporting] histogram distance wrt previous frame analysis area
 
-        self.f_hist = None                                              # histogram of frame
         self.w_hist = None                                              # histogram of wall, filled in by FrameObjectTracker
         self.wall = None                                                # [ndarray: container] image of processed area in this frame
 
