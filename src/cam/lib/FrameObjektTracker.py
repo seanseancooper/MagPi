@@ -58,7 +58,6 @@ class FrameObjektTracker(object):
 
         # internal values use to ascertain similarity between frames
         self.f_delta_pcnt = 0.5             # 0..1 percentage of delta between current/previous f over all pixels
-        self.f_delta_mean = float()         # InCORRECT!: mean of ALL differences between ALL SEEN frames -- no f_limit.
         self.delta_range = 90.00            # offset +/- allowed difference; frm_delta_pcnt * fd_mean
         self.l_delta_pcnt = 0.2             # 0..1 percentage of delta between the current/previous mean locations
 
