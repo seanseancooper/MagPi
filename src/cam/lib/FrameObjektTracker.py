@@ -190,7 +190,7 @@ class FrameObjektTracker(object):
         Y = make_grey_data(wall, rectangle)
         self.set_frame_delta(X, Y)
 
-        o.distance = self.e_distance  # delta of wall image to current f
+        o.distance = int(o.distances[0])  # distance to previous mean location
         o.distances_mean = np.mean(self.e_cache)
 
         # is the current distance within a range of the
