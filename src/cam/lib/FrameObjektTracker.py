@@ -167,7 +167,7 @@ class FrameObjektTracker(object):
                 o1.tag = f"{self.f_id}_{o1.prev_tag.split('_')[1]}"
                 print_frame(o1, "N1:")
 
-            if not o1.close and not o1.wall_pass:
+            if not o1.close:
                 # NEW 'interstitial' item
                 o1.tag = o1.create_tag(self.f_id)
                 print_frame(o1, "!N:")
