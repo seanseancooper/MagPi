@@ -20,18 +20,14 @@ def print_frame(o, origin):
     print(
             f"{o.f_id}"
             f"\t{origin}"
+            #  numerical distance to the previous tag
             f"\t{o.tag}"
             f"\t{o.prev_tag}"
 
             f"\to.avg_loc: {str(o.avg_loc)}"
-            f"\to.rect:{str(o.rect).ljust(10, ' ')}"
-                        
+            f"\to.rect:{str(o.rect).ljust(10, ' ')}"       
             f"\to.lat: {o.lat}"
             f"\to.lon: {o.lon}"
-
-            
-            # f"\tdistance: {str(o.distance.__format__('.4f')).ljust(3, ' ')}"
-            # f"\tdistances_mean: {str(o.distances_mean.__format__('.4f')).ljust(3, ' ')}"
     )
 
 class FrameObjektTracker(object):
@@ -121,7 +117,6 @@ class FrameObjektTracker(object):
         o.frame_rate = frame_stats['capture_frame_rate']
         o.frame_period = frame_stats['capture_frame_period']
         o.frame_shape = frame_stats['capture_frame_shape']
-        # o.frame_shape = wall.shape
 
         return o
 
@@ -139,11 +134,9 @@ class FrameObjektTracker(object):
         """ find elements 'tag' by euclidean distance """
 
         labeled = []
-        # get all previous mean_locations (if they exist)
         p_ml = [self.tracked.get(o_tag).avg_loc for o_tag in list(self.tracked.keys())]
 
         if len(p_ml) == 1:
-            # NEW TAG for a different thing; there is only one
             o1 = self.init_o(wall, self.rectangle, frame_stats)
 
             o1.distances = euclidean_distances(
@@ -153,13 +146,11 @@ class FrameObjektTracker(object):
 
             o1.distance = int(o1.distances[0])
             o1.prev_tag = str(list(self.tracked.keys())[0])
-
             o1.tag = o1.create_tag(self.f_id)
             self.get_stats(o1)
 
             if o1.inside and None:
                 # item following f0 item.
-
                 # back reference and merge the rects (n largest) and
                 # take a pic of the merged area (use frame)
                 # largest area wins.
@@ -168,7 +159,6 @@ class FrameObjektTracker(object):
                 print_frame(o1, "N1:")
 
             if not o1.close and not None and not None:
-                # NEW 'interstitial' item
                 o1.tag = o1.create_tag(self.f_id)
                 print_frame(o1, "!N:")
 
