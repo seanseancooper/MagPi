@@ -17,13 +17,11 @@ class RabbitMQConsumer:
         self.data = None
 
     def on_message(self, method, properties, body):
-
         """Callback function for RabbitMQ messages."""
         try:
             self.data = str(body.decode)
             self.channel.basic_ack(delivery_tag=method.delivery_tag)
             return self.data
-
         except Exception as e:
             net_logger.error(f"Failed to consume message: {e}")
 
@@ -33,10 +31,8 @@ class RabbitMQConsumer:
 
         try:
             self.channel.basic_consume(queue=self.queue, on_message_callback=self.on_message)
-
-            net_logger.info("Waiting for messages. To exit press CTRL+C")
+            net_logger.info("Waiting for messages")
             self.channel.start_consuming()
-
         except Exception as e:
             net_logger.critical(f"Consumer failed: {e}")
 

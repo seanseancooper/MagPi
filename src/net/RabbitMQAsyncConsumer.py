@@ -18,16 +18,13 @@ class RabbitMQAsyncConsumer:
     def on_channel_open(self, channel):
         """Callback when the channel is successfully opened."""
         net_logger.info("Channel opened")
-
-        # Declare queue to ensure it exists
         self.channel = channel
+        # Declare queue to ensure it exists
         channel.queue_declare(queue=self.queue, durable=True, callback=self.on_queue_declared)
 
     def on_queue_declared(self, _):
         """Callback after queue declaration."""
         net_logger.info("Queue declared, starting consumption...")
-
-        # Start consuming messages from the queue
         self.channel.basic_consume(queue=self.queue, on_message_callback=self.on_message)
 
     def on_connection_open(self, connection):
