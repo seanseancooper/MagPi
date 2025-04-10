@@ -87,23 +87,11 @@ class FrameObjektEncoder(threading.Thread):
 
                 draw_pose(f, self._result_T)
 
-    def set_frame_delta(self, rect_array):
+    def set_frame_delta(self, X, Y):
         ''' set the allowable difference between frames *fragments_* to the
         average of the paired euclidean distances between the previous 'item'
         and the current frame 'wall'.
         '''
-
-        def make_grey_data(item, rectangle):
-            wx, wy, ww, wh = rectangle
-            return cv.cvtColor(item[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)
-
-        # get the previous wall if it exists
-        prev_wall = self.frame_obj.prev_tag.wall
-        # get wall off MQ
-        wall = self.frame_obj.wall
-
-        X = make_grey_data(prev_wall, rect_array)
-        Y = make_grey_data(wall, rect_array)
 
         try:
             # return the distances between the row vectors of X and Y
@@ -153,7 +141,16 @@ class FrameObjektEncoder(threading.Thread):
         _s = self.frame_obj.frame_shape
         rect_array = np.asarray([int(_s[1]), int(_s[0]), int(_s[1]), int(_s[0])])
         loc_array = np.asarray([int(_s[1]), int(_s[0])])
-        self.set_frame_delta(rect_array)
+
+        def make_grey_data(item, rectangle):
+            wx, wy, ww, wh = rectangle
+            return cv.cvtColor(item[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)
+
+        prev_wall = self.frame_obj.prev_tag.wall
+        wall = self.frame_obj.prev_tag.wall
+        X = make_grey_data(prev_wall, rect_array)
+        Y = make_grey_data(wall, rect_array)
+        self.set_frame_delta(X, Y)
 
         encoded_rect = np.divide((np.asarray(self.frame_obj.rect)), rect_array)
         encoded_avg_loc = np.divide((np.asarray(self.frame_obj.avg_loc)), loc_array)
