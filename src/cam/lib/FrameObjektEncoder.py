@@ -5,11 +5,9 @@ import numpy as np
 import geohash
 import cv2 as cv
 import hashlib
-from src.cam.Showxating.ShowxatingHistogramPlugin import ShowxatingHistogramPlugin
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics import euclidean_distances, pairwise_distances
 import logging
-
 
 # IDEA: MEDIAPIPE
 # person detection: use mediapipe pose to label as 'human' motion.
@@ -20,9 +18,11 @@ class FrameObjektEncoder(threading.Thread):
     def __init__(self, frame_obj):
         super().__init__()
         self.frame_obj = frame_obj
+
         self.hash_histogram = True
         self.bins = 32                          # get from config and configure
         self.precision = 8                      # TOOD: geohash precision, make config
+
         self.mm_scaler = MinMaxScaler()
         # self.std_scaler = StandardScaler()
 
@@ -105,22 +105,6 @@ class FrameObjektEncoder(threading.Thread):
 
         except Exception as e:
             logging.warning(f'FrameObjektTracker error while setting deltas: {e}  {X.shape}, {Y.shape}')
-
-    def get_histogram(self, wall, rectangle):
-
-        hist_plugin = ShowxatingHistogramPlugin()
-        hist_plugin.plugin_name = 'histogramPlugin'
-        hist_plugin.get_config()
-        hist_plugin.f_id = self.frame_obj.f_id
-        hist_plugin._kz = (3, 3)                            # self.kernel_sz
-        hist_plugin.library = 'cv'                          # TODO: add to configurable
-        hist_plugin.compare_method = cv.HISTCMP_CORREL
-        hist_plugin.norm_type = cv.NORM_MINMAX
-
-        histogram = hist_plugin.get_histogram(wall, rectangle)
-        histogram = cv.normalize(histogram, histogram)
-        flattened = histogram.flatten()
-        return flattened.tolist()
 
     def extract_color_histogram_from_image(self, image):
         # images, channels, mask, histSize, ranges[, hist[, accumulate]]
