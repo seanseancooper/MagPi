@@ -36,11 +36,11 @@ class SDRSignalPoint(SignalPoint):
 
         self.text_attributes = {}
 
-        # if audio_data is not None and sr is not None:
-        #     self._audio_frequency_features = self.compute_audio_frequency_features(audio_data, sr)
+        if audio_data is not None and sr is not None:
+            self._audio_frequency_features = self.compute_audio_frequency_features(audio_data, sr)
 
         if array_data is not None:
-            self._array_frequency_features = self.compute_array_features(array_data)
+            self._array_frequency_features = self.compute_array_frequency_features(array_data)
 
     def get(self):
         data = {
@@ -102,15 +102,15 @@ class SDRSignalPoint(SignalPoint):
 
     def get_frequency_features(self):
         """Get the computed frequency features."""
-        return self._frequency_features
+        return self._array_frequency_features
 
     def compute_audio_frequency_features(self, audio_data, sampling_rate):
         """Compute frequency features for the given audio data."""
         return self.extract_audio_features(audio_data, sampling_rate)
 
-    def compute_array_features(self, array_data):
+    def compute_array_frequency_features(self, array_data):
         """Compute fft features for the given audio data."""
-        return self.compute_fft_features([self.normalize_signal(s) for s in array_data])
+        return self.compute_fft_frequency_features([self.normalize_signal(s) for s in array_data])
 
     @staticmethod
     def extract_audio_features(audio_data, sampling_rate):
@@ -120,6 +120,7 @@ class SDRSignalPoint(SignalPoint):
         # librosa deals with arrays of floats, the SDR puts arrays of complex numbers.
         # either convert the structure:
         # or use a different library:
+        #   def compute_frequency_features(self, signal, sampling_rate=1):
 
 
         zcr = float(np.mean(librosa.feature.zero_crossing_rate(audio_data)))
@@ -142,4 +143,36 @@ class SDRSignalPoint(SignalPoint):
             "tempo": float(tempo),
             "mfcc": mfccs,
             "chroma": chroma
+        }
+
+    @staticmethod
+    def compute_fft_frequency_features(norm_array_data, sampling_rate=1):
+
+        # Since sgnl is a single value at a point in time, we need to collect multiple signals over
+        # a time window (e.g., the last 100 signal points) and analyze their frequency spectrum.
+        # Fast Fourier Transform (FFT)
+        #
+        # FFT converts a time-series signal into a set of frequency components.
+        #  We use it to extract dominant frequencies, spectral power, and energy concentration.
+
+        """
+        Compute FFT features from a list of signal values.
+        :param norm_array_data: Normalized list of past signal strengths.
+        :param sampling_rate: Number of samples per second (adjust as needed).
+        :return: Dictionary of frequency domain features.
+        """
+        from scipy.fftpack import fft
+
+        N = len(norm_array_data)
+        fft_vals = np.abs(fft(norm_array_data))[:N // 2]  # One-sided FFT
+        freqs = np.fft.fftfreq(N, d=1 / sampling_rate)[:N // 2]  # Corresponding frequencies
+
+        # Extract dominant frequency and spectral features
+        dominant_freq = freqs[np.argmax(fft_vals)]
+        spectral_entropy = -np.sum((fft_vals / np.sum(fft_vals)) * np.log2(fft_vals / np.sum(fft_vals)))
+
+        return {
+            "dominant_freq": dominant_freq,
+            "spectral_entropy": spectral_entropy,
+            "fft_magnitude": fft_vals.tolist()
         }
