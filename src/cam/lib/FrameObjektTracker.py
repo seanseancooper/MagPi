@@ -131,7 +131,8 @@ class FrameObjektTracker(object):
 
         # is the current distance within a range of the
         # median of distances for the last thing with a tag?
-        o.close = is_in_range(o.distance, max(o.rect[2], o.rect[3]), self.l_delta_pcnt * max(o.rect[1], o.rect[2]))
+        # o.close = is_in_range(o.distance, max(o.rect[2], o.rect[3]), self.l_delta_pcnt * max(o.rect[1], o.rect[2]))
+        o.close = is_in_range(o.distance, o.distances_mean, self.l_delta_pcnt * o.distances_mean)
         o.inside = is_inside(o.avg_loc, o.rect)                                 # is the ml inside rect?
         o.delta_range = self.f_delta_pcnt * o.distances_mean                    # percentage of px difference
 
@@ -233,7 +234,7 @@ class FrameObjektTracker(object):
         if not labeled:
             # f 0
             o = self.init_o(wall, self.rectangle, frame_stats)
-            o.close = is_in_range(o.distance, o.distances_mean, self.l_delta_pcnt * o.distances_mean)
+            o.close = True
             o.inside = is_inside(o.avg_loc, o.rect)
             o.tag = o.create_tag(self.f_id)
             print_frame(o, "N0:")
