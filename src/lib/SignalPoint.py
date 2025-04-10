@@ -1,7 +1,6 @@
 import uuid
 from datetime import datetime
 import hashlib
-import numpy as np
 import geohash
 
 
@@ -15,7 +14,6 @@ class SignalPoint(object):
         self._lon = lon
         self._lat = lat
         self._sgnl = sgnl               # a discrete value
-        self._frequency_features = None
 
     def getId(self):
         return self._id

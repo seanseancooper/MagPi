@@ -35,7 +35,7 @@ class WifiWorker:
         self.return_all = False         # return all/any
         self.test_results = {}          # mapping of results
         self.cache_max = 0              # maximum number of SignalPoints displayed in logs
-        self._frequency_features = None
+        self._signal_cache_frequency_features = None
 
         self.DEBUG = False
 
@@ -55,7 +55,7 @@ class WifiWorker:
                 "is_mute"       : self.is_mute,
                 "tracked"       : self.tracked,
                 "signal_cache"  : [pt.get() for pt in self.scanner.signal_cache[self.bssid]][self.cache_max:],
-                "frequency_features"  : self._frequency_features,
+                "frequency_features"  : self._signal_cache_frequency_features,
                 "tests"         : [x for x in self.test_results]
         }
 
@@ -64,7 +64,7 @@ class WifiWorker:
     #  location, signal_cache, Vendor, Quality?
 
     @staticmethod
-    def extract_signal_strength_features(past_signals, sampling_rate=1):
+    def extract_signal_cache_features(norm_signal_cache, sampling_rate=1):
 
         import numpy as np
         from scipy.fftpack import fft
@@ -72,7 +72,7 @@ class WifiWorker:
 
         MIN_LEN = 50
 
-        if len(past_signals) < 2:
+        if len(norm_signal_cache) < 2:
             return {
                 "dominant_freq": None,
                 "spectral_entropy": None,
@@ -80,7 +80,7 @@ class WifiWorker:
                 "mfcc"         : [0.0] * 13
             }
 
-        signal_values = np.array(past_signals)
+        signal_values = np.array(norm_signal_cache)
         N = len(signal_values)
 
         if N < MIN_LEN:
@@ -104,17 +104,6 @@ class WifiWorker:
             mfcc_mean = mfcc_features.mean(axis=0).tolist()
         except Exception:
             mfcc_mean = [0.0] * 13
-
-        # AUDIO FREQUENCY FEATURES:
-        # // ENOB: Effective number of bits
-
-        # DB (_sgnl): decibels
-        # SNR: Signal-to-noise ratio
-        # THD: Total harmonic distortion
-        # THD + N: Total harmonic distortion plus noise
-
-        # SFDR: Spurious free dynamic range
-        # SINAD: Signal-to-noise-and-distortion ratio
 
         return {
             "dominant_freq"   : float(dominant_freq),
@@ -172,9 +161,12 @@ class WifiWorker:
         self.elapsed = self.updated - self.created
         self.tracked = self.bssid in self.scanner.tracked_signals
         self.scanner.make_signalpoint(self.id, self.bssid, int(sgnl.get('Signal', -99)))
-        self._frequency_features = self.extract_signal_strength_features(
+        self._signal_cache_frequency_features = self.extract_signal_cache_features(
                 [pt.getSgnl() for pt in self.scanner.signal_cache[self.bssid]]
         )
+
+    def get__signal_cache_frequency_features(self):
+        return self._signal_cache_frequency_features
 
     def match(self, cell):
         """ match BSSID, derive the 'id' and set mute status """
