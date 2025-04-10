@@ -1,5 +1,3 @@
-import time
-
 import cv2 as cv
 import threading
 import json
