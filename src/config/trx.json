@@ -12,7 +12,7 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
-			"TEST_FILE": "TEST_FILE.csv"
+			"TEST_FILE": "/Users/scooper/PycharmProjects/MagPi/dev/trx/TEST_FILE.csv"
 		},
 		{
 			"TEST_FILE_TIME_MAX": 300
