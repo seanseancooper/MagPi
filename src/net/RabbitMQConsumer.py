@@ -1,61 +1,46 @@
-# Version: 1.1.0
-# Description: RabbitMQ consumer for processing FrameObjekt instances.
-# Uses threading for concurrent message handling.
-# Message acknowledgment ensures reliable processing.
-# Logging added for better monitoring and debugging.
-
 import pika
-import json
-from src.net.lib.net_utils import dict_to_frameobjekt
-from src.cam.Showxating.lib.FrameObjektEncoder import FrameObjektEncoder
 import logging
 
-# Configure logging
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s [%(levelname)s] - %(message)s')
+logger_root = logging.getLogger('root')
+net_logger = logging.getLogger('net_logger')
+speech_logger = logging.getLogger('speech_logger')
 
 
 class RabbitMQConsumer:
-
     """RabbitMQ Consumer using BlockingConnection. """
-    def __init__(self):
+    
+    def __init__(self, queue):
         self.connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
         self.channel = self.connection.channel()
-        self.channel.queue_declare(queue='frame_queue', durable=True)
+        self.queue = queue
+        self.channel.queue_declare(queue=self.queue, durable=True)
+        self.data = None
 
     def on_message(self, method, properties, body):
 
         """Callback function for RabbitMQ messages."""
         try:
-            data = json.loads(body)
-            frame_obj = dict_to_frameobjekt(data)
-
-            # Start encoder thread to process frame
-            encoder = FrameObjektEncoder(frame_obj)
-            encoder.start()
-
-            # Acknowledge message after processing starts
+            self.data = str(body.decode)
             self.channel.basic_ack(delivery_tag=method.delivery_tag)
-            logging.info(f"Acknowledged frame {frame_obj.f_id}")
+            return self.data
 
         except Exception as e:
-            logging.error(f"Failed to consume message: {e}")
-
+            net_logger.error(f"Failed to consume message: {e}")
 
     def run(self):
         """Main consumer function."""
-        logging.info("Starting consumer...")
+        net_logger.info("Starting consumer...")
 
         try:
             self.channel.basic_consume(queue='frame_queue', on_message_callback=self.on_message)
 
-            logging.info("Waiting for messages. To exit press CTRL+C")
+            net_logger.info("Waiting for messages. To exit press CTRL+C")
             self.channel.start_consuming()
 
         except Exception as e:
-            logging.critical(f"Consumer failed: {e}")
+            net_logger.critical(f"Consumer failed: {e}")
 
 
 if __name__ == "__main__":
-    consumer = RabbitMQConsumer()
+    consumer = RabbitMQConsumer('test_queue')
     consumer.run()

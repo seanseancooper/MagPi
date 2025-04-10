@@ -1,12 +1,9 @@
-# Version: 1.1.0
-# Description: RabbitMQ producer for sending FrameObjekt instances as JSON messages.
-# Uses pika for RabbitMQ communication.
-# Message persistence enabled for reliability.
-# Logging added for better monitoring and debugging.
-
 import pika
 import logging
 
+logger_root = logging.getLogger('root')
+net_logger = logging.getLogger('net_logger')
+speech_logger = logging.getLogger('speech_logger')
 
 class RabbitMQProducer:
 
@@ -27,6 +24,6 @@ class RabbitMQProducer:
                         delivery_mode=2  # Make message persistent
                 )
             )
-            logging.info(f"Sent message successfully")
+            net_logger.info(f"Sent message successfully")
         except Exception as e:
-            logging.error(f"Failed to send message: {e}")
+            net_logger.error(f"Failed to send message: {e}")

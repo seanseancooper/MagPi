@@ -1,15 +1,14 @@
 import pika
-import json
 import logging
 
-# Configure logging
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s [%(levelname)s] - %(message)s')
+logger_root = logging.getLogger('root')
+net_logger = logging.getLogger('net_logger')
+speech_logger = logging.getLogger('speech_logger')
 
 
 class RabbitMQAsyncProducer:
     """RabbitMQ Producer using SelectConnection (async)."""
-
+    
     def __init__(self):
         self.connection = None
         self.channel = None
@@ -17,7 +16,7 @@ class RabbitMQAsyncProducer:
 
     def on_channel_open(self, channel):
         """Callback when the channel is opened."""
-        logging.info("Channel opened")
+        net_logger.info("Channel opened")
         self.channel = channel
 
         # Declare queue to ensure it exists
@@ -25,11 +24,11 @@ class RabbitMQAsyncProducer:
 
     def on_queue_declared(self, _):
         """Callback when the queue is declared."""
-        logging.info("Queue declared, ready to publish messages.")
+        net_logger.info("Queue declared, ready to publish messages.")
 
     def on_connection_open(self, connection):
         """Callback when the connection is opened."""
-        logging.info("Connection opened")
+        net_logger.info("Connection opened")
         self.connection = connection
 
         # Open channel after connection is established
@@ -37,12 +36,11 @@ class RabbitMQAsyncProducer:
 
     def on_connection_error(self, _connection, error_message=None):
         """Callback when a connection error occurs."""
-        logging.error(f"Connection error: {error_message}")
+        net_logger.error(f"Connection error: {error_message}")
 
-    def publish_message(self, dictObject):
+    def publish_message(self, message):
         """Publish a message (dictionary) to the queue."""
         try:
-            message = json.dumps(dictObject)
             self.channel.basic_publish(
                 exchange='',
                 routing_key=self.queue,
@@ -51,13 +49,13 @@ class RabbitMQAsyncProducer:
                     delivery_mode=2  # Make message persistent
                 )
             )
-            logging.info(f"Sent message successfully")
+            net_logger.info(f"Sent message successfully")
         except Exception as e:
-            logging.error(f"Failed to send message: {e}")
+            net_logger.error(f"Failed to send message: {e}")
 
     def run(self):
             """Start the asynchronous producer."""
-            logging.info("Starting producer...")
+            net_logger.info("Starting producer...")
 
             parameters = pika.ConnectionParameters(host='localhost')
             self.connection = pika.SelectConnection(
@@ -67,10 +65,10 @@ class RabbitMQAsyncProducer:
             )
 
             try:
-                logging.info("Starting event loop...")
+                net_logger.info("Starting event loop...")
                 self.connection.ioloop.start()
             except KeyboardInterrupt:
-                logging.info("Interrupted. Closing connection...")
+                net_logger.info("Interrupted. Closing connection...")
                 self.connection.close()
                 self.connection.ioloop.start()
 
