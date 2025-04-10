@@ -22,7 +22,6 @@ class FrameObjekt:
         self.frame_period = 0.0
 
         # "unused" features
-        self.contour_id = None                                          # [string: object tracking] id of source contour
         self.contours = None                                            # [tuple of ndarray(n, 1, 2): object tracking] ALL contours in this frame
         self.hierarchy = None                                           # [ndarray  1, n, 4: unused] ordering of the contours in this frame  (UNUSED)
 
