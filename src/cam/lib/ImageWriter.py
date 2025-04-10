@@ -1,7 +1,7 @@
 from datetime import datetime
 import os
 import cv2 as cv
-from src.config import CONFIG_PATH, readConfig
+from src.config import readConfig
 
 
 class ImageWriter:

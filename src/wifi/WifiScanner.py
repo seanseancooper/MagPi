@@ -17,7 +17,6 @@ from src.wifi.WifiWorker import WifiWorker
 
 import logging
 
-# IDEA: pub/sub these signals
 wifi_signals = Namespace()
 wifi_started = wifi_signals.signal('WIFI START')
 wifi_updated = wifi_signals.signal('WIFI UPDATED')

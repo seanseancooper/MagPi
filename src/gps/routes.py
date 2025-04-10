@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, jsonify
 
 from src.gps.GPSRetriever import GPSRetriever
-from src.gps.lib.Trilaterator import Trilaterator as Trilaterator
+from src.gps.lib.Trilaterator import Trilaterator
 
 gpsRet = GPSRetriever()
 gpsRet.configure('gps.json')

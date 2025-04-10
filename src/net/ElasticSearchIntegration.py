@@ -1,7 +1,7 @@
 import json
 from datetime import datetime, timedelta, timezone
 from elasticsearch import Elasticsearch
-from src.net.lib.net_utils import WifiWorkerParser as WifiWorkerParser
+from src.net.lib.net_utils import WifiWorkerParser
 from src.config import readConfig
 
 

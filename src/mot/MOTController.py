@@ -2,7 +2,7 @@ import threading
 from flask import Flask
 from flask_cors import CORS, cross_origin
 import routes
-from src.lib.rest_server import RESTServer as RESTServer
+from src.lib.rest_server import RESTServer
 
 
 class MOTController(threading.Thread):

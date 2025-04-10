@@ -38,7 +38,7 @@ def print_frame(o, origin):
             # f"\tdistances_mean: {str(o.distances_mean.__format__('.4f')).ljust(3, ' ')}"
     )
 
-class FrameObjektTracker:
+class FrameObjektTracker(object):
 
     def __init__(self):
         super().__init__()

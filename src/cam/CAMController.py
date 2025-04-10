@@ -2,7 +2,7 @@ import threading
 from flask import Flask
 from flask_cors import CORS, cross_origin
 import src.cam.routes as routes
-from src.lib.rest_server import RESTServer as RESTServer
+from src.lib.rest_server import RESTServer
 
 
 class CAMController(threading.Thread):

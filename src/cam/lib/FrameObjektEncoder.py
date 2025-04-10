@@ -7,6 +7,10 @@ import cv2 as cv
 import hashlib
 from src.cam.Showxating.ShowxatingHistogramPlugin import ShowxatingHistogramPlugin
 
+# IDEA: MEDIAPIPE
+# person detection: use mediapipe pose to label as 'human' motion.
+# find AND magnify faces: use mediapipe face to find the head ROI, Magnify it.
+
 class FrameObjektEncoder(threading.Thread):
 
     def __init__(self, frame_obj):
@@ -16,10 +20,41 @@ class FrameObjektEncoder(threading.Thread):
         self.bins = 32                          # get from config and configure
         self.precision = 8                      # TOOD: geohash precision, make config
         self.mm_scaler = MinMaxScaler()
-        self.std_scaler = StandardScaler()
+        # self.std_scaler = StandardScaler()
+
+        self.mediapipe = False
+        self._pose = None
+        self._result_T = None
 
     def encode_lat_lon(self, latitude, longitude):
         return geohash.encode(latitude, longitude, precision=self.precision)
+
+    def pre_mediapipe(self, f):
+
+        if self.mediapipe:
+            import mediapipe as mp  # only load if needed. slow...
+
+            mp_pose = mp.solutions.pose
+            self._pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+            BGR_T = cv.cvtColor(f[self._max_height, self._max_width], cv.COLOR_RGB2BGR)  # 'BGR'
+            self._result_T = self._pose.process(BGR_T)
+
+    def post_mediapipe(self, f):
+        if self.mediapipe:
+            import mediapipe as mp  # already loaded, only here for refs
+            mp_pose = mp.solutions.pose
+
+        if self._result_T is not None:
+            if self._result_T.pose_landmarks is not None:
+
+                def draw_pose(fragment, result):
+                    if result.pose_landmarks is not None:
+                        mp_drawing = mp.solutions.drawing_utils
+                        mp_drawing_styles = mp.solutions.drawing_styles
+                        mp_drawing.draw_landmarks(fragment, result.pose_landmarks, mp_pose.POSE_CONNECTIONS,
+                                                  landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+
+                draw_pose(f, self._result_T)
 
     def get_histogram(self, wall, rectangle):
 

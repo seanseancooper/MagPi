@@ -2,7 +2,7 @@ import threading
 import logging
 
 from src.cam.Showxating.ShowxatingBlackviewPlugin import ShowxatingBlackviewPlugin
-from src.cam.lib import StreamService, StreamingHandler
+from src.cam.lib.StreamService import StreamService, StreamingHandler
 from src.config.__init__ import readConfig
 
 cam_logger = logging.getLogger('cam_logger')

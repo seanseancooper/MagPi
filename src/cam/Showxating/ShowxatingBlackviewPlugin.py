@@ -1,21 +1,18 @@
 import cv2 as cv
 import numpy as np
-
 import json
 
 from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
 from pika.exceptions import AMQPConnectionError
 
-
 from src.cam.Showxating.plugin import ShowxatingPlugin
 from src.cam.lib.ImageWriter import ImageWriter
-from src.cam.lib import FrameObjektTracker
+from src.cam.lib.FrameObjektTracker import FrameObjektTracker
 from src.cam.lib.utils import draw_contours, wall_images, sortedContours
-
-import logging
-
 from src.ebs.lib.TokenBucket import TokenBucket
 from src.lib.utils import format_time, format_delta
+
+import logging
 
 cam_logger = logging.getLogger('cam_logger')
 speech_logger = logging.getLogger('speech_logger')
@@ -254,37 +251,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         _snap(frame)
 
         return "OK"
-
-    def pre_mediapipe(self, f):
-
-        if self.mediapipe:
-            import mediapipe as mp  # only load if needed. slow...
-
-            mp_pose = mp.solutions.pose
-            self._pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
-            BGR_T = cv.cvtColor(f[self._max_height, self._max_width], cv.COLOR_RGB2BGR)  # 'BGR'
-            self._result_T = self._pose.process(BGR_T)
-
-    def post_mediapipe(self, f):
-        if self.mediapipe:
-            import mediapipe as mp  # already loaded, only here for refs
-            mp_pose = mp.solutions.pose
-
-        if self._result_T is not None:
-            if self._result_T.pose_landmarks is not None:
-
-                def draw_pose(fragment, result):
-                    if result.pose_landmarks is not None:
-                        mp_drawing = mp.solutions.drawing_utils
-                        mp_drawing_styles = mp.solutions.drawing_styles
-                        mp_drawing.draw_landmarks(fragment, result.pose_landmarks, mp_pose.POSE_CONNECTIONS,
-                                                  landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
-
-                draw_pose(f, self._result_T)
-
-                # IDEA: MEDIAPIPE OFFLINE PROCESSING
-                # person detection: use mediapipe pose to label as 'human' motion.
-                # find+magnify faces: use mediapipe face to find the heads ROI, then magnify it.
 
     def process_contours(self, frame, contours, hier):
 
