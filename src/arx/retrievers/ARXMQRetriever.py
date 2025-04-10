@@ -16,7 +16,7 @@ wifi_logger = logging.getLogger('wifi_logger')
 
 
 
-class ARXWifiRetriever(threading.Thread):
+class ARXMQRetriever(threading.Thread):
     """ MQ Wifi Retriever class """
     def __init__(self):
         super().__init__()
