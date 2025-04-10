@@ -182,15 +182,32 @@ if (enable_hardware) {
     }, 1000);
 };
 
-geolocation.on('change', function (evt) {
-    if (!enable_hardware) {
-        const coordJS = geolocation.getPosition();
-        var jsCoords = toLonLat(coordJS);
-        coordinate = jsCoords;
-        animate(jsCoords);
-        update(jsCoords);
-    }
+//geolocation.on('change', function (evt) {
+//    if (!enable_hardware) {
+//        const coordJS = geolocation.getPosition();
+//        var jsCoords = toLonLat(coordJS);
+//        coordinate = jsCoords;
+//        animate(jsCoords);
+//        update(jsCoords);
+//    }
+//});
+
+geolocation.on('change', function () {
+  const coordJS = geolocation.getPosition();
+  const jsCoords = toLonLat(coordJS);
+  const payload = {
+    lon: jsCoords[0],
+    lat: jsCoords[1]
+  };
+
+  // Send coords to Node server
+  fetch('http://localhost:3000', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
 });
+
 
 geolocation.on('error', function (error) {
     if  (!enable_hardware) {
