@@ -102,16 +102,13 @@ class FrameObjektEncoder(threading.Thread):
         lat_lon_features = self.encode_lat_lon(self.frame_obj.lat, self.frame_obj.lon)
 
         hashed_histogram = None
-        if self.frame_obj.w_hist:
+        histogram = self.extract_color_histogram_from_image(self.frame_obj.wall) # <-- get this from zeroMQ/imageZMQ
+        normalized = cv.normalize(histogram, histogram)
+        flattened = normalized.flatten()
+        color_histogram = flattened.tolist()
 
-            # histogram = self.get_histogram(self.frame_obj.wall, self.frame_obj.rect)
-            histogram = self.extract_color_histogram_from_image(self.frame_obj.wall)
-            normalized = cv.normalize(histogram, histogram)
-            flattened = normalized.flatten()
-            color_histogram = flattened.tolist()
-
-            if self.hash_histogram:
-                hashed_histogram = self.hash_color_histogram(color_histogram)
+        if self.hash_histogram:
+            hashed_histogram = self.hash_color_histogram(color_histogram)
 
         encoded_data = list(norm_numerical_features) + list(encoded_rect) + list(encoded_avg_loc) + [lat_lon_features] + [hashed_histogram]
 

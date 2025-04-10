@@ -31,7 +31,6 @@ class FrameObjekt:
         self.delta_range = 0.0
         self.hist_delta = 0.0                                           # [0.0: reporting] histogram distance wrt previous frame analysis area
 
-        self.w_hist = None                                              # histogram of wall, filled in by FrameObjectTracker
         self.wall = None                                                # [ndarray: container] image of processed area in this frame
 
         # 'deprecated' booleans

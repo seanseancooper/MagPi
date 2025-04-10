@@ -20,8 +20,6 @@ def frameobjekt_to_dict(f_obj):
         'distances_mean'    : f_obj.distances_mean,
         # 'delta_range'     : f_obj.delta_range,
         'hist_delta'        : f_obj.hist_delta,
-        # 'f_hist'          : f_obj.f_hist,
-        'w_hist'            : f_obj.w_hist.tolist() if f_obj.w_hist is not None else [],  # DBUG this needs to be an array, so this isn't the right way to process this
         'rect'              : f_obj.rect,
         'avg_loc'           : f_obj.avg_loc.tolist(),
         'dist_mean'         : f_obj.dist_mean,
@@ -58,8 +56,6 @@ def dict_to_frameobjekt(data):
     frame_obj.distances_mean = data['distances_mean']
     # frame_obj.delta_range = data['delta_range']
     frame_obj.hist_delta = data['hist_delta']
-    # frame_obj.f_hist = data['f_hist']
-    frame_obj.w_hist = data['w_hist']  # DBUG this needed to be an array, so this isn't the right way to process this
     frame_obj.rect = tuple(data['rect']) if data['rect'] else None
     frame_obj.avg_loc = np.array(data['avg_loc'])
     frame_obj.dist_mean = data['dist_mean']
