@@ -233,8 +233,8 @@ class FrameObjektTracker(object):
         if not labeled:
             # f 0
             o = self.init_o(wall, self.rectangle, frame_stats)
-            o.close = is_in_range(o.distance, o.distances_mean, self.l_delta_pcnt * o.distances_mean)
-            o.inside = is_inside(o.avg_loc, o.rect)
+            o.close = False
+            o.inside = True
             o.tag = o.create_tag(self.f_id)
             print_frame(o, "N0:")
             labeled.append(o)
