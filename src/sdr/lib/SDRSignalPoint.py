@@ -20,6 +20,7 @@ class SDRSignalPoint(SignalPoint):
         self._array_data = array_data
 
         self._audio_frequency_features = None
+        self._array_frequency_features = None
 
         self.is_mute = False
         self.tracked = False
@@ -100,8 +101,12 @@ class SDRSignalPoint(SignalPoint):
         """Get the sampling rate."""
         return self._sr
 
-    def get_frequency_features(self):
-        """Get the computed frequency features."""
+    def get_audio_frequency_features(self):
+        """Get the audio frequency features."""
+        return self._audio_frequency_features
+
+    def get_array_frequency_features(self):
+        """Get the array frequency features."""
         return self._array_frequency_features
 
     def compute_audio_frequency_features(self, audio_data, sampling_rate):
@@ -116,12 +121,6 @@ class SDRSignalPoint(SignalPoint):
     def extract_audio_features(audio_data, sampling_rate):
         if len(audio_data) < 2:
             return {}
-
-        # librosa deals with arrays of floats, the SDR puts arrays of complex numbers.
-        # either convert the structure:
-        # or use a different library:
-        #   def compute_frequency_features(self, signal, sampling_rate=1):
-
 
         zcr = float(np.mean(librosa.feature.zero_crossing_rate(audio_data)))
         centroid = float(np.mean(librosa.feature.spectral_centroid(y=audio_data, sr=sampling_rate)))

@@ -30,7 +30,7 @@ class TRXSignalPoint(SignalPoint):
         self._audio_data = audio_data           # continuous: intermittent audio data as a Signal
         self._sr = sr                           # need config, and ability to ad hoc change
 
-        self._frequency_features = None
+        self._audio_frequency_features = None
 
         if text_data is not None:
             #   ALPHATAG: name of system broadcasting
@@ -58,17 +58,21 @@ class TRXSignalPoint(SignalPoint):
                 self.text_attributes[k] = v
             [aggregate(k, str(v)) for k, v in text_data.items()]
 
-        if self._signal_type == "continuous" and self._audio_data is not None:
+        if self._signal_type == "object" and self._audio_data is None:
+            self._sgnl = 0.0
+        if self._signal_type == "object" and self._audio_data is not None:
+            self._sgnl = 0.0 # set to peak db in audio
+        elif self._signal_type == "continuous" and self._audio_data is not None:
             # set sr, make Signal. use audio data and extract_audio_features
             signal = Signal(audio_data, self._id, sr=self._sr)
-            self._frequency_features = self.extract_audio_features(signal.get_data(), signal.get_sr())
+            self._audio_frequency_features = self.extract_audio_frequency_features(signal.get_data(), signal.get_sr())
 
     def get_audio_data(self):
         return self._audio_data
 
     def set_audio_data(self, audio_data):
         self._audio_data = Signal(audio_data, self._id, sr=self._sr)
-        self._frequency_features = self.extract_audio_features(audio_data, self._sr)
+        self._audio_frequency_features = self.extract_audio_frequency_features(audio_data, self._sr)
 
     def update(self, tracked):
         self.updated = datetime.now()
@@ -93,11 +97,11 @@ class TRXSignalPoint(SignalPoint):
             "audio_data"        : self._audio_data.tolist() if self._audio_data is not None else None,
             "text_data"         : {k: v for k, v in self.text_attributes.items()},
 
-            "frequency_features": self._frequency_features,
+            "frequency_features": self._audio_frequency_features,
         }
 
     @staticmethod
-    def extract_audio_features(audio_data, sampling_rate):
+    def extract_audio_frequency_features(audio_data, sampling_rate):
         if len(audio_data) < 2:
             return {}
 
@@ -110,17 +114,6 @@ class TRXSignalPoint(SignalPoint):
         tempo, _ = librosa.beat.beat_track(y=audio_data, sr=sampling_rate)
         mfccs = librosa.feature.mfcc(y=audio_data, sr=sampling_rate, n_mfcc=13).mean(axis=1).tolist()
         chroma = float(np.mean(librosa.feature.chroma_stft(y=audio_data, sr=sampling_rate)))
-
-        # AUDIO FREQUENCY FEATURES:
-        # // ENOB: Effective number of bits
-
-        # DB (_sgnl): decibels
-        # SNR: Signal-to-noise ratio
-        # THD: Total harmonic distortion
-        # THD + N: Total harmonic distortion plus noise
-
-        # SFDR: Spurious free dynamic range
-        # SINAD: Signal-to-noise-and-distortion ratio
 
 
         return {
