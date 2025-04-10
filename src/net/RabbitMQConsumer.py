@@ -32,7 +32,7 @@ class RabbitMQConsumer:
         net_logger.info("Starting consumer...")
 
         try:
-            self.channel.basic_consume(queue='frame_queue', on_message_callback=self.on_message)
+            self.channel.basic_consume(queue=self.queue, on_message_callback=self.on_message)
 
             net_logger.info("Waiting for messages. To exit press CTRL+C")
             self.channel.start_consuming()
