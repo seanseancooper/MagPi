@@ -21,6 +21,7 @@ class FrameObjekt:
         self.frame_rate = 0.0
         self.frame_period = 0.0
         self.frame_shape = None                                             # [ndarray: container] shape of current frame
+        self.wall = None                                                # [ndarray: container] image of processed area in this frame
 
         # "unused" features
         self.contours = None                                            # [tuple of ndarray(n, 1, 2): object tracking] ALL contours in this frame
@@ -30,8 +31,6 @@ class FrameObjekt:
         self.distances_mean = 0.0
         self.delta_range = 0.0
         self.hist_delta = 0.0                                           # [0.0: reporting] histogram distance wrt previous frame analysis area
-
-        self.wall = None                                                # [ndarray: container] image of processed area in this frame
 
         # 'deprecated' booleans
         self.close = None                                               # [boolean: reporting] is this mean location with the bounds of the contour?
