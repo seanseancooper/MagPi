@@ -4,7 +4,13 @@ from src.sdr.lib.SDRSignalPoint import SDRSignalPoint
 class SDRReceiver:
 
     def __init__(self, sr=2.048e6, center_freq=100e6, freq_correction=60, gain='auto'):
-        """Initialize the SDR hardware with provided parameters."""
+        """Initialize the SDR hardware with provided parameters.
+        Received energy on a particular frequency may start a recorder, and alert a human
+        to listen to the signals if they are intelligible (i.e., COMINT). If the frequency
+        is not known, the operators may look for power on primary or sideband frequencies
+        using a spectrum analyzer. Information from the spectrum analyzer is then used to
+        tune receivers to signals of interest.
+        """
         self.sdr = RtlSdr()
         self.sdr.sample_rate = sr
         self.sdr.center_freq = center_freq
@@ -33,15 +39,17 @@ class SDRReceiver:
         x = self.read_samples(fft_size * num_rows)  # get all the samples we need for the spectrogram
         self.sdr.close()
 
-        # testing SDRSignalPoint
+        # test SDRSignalPoint
         self.signalpoint = SDRSignalPoint(
                 'worker_id',
                 0.0,  # lat
                 0.0,  # lon
                 0.0,  # sgnl
                 array_data=x,
-                audio_data=x,
+                audio_data=None,
                 sr=self.sdr.sample_rate)
+
+        print(self.signalpoint.get_audio_frequency_features())
 
         return x
 

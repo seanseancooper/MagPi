@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 
 class SDRAnalyzer:
 
+    #  Fast Fourier Transform (FFT): FFT converts a time-series signal into a set of frequency components.
+    #     We use it to extract dominant frequencies, spectral power, and energy concentration.
+    # compute_fft_features(signal_values, sampling_rate=1)
+
     def __init__(self, data, sr=2.048e6, center_freq=100e6, fft_size=512, num_rows=500):
         self._data = data
         self._sr = sr
