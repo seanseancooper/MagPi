@@ -47,7 +47,7 @@ def print_analytics(p, f, contours, hierarchy):
         # draw_centroid(f, contours, 5, (127, 0, 255), 1)  # purple centroid
 
 
-def print_tracked(p, f, rect):
+def print_tracked(p, f):
     _height, _width, ch = f.shape
     _end = int(0.70 * _height)
     _font_size = 0.75
@@ -60,16 +60,9 @@ def print_tracked(p, f, rect):
             y = o.avg_loc[1]
             item = f'{o.contour_id}-{o.tag[-12:]} [{x},{y}]'
             pt = x, y
-            # if rect and is_inside(pt, rect):
-            if rect and not o.hist_pass:
-                # yellow dot: items being tracked
-                cv.putText(f, item, (x, (y + (i * 10))), cv.FONT_HERSHEY_PLAIN, .75, (0, 255, 255), 1)
-                cv.rectangle(f, (x, y), (x+5, y+5), (0, 255, 255), -1)
-            else:
-                # red dot: tests false.
-                # cv.putText(f, item, (x, (y + (i * 10))), cv.FONT_HERSHEY_PLAIN, .75, (0, 0, 255), 1)
-                # cv.rectangle(f, (x, y), (x+5, y+5), (0, 0, 255), -1)
-                pass
+            # yellow dot: items being tracked
+            cv.putText(f, item, (x, (y + (i * 10))), cv.FONT_HERSHEY_PLAIN, .75, (0, 255, 255), 1)
+            cv.rectangle(f, (x, y), (x+5, y+5), (0, 255, 255), -1)
 
     if p.has_analysis:
         for w, _ in enumerate([x for x in p.tracked][:p.tracker.contour_limit], 1):
@@ -277,7 +270,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                         if self.rmq:
                             [self.rmq.publish_message(o) for o in self.tracked.values() if o.f_id > 0]
 
-                        print_tracked(self, frame, rect)
+                        print_tracked(self, frame)
                         print_symbology(self, frame, rect)
                     print_analytics(self, frame, cnt, hier)
 

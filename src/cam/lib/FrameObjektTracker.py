@@ -44,16 +44,25 @@ class FrameObjektTracker(object):
         super().__init__()
         self.f_id = 0                       # current frame id
         self.f_limit = 5                    # max age of frames in o_cache_map.
+        self.contour_limit = None           # number of contours evaluated by plugin in each pass
+
+        # CART features
+        self.avg_loc = []                   # list of (x,y) location of contour in self.contours
+        self.rectangle = None               # [tuple {x, y, w, h}: object segmentation] bounding rects of contours in this frame
+        self.lat = 0.0                      # current latitude
+        self.lon = 0.0                      # current longitude
+        self.decision_tree = None
+
+        self.tracked = {}                   # mapping of FrameObjekts over last 'f_limit' frames.
+        self.config = {}
+
+        # internal values use to ascertain similarity between frames
         self.f_delta_pcnt = 0.5             # 0..1 percentage of delta between current/previous f over all pixels
         self.f_delta_mean = float()         # InCORRECT!: mean of ALL differences between ALL SEEN frames -- no f_limit.
         self.delta_range = 90.00            # offset +/- allowed difference; frm_delta_pcnt * fd_mean
         self.l_delta_pcnt = 0.2             # 0..1 percentage of delta between the current/previous mean locations
 
-        self.contour_limit = None           # number of contours evaluated by plugin in each pass
-
-        self.tracked = {}                   # mapping of FrameObjekts over last 'f_limit' frames.
-        self.avg_loc = []                   # list of (x,y) location of contour in self.contours
-
+        # unused features: caches are internal --> post-processing
         self.e_distance = float()           # euclidean distance between the current and previous frames
         self.e_cache = []                   # list of previous euclidean distance over last f_limit frames
 
@@ -65,12 +74,6 @@ class FrameObjektTracker(object):
 
         self.ssim = float()                 # Structural similarity between the current and previous frames
         self.ssim_cache = []                # list of previous...
-
-        self.lat = 0.0                      # current latitude
-        self.lon = 0.0                      # current longitude
-
-        self.decision_tree = None
-        self.config = {}
 
     def get(self):
         return {
@@ -194,16 +197,16 @@ class FrameObjektTracker(object):
         # median of distances for the last thing with a tag?
         o.close = is_in_range(o.distance, max(o.rect[2], o.rect[3]), self.l_delta_pcnt * max(o.rect[1], o.rect[2]))
 
-        o.inside_rect = is_inside(o.avg_loc, o.rect)                            # is the ml inside rect?
+        o.inside = is_inside(o.avg_loc, o.rect)                            # is the ml inside rect?
         o.delta_range = self.f_delta_pcnt * o.distances_mean                    # percentage of px difference
 
         o.hist_pass = None
-        o.ssim_pass = self.ssim > 0.1
         o.wall_pass = is_in_range(o.distance, o.distances_mean, self.delta_range)
         o.mse_pass = self.mse > 0.0
         o.cosim_pass = self.cosim > 0.0
+        o.ssim_pass = self.ssim > 0.1
 
-    def label_locations(self, frame, wall, rectangle, frame_stats):
+    def label_locations(self, frame, wall, frame_stats):
         """ find elements 'tag' by euclidean distance """
 
         labeled = []
@@ -212,7 +215,7 @@ class FrameObjektTracker(object):
 
         if len(p_ml) == 1:
             # NEW TAG for a different thing; there is only one
-            o1 = self.init_o(wall, rectangle, frame_stats)
+            o1 = self.init_o(wall, self.rectangle, frame_stats)
 
             o1.distances = euclidean_distances(
                     np.array([self.avg_loc], dtype=int),
@@ -225,9 +228,9 @@ class FrameObjektTracker(object):
             o1.prev_tag = str(list(self.tracked.keys())[0])
 
             o1.tag = o1.create_tag(self.f_id)
-            self.get_stats(o1, wall, rectangle)
+            self.get_stats(o1, wall, self.rectangle)
 
-            if o1.inside_rect and o1.ssim_pass:
+            if o1.inside and o1.ssim_pass:
                 # item following f0 item.
 
                 # back reference and merge the rects (n largest) and
@@ -261,7 +264,7 @@ class FrameObjektTracker(object):
             self.decision_tree = DecisionTreeRegressor()
             label_encoder = LabelEncoder()
 
-            oN = self.init_o(wall, rectangle, frame_stats)
+            oN = self.init_o(wall, self.rectangle, frame_stats)
             features = np.array([[    oN.rect[0], oN.rect[1], oN.rect[2], oN.rect[3], oN.avg_loc[0], oN.avg_loc[1]    ]])
 
             # Collect past tracked objects for training
@@ -292,7 +295,7 @@ class FrameObjektTracker(object):
                     predicted_tag = label_encoder.inverse_transform(self.decision_tree.predict(features).astype(int))[0]
                     oN.tag = f"{self.f_id}_{predicted_tag.split('_')[1]}"
                     oN.prev_tag = predicted_tag
-                    self.get_stats(oN, wall, rectangle)
+                    self.get_stats(oN, wall, self.rectangle)
 
             else:
                 oN.tag = oN.create_tag(self.f_id)
@@ -302,9 +305,9 @@ class FrameObjektTracker(object):
 
         if not labeled:
             # f 0
-            o = self.init_o(wall, rectangle, frame_stats)
+            o = self.init_o(wall, self.rectangle, frame_stats)
             o.close = is_in_range(o.distance, o.distances_mean, self.l_delta_pcnt * o.distances_mean)
-            o.inside_rect = is_inside(o.avg_loc, o.rect)
+            o.inside = is_inside(o.avg_loc, o.rect)
             o.tag = o.create_tag(self.f_id)
             print_frame(o, "N0:")
             labeled.append(o)
@@ -313,6 +316,7 @@ class FrameObjektTracker(object):
 
     def track_objects(self, f_id, frame, contour, wall, rectangle, frame_stats):
         self.f_id = f_id
+        self.rectangle = rectangle
 
         def get_mean_location(contours):
             x = []
@@ -323,7 +327,7 @@ class FrameObjektTracker(object):
 
         self.avg_loc = get_mean_location(contour)
 
-        for o in self.label_locations(frame, wall, rectangle, frame_stats):
+        for o in self.label_locations(frame, wall, frame_stats):
             o.contour = contour
 
             if not o.prev_tag:
