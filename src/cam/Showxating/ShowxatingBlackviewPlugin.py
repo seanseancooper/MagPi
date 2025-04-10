@@ -18,59 +18,6 @@ cam_logger = logging.getLogger('cam_logger')
 speech_logger = logging.getLogger('speech_logger')
 
 
-def print_symbology(p, f, rect):
-
-    _height, _width, ch = f.shape
-    _start = int(0.25 * _height)
-
-    if p.has_symbols:
-        if p.has_motion:
-            cv.putText(f, "MOTION DETECTED!", (5, _start - 5), cv.FONT_HERSHEY_PLAIN, 1.0, p.majic_color, 2)
-
-        # yellow rect: items that are moving
-        try:
-            def print_rect(r):
-                x, y, w, h = r
-                item = f'({x},{y})'
-                cv.putText(f, item, (x - 15, y - 10), cv.FONT_HERSHEY_PLAIN, .75, (0, 255, 255), 1)
-                cv.rectangle(f, (x, y), (x + w, y + h), (0, 255, 255), 2)
-
-            if np.any(rect):
-                print_rect(rect)
-
-        except TypeError: pass  # 'NoneType' object is not subscriptable
-
-def print_analytics(p, f, contours, hierarchy):
-    if p.has_analysis:
-        draw_contours(f, contours, hierarchy, (64, 255, 64), 1)  # green contours
-        # draw_centroid(f, contours, 5, (127, 0, 255), 1)  # purple centroid
-
-def print_tracked(p, f):
-    _height, _width, ch = f.shape
-    _end = int(0.70 * _height)
-    _font_size = 0.75
-
-    if p.has_symbols:
-
-        for i, _ in enumerate(p.tracked):
-            o = p.tracked.get(_)
-            x = o.avg_loc[0]
-            y = o.avg_loc[1]
-            item = f'{o.tag[-12:]} [{x},{y}]'
-            pt = x, y
-            # yellow dot: items being tracked
-            cv.putText(f, item, (x, (y + (i * 10))), cv.FONT_HERSHEY_PLAIN, .75, (0, 255, 255), 1)
-            cv.rectangle(f, (x, y), (x+5, y+5), (0, 255, 255), -1)
-
-    if p.has_analysis:
-        for w, _ in enumerate([x for x in p.tracked][:p.tracker.contour_limit], 1):
-            o = p.tracked.get(_)
-            try:
-                cv.putText(f, o.tag, (385, _end + (w * 20)), cv.FONT_HERSHEY_PLAIN, _font_size, (255, 255, 255), 1)
-            except AttributeError as a:
-                pass
-
-
 class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
     def __init__(self):
@@ -107,6 +54,77 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
         self.tracked = {}
 
+    @staticmethod
+    def print_symbology(p, f, rect):
+
+        _height, _width, ch = f.shape
+        _start = int(0.25 * _height)
+
+        if p.has_symbols:
+            if p.has_motion:
+                cv.putText(f, "MOTION DETECTED!", (5, _start - 5), cv.FONT_HERSHEY_PLAIN, 1.0, p.majic_color, 2)
+
+            # yellow rect: items that are moving
+            try:
+                def print_rect(r):
+                    x, y, w, h = r
+                    item = f'({x},{y})'
+                    cv.putText(f, item, (x - 15, y - 10), cv.FONT_HERSHEY_PLAIN, .75, (0, 255, 255), 1)
+                    cv.rectangle(f, (x, y), (x + w, y + h), (0, 255, 255), 2)
+
+                if np.any(rect):
+                    print_rect(rect)
+
+            except TypeError:
+                pass  # 'NoneType' object is not subscriptable
+
+    @staticmethod
+    def print_analytics(p, f, contours, hierarchy):
+        if p.has_analysis:
+            draw_contours(f, contours, hierarchy, (64, 255, 64), 1)  # green contours
+            # draw_centroid(f, contours, 5, (127, 0, 255), 1)  # purple centroid
+
+    @staticmethod
+    def print_tracked(p, f):
+        _height, _width, ch = f.shape
+        _end = int(0.70 * _height)
+        _font_size = 0.75
+
+        if p.has_symbols:
+
+            for i, _ in enumerate(p.tracked):
+                o = p.tracked.get(_)
+                x = o.avg_loc[0]
+                y = o.avg_loc[1]
+                item = f'{o.tag[-12:]} [{x},{y}]'
+                pt = x, y
+                # yellow dot: items being tracked
+                cv.putText(f, item, (x, (y + (i * 10))), cv.FONT_HERSHEY_PLAIN, .75, (0, 255, 255), 1)
+                cv.rectangle(f, (x, y), (x + 5, y + 5), (0, 255, 255), -1)
+
+        if p.has_analysis:
+            for w, _ in enumerate([x for x in p.tracked][:p.tracker.contour_limit], 1):
+                o = p.tracked.get(_)
+                try:
+                    cv.putText(f, o.tag, (385, _end + (w * 20)), cv.FONT_HERSHEY_PLAIN, _font_size, (255, 255, 255), 1)
+                except AttributeError as a:
+                    pass
+
+    def get_config(self):
+        super().get_config()
+        self.tracker.configure()
+        self.throttle = TokenBucket(self.plugin_config['tokenbucket'].get('tokens', 1),
+                                    self.plugin_config['tokenbucket'].get('interval', 60)
+                                    )
+        self.krnl = self.plugin_config.get('krnl', 10.0)
+        self.threshold = self.plugin_config.get('threshold', 10.0)
+
+        try:
+            self.rmq = RabbitMQProducer('frame_queue')
+            # self.rmq = mq.create()
+        except AMQPConnectionError:
+            pass
+
     def get(self):
         return {
             "has_symbols": self.has_symbols,
@@ -126,21 +144,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             "updated": format_time(self.updated, "%H:%M:%S"),
             "elapsed": format_delta(self.elapsed, "%H:%M:%S")
         }
-
-    def get_config(self):
-        super().get_config()
-        self.tracker.configure()
-        self.throttle = TokenBucket(self.plugin_config['tokenbucket'].get('tokens', 1),
-                                    self.plugin_config['tokenbucket'].get('interval', 60)
-                                    )
-        self.krnl = self.plugin_config.get('krnl', 10.0)
-        self.threshold = self.plugin_config.get('threshold', 10.0)
-
-        try:
-            self.rmq = RabbitMQProducer('frame_queue')
-            # self.rmq = mq.create()
-        except AMQPConnectionError:
-            pass
 
     def sets_hold_threshold(self, value):
         if value is True:
@@ -257,9 +260,9 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                         if self.rmq:
                             [self.rmq.publish_message(o) for o in self.tracked.values() if o.f_id > 0]
 
-                        print_tracked(self, frame)
-                        print_symbology(self, frame, rect)
-                    print_analytics(self, frame, cnt, hier)
+                        self.print_tracked(self, frame)
+                        self.print_symbology(self, frame, rect)
+                    self.print_analytics(self, frame, cnt, hier)
 
                     if self.plugin_config['write_all_frames']:
                          self.print_frame(frame, self.frame_id)  # <-- memorize moving things
