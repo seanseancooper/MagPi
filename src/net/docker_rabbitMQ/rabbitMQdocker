@@ -1,0 +1,23 @@
+FROM rabbitmq:4-management
+
+# Set non-root user details
+#ARG USER=trxuser
+#ARG UID=1001
+#ARG GID=1001
+
+# Create user and install system deps
+#RUN groupadd -g $GID $USER && \
+#    useradd -u $UID -g $GID -m $USER
+
+# Install apt dependencies
+#RUN apt-get update && apt-get install -y \
+#    sudo \
+#    && rm -rf /var/lib/apt/lists/*
+
+# Switch to non-root user
+#USER $USER
+
+# port bindings
+#-p 5552:5552
+#-p 15672:15672
+#-p 5672:5672

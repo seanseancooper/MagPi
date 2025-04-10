@@ -1,0 +1,6 @@
+services:
+  rabbitmq:
+    build:
+      context: .
+      dockerfile: rabbitMQdocker
+    container_name: rabbitmq
