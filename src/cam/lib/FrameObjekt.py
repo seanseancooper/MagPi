@@ -42,6 +42,38 @@ class FrameObjekt:
         self.mse_pass = None
         self.cosim_pass = None
 
+
+    @staticmethod
+    def frameobjekt_to_dict(f_obj):
+        """Convert FrameObjekt to a serializable dictionary."""
+        return {
+            'f_id'       : f_obj.f_id,
+            'frame_shape': f_obj.frame_shape,
+            'created'    : f_obj.created.isoformat(),
+            'tag'        : f_obj.tag,
+
+            'rect'       : f_obj.rect,
+            'avg_loc'    : f_obj.avg_loc.tolist(),
+            'lat'        : f_obj.lat,
+            'lon'        : f_obj.lon,
+        }
+
+    @staticmethod
+    def dict_to_frameobjekt(data):
+        """Convert dictionary back to FrameObjekt."""
+        frame_obj = FrameObjekt.create(data['f_id'])
+        frame_obj.f_id = data['f_id']
+        frame_obj.frame_shape = tuple(data['frame_shape'])
+        frame_obj.created = datetime.fromisoformat(data['created'])
+        frame_obj.tag = data['tag']
+
+        frame_obj.rect = tuple(data['rect']) if data['rect'] else None
+        frame_obj.avg_loc = np.array(data['avg_loc'])
+        frame_obj.lat = data['lat']
+        frame_obj.lon = data['lon']
+
+        return frame_obj
+
     @staticmethod
     def create(f_id):
         return FrameObjekt(f_id)
