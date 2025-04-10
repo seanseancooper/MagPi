@@ -1,5 +1,10 @@
 FROM rabbitmq:4-management
 
+# port bindings
+EXPOSE 5552
+EXPOSE 5672
+EXPOSE 15672
+
 # Set non-root user details
 #ARG USER=trxuser
 #ARG UID=1001
@@ -17,7 +22,3 @@ FROM rabbitmq:4-management
 # Switch to non-root user
 #USER $USER
 
-# port bindings
-#-p 5552:5552
-#-p 15672:15672
-#-p 5672:5672

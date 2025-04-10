@@ -4,3 +4,8 @@ services:
       context: .
       dockerfile: rabbitMQdocker
     container_name: rabbitmq
+    ports:
+      - "5552:5552"
+      - "5672:5672"
+      - "15672:15672"
+
