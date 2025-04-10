@@ -40,12 +40,10 @@ def print_symbology(p, f, rect):
 
         except TypeError: pass  # 'NoneType' object is not subscriptable
 
-
 def print_analytics(p, f, contours, hierarchy):
     if p.has_analysis:
         draw_contours(f, contours, hierarchy, (64, 255, 64), 1)  # green contours
         # draw_centroid(f, contours, 5, (127, 0, 255), 1)  # purple centroid
-
 
 def print_tracked(p, f):
     _height, _width, ch = f.shape
@@ -101,7 +99,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self.show_threshold = False
         self.hold_threshold = 0                         # number of frames threshold mask is displayed if displayed
 
-        self.mediapipe = False  # slow!
         self._pose = None
         self._result_T = None  # medipipe result
 
@@ -115,7 +112,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             "has_symbols": self.has_symbols,
             "has_analysis": self.has_analysis,
             "has_motion": self.has_motion,
-            "mediapipe": self.mediapipe,
 
             "kSz": str(self._kSz),
             "threshold": self.threshold,
@@ -155,9 +151,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
     def set_field(self, field, value):
         if field == 'hold_threshold':
             self.show_threshold = (value == 'true')
-        if field == 'mediapipe':
-            self.mediapipe = (value == 'true')
-
 
         if field == 'krnl':
             self.krnl = value
@@ -168,7 +161,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             self.tracker.f_delta_pcnt = float(value)
         if field == 'f_limit':
             self.tracker.f_limit = int(value)
-
 
         if field == 'crop':
             json_value = json.loads(value)
@@ -190,13 +182,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
             if self.has_motion:
 
                 def _snap(plugin, f):
-
-                    # trap for human forms using mediapipe.
-                    # these take a fragment of the input
-                    # frame, so they'll need refactor
-
-                    # plugin.pre_mediapipe(f)
-                    # plugin.post_mediapipe(f)
 
                     writer = ImageWriter("CAMManager")
                     writer.write_trapped("CAM_TRAP", self.plugin_config.get('outfile_path', '../_out'), f)
@@ -257,7 +242,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                 wall, rect = wall_images(frame.copy(), cnt)
 
                 if self.has_analysis or self.has_symbols:
-                    # pass latency relate plugin.statistics to the tracker:
+
                     stats = {
                         "capture_frame_rate": self.frame_rate,
                         "capture_frame_period": self.frame_period,
@@ -280,7 +265,6 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                          self.print_frame(frame, self.frame_id)  # <-- memorize moving things
 
             self.trap(frame, False)
-            # self.post_mediapipe(frame)  # do this with mq....
 
             if self.had_motion != self.has_motion is True:
                 if self.throttle.handle('motion'):
@@ -306,7 +290,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                 ret, reference = self.plugin_capture.capture.read()
 
             if ret:
-                # self.pre_mediapipe(frame)
+
                 self.cropped_frame = frame[self._max_height, self._max_width]
                 self.cropped_reference = reference[self._max_height, self._max_width]
 
