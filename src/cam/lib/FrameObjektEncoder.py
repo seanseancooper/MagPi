@@ -1,20 +1,15 @@
 import threading
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 import geohash
 import cv2 as cv
 import hashlib
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.metrics import euclidean_distances, pairwise_distances
+from sklearn.metrics import pairwise_distances
+from src.config import readConfig
 import logging
 
-from src.config import readConfig
-
-
-# IDEA: MEDIAPIPE
-# person detection: use mediapipe pose to label as 'human' motion.
-# find AND magnify faces: use mediapipe face to find the head ROI, Magnify it.
 
 class FrameObjektEncoder(threading.Thread):
 
@@ -92,14 +87,25 @@ class FrameObjektEncoder(threading.Thread):
 
                 draw_pose(f, self._result_T)
 
-    def set_frame_delta(self, X, Y):
+    def set_frame_delta(self, rect_array):
         ''' set the allowable difference between frames *fragments_* to the
         average of the paired euclidean distances between the previous 'item'
         and the current frame 'wall'.
         '''
 
-        try:
+        def make_grey_data(item, rectangle):
+            wx, wy, ww, wh = rectangle
+            return cv.cvtColor(item[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)
 
+        # get the previous wall if it exists
+        prev_wall = self.frame_obj.prev_tag.wall
+        # get wall off MQ
+        wall = self.frame_obj.wall
+
+        X = make_grey_data(prev_wall, rect_array)
+        Y = make_grey_data(wall, rect_array)
+
+        try:
             # return the distances between the row vectors of X and Y
             self.e_distance = np.mean(pairwise_distances(X, Y))
             self.e_cache.append(self.e_distance)
@@ -147,19 +153,11 @@ class FrameObjektEncoder(threading.Thread):
         _s = self.frame_obj.frame_shape
         rect_array = np.asarray([int(_s[1]), int(_s[0]), int(_s[1]), int(_s[0])])
         loc_array = np.asarray([int(_s[1]), int(_s[0])])
-
-        def make_grey_data(item, rectangle):
-            wx, wy, ww, wh = rectangle
-            return cv.cvtColor(item[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)
-
-        prev_wall = self.frame_obj.prev_tag.wall
-        wall = self.frame_obj.prev_tag.wall
-        X = make_grey_data(prev_wall, rect_array)
-        Y = make_grey_data(wall, rect_array)
-        self.set_frame_delta(X, Y)
+        self.set_frame_delta(rect_array)
 
         encoded_rect = np.divide((np.asarray(self.frame_obj.rect)), rect_array)
         encoded_avg_loc = np.divide((np.asarray(self.frame_obj.avg_loc)), loc_array)
+
         norm_numerical_features = self.mm_scaler.fit_transform(numerical_features)
         lat_lon_features = self.encode_lat_lon(self.frame_obj.lat, self.frame_obj.lon)
 
@@ -174,11 +172,14 @@ class FrameObjektEncoder(threading.Thread):
 
         encoded_data = list(norm_numerical_features) + list(encoded_rect) + list(encoded_avg_loc) + [lat_lon_features] + [hashed_histogram]
 
-        # do something with encoded_data...
-        # OFFLINE PROCESSING FEATURES
         # event list --> push events, labels and image refs to elastic
         # vehicle id: available in a model?
         # license plate reader: is this available in a model?
+
+        # IDEA: MEDIAPIPE
+        # person detection: use mediapipe pose to label as 'human' motion.
+        # find AND magnify faces: use mediapipe face to find the head ROI, Magnify it.
+
         print(f'encoded data {self.frame_obj.f_id}: {encoded_data}')
         exit(0)
         # return encoded_data
