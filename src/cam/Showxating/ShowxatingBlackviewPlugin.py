@@ -58,7 +58,7 @@ def print_tracked(p, f):
             o = p.tracked.get(_)
             x = o.avg_loc[0]
             y = o.avg_loc[1]
-            item = f'{o.contour_id}-{o.tag[-12:]} [{x},{y}]'
+            item = f'{o.tag[-12:]} [{x},{y}]'
             pt = x, y
             # yellow dot: items being tracked
             cv.putText(f, item, (x, (y + (i * 10))), cv.FONT_HERSHEY_PLAIN, .75, (0, 255, 255), 1)
@@ -259,9 +259,9 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                 if self.has_analysis or self.has_symbols:
                     # pass latency relate plugin.statistics to the tracker:
                     stats = {
-                        "frame_rate": self.frame_rate,
-                        "frame_period": self.frame_period,
-                        "frame_shape": self.frame_shape
+                        "capture_frame_rate": self.frame_rate,
+                        "capture_frame_period": self.frame_period,
+                        "capture_frame_shape": self.frame_shape
                     }
 
                     self.tracked = self.tracker.track_objects(self.frame_id, frame, cnt, wall, rect, stats)
