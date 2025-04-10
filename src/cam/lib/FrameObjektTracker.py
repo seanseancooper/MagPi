@@ -4,8 +4,8 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.tree import DecisionTreeRegressor
 
 from src.cam.lib.FrameObjekt import FrameObjekt
-from sklearn.metrics import euclidean_distances, pairwise_distances
-from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics import euclidean_distances
+
 
 from src.cam.lib.utils import is_in_range, is_inside
 from src.config import readConfig
@@ -62,18 +62,6 @@ class FrameObjektTracker(object):
         self.delta_range = 90.00            # offset +/- allowed difference; frm_delta_pcnt * fd_mean
         self.l_delta_pcnt = 0.2             # 0..1 percentage of delta between the current/previous mean locations
 
-        # unused features: caches are internal --> post-processing
-        self.e_distance = float()           # euclidean distance between the current and previous frames
-        self.e_cache = []                   # list of previous euclidean distance over last f_limit frames
-
-        self.cosim = float()                # cosine similarity between the current and previous frames
-        self.cosim_cache = []               # list of previous...
-
-        self.mse = float()                  # Mean Squared Error between the current and previous frames
-        self.mse_cache = []                 # list of previous...
-
-        self.ssim = float()                 # Structural similarity between the current and previous frames
-        self.ssim_cache = []                # list of previous...
 
     def get(self):
         return {
@@ -124,42 +112,6 @@ class FrameObjektTracker(object):
             if (f_id - last_frame) > self.f_limit:
                 self.tracked.clear()
 
-    def set_frame_delta(self, X, Y):
-        ''' set the allowable difference between frames *fragments_* to the
-        average of the paired euclidean distances between the previous 'item'
-        and the current frame 'wall'.
-        '''
-
-        try:
-
-            # return the distances between the row vectors of X and Y
-            self.e_distance = np.mean(pairwise_distances(X, Y))
-            self.e_cache.append(self.e_distance)
-
-            # return the cosine similarity of X and Y
-            self.cosim = np.mean(cosine_similarity(X, Y))
-            self.cosim_cache.append(self.cosim)
-
-            # def MSE(X, Y):
-            #     n = X.shape[0] * Y.shape[1]
-            #     return 1 / n * np.sum(np.square(X - Y))
-            # self._frame_SSIM = MSE(X, Y)
-
-            self.mse = np.sum((X - Y) ** 2)
-            self.mse /= float(X.shape[0] * Y.shape[1])
-            self.mse_cache.append(self.mse)
-
-            from skimage.metrics import structural_similarity as ssim
-
-            self.ssim = 0.0
-            if X.shape[0] > self.config['tracker']['ssim_win_size'] and X.shape[1] > self.config['tracker']['ssim_win_size']:
-                # skimage.metrics.structural_similarity(im1, im2, *, win_size=None, gradient=False, data_range=None, channel_axis=None, gaussian_weights=False, full=False, **kwargs)
-                (self.ssim, diff) = ssim(X, Y, win_size=self.config['tracker']['ssim_win_size'], full=True)
-                self.ssim_cache.append(self.ssim)
-
-        except Exception as e:
-            cam_logger.warning(f'FrameObjektTracker error while setting deltas: {e}  {X.shape}, {Y.shape}')
-
     def init_o(self, wall, rectangle, frame_stats):
         o = FrameObjekt.create(self.f_id)
         o.avg_loc = self.avg_loc
@@ -178,33 +130,15 @@ class FrameObjektTracker(object):
 
         return o
 
-    def get_stats(self, o, wall, rectangle):
-
-        def make_grey_data(item, rectangle):
-            wx, wy, ww, wh = rectangle
-            return cv.cvtColor(item[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)
-
-        # does this wall match the previous one?
-        # pairwise distance to the previous wall image
-        X = make_grey_data(self.tracked.get(o.prev_tag).wall, rectangle)
-        Y = make_grey_data(wall, rectangle)
-        self.set_frame_delta(X, Y)
-
+    def get_stats(self, o):
         o.distance = int(o.distances[0])  # distance to previous mean location
-        o.distances_mean = np.mean(self.e_cache)
+        o.distances_mean = np.mean(o.distances)
 
         # is the current distance within a range of the
         # median of distances for the last thing with a tag?
         o.close = is_in_range(o.distance, max(o.rect[2], o.rect[3]), self.l_delta_pcnt * max(o.rect[1], o.rect[2]))
-
-        o.inside = is_inside(o.avg_loc, o.rect)                            # is the ml inside rect?
+        o.inside = is_inside(o.avg_loc, o.rect)                                 # is the ml inside rect?
         o.delta_range = self.f_delta_pcnt * o.distances_mean                    # percentage of px difference
-
-        o.hist_pass = None
-        o.wall_pass = is_in_range(o.distance, o.distances_mean, self.delta_range)
-        o.mse_pass = self.mse > 0.0
-        o.cosim_pass = self.cosim > 0.0
-        o.ssim_pass = self.ssim > 0.1
 
     def label_locations(self, frame, wall, frame_stats):
         """ find elements 'tag' by euclidean distance """
@@ -222,13 +156,11 @@ class FrameObjektTracker(object):
                     np.array([p_ml[0]], dtype=int).reshape(1, -1)
             )
 
-            o1.distances_mean = np.mean(o1.distances)
-
             o1.distance = int(o1.distances[0])
             o1.prev_tag = str(list(self.tracked.keys())[0])
 
             o1.tag = o1.create_tag(self.f_id)
-            self.get_stats(o1, wall, self.rectangle)
+            self.get_stats(o1)
 
             if o1.inside and o1.ssim_pass:
                 # item following f0 item.
@@ -295,7 +227,7 @@ class FrameObjektTracker(object):
                     predicted_tag = label_encoder.inverse_transform(self.decision_tree.predict(features).astype(int))[0]
                     oN.tag = f"{self.f_id}_{predicted_tag.split('_')[1]}"
                     oN.prev_tag = predicted_tag
-                    self.get_stats(oN, wall, self.rectangle)
+                    self.get_stats(oN)
 
             else:
                 oN.tag = oN.create_tag(self.f_id)

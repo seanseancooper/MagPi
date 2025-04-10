@@ -52,6 +52,7 @@ class FrameObjekt:
             'frame_shape': f.frame_shape,
             'created'    : f.created.isoformat(),
             'tag'        : f.tag,
+            'prev_tag'   : f.prev_tag,
 
             'rect'       : f.rect,
             'avg_loc'    : f.avg_loc.tolist(),
@@ -67,6 +68,7 @@ class FrameObjekt:
         frame_obj.frame_shape = tuple(d['frame_shape'])
         frame_obj.created = datetime.fromisoformat(d['created'])
         frame_obj.tag = d['tag']
+        frame_obj.prev_tag = d['prev_tag']
 
         frame_obj.rect = tuple(d['rect']) if d['rect'] else None
         frame_obj.avg_loc = np.array(d['avg_loc'])

@@ -6,6 +6,10 @@ import geohash
 import cv2 as cv
 import hashlib
 from src.cam.Showxating.ShowxatingHistogramPlugin import ShowxatingHistogramPlugin
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics import euclidean_distances, pairwise_distances
+import logging
+
 
 # IDEA: MEDIAPIPE
 # person detection: use mediapipe pose to label as 'human' motion.
@@ -25,6 +29,16 @@ class FrameObjektEncoder(threading.Thread):
         self.mediapipe = False
         self._pose = None
         self._result_T = None
+
+        # distances
+        self.e_distance = float()           # euclidean distance between the current and previous frames
+        self.e_cache = []                   # list of previous euclidean distance over last f_limit frames
+        self.cosim = float()                # cosine similarity between the current and previous frames
+        self.cosim_cache = []               # list of previous...
+        self.mse = float()                  # Mean Squared Error between the current and previous frames
+        self.mse_cache = []                 # list of previous...
+        self.ssim = float()                 # Structural similarity between the current and previous frames
+        self.ssim_cache = []                # list of previous...
 
     def encode_lat_lon(self, latitude, longitude):
         return geohash.encode(latitude, longitude, precision=self.precision)
@@ -55,6 +69,42 @@ class FrameObjektEncoder(threading.Thread):
                                                   landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
 
                 draw_pose(f, self._result_T)
+
+    def set_frame_delta(self, X, Y):
+        ''' set the allowable difference between frames *fragments_* to the
+        average of the paired euclidean distances between the previous 'item'
+        and the current frame 'wall'.
+        '''
+
+        try:
+
+            # return the distances between the row vectors of X and Y
+            self.e_distance = np.mean(pairwise_distances(X, Y))
+            self.e_cache.append(self.e_distance)
+
+            # return the cosine similarity of X and Y
+            self.cosim = np.mean(cosine_similarity(X, Y))
+            self.cosim_cache.append(self.cosim)
+
+            # def MSE(X, Y):
+            #     n = X.shape[0] * Y.shape[1]
+            #     return 1 / n * np.sum(np.square(X - Y))
+            # self._frame_SSIM = MSE(X, Y)
+
+            self.mse = np.sum((X - Y) ** 2)
+            self.mse /= float(X.shape[0] * Y.shape[1])
+            self.mse_cache.append(self.mse)
+
+            from skimage.metrics import structural_similarity as ssim
+
+            self.ssim = 0.0
+            if X.shape[0] > self.config['tracker']['ssim_win_size'] and X.shape[1] > self.config['tracker']['ssim_win_size']:
+                # skimage.metrics.structural_similarity(im1, im2, *, win_size=None, gradient=False, data_range=None, channel_axis=None, gaussian_weights=False, full=False, **kwargs)
+                (self.ssim, diff) = ssim(X, Y, win_size=self.config['tracker']['ssim_win_size'], full=True)
+                self.ssim_cache.append(self.ssim)
+
+        except Exception as e:
+            logging.warning(f'FrameObjektTracker error while setting deltas: {e}  {X.shape}, {Y.shape}')
 
     def get_histogram(self, wall, rectangle):
 
@@ -95,6 +145,16 @@ class FrameObjektEncoder(threading.Thread):
         _s = self.frame_obj.frame_shape
         rect_array = np.asarray([int(_s[1]), int(_s[0]), int(_s[1]), int(_s[0])])
         loc_array = np.asarray([int(_s[1]), int(_s[0])])
+
+        def make_grey_data(item, rectangle):
+            wx, wy, ww, wh = rectangle
+            return cv.cvtColor(item[wy:wy + wh, wx:wx + ww], cv.COLOR_BGR2GRAY)
+
+        prev_wall = self.frame_obj.prev_tag.wall
+        wall = self.frame_obj.prev_tag.wall
+        X = make_grey_data(prev_wall, rect_array)
+        Y = make_grey_data(wall, rect_array)
+        self.set_frame_delta(X, Y)
 
         encoded_rect = np.divide((np.asarray(self.frame_obj.rect)), rect_array)
         encoded_avg_loc = np.divide((np.asarray(self.frame_obj.avg_loc)), loc_array)
