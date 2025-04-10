@@ -272,7 +272,6 @@ class FrameObjektTracker:
                 # this is a regression problem; what does the CART tree need? do normalize of data.
                 # include latency [o.frame_rate, o.frame_period]
 
-
                 training_data = np.array([[    o.rect[0], o.rect[1], o.rect[2], o.rect[3], o.avg_loc[0], o.avg_loc[1]    ] for o in self.tracked.values()])
                 training_labels = [o.tag for o in self.tracked.values()]
 
@@ -314,20 +313,10 @@ class FrameObjektTracker:
 
         return labeled
 
-    def track_objects(self, f_id, frame, contour, hierarchy, wall, rectangle, frame_stats):
-        """
-        LEARNINGS:
-        Not all moving things should be tracked; this is very sensitive to minute
-        changes in light, and not all movement is relevant.
-        Not all tracked things move; Consider flashing lights or any localized,
-        repetitive change. Tracking seizes!
-        Objects can suddenly appear or appear to change *size* if the frame drags
-        due to network latency. Back referencing frames needs a cache.
-        """
+    def track_objects(self, f_id, frame, contour, wall, rectangle, frame_stats):
         self.f_id = f_id
 
         def get_mean_location(contours):
-            ''' aka 'basically where it is' get the average location of all the contours in the frame '''
             x = []
             y = []
 
@@ -337,9 +326,7 @@ class FrameObjektTracker:
         self.avg_loc = get_mean_location(contour)
 
         for o in self.label_locations(frame, wall, rectangle, frame_stats):
-
             o.contour = contour
-            o.hierarchy = hierarchy                      # unused for now
 
             if not o.prev_tag:
                 o.prev_tag = o.tag

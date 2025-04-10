@@ -306,7 +306,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                         "frame_shape": self.frame_shape
                     }
 
-                    self.tracked = self.tracker.track_objects(self.frame_id, frame, cnt, hier, wall, rect, stats)
+                    self.tracked = self.tracker.track_objects(self.frame_id, frame, cnt, wall, rect, stats)
 
                     if self.tracked:
                         if self.rmq:
