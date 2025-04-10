@@ -29,10 +29,6 @@ def print_frame(o, origin):
             f"\to.lat: {o.lat}"
             f"\to.lon: {o.lon}"
 
-            # f"\to.ssim_pass: {o.ssim_pass}"
-            # f"\to.wall_pass: {o.wall_pass}"
-            # f"\to.mse_pass: {o.mse_pass}"
-            # f"\to.cosim_pass: {o.cosim_pass}"
             
             # f"\tdistance: {str(o.distance.__format__('.4f')).ljust(3, ' ')}"
             # f"\tdistances_mean: {str(o.distances_mean.__format__('.4f')).ljust(3, ' ')}"
@@ -161,7 +157,7 @@ class FrameObjektTracker(object):
             o1.tag = o1.create_tag(self.f_id)
             self.get_stats(o1)
 
-            if o1.inside and o1.ssim_pass:
+            if o1.inside:
                 # item following f0 item.
 
                 # back reference and merge the rects (n largest) and
@@ -171,7 +167,7 @@ class FrameObjektTracker(object):
                 o1.tag = f"{self.f_id}_{o1.prev_tag.split('_')[1]}"
                 print_frame(o1, "N1:")
 
-            if not o1.close and not o1.ssim_pass and not o1.wall_pass:
+            if not o1.close and not o1.wall_pass:
                 # NEW 'interstitial' item
                 o1.tag = o1.create_tag(self.f_id)
                 print_frame(o1, "!N:")
