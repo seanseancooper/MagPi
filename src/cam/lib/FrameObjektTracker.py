@@ -115,6 +115,8 @@ class FrameObjektTracker(object):
         o.frame_rate = frame_stats['capture_frame_rate']
         o.frame_period = frame_stats['capture_frame_period']
         o.frame_shape = frame_stats['capture_frame_shape']
+        o.max_height = frame_stats['max_height']
+        o.max_width = frame_stats['max_width']
 
         return o
 

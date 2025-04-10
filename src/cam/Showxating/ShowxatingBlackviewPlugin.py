@@ -261,7 +261,9 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                     stats = {
                         "capture_frame_rate": self.frame_rate,
                         "capture_frame_period": self.frame_period,
-                        "capture_frame_shape": self.frame_shape
+                        "capture_frame_shape": self.frame_shape,
+                        "max_height": self._max_height,
+                        "max_width": self._max_width
                     }
 
                     self.tracked = self.tracker.track_objects(self.frame_id, frame, cnt, wall, rect, stats)

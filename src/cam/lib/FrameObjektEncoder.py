@@ -9,6 +9,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics import euclidean_distances, pairwise_distances
 import logging
 
+from src.config import readConfig
+
+
 # IDEA: MEDIAPIPE
 # person detection: use mediapipe pose to label as 'human' motion.
 # find AND magnify faces: use mediapipe face to find the head ROI, Magnify it.
@@ -18,10 +21,11 @@ class FrameObjektEncoder(threading.Thread):
     def __init__(self, frame_obj):
         super().__init__()
         self.frame_obj = frame_obj
+        self.config = {}
 
         self.hash_histogram = True
-        self.bins = 32                          # get from config and configure
-        self.precision = 8                      # TOOD: geohash precision, make config
+        self.hist_nbins = 32                          # get from config and configure
+        self.geohash_prec = 8                      # TOOD: geohash precision, make config
 
         self.mm_scaler = MinMaxScaler()
         # self.std_scaler = StandardScaler()
@@ -40,17 +44,35 @@ class FrameObjektEncoder(threading.Thread):
         self.ssim = float()                 # Structural similarity between the current and previous frames
         self.ssim_cache = []                # list of previous...
 
-    def encode_lat_lon(self, latitude, longitude):
-        return geohash.encode(latitude, longitude, precision=self.precision)
+    @staticmethod
+    def hash_color_histogram(histogram):
+        histogram_str = ','.join(map(str, histogram))
+        return hashlib.sha256(histogram_str.encode()).hexdigest()
 
-    def pre_mediapipe(self, f):
+    def configure(self):
+        tmp = {}
+        readConfig('cam.json', tmp)
+        self.config = tmp['PLUGIN']
+
+        try:
+            self.hash_histogram = self.config['encoder']['hash_histogram']
+            self.hist_nbins = int(self.config['encoder']['hist_nbins'])
+            self.geohash_prec = int(self.config['encoder']['geohash_prec'])
+        except ValueError as v:
+            print(f'{v} bad value: (should be numeric)')
+            exit(1)
+
+    def encode_lat_lon(self, latitude, longitude):
+        return geohash.encode(latitude, longitude, precision=self.geohash_prec)
+
+    def pre_mediapipe(self, f, _max_height, _max_width):
 
         if self.mediapipe:
             import mediapipe as mp  # only load if needed. slow...
 
             mp_pose = mp.solutions.pose
             self._pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
-            BGR_T = cv.cvtColor(f[self._max_height, self._max_width], cv.COLOR_RGB2BGR)  # 'BGR'
+            BGR_T = cv.cvtColor(f[_max_height, _max_width], cv.COLOR_RGB2BGR)  # 'BGR'
             self._result_T = self._pose.process(BGR_T)
 
     def post_mediapipe(self, f):
@@ -108,13 +130,9 @@ class FrameObjektEncoder(threading.Thread):
 
     def extract_color_histogram_from_image(self, image):
         # images, channels, mask, histSize, ranges[, hist[, accumulate]]
-        histogram = cv.calcHist([image], [0, 1, 2], None, [self.bins, self.bins, self.bins], [0, 256, 0, 256, 0, 256])
+        histogram = cv.calcHist([image], [0, 1, 2], None, [self.hist_nbins, self.hist_nbins, self.hist_nbins], [0, 256, 0, 256, 0, 256])
         histogram = cv.normalize(histogram, histogram).flatten()
         return histogram.tolist()
-
-    def hash_color_histogram(self, histogram):
-        histogram_str = ','.join(map(str, histogram))
-        return hashlib.sha256(histogram_str.encode()).hexdigest()
 
     def run(self):
 

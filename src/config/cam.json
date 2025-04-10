@@ -64,6 +64,11 @@
 					"contour_limit": 2,
 					"ssim_win_size": 5
 				},
+				"encoder": {
+					"hash_histogram": true,
+					"hist_nbins": 32,
+					"geohash_prec": 8
+				},
 				"tokenbucket": {
 					"tokens": 2,
 					"interval": 60

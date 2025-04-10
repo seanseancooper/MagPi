@@ -23,6 +23,9 @@ class FrameObjekt:
         self.frame_rate = 0.0
         self.frame_period = 0.0
         self.frame_shape = None                                         # [ndarray: container] shape of current frame
+
+        self.max_width = None
+        self.max_height = None
         self.wall = None                                                # [ndarray: container] image of processed area in this frame
 
         self.ssim_pass = None
