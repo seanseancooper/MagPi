@@ -2,10 +2,10 @@ import json
 import logging
 import zmq
 import numpy as np
-from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
+from src.cam.lib.FrameObjekt import FrameObjekt
 from datetime import datetime
 
-from src.cam.Showxating.lib.FrameObjektEncoder import FrameObjektEncoder
+from src.cam.lib.FrameObjektEncoder import FrameObjektEncoder
 
 logging.basicConfig(level=logging.INFO)
 

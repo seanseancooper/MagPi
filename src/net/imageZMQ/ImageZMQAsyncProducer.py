@@ -3,7 +3,7 @@ import cv2 as cv
 import json
 import logging
 from imagezmq import ImageSender
-from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
+from src.cam.lib.FrameObjekt import FrameObjekt
 
 logging.basicConfig(level=logging.INFO)
 

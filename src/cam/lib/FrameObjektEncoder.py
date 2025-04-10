@@ -91,7 +91,7 @@ class FrameObjektEncoder(threading.Thread):
 
 if __name__ == "__main__":
 
-    from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
+    from src.cam.lib.FrameObjekt import FrameObjekt
 
     frame_objects = [
         FrameObjekt.create(1),

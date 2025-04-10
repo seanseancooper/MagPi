@@ -3,11 +3,11 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 from sklearn.tree import DecisionTreeRegressor
 
-from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
-from sklearn.metrics import euclidean_distances, pairwise_distances, pairwise_kernels
-from sklearn.metrics.pairwise import paired_distances, cosine_similarity
+from src.cam.lib.FrameObjekt import FrameObjekt
+from sklearn.metrics import euclidean_distances, pairwise_distances
+from sklearn.metrics.pairwise import cosine_similarity
 
-from src.cam.Showxating.lib.utils import is_in_range, is_inside
+from src.cam.lib.utils import is_in_range, is_inside
 from src.config import readConfig
 from src.lib.utils import get_location
 

@@ -4,7 +4,7 @@ import json
 import logging
 
 import zmq
-from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
+from src.cam.lib.FrameObjekt import FrameObjekt
 
 logging.basicConfig(level=logging.INFO)
 

@@ -1,4 +1,4 @@
-from src.cam.Showxating.lib.FrameObjekt import FrameObjekt
+from src.cam.lib.FrameObjekt import FrameObjekt
 from datetime import datetime
 import numpy as np
 

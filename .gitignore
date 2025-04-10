@@ -1,12 +1,5 @@
 /dev/
 /logs/
-/src/cam/Showxating/lib/contours_clustering.py
-/src/cam/Showxating/lib/FeatureLatLonEncoder_7.py
-/src/cam/Showxating/lib/FeatureLatLonHistEncoder.py
-/src/cam/Showxating/lib/KNNClassifier.py
-/src/cam/Showxating/lib/NaiveBayesClassifier.py
-/src/cam/Showxating/lib/Stitch.py
-/src/cam/Showxating/lib/TemplateMatch.py
 /src/cam/static/js/cam_controller.js
 /src/map/static/assets/index-BtPuoxOl.css
 /src/map/static/assets/index-DITrrm10.js
