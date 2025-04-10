@@ -1,3 +1,3 @@
 from src.wifi.retrievers.MacOSAirportWifiRetriever import MacOSAirportWifiRetriever
 from src.wifi.retrievers.LinuxIWListWifiRetriever import LinuxIWListWifiRetriever
-from src.wifi.retrievers.MQWifiRetriever import MQWifiRetriever
+from src.wifi.retrievers.WifiMQRetriever import MQWifiRetriever
