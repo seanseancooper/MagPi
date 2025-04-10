@@ -9,7 +9,7 @@ def frameobjekt_to_dict(f_obj):
         'f_id'              : f_obj.f_id,
         'created'           : f_obj.created.isoformat(),
         'tag'               : f_obj.tag,
-        'f_shape'           : f_obj.f_shape,
+        'frame_shape'       : f_obj.frame_shape,
 
         # 'contours'        : f_obj.contours.tolist() if f_obj.contours is not None else None,
         # 'hierarchy'       : f_obj.hierarchy.tolist() if f_obj.hierarchy is not None else None,
@@ -45,7 +45,7 @@ def dict_to_frameobjekt(data):
     """Convert dictionary back to FrameObjekt."""
     frame_obj = FrameObjekt.create(data['f_id'])
     frame_obj.f_id = data['f_id']
-    frame_obj.f_shape = tuple(data['f_shape'])
+    frame_obj.frame_shape = tuple(data['frame_shape'])
     frame_obj.created = datetime.fromisoformat(data['created'])
     frame_obj.tag = data['tag']
 

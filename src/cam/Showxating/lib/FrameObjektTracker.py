@@ -1,5 +1,3 @@
-import uuid
-
 import cv2 as cv
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
@@ -161,10 +159,10 @@ class FrameObjektTracker:
 
     def init_o(self, wall, rectangle, frame_stats):
         o = FrameObjekt.create(self.f_id)
+        o.avg_loc = self.avg_loc
         o.rect = rectangle
-        # put the wall on a temp filesystem and use the tag for the name
-        o.wall = wall
-        o.f_shape = wall.shape
+
+        o.wall = wall        # put the wall on a temp filesystem and use the tag for the name
 
         get_location(self)
         o.lat = self.lat
@@ -172,8 +170,8 @@ class FrameObjektTracker:
 
         o.frame_rate = frame_stats['capture_frame_rate']
         o.frame_period = frame_stats['capture_frame_period']
-
-        o.avg_loc = self.avg_loc
+        o.frame_shape = frame_stats['capture_frame_shape']
+        # o.frame_shape = wall.shape
 
         return o
 

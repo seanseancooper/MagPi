@@ -57,7 +57,7 @@ class FrameObjektEncoder(threading.Thread):
             ]
         ])
 
-        _s = self.frame_obj.f_shape
+        _s = self.frame_obj.frame_shape
         rect_array = np.asarray([int(_s[1]), int(_s[0]), int(_s[1]), int(_s[0])])
         loc_array = np.asarray([int(_s[1]), int(_s[0])])
 
