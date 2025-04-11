@@ -1,8 +1,8 @@
-/dev/
-/logs/
+/dev
+/logs
 /src/cam/static/js/cam_controller.js
 /src/map/static/assets/index-BtPuoxOl.css
 /src/map/static/assets/index-DITrrm10.js
 /src/map/static/index.html
-/.idea/
+/.idea
 /setup.py
