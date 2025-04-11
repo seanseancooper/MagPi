@@ -8,6 +8,8 @@ import numpy as np
 import sounddevice as sd
 import soundfile as sf
 
+from src.arx.lib.ARXSignalPoint import ARXSignalPoint
+from src.lib.utils import get_location
 from src.config import readConfig
 
 
@@ -18,7 +20,6 @@ def file_writing_thread(*, q, **soundfile_args):
             if data is None:
                 break
             f.write(data)
-
 
 class ARXRecorder(threading.Thread):
     ''' Passthrough recording '''
@@ -40,12 +41,15 @@ class ARXRecorder(threading.Thread):
         self._stream = None
         self.thread = None
         self.recording = self.previously_recording = False
-        self.audioq = queue.Queue()
+        self.audioq = queue.Queue() #DBUG unbounded queue
         self.metering_q = queue.Queue(maxsize=1)
         self.peak = 0.0
         self.meter = {'max': 1.0, 'peak_percentage': 0}
-        self.signal_cache = []   # a lists of audio SignalPoint.
+        self.signal_cache = []   #DBUG an UNBOUNDED list of audio peaks?
 
+        self.arx_sgnl = None
+        self.lon = 0.0
+        self.lat = 0.0
 
     def configure(self, config_file):
 
@@ -53,6 +57,7 @@ class ARXRecorder(threading.Thread):
             exit(1)
 
         readConfig(config_file, self.config)
+        get_location(self)
 
     def create_stream(self):
 
@@ -66,6 +71,7 @@ class ARXRecorder(threading.Thread):
         DTYPE = self.config.get('DTYPE', 'float32')
         LATENCY = self.config.get('LATENCY', 0.1)
         CHANNELS = self.config.get('CHANNELS', 2)
+
         self._stream = sd.Stream(device=(INPUT_DEVICE,
                                          OUTPUT_DEVICE),
                                  samplerate=SR,
@@ -74,6 +80,14 @@ class ARXRecorder(threading.Thread):
                                  latency=LATENCY,
                                  channels=CHANNELS,
                                  callback=self.streamCallback)
+
+        self.arx_sgnl = ARXSignalPoint(self._worker_id,
+                                       self.lon,
+                                       self.lat,
+                                       self.signal_cache[:-1],
+                                       audio_data=self.streamCallback, # ? night need to delay until stop()
+                                       sr=SR
+                                       )
 
         self._stream.start()
 
@@ -144,9 +158,13 @@ class ARXRecorder(threading.Thread):
             return
         self.thread.join()
 
+    def get_worker_id(self):
+        return self._worker_id
+
     def stop(self):
         self.recording = False
         self.wait_for_thread()
+        # do something with arx_sgnl...
 
     def run(self):
         self.recording = True
