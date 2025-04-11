@@ -1,77 +1,99 @@
-ARX:
-    ARXAudioEncoder output formatting
-    ARXAudioEncoder MQ: which one?
+ARX (ARXSignalPoint, ZeroMQ):
+    ARXRecorder manufatcures ARXSignalPoint.
+    ARXSignalPoint to output file.
+    ARXSignalPoint ZeroMQ to ARXAudioEncoder
     project-keyword-spotter integration? feasible, alt. solution
-    Elasticsearch mappings
-    data persistence?
+    Elasticsearch mappings?
+    Processing germane to audio:back to original requirements + new ideas.
+    Local ML Models germane to audio.
 
 BLU:
     NOT STARTED
 
-CAM:
-    automate FrameObjektTracker output analysis.
-    start encoding frames using FrameObjektEncoder
-    FrameObjektEncoder Elasticsearch mappings
+CAM (FrameObjekt, RabbitMQ(events)?, ImageZMQ(images)):
+    automate FrameObjektTracker output analysis: design a processing chain based on MQ.
+    Choose Models; hugging face.
+    Encoding frames using FrameObjektEncoder: what fields are encoded, and how analyzed.
+    FrameObjekt ImageZMQ messaging: in progress.
+    FrameObjektEncoder Elasticsearch mappings: on hold.
 
 CAN:
-    NOT STARTED
+    NOT STARTED: ideas
 
 CONFIG:
-    move config into modules?
+    IDEA: Configuration layering, global vs.modile vs. class:
+        class configuration: look for a configuration file at the same level as a class (overides class fields only), named 'class.json' where class is the name of the class.
+        module configuration: look for a configuration for the module, in a dir called 'config'. This overides any 'class.json' class configuration if it exists.
+        global configuration: look for a configuration file in 'config' directory, named 'module.json': this overides module config)
+    poetential benefits vs. compleity added
 
 EBS:
-    COMPLETED FOR NOW.
+    configure text logging
+    MCP Model Context Protocol client for my project.
 
-GPS:
+GPS (MapAggregator, REST, class?):
+    Trilaterator! Testdata and map symbology.
+    implement GPS via JS: Delayed.
     GPS via hardware
-    implement GPS via JS
 
 LIB:
+    code review: there is junk here and things to add.
 
-MAP:
-    mapaggregator refresh; read from rabbitMQ, not REST
+MAP (MapAggregator, read configs, test REST endpoints and pull data [AGGREGATOR_TIMEOUT], class):
+    Elastic Integration:
+        Elastic pull()
+    MapAggregator refresh; read from rabbitMQ, not REST
     hyperspectral imaging: BLOCKED DUE TO ENVIRONMENT
-    Elastic Integration: can I pull() data from Elastic and put it on the existing map component?
 
 MOT:
-    NEVER STARTED; may go away....
+    NEVER STARTED; may go away again.
 
 NET:
-    FrameObjektEncoder: imageZMQ
-    ARXEncoder: zeromq
-    WifiSignalPoint Elastic mappings. Dense vectors, nested data
+    Directory structure for each, including ELK.
+        ImageZMQ
+        ZeroMQ
+        RabbitMQ:
+        ElasticSearch:
+            data mapping. Dense vectors, nested data, types
+            what about EAVs, object/NoSQL?
+    Dashboard URL in template: too where/what?
 
 PSX:
-    GPT: NOT STARTED. Use Pyshark
+    NOT STARTED. Pyshark. Ideas? Visualizations? Stats? GPT?
 
-SDR:
-    Capture signals to discrete arrays
-    SignalPoint processing via MQ! not a local method. offline proccessing...
+SDR (SDRSignalPoint, RabbitMQ(vector, text), ZeroMQ(Signal)):
+    Reciever modifications: assignable frequency, bandwidth
+
+    A thing that looks at a block of spectrum, finds the peaks in the EM
+    and tunes an SDRWorker() reciever to the peak frequency, recording it as a Signal().
+
+    Enccapsulate an SDR signal in a Signal type.
+    SignalPoint processing zeroMQ
     ARXAudioEncoder via MQ! not a local method. offline proccessing...
     Elasticsearch mappings
 
-TRX:
-    TRXUSBRetriever docker solution cont'd
-    produce internal maps over rabbitMQ
-    TRXSerialRetriever may be kaput on Mac?
-    TRXSignalPoint Elasticsearch mappings
+TRX (TRXSignalPoint, RabbitMQ (object), ZeroMQ(Signal)):
+    TRXUSBRetriever docker solution: on hold.
+    TRXSerialRetriever may be kaput on Mac? Verify this.
+    TRXSignalPoint mappings
 
-VIEW:
+VIEW (ViewController, REST):
     Integrate Kibana: blocker is elastic https
     Integrate SDR: jupyterlite w/ matplotlib inline + custom javascript vertical waterfall served via node.
 
-WIFI:
-    refactor retrieval out, and produce internal maps over rabbitMQ
-    refactor to read ALL SignalPoint types from MQ
+WIFI (WifiSignalPoint, RabbitMQ):
+    Refactor Wifisscanner to read ALL SignalPoint types from MQ.
+        Tabulator subsorting??
 
 DOCKER:
-    compose.yaml
-    Elasticsearch:
-        https for Kibana integration
-    Kibana:
-        dashboards (read serialized json output on filesystem)
+    TRX:docker_trx: dockerfile and compose update: works, add spice where needed.
+    NET:docker_elastic: dockerfile and compose updates: works, add spice where needed.
+        HTTPS for Kibana:
+            docker-compose.yaml for cluster appears to have certs and password is in env. It may be the case that it
+            needs to be enabled and configured in the compose file.
+        Kibana dashboards: component to read serialized json output on filesystem.
 
-    Rabbit MQ startup
+    NET:docker_rabbitMQ: dockerfile and compose updates: works, add spice where needed.
 
     node processes.
 
