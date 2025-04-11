@@ -1,8 +1,8 @@
 import threading
 
 from src.config import readConfig
-from src.net.rabbitMQ.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
-from src.arx.MQARXHelper import MQARXHelper
+from src.net.rabbitMQ.RabbitMQAsyncProducer import RabbitMQAsyncProducer
+from src.arx.ZeroMQARXHelper import ZeroMQARXHelper
 
 import logging
 
@@ -10,7 +10,7 @@ logger_root = logging.getLogger('root')
 wifi_logger = logging.getLogger('wifi_logger')
 
 
-class ARXMQRetriever(threading.Thread):
+class ARXMQProvider(threading.Thread):
     """ MQ Wifi Retriever class """
     def __init__(self):
         super().__init__()
@@ -18,16 +18,12 @@ class ARXMQRetriever(threading.Thread):
         self.config = {}
         self.interface = None
 
-        self.consumer = RabbitMQAsyncConsumer('arx_queue')  # make configurablev
-
-        self.stats = {}                         # new, not yet used
-        self.parsed_signals = []                # signals represented as a list of dictionaries.
+        self.producer = RabbitMQAsyncProducer('arx_queue')  # make configurablev
         self.DEBUG = False
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
         self.DEBUG = self.config.get('DEBUG')
-
         self.start_helper()
         self.start_consumer()
 
@@ -38,6 +34,6 @@ class ARXMQRetriever(threading.Thread):
         t = threading.Thread(target=h.run, daemon=True)
         t.start()
 
-    def start_consumer(self):
-        t = threading.Thread(target=self.consumer.run, daemon=True)
+    def start_producer(self):
+        t = threading.Thread(target=self.producer.run, daemon=True)
         t.start()
