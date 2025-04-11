@@ -14,14 +14,10 @@ class ARXSignalPoint(SignalPoint):
         super().__init__(lon, lat, sgnl)
         self._worker_id = worker_id or 'ARXRecorder'
         self._signal_type = 'continuous'
-        self._audio_data = audio_data                   # potentially a LIST of Signal
+        self._audio_data = audio_data                   # potentially a Signal or LIST of Signal
         self._sr = sr
         self._frequency_features = None                 # potentially a mapping of features
 
-        if audio_data is not None:
-            # Compute frequency features for the audio data
-            arx  = ARXEncoder(audio_data, self._sr) # assumes numpy array...
-            self._frequency_features = arx.compute_audio_frequency_features()
 
     def get_signal_type(self):
         return self._signal_type
@@ -34,8 +30,13 @@ class ARXSignalPoint(SignalPoint):
 
     def set_audio_data(self, audio_data):
         self._audio_data = Signal(audio_data, self._id, sr=self._sr) # was a raw numpy array, now a Signal?
+        self.compute_audio_frequency_features()
+
+    def compute_audio_frequency_features(self):
+        # Compute frequency features for the audio data
         arx = ARXEncoder(self._audio_data, self._sr)
         self._frequency_features = arx.compute_audio_frequency_features()
+        yield self._frequency_features
 
     def get(self):
         return {
@@ -46,5 +47,16 @@ class ARXSignalPoint(SignalPoint):
             "lon"               : self._lon,
             "lat"               : self._lat,
             "audio_data"        : self._audio_data.tolist() if self._audio_data is not None else None,
-            "frequency_features": self._frequency_features,
+            "frequency_features": self.compute_audio_frequency_features(),
         }
+
+
+            # "zero_crossing_rate": zcr,
+            # "spectral_centroid": centroid,
+            # "spectral_bandwidth": bandwidth,
+            # "spectral_flatness": flatness,
+            # "spectral_contrast": contrast,
+            # "spectral_rolloff": rolloff,
+            # "tempo": float(tempo),
+            # "mfcc": mfccs,
+            # "chroma": chroma
