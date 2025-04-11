@@ -8,7 +8,7 @@ from src.cam.lib.FrameObjekt import FrameObjekt
 
 logging.basicConfig(level=logging.INFO)
 
-class AsyncProducer:
+class ZeroMQAsyncProducer:
     def __init__(self):
         context = zmq.Context()
         self.socket = context.socket(zmq.PUSH)

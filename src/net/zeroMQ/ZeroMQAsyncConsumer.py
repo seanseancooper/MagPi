@@ -9,7 +9,7 @@ from src.cam.lib.FrameObjektEncoder import FrameObjektEncoder
 
 logging.basicConfig(level=logging.INFO)
 
-class AsyncConsumer:
+class ZeroMQAsyncConsumer:
     def __init__(self):
         context = zmq.Context()
         self.socket = context.socket(zmq.PULL)
