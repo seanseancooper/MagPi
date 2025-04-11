@@ -4,11 +4,5 @@
 /src/map/static/assets/index-BtPuoxOl.css
 /src/map/static/assets/index-DITrrm10.js
 /src/map/static/index.html
-/.idea/inspectionProfiles/profiles_settings.xml
-/.idea/.gitignore
-/.idea/MagPi.iml
-/.idea/misc.xml
-/.idea/modules.xml
-/.idea/vcs.xml
-/dev
+/.idea/
 /setup.py
