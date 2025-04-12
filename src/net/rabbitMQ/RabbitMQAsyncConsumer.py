@@ -66,5 +66,5 @@ class RabbitMQAsyncConsumer:
             self.connection.close()
 
 if __name__ == "__main__":
-    consumer = RabbitMQAsyncConsumer('wifi_queue')
+    consumer = RabbitMQAsyncConsumer('arx_queue')
     consumer.run()
