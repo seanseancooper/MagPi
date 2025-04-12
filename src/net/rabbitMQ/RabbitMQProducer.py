@@ -14,7 +14,7 @@ class RabbitMQProducer:
         self.channel.queue_declare(queue=self.queue, durable=True)
 
     def publish_message(self, message):
-        """Send FrameObjekt data to RabbitMQ."""
+        """Send message to RabbitMQ."""
         try:
             self.channel.basic_publish(
                 exchange='',
