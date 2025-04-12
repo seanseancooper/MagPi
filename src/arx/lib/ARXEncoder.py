@@ -141,11 +141,11 @@ class ARXEncoder:
         }
 
     @staticmethod
-    def frame_audio(audio, FFT_size=2048, hop_size=10, sample_rate=44100):
+    def frame_audio(audio, FFT_size=2048, hop_size=10, sr=44100):
         # hop_size in ms
 
         audio = np.pad(audio, int(FFT_size / 2), mode='reflect')
-        frame_len = np.round(sample_rate * hop_size / 1000).astype(int)
+        frame_len = np.round(sr * hop_size / 1000).astype(int)
         frame_num = int((len(audio) - FFT_size) / frame_len) + 1
         frames = []  # np.zeros((frame_num,FFT_size))
 
@@ -166,10 +166,10 @@ class ARXEncoder:
 
         return framed_audio
 
-    def save_me(self, FFT_size=2048, hop_size=10, sample_rate=44100):
+    def save_me(self, FFT_size=2048, hop_size=10, sr=44100):
 
         audio_data = self.get_audio_data()
-        audio_framed = self.frame_audio(audio_data, FFT_size=FFT_size, hop_size=hop_size, sample_rate=sample_rate)
+        audio_framed = self.frame_audio(audio_data, FFT_size=FFT_size, hop_size=hop_size, sr=sr)
 
         # this controls the size and type of window used to
         # create the fft bins

@@ -4,7 +4,7 @@ from src.lib.utils import format_time
 from src.lib.SignalPoint import SignalPoint
 from src.lib.Signal import Signal
 from src.arx.lib.ARXEncoder import ARXEncoder
-from src.arx.lib.ARXMQProvider import ARXMQProvider
+from src.arx.lib.ARXMQConsumer import ARXMQConsumer
 
 class ARXSignalPoint(SignalPoint):
     """
@@ -22,8 +22,8 @@ class ARXSignalPoint(SignalPoint):
         self._sr = sr
         self._audio_frequency_features = None                 # a mapping of features, or LIST of mappings
 
-        self.text_attributes = {}
-        self.text_attributes.update({
+        self._text_attributes = {}
+        self._text_attributes.update({
             # map of signal attributes (Who, What, When, Where, How, Why).
             # defaults:
             "source"            : None,           # who: source component, plugin or process
@@ -39,17 +39,17 @@ class ARXSignalPoint(SignalPoint):
         })
 
     def get_text_attributes(self):
-        return self.text_attributes
+        return self._text_attributes
 
     def get_text_attribute(self, a):
-        return self.text_attributes[a]
+        return self._text_attributes[a]
 
     def set_text_attribute(self, a, v):
-        self.text_attributes[a] = v
+        self._text_attributes[a] = v
         
-    def set_text_attibutes(self, text_data):
+    def set_text_attributes(self, text_data):
         def aggregate(k, v):
-            self.text_attributes[k] = v
+            self._text_attributes[k] = v
         [aggregate(k, str(v)) for k, v in text_data.items()]
 
     def get_signal_type(self):
@@ -74,7 +74,8 @@ class ARXSignalPoint(SignalPoint):
             [self._audio_frequency_features.append(process_features(_data)) for _data in audio_data]
 
     @staticmethod
-    def arxsignalpoint_to_dict(arxs): # hey, this is get()!
+    def arxs_to_dict(arxs):
+        """ calculates on arxs """
         audio_data = arxs.get_audio_data()
         return  {
             "worker_id"                 : arxs.worker_id,
@@ -82,19 +83,32 @@ class ARXSignalPoint(SignalPoint):
             "lat"                       : arxs.lat,
             "sgnl"                      : arxs.sgnl,
             "audio_data"                : audio_data,
-            "sampling_rate"             : arxs.get_sampling_rate(),
+            "sr"                        : arxs.get_sampling_rate(),
             "signal_type"               : arxs.get_signal_type(),
             "frequency_features"        : arxs.get_audio_frequency_features(),
             "text_attributes"           : arxs.get_text_attributes(),
         }
 
+    def get(self):
+        """ return arxs *as is* """
+        return {
+            "created"           : format_time(self._created, "%Y-%m-%d %H:%M:%S.%f"),
+            "id"                : self._id,
+            "worker_id"         : self._worker_id,
+            "signal_type"       : self._signal_type,
+            "lon"               : self._lon,
+            "lat"               : self._lat,
+            "audio_data"        : self._audio_data.tolist() if self._audio_data is not None else None,
+            "sr"                : self._sr,
+            "frequency_features": self._audio_frequency_features,
+            "text_attributes"   : self._text_attributes
+        }
+
     @staticmethod
-    def dict_to_arxsignalpoint(d):
-        import asyncio
-        # get the data from zeroMQprovider
-        mq_prov = ARXMQProvider()
-        _meta_data = mq_prov.zmq.get_metadata()     # potentially an array, a Signal() or LIST of type
-        _audio_data = mq_prov.zmq.get_data()        # potentially an array, a Signal() or LIST of type
+    def dict_to_arxs(d):
+        provider = ARXMQConsumer()
+        _metadata = provider.zmq.get_metadata() # potentially array, a Signal() or LIST of type
+        _audio_data = provider.zmq.get_data()   # potentially array, a Signal() or LIST of type
 
         sgnlpt  = ARXSignalPoint(d['worker_id'],
                                  d['lon'],
@@ -105,10 +119,9 @@ class ARXSignalPoint(SignalPoint):
 
         sgnlpt._worker_id = d.worker_id
         sgnlpt._signal_type = d['signal_type']
-        sgnlpt._sampling_rate = d['sampling_rate']
-
+        sgnlpt._sampling_rate = d['sr']
         sgnlpt._audio_frequency_features = d['audio_frequency_features']  # a mapping of features, or LIST of mappings
-        sgnlpt.text_attributes = {k: v for k, v in d['text_attributes'].items()},
+        sgnlpt._text_attributes = {k: v for k, v in d['_text_attributes'].items()},
 
         return sgnlpt
 
@@ -117,16 +130,3 @@ class ARXSignalPoint(SignalPoint):
         enc = ARXEncoder(self._audio_data, self._sr) # <-- now needs to  process multiple
         self._audio_frequency_features = enc.compute_audio_frequency_features()
         yield self._audio_frequency_features
-
-    def get(self):
-        return {
-            "created"           : format_time(self._created, "%Y-%m-%d %H:%M:%S.%f"),
-            "id"                : str(self._id),
-            "worker_id"         : self._worker_id,
-            "signal_type"       : self._signal_type,
-            "lon"               : self._lon,
-            "lat"               : self._lat,
-            "audio_data"        : self._audio_data.tolist() if self._audio_data is not None else None,
-            "sr"                : self._sr,
-            "frequency_features": self.compute_audio_frequency_features(),
-        }
