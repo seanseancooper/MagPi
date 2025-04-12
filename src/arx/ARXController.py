@@ -1,6 +1,8 @@
+import asyncio
 import threading
 from flask import Flask
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
+
 import routes
 from src.lib.rest_server import RESTServer
 
@@ -32,7 +34,39 @@ class ARXController(threading.Thread):
             import atexit
 
             def stop():
-                routes.arxRec.stop()  # required.
+
+                out = routes.arxRec.stop()  # required.
+                # print(f'out: {out}')
+                import soundfile as sf
+                def get_audio_data(f):
+                    return sf.read(f)
+
+                from src.arx.lib.ARXSignalPoint import ARXSignalPoint
+                arxs = ARXSignalPoint(routes.arxRec.get_worker_id(),
+                                          routes.arxRec.lon,
+                                          routes.arxRec.lat,
+                                          routes.arxRec.signal_cache[:-1],
+                                          )
+
+                data, sr = get_audio_data(out)
+                # print(f'data: {data}')
+                arxs.set_audio_data(data)
+                # print(f'ad: {arxs.get_audio_data()}')
+                arxs.set_sampling_rate(sr)
+                arxs.set_text_attribute('shape', data.shape)
+                # print(arxs.get())
+                # print(arxs.arxs_to_dict(arxs))
+
+                from src.arx.lib.ARXMQProvider import ARXMQProvider
+                try:
+                    mq = ARXMQProvider()
+                    mq.configure('arx.json')
+                    loop = asyncio.get_event_loop()
+
+                    loop.run_until_complete(mq.send_sgnlpt(arxs))
+                except Exception as e:
+                    print(f'mq failed : {e}')
+                    pass
 
             atexit.register(stop)
 
