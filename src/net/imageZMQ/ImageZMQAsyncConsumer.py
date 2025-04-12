@@ -8,7 +8,7 @@ from src.cam.lib import FrameObjektEncoder
 
 logging.basicConfig(level=logging.INFO)
 
-class Consumer:
+class ImageZMQAsyncConsumer:
     def __init__(self):
         self.hub = ImageHub(open_port="tcp://*:5555")
 
@@ -31,5 +31,5 @@ class Consumer:
             self.hub.send_reply(b"OK")
 
 if __name__ == "__main__":
-    consumer = Consumer()
+    consumer = ImageZMQAsyncConsumer()
     consumer.receive_frame()
