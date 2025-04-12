@@ -13,6 +13,9 @@ from src.arx.lib.ARXMQProvider import ARXMQProvider
 from src.lib.utils import get_location
 from src.config import readConfig
 
+import logging
+
+arx_logger = logging.getLogger('arx_logger')
 
 def file_writing_thread(*, q, **soundfile_args):
     with sf.SoundFile(**soundfile_args) as f:
@@ -210,11 +213,9 @@ if __name__ == '__main__':
 
     def run() -> None:
         import atexit
-
         def stop():
             arxRec.stop()  # required.
         atexit.register(stop)
 
         arxRec.run()
-
     run()
