@@ -2,7 +2,7 @@ import threading
 
 from src.config import readConfig
 from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
-from src.net.imageZMQ.ImageZMQAsyncProducer import ImageZMQAsyncProducer
+from src.net.zeroMQ.ZeroMQAsyncProducer import ZeroMQAsyncProducer
 
 import logging
 
@@ -23,7 +23,7 @@ class ARXMQProvider(threading.Thread):
         readConfig(config_file, self.config)
 
         self.rmq = RabbitMQProducer(self.config['arx_queue'])
-        self.zmq = ImageZMQAsyncProducer()
+        self.zmq = ZeroMQAsyncProducer()
         self.DEBUG = self.config.get('DEBUG')
 
     def send_frame(self,frame):

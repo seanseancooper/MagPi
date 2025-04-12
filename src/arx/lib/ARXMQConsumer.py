@@ -1,8 +1,9 @@
+import asyncio
 import threading
 
 from src.config import readConfig
 from src.net.rabbitMQ.RabbitMQConsumer import RabbitMQConsumer
-from src.net.imageZMQ.ImageZMQAsyncConsumer import ImageZMQAsyncConsumer
+from src.net.zeroMQ.ZeroMQAsyncConsumer import ZeroMQAsyncConsumer
 
 import logging
 
@@ -23,10 +24,18 @@ class ARXMQConsumer():
         readConfig(config_file, self.config)
         self.DEBUG = self.config.get('DEBUG')
 
+    def get_data(self):
+        return self.zmq.get_data()
+
+    def get_metadata(self):
+        return self.zmq.get_metadata()
+
+    # def get_object(self):
+    #     return self.rmq._data
+
     def consume_frame(self):
-        self.zmq = ImageZMQAsyncConsumer()
-        t = threading.Thread(target=self.zmq.receive_frame())
-        t.start()
+        self.zmq = ZeroMQAsyncConsumer()
+        asyncio.run(self.zmq.receive_data())
 
     def consume_msg(self):
         self.rmq = RabbitMQConsumer(self.config['arx_queue'])
