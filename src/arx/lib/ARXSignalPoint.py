@@ -110,8 +110,8 @@ class ARXSignalPoint(SignalPoint):
 
     def compute_audio_frequency_features(self):
         # Compute frequency features for the audio data
-        arx = ARXEncoder(self._audio_data, self._sr) # <-- now needs to  process multiple
-        self._audio_frequency_features = arx.compute_audio_frequency_features()
+        enc = ARXEncoder(self._audio_data, self._sr) # <-- now needs to  process multiple
+        self._audio_frequency_features = enc.compute_audio_frequency_features()
         yield self._audio_frequency_features
 
     def get(self):
