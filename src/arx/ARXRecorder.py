@@ -9,6 +9,7 @@ import sounddevice as sd
 import soundfile as sf
 
 from src.arx.lib.ARXSignalPoint import ARXSignalPoint
+from src.arx.lib.ARXMQProvider import ARXMQProvider
 from src.lib.utils import get_location
 from src.config import readConfig
 
@@ -164,7 +165,14 @@ class ARXRecorder(threading.Thread):
     def stop(self):
         self.recording = False
         self.wait_for_thread()
-        # do something with arx_sgnl...
+
+        # send arx_sgnl over MQ
+        try:
+            mq = ARXMQProvider()
+            mq.send_sgnlpt(self.arx_sgnl)
+        except Exception as e:
+            arx_logger.warning(f'mq failed : {e}')
+            pass
 
     def run(self):
         self.recording = True
