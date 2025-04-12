@@ -6,7 +6,6 @@ from src.net.zeroMQ.ZeroMQAsyncProducer import ZeroMQAsyncProducer
 
 import logging
 
-logger_root = logging.getLogger('root')
 arx_logger = logging.getLogger('arx_logger')
 
 
@@ -16,23 +15,27 @@ class ARXMQProvider(threading.Thread):
         super().__init__()
         self.config = {}
         self.rmq = None
-        self.zmq = None
+        self.zmq = ZeroMQAsyncProducer()
         self.DEBUG = False
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
-
         self.rmq = RabbitMQProducer(self.config['arx_queue'])
-        self.zmq = ZeroMQAsyncProducer()
         self.DEBUG = self.config.get('DEBUG')
 
-    def send_frame(self,frame):
-        self.zmq.send_frame(frame)
+    def send_frame(self, frame):
+        metadata, data = frame
+        self.zmq.send_data(metadata, data)
 
-    def send_msg(self, message):
+    def send_message(self, message):
         self.rmq.publish_message(message)
 
     def send_sgnlpt(self, sgnlpt):
         message = sgnlpt.get()
-        self.send_frame(message.pop("audio_data"))
-        self.send_msg(message)
+
+        metadata = message['text_attributes']
+        data = message.pop('audio_data')
+        frame = metadata, data
+
+        self.send_frame(frame)
+        self.send_message(message)
