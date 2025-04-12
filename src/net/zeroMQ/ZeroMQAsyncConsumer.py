@@ -36,5 +36,5 @@ class ZeroMQAsyncConsumer:
 
 if __name__ == "__main__":
     import asyncio
-    consumer = AsyncConsumer()
+    consumer = ZeroMQAsyncConsumer()
     asyncio.run(consumer.receive_frame())
