@@ -17,11 +17,12 @@ class ARXMQConsumer():
         super().__init__()
         self.config = {}
         self.rmq = None
-        self.zmq = None
+        self.zmq = ZeroMQAsyncConsumer()
         self.DEBUG = False
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
+        self.rmq = RabbitMQConsumer(self.config['arx_queue'])
         self.DEBUG = self.config.get('DEBUG')
 
     def get_data(self):
@@ -30,15 +31,17 @@ class ARXMQConsumer():
     def get_metadata(self):
         return self.zmq.get_metadata()
 
-    # def get_object(self):
-    #     return self.rmq._data
+    def get_frame(self):
+        frame = self.get_metadata(), self.get_data(),
+        return frame
+
+    def get_message(self):
+        return self.rmq.data
 
     def consume_frame(self):
-        self.zmq = ZeroMQAsyncConsumer()
         asyncio.run(self.zmq.receive_data())
 
     def consume_msg(self):
-        self.rmq = RabbitMQConsumer(self.config['arx_queue'])
         t = threading.Thread(target=self.rmq.run)
         t.start()
 
