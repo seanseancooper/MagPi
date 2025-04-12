@@ -19,7 +19,7 @@ class ZeroMQAsyncConsumer:
             metadata_part, data_part = self._message.split(b'||', 1)
 
             self._metadata = json.loads(metadata_part.decode('utf-8'))
-            self._data = np.frombuffer(data_part, dtype=np.uint8).reshape(self._metadata['text_attributes']['shape'])
+            self._data = np.frombuffer(data_part, dtype=np.float64).reshape(self._metadata['shape'])  # was np.uint8
 
             logging.info(f"Received data")
 
