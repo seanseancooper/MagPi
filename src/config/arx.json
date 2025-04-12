@@ -33,6 +33,9 @@
 			"LATENCY": 0.1
 		},
 		{
+			"QUEUE_NAME": "arx_queue"
+		},
+		{
 			"OUTFILE_NAME": "arx_audio"
 		},
 		{
