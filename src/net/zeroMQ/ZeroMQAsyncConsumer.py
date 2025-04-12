@@ -4,6 +4,7 @@ import json
 import logging
 
 class ZeroMQAsyncConsumer:
+    """ZeroMQ Consumer. """
     def __init__(self):
         context = zmq.Context()
         self.socket = context.socket(zmq.PULL)
