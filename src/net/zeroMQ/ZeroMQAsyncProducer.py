@@ -15,12 +15,15 @@ class ZeroMQAsyncProducer:
         self.socket.connect("tcp://127.0.0.1:5555")
 
     async def send_frame(self, frame_objekt: FrameObjekt):
+
         metadata = {
             "f_id": frame_objekt.f_id,
             "created": frame_objekt.created.isoformat(),
             "shape": frame_objekt.wall.shape
         }
         message = json.dumps(metadata).encode('utf-8') + b'||' + frame_objekt.wall.tobytes()
+
+
         logging.info(f"Sending: {metadata}")
         self.socket.send(message)
 
@@ -37,7 +40,7 @@ class CapsVid(threading.Thread):
 
 if __name__ == "__main__":
     import asyncio
-    producer = AsyncProducer()
+    producer = ZeroMQAsyncProducer()
     capture = CapsVid()
     frame = capture.snap()
     while True:
