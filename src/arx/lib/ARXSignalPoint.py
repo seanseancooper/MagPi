@@ -33,6 +33,7 @@ class ARXSignalPoint(SignalPoint):
             "id"                : self._id,       # when: derived from creator SignalPoint type.
             "fs_path"           : None,           # where: could be on filesystem
             "channels"          : None,           # how: documentation of created value.
+            "shape"             : self._audio_data.shape(),           # how: documentation of created value.
             "sr"                : self._sr,       # how: documentation of created value.
             "tags"              : [None]          # why: a list of ad hoc tags for this Signal
         })
@@ -73,18 +74,17 @@ class ARXSignalPoint(SignalPoint):
             [self._audio_frequency_features.append(process_features(_data)) for _data in audio_data]
 
     @staticmethod
-    def arxsignalpoint_to_dict(arxs):
+    def arxsignalpoint_to_dict(arxs): # hey, this is get()!
+        audio_data = arxs.get_audio_data()
         return  {
             "worker_id"                 : arxs.worker_id,
             "lon"                       : arxs.lon,
             "lat"                       : arxs.lat,
             "sgnl"                      : arxs.sgnl,
-
-            "audio_data"                : arxs.get_audio_data(),
-
+            "audio_data"                : audio_data,
             "sampling_rate"             : arxs.get_sampling_rate(),
             "signal_type"               : arxs.get_signal_type(),
-            "audio_frequency_features"  : arxs.get_audio_frequency_features(),
+            "frequency_features"        : arxs.get_audio_frequency_features(),
             "text_attributes"           : arxs.get_text_attributes(),
         }
 
@@ -93,7 +93,8 @@ class ARXSignalPoint(SignalPoint):
         import asyncio
         # get the data from zeroMQprovider
         mq_prov = ARXMQProvider()
-        _audio_data = asyncio.run(mq_prov.zmq.receive_frame())  # potentially an array, a Signal() or LIST of type
+        _meta_data = mq_prov.zmq.get_metadata()     # potentially an array, a Signal() or LIST of type
+        _audio_data = mq_prov.zmq.get_data()        # potentially an array, a Signal() or LIST of type
 
         sgnlpt  = ARXSignalPoint(d['worker_id'],
                                  d['lon'],
