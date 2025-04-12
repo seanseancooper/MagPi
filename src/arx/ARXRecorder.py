@@ -8,8 +8,6 @@ import numpy as np
 import sounddevice as sd
 import soundfile as sf
 
-from src.arx.lib.ARXSignalPoint import ARXSignalPoint
-from src.arx.lib.ARXMQProvider import ARXMQProvider
 from src.lib.utils import get_location
 from src.config import readConfig
 
@@ -51,7 +49,6 @@ class ARXRecorder(threading.Thread):
         self.meter = {'max': 1.0, 'peak_percentage': 0}
         self.signal_cache = []   #DBUG an UNBOUNDED list of audio peaks?
 
-        self.arx_sgnl = None
         self.lon = 0.0
         self.lat = 0.0
 
@@ -84,14 +81,6 @@ class ARXRecorder(threading.Thread):
                                  latency=LATENCY,
                                  channels=CHANNELS,
                                  callback=self.streamCallback)
-
-        self.arx_sgnl = ARXSignalPoint(self._worker_id,
-                                       self.lon,
-                                       self.lat,
-                                       self.signal_cache[:-1],
-                                       audio_data=self.streamCallback, # ? night need to delay until stop()
-                                       sr=SR
-                                       )
 
         self._stream.start()
 
@@ -168,14 +157,7 @@ class ARXRecorder(threading.Thread):
     def stop(self):
         self.recording = False
         self.wait_for_thread()
-
-        # send arx_sgnl over MQ
-        try:
-            mq = ARXMQProvider()
-            mq.send_sgnlpt(self.arx_sgnl)
-        except Exception as e:
-            arx_logger.warning(f'mq failed : {e}')
-            pass
+        return self._OUTFILE
 
     def run(self):
         self.recording = True
