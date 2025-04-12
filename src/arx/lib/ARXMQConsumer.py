@@ -10,7 +10,6 @@ logger_root = logging.getLogger('root')
 arx_logger = logging.getLogger('arx_logger')
 
 
-
 class ARXMQConsumer():
 
     def __init__(self):
@@ -24,12 +23,12 @@ class ARXMQConsumer():
         readConfig(config_file, self.config)
         self.DEBUG = self.config.get('DEBUG')
 
-    def get_frame(self):
+    def consume_frame(self):
         self.zmq = ImageZMQAsyncConsumer()
         t = threading.Thread(target=self.zmq.receive_frame())
         t.start()
 
-    def get_msg(self):
+    def consume_msg(self):
         self.rmq = RabbitMQConsumer(self.config['arx_queue'])
         t = threading.Thread(target=self.rmq.run)
         t.start()

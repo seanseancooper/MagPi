@@ -79,6 +79,9 @@ class ARXSignalPoint(SignalPoint):
             "lon"                       : arxs.lon,
             "lat"                       : arxs.lat,
             "sgnl"                      : arxs.sgnl,
+
+            "audio_data"                : arxs.get_audio_data(),
+
             "sampling_rate"             : arxs.get_sampling_rate(),
             "signal_type"               : arxs.get_signal_type(),
             "audio_frequency_features"  : arxs.get_audio_frequency_features(),
@@ -88,7 +91,7 @@ class ARXSignalPoint(SignalPoint):
     @staticmethod
     def dict_to_arxsignalpoint(d):
         import asyncio
-        # get the data from zeroMQprovider first!!
+        # get the data from zeroMQprovider
         mq_prov = ARXMQProvider()
         _audio_data = asyncio.run(mq_prov.zmq.receive_frame())  # potentially an array, a Signal() or LIST of type
 
@@ -99,7 +102,7 @@ class ARXSignalPoint(SignalPoint):
                                  audio_data=_audio_data,
                                  sr=d.sr)
 
-        sgnlpt._worker_id = d.worker_id or 'ARXRecorder'
+        sgnlpt._worker_id = d.worker_id
         sgnlpt._signal_type = d['signal_type']
         sgnlpt._sampling_rate = d['sampling_rate']
 

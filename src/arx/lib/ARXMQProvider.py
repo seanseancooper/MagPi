@@ -11,7 +11,7 @@ arx_logger = logging.getLogger('arx_logger')
 
 
 class ARXMQProvider(threading.Thread):
-    """ MQ Wifi Retriever class """
+
     def __init__(self):
         super().__init__()
         self.config = {}
@@ -21,6 +21,7 @@ class ARXMQProvider(threading.Thread):
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
+
         self.rmq = RabbitMQProducer(self.config['arx_queue'])
         self.zmq = ImageZMQAsyncProducer()
         self.DEBUG = self.config.get('DEBUG')
