@@ -1,40 +1,38 @@
-import json
-import logging
 import zmq
 import numpy as np
-from src.cam.lib.FrameObjekt import FrameObjekt
-from datetime import datetime
-
-from src.cam.lib.FrameObjektEncoder import FrameObjektEncoder
-
-logging.basicConfig(level=logging.INFO)
+import json
+import logging
 
 class ZeroMQAsyncConsumer:
     def __init__(self):
         context = zmq.Context()
         self.socket = context.socket(zmq.PULL)
         self.socket.bind("tcp://127.0.0.1:5555")
+        self._message = None    # entire message
+        self._metadata = None   # ARX 'text_attributes'
+        self._data = None       # ARX 'audio_data'
 
-    async def receive_frame(self):
+    async def receive_data(self):
         while True:
-            message = self.socket.recv()
-            metadata_part, frame_part = message.split(b'||', 1)
-            metadata = json.loads(metadata_part.decode('utf-8'))
-            frame = np.frombuffer(frame_part, dtype=np.uint8).reshape(metadata['shape'])
+            self._message = self.socket.recv()
+            metadata_part, data_part = self._message.split(b'||', 1)
 
-            frame_objekt = FrameObjekt.create(metadata['f_id'])
-            frame_objekt.wall = frame
+            self._metadata = json.loads(metadata_part.decode('utf-8'))
+            self._data = np.frombuffer(data_part, dtype=np.uint8).reshape(self._metadata['text_attributes']['shape'])
 
-            # Start encoder thread to process frame
-            encoder = FrameObjektEncoder(frame_objekt)
-            encoder.start()
+            logging.info(f"Received data")
 
-            created_time = datetime.fromisoformat(metadata['created'])
-            time_diff = (datetime.now() - created_time).total_seconds()
+    def get_message(self):
+        return self._message
 
-            logging.info(f"Received {metadata['f_id']} {metadata['created']}, time_diff={time_diff:.6f}s")
+    def get_metadata(self):
+        return self._metadata
+
+    def get_data(self):
+        return self._data
 
 if __name__ == "__main__":
-    import asyncio
     consumer = ZeroMQAsyncConsumer()
-    asyncio.run(consumer.receive_frame())
+
+    import asyncio
+    asyncio.run(consumer.receive_data())
