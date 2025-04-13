@@ -35,7 +35,6 @@ class ARXController(threading.Thread):
 
             def stop():
 
-
                 from src.arx.lib.ARXSignalPoint import ARXSignalPoint
                 arxs = ARXSignalPoint(routes.arxRec.get_worker_id(),
                                       routes.arxRec.lon,
@@ -66,34 +65,41 @@ class ARXController(threading.Thread):
 
                 # import asyncio
                 from src.arx.lib.ARXMQConsumer import ARXMQConsumer
-                try:
-                    consumer = ARXMQConsumer()
-                    consumer.configure('arx.json')
-                    # loop = asyncio.get_event_loop()
-                    # loop.run_until_complete(consumer.consume())
-                    # consumer.consume()
-                except Exception as e:
-                    print(f'controller consumer failed : {e}')
-                    pass
+                consumer = ARXMQConsumer()
+                consumer.configure('arx.json')
+                # loop = asyncio.get_event_loop()
+                # loop.run_until_complete(consumer.consume())
+                consumer.consume()
+
+                # try:
+                #     consumer = ARXMQConsumer()
+                #     consumer.configure('arx.json')
+                #     # loop = asyncio.get_event_loop()
+                #     # loop.run_until_complete(consumer.consume())
+                #     consumer.consume()
+                #
+                # except Exception as e:
+                #     print(f'controller consumer failed : {e}')
+                #     pass
 
                 from src.arx.lib.ARXMQProvider import ARXMQProvider
                 try:
                     provider = ARXMQProvider()
                     provider.configure('arx.json')
-                    loop = asyncio.get_event_loop()
-                    loop.run_until_complete(provider.send_sgnlpt(arxs)) #  RuntimeWarning: coroutine 'ZeroMQAsyncProducer.send_data' was never awaited
-                    # provider.send_sgnlpt(arxs)
+                    # loop = asyncio.get_event_loop()
+                    # loop.run_until_complete(provider.send_sgnlpt(arxs)) #  RuntimeWarning: coroutine 'ZeroMQAsyncProducer.send_data' was never awaited
+                    provider.send_sgnlpt(arxs)
                     pass
                 except Exception as e:
                     print(f'controller producer failed : {e}')
                     pass
 
-                # metadata = consumer.get_metadata()     # potentially array, a Signal() or LIST of type
-                # audio_data = consumer.get_data()       # potentially array, a Signal() or LIST of type
-                # message = consumer.get_message()        # potentially array, a Signal() or LIST of type
+                metadata = consumer.get_metadata()     # potentially array, a Signal() or LIST of type
+                print(f'metadata :{metadata}')
+                audio_data = consumer.get_data()       # potentially array, a Signal() or LIST of type
+                print(f'audio_data :{audio_data}')
 
-                # print(f'metadata :{metadata}')
-                # print(f'audio_data :{audio_data}')
+                # message = consumer.get_message()       # potentially array, a Signal() or LIST of type
                 # print(f'message :{message}')
 
             atexit.register(stop)

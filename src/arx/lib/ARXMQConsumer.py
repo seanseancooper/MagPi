@@ -22,7 +22,7 @@ class ARXMQConsumer(threading.Thread):
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
-        self.rmq = RabbitMQAsyncConsumer(self.config['QUEUE_NAME'])
+        # self.rmq = RabbitMQAsyncConsumer(self.config['QUEUE_NAME'])
         self.DEBUG = self.config.get('DEBUG')
 
     def get_data(self):
@@ -40,11 +40,12 @@ class ARXMQConsumer(threading.Thread):
 
     def consume(self):
         self.consume_zmq()
-        self.consume_rmq()
+        # self.consume_rmq()
 
     def consume_zmq(self):
         try:
-            asyncio.run(self.zmq.receive_data())
+            # asyncio.run(self.zmq.receive_data())
+            self.zmq.receive_data()
         except Exception as e:
             print(f'{e}')
 

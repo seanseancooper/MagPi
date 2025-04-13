@@ -24,25 +24,27 @@ class ARXMQProvider(threading.Thread):
         self.DEBUG = self.config.get('DEBUG')
         print('configured provider.')
 
-    async def send_frame(self, frame):
+    def send_frame(self, frame):
         metadata, data = frame
-        await self.zmq.send_data(metadata, data)
+        self.zmq.send_data(metadata, data)  # RuntimeWarning: coroutine 'ZeroMQAsyncProducer.send_data' was never awaited
 
     def send_message(self, message):
         self.rmq.publish_message(message)
 
-    async def send_sgnlpt(self, arxs):
+    def send_sgnlpt(self, arxs):
         try:
             message = arxs.get()
             metadata = message['text_attributes']
             data = arxs.get_audio_data()
             frame = metadata, data
-            print(f'sending zmq {frame}')
-            await self.send_frame(frame)
+
+            print(f'sending zmq')
+            self.send_frame(frame)
 
             # print(f'sending rmq....')
             # self.send_message(message)
-            print(f'arxs sent!')
+
         except Exception as e:
             print(f'{e}')
 
+        print(f'arxs sent!')
