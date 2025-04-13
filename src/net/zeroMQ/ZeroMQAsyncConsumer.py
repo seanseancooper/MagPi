@@ -10,8 +10,8 @@ class ZeroMQAsyncConsumer:
         self.socket = context.socket(zmq.PULL)
         self.socket.bind("tcp://127.0.0.1:5555")
         self._message = None    # entire message
-        self._metadata = None   # ARX 'text_attributes'
-        self._data = None       # ARX 'audio_data'
+        self._metadata = None   # 'text_attributes'
+        self._data = None
 
     async def receive_data(self):
         while True:

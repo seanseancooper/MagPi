@@ -9,7 +9,6 @@ class ZeroMQAsyncProducer:
         self.socket.connect("tcp://127.0.0.1:5555")
 
     async def send_data(self, metadata, data):
-        print(f'shape: {data.shape}')
         message = json.dumps(metadata).encode('utf-8') + b'||' + data.tobytes()
         self.socket.send(message)
 
