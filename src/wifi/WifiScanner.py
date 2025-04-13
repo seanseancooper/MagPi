@@ -80,7 +80,7 @@ class WifiScanner(threading.Thread):
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
-        golden_retriever = self.get_retriever("retrievers." + self.config['RETRIEVER'])
+        golden_retriever = self.get_retriever("retrievers." + self.config['SCANNER_RETRIEVER'])
         self.retriever = golden_retriever()
         self.retriever.configure(config_file)
         self.searchmap = self.config['SEARCHMAP']

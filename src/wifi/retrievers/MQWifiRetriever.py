@@ -1,6 +1,6 @@
 import threading
 
-from src.wifi.MQWifiScanner import MQWifiScanner
+from src.net.rabbitMQ.RabbitMQWifiScanner import RabbitMQWifiScanner
 import xml
 import xml.etree.ElementTree as ET
 import xml.parsers.expat
@@ -53,12 +53,13 @@ class MQWifiRetriever(threading.Thread):
         self.DEBUG = self.config.get('DEBUG')
 
         self.start_scanner()
+        self.consumer = RabbitMQAsyncConsumer(self.config['WIFI_QUEUE'])
         self.start_consumer()
 
     @staticmethod
     def start_scanner():
-        scanner = MQWifiScanner()
-        scanner.configure('net.json')
+        scanner = RabbitMQWifiScanner()
+        scanner.configure('wifi.json')
         t = threading.Thread(target=scanner.run, daemon=True)
         t.start()
 
