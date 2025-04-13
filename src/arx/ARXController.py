@@ -35,38 +35,66 @@ class ARXController(threading.Thread):
 
             def stop():
 
-                out = routes.arxRec.stop()  # required.
-                # print(f'out: {out}')
-                import soundfile as sf
-                def get_audio_data(f):
-                    return sf.read(f)
 
                 from src.arx.lib.ARXSignalPoint import ARXSignalPoint
                 arxs = ARXSignalPoint(routes.arxRec.get_worker_id(),
-                                          routes.arxRec.lon,
-                                          routes.arxRec.lat,
-                                          routes.arxRec.signal_cache[:-1],
-                                          )
+                                      routes.arxRec.lon,
+                                      routes.arxRec.lat,
+                                      routes.arxRec.signal_cache[:-1]) #remove signal_cache
+
+                out = routes.arxRec.stop()  # required.
+
+                def get_audio_data(f):
+                    import soundfile as sf
+                    return sf.read(f)
 
                 data, sr = get_audio_data(out)
-                # print(f'data: {data}')
+
                 arxs.set_audio_data(data)
-                # print(f'ad: {arxs.get_audio_data()}')
                 arxs.set_sampling_rate(sr)
+
+                # arxs.set_text_attribute('source', '')
+                arxs.set_text_attribute('signal_type', arxs.get_signal_type())
+                # arxs.set_text_attribute('name', '')
+                arxs.set_text_attribute('d_type', str(type(data)))
+                arxs.set_text_attribute('fs_path', out)
+                arxs.set_text_attribute('channels', data.shape[1])
                 arxs.set_text_attribute('shape', data.shape)
-                # print(arxs.get())
-                # print(arxs.arxs_to_dict(arxs))
+                arxs.set_text_attribute('sr', sr)
+
+                # print(f'arxs:\n{arxs.get()}')
+
+                # import asyncio
+                from src.arx.lib.ARXMQConsumer import ARXMQConsumer
+                try:
+                    consumer = ARXMQConsumer()
+                    consumer.configure('arx.json')
+                    # loop = asyncio.get_event_loop()
+                    # loop.run_until_complete(consumer.consume())
+                    # consumer.consume()
+                except Exception as e:
+                    print(f'controller consumer failed : {e}')
+                    pass
 
                 from src.arx.lib.ARXMQProvider import ARXMQProvider
                 try:
-                    mq = ARXMQProvider()
-                    mq.configure('arx.json')
+                    provider = ARXMQProvider()
+                    provider.configure('arx.json')
                     loop = asyncio.get_event_loop()
-
-                    loop.run_until_complete(mq.send_sgnlpt(arxs))
-                except Exception as e:
-                    print(f'mq failed : {e}')
+                    loop.run_until_complete(provider.send_sgnlpt(arxs)) #  RuntimeWarning: coroutine 'ZeroMQAsyncProducer.send_data' was never awaited
+                    # provider.send_sgnlpt(arxs)
                     pass
+                except Exception as e:
+                    print(f'controller producer failed : {e}')
+                    pass
+
+                # metadata = consumer.get_metadata()     # potentially array, a Signal() or LIST of type
+                # audio_data = consumer.get_data()       # potentially array, a Signal() or LIST of type
+                # message = consumer.get_message()        # potentially array, a Signal() or LIST of type
+
+                # print(f'metadata :{metadata}')
+                # print(f'audio_data :{audio_data}')
+                # print(f'message :{message}')
 
             atexit.register(stop)
 
