@@ -23,15 +23,6 @@ class Worker:
 
         self._text_attributes = {}       # mapping of worker attributes
 
-        # "Vendor"        : self.vendor,
-        # "Channel"       : self.channel,
-        # "Frequency"     : self.frequency,
-        # "Signal"        : self.signal,
-        # "Quality"       : self.quality,
-        # "Encryption"    : self.is_encrypted,
-        # "lon"           : self._lon,
-        # "lat"           : self._lat,
-
         self.results = []               # a list of test results (this should be local to method)
         self.return_all = False         # return all/any
         self.test_results = {}          # mapping of results
@@ -40,21 +31,48 @@ class Worker:
 
         self.DEBUG = False
 
+    def worker_to_sgnl(self, sgnl, worker):
+        """ update sgnl data map with current info from worker """
+        sgnl['id'] = worker.id
+        sgnl['Signal'] = worker.signal
+
+        # this is formatting for luxon.js, but is not clean.
+        sgnl['created'] = format_time(worker.created, "%Y-%m-%d %H:%M:%S")
+        sgnl['updated'] = format_time(worker.updated, "%Y-%m-%d %H:%M:%S")
+        sgnl['elapsed'] = format_delta(worker.elapsed, self.config.get('TIME_FORMAT', "%H:%M:%S"))
+
+        sgnl['is_mute'] = worker.is_mute
+        sgnl['tracked'] = worker.tracked
+        sgnl['signal_cache'] = [sgnl.get() for sgnl in self.scanner.signal_cache[worker.id]]
+        sgnl['results'] = [json.dumps(result) for result in worker.test_results]
+
+    @staticmethod
+    def worker_to_dict(worker):
+        """ calculates on arxs """
+        return  {
+            "id"                        : worker.id,
+            "name"                      : worker.name,
+            "created"                   : format_time(worker.created, "%Y-%m-%d %H:%M:%S"),
+            "updated"                   : format_time(worker.updated, "%Y-%m-%d %H:%M:%S"),
+            "elapsed"                   : format_delta(worker.elapsed, "%H:%M:%S"),
+
+            "is_mute"                   : worker.is_mute,
+            "tracked"                   : worker.tracked,
+            "text_attributes"           : worker.get_text_attributes(),
+        }
+
     def get(self):
-        return {"id"            : self.id,
-                "name"          : self.name,
-                "created"       : format_time(self.created, "%Y-%m-%d %H:%M:%S"),
-                "updated"       : format_time(self.updated, "%Y-%m-%d %H:%M:%S"),
-                "elapsed"       : format_delta(self.elapsed, "%H:%M:%S"),
+        return {
+            "id"                    : self.id,
+            "name"                  : self.name,
+            "created"               : format_time(self.created, "%Y-%m-%d %H:%M:%S"),
+            "updated"               : format_time(self.updated, "%Y-%m-%d %H:%M:%S"),
+            "elapsed"               : format_delta(self.elapsed, "%H:%M:%S"),
 
-                "is_mute"       : self.is_mute,
-                "tracked"       : self.tracked,
+            "is_mute"               : self.is_mute,
+            "tracked"               : self.tracked,
 
-                "text_attributes"   : self.get_text_attributes(),
-
-                "signal_cache"  : [pt.get() for pt in self.scanner.signal_cache[self.id]][self.cache_max:],
-                "frequency_features"  : self._signal_cache_frequency_features,
-                "tests"         : [x for x in self.test_results]
+            "text_attributes"       : self.get_text_attributes(),
         }
 
     def config_worker(self, scanner):
@@ -76,10 +94,7 @@ class Worker:
     def set_text_attributes(self, text_data):
         def aggregate(k, v):
             self._text_attributes[k] = v
-
         [aggregate(k, str(v)) for k, v in text_data.items()]
-
-
 
     def make_signalpoint(self, worker_id, id, signal):
         sgnlPt = SignalPoint(self.scanner.lon, self.scanner.lat, signal)
@@ -88,39 +103,9 @@ class Worker:
         while len(self.scanner.signal_cache[id]) >= self.scanner.signal_cache_max:
             self.scanner.signal_cache[id].pop(0)
 
-
-
-
-    def worker_to_sgnl(self, sgnl, worker):
-        """ update sgnl data map with current info from worker """
-        sgnl['id'] = worker.id
-        sgnl['Signal'] = worker.signal
-
-        # this is formatting for luxon.js, but is not clean.
-        sgnl['created'] = format_time(worker.created, "%Y-%m-%d %H:%M:%S")
-        sgnl['updated'] = format_time(worker.updated, "%Y-%m-%d %H:%M:%S")
-        sgnl['elapsed'] = format_delta(worker.elapsed, self.config.get('TIME_FORMAT', "%H:%M:%S"))
-
-        sgnl['is_mute'] = worker.is_mute
-        sgnl['tracked'] = worker.tracked
-        sgnl['signal_cache'] = [sgnl.get() for sgnl in self.scanner.signal_cache[worker.id]]
-        sgnl['results'] = [json.dumps(result) for result in worker.test_results]
-
     def process_cell(self, cell):
         """ update static fields, tests"""
-
-        # make these into 'text_attributes'
-        # if cell['SSID'] == '' or None:
-        #     cell['SSID'] = "*HIDDEN SSID*"
-
-        # self.ssid = cell['SSID']
-        # self.vendor = cell['Vendor']
-        # self.channel = cell['Channel']
-        # self.frequency = cell['Frequency']
-        # self.quality = cell['Quality']
-        # self.is_encrypted = cell['Encryption']
-        # self.signal = cell['Signal']
-
+        self.set_text_attributes(cell)
         self.update(cell)
 
         def test(cell):
@@ -173,7 +158,6 @@ class Worker:
 
     def mute(self):
         from src.lib.utils import mute
-        # SIGNAL: MUTE/UNMUTE
         return mute(self)
 
     def signal_vec(self):
@@ -184,30 +168,27 @@ class Worker:
         if self.config['MUTE_TIME'] > 0:
             if datetime.now() - self.updated > timedelta(seconds=self.config['MUTE_TIME']):
                 self.is_mute = False
-                # SIGNAL: AUTO UNMUTE
 
-    def add(self, bssid):
+    def add(self, id):
 
         try:
-            worker = self.scanner.get_worker(bssid)
+            worker = self.scanner.get_worker(id)
 
             if worker:
                 worker.tracked = True
-                self.scanner.tracked_signals.append(bssid)
+                self.scanner.tracked_signals.append(id)
                 if worker not in self.scanner.workers:
                     self.scanner.workers.append(worker)
-                # SIGNAL: ADDED ITEM
                 return True
 
             return False
         except IndexError:
             return False
 
-    def remove(self, bssid):
+    def remove(self, id):
         _copy = self.scanner.tracked_signals.copy()
         self.scanner.tracked_signals.clear()
-        [self.add(remaining) for remaining in _copy if remaining != bssid]
-        # SIGNAL: REMOVED ITEM
+        [self.add(remaining) for remaining in _copy if remaining != id]
         return True
 
     def stop(self):
@@ -266,12 +247,7 @@ class Worker:
                     "created"     : cell['created'],
                     "updated"     : cell['updated'],
                     "elapsed"     : cell['elapsed'],
-                    "Vendor"      : cell['Vendor'],
-                    "Channel"     : cell['Channel'],
-                    "Frequency"   : cell['Frequency'],
-                    "Signal"      : cell['Signal'],
-                    "Quality"     : cell['Quality'],
-                    "Encryption"  : cell['Encryption'],
+                    # "text_attributes":
                     "is_mute"     : cell['is_mute'],
                     "tracked"     : cell['tracked'],
                     "signal_cache": [pt.get() for pt in cls.scanner.signal_cache[cell['id']]][cls.cache_max:],
