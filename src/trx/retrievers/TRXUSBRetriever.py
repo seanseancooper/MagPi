@@ -132,7 +132,7 @@ class TRXUSBRetriever(threading.Thread):
     def get_tracked(self):
         return [sgnl for sgnl in self.tracked_signals]
 
-    def get_scan(self):
+    def scan(self):
         return self.out
 
     def mute(self, uniqId):
