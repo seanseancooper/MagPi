@@ -1,4 +1,3 @@
-from collections import defaultdict
 from datetime import datetime, timedelta
 import numpy as np
 import librosa
@@ -26,7 +25,7 @@ class TRXSignalPoint(SignalPoint):
         self.tracked = False
         self.is_mute = False
 
-        self.text_attributes = {}               # object (default): intermittent text from hardware, see aggregate(k, v)
+        self._text_attributes = {}               # object (default): intermittent text from hardware, see aggregate(k, v)
         self._audio_data = audio_data           # continuous: intermittent audio data as a Signal
         self._sr = sr                           # need config, and ability to ad hoc change
 
@@ -55,7 +54,7 @@ class TRXSignalPoint(SignalPoint):
             #   TSYS_TYPE: broadcast system TYPE
             #   TYPE: broadcast type
             def aggregate(k, v):
-                self.text_attributes[k] = v
+                self._text_attributes[k] = v
             [aggregate(k, str(v)) for k, v in text_data.items()]
 
         if self._signal_type == "object" and self._audio_data is None:
@@ -95,7 +94,7 @@ class TRXSignalPoint(SignalPoint):
 
             # "signal_data"       : [_ for _ in self._signal_data] if self._signal_data is not None else None,
             "audio_data"        : self._audio_data.tolist() if self._audio_data is not None else None,
-            "text_data"         : {k: v for k, v in self.text_attributes.items()},
+            "text_data"         : {k: v for k, v in self._text_attributes.items()},
 
             "frequency_features": self._audio_frequency_features,
         }

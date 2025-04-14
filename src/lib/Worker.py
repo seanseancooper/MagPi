@@ -11,8 +11,8 @@ class Worker:
     def __init__(self, id):
         self.config = {}
         self.scanner = None
-        self.id = ''                    # filled if match(), marks 'SignalPoint'.
-        self.name = ''                  # Human readable name of Wifi access point.
+        self.id = ''                    # filled if match(), marks 'SignalPoint' type.
+        self.name = ''                  # Human readable name of asset.
 
         self.created = datetime.now()   # when signal was found
         self.updated = datetime.now()   # when signal was last reported
@@ -21,7 +21,7 @@ class Worker:
         self.is_mute = False            # is muted
         self.tracked = False            # is in scanner.tracked_signals
 
-        self.text_attributes = {}       # mapping of worker attributes
+        self._text_attributes = {}       # mapping of worker attributes
 
         self.results = []               # a list of test results (this should be local to method)
         self.return_all = False         # return all/any
@@ -83,17 +83,17 @@ class Worker:
         self.DEBUG = scanner.config['DEBUG']
 
     def get_text_attributes(self):
-        return self.text_attributes
+        return self._text_attributes
 
     def get_text_attribute(self, a):
-        return self.text_attributes[a]
+        return self._text_attributes[a]
 
     def set_text_attribute(self, a, v):
-        self.text_attributes[a] = v
+        self._text_attributes[a] = v
 
     def set_text_attributes(self, text_data):
         def aggregate(k, v):
-            self.text_attributes[k] = v
+            self._text_attributes[k] = v
         [aggregate(k, str(v)) for k, v in text_data.items()]
 
     def make_signalpoint(self, worker_id, id, signal):

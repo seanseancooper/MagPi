@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import numpy as np
 from src.lib.utils import format_time
 from src.lib.SignalPoint import SignalPoint
@@ -14,6 +15,7 @@ class SDRSignalPoint(SignalPoint):
     def __init__(self, worker_id, lon, lat, sgnl, array_data=None, audio_data=None, sr=48000):
         super().__init__(lon, lat, sgnl)
         self._worker_id = worker_id
+        self._signal_type = None                # 'array' | 'audio' | 'both' ??
 
         self._audio_data = audio_data
         self._sr = sr
@@ -22,20 +24,22 @@ class SDRSignalPoint(SignalPoint):
         self._audio_frequency_features = None
         self._array_frequency_features = None
 
-        self.is_mute = False
+        self.updated = datetime.now()           # when signal was last reported
+        self.elapsed = timedelta()              # time signal has been tracked.
         self.tracked = False
+        self.is_mute = False
 
-        self.ctrl_record = False
-        self.ctrl_analyze = False
-        self.ctrl_demux = False
-        self.ctrl_decode = False
-        self.ctrl_filter = False
-        self.ctrl_block = False
-        self.ctrl_label = False
-        self.ctrl_test = False
-        self.control_fields = [f for f in dir(self) if f.startswith("ctrl_")]
+        self._ctrl_record = False
+        self._ctrl_analyze = False
+        self._ctrl_demux = False
+        self._ctrl_decode = False
+        self._ctrl_filter = False
+        self._ctrl_block = False
+        self._ctrl_label = False
+        self._ctrl_test = False
+        self._control_fields = [f for f in dir(self) if f.startswith("_ctrl_")]
 
-        self.text_attributes = {}
+        self._text_attributes = {}
 
         if audio_data is not None and sr is not None:
             self._audio_frequency_features = self.compute_audio_frequency_features(audio_data, sr)
@@ -57,14 +61,20 @@ class SDRSignalPoint(SignalPoint):
             data["audio_data"] = self._audio_data.tolist()  # Assuming audio data is a numpy array
         if self._array_data is not None:
             data["array_data"] = self._array_data.tolist()  # Assuming array data is a numpy array
-        if self._frequency_features is not None:
-            data["frequency_features"] = self._frequency_features
+        if self._audio_frequency_features is not None:
+            data["frequency_features"] = self._audio_frequency_features
         return data
+
+    def get_signal_type(self):
+        return self._signal_type
+
+    def set_signal_type(self, signal_type):
+        self._signal_type = signal_type
 
     def set_audio_data(self, audio_data):
         self._audio_data = audio_data
         signal = Signal(audio_data, self._id, sr=self._sr)
-        self._frequency_features = self.compute_audio_frequency_features(signal.get_data(), signal.get_sr())
+        self._audio_frequency_features = self.compute_audio_frequency_features(signal.get_data(), signal.get_sr())
 
     def get_audio_data(self):
         return self._audio_data
@@ -80,21 +90,21 @@ class SDRSignalPoint(SignalPoint):
     def set_attributes(self, attributes):
         if attributes is not None:
             def aggregate(k, v):
-                self.text_attributes[k] = v
+                self._text_attributes[k] = v
             [aggregate(k, str(v)) for k, v in attributes.items()]
 
     def set_attribute(self, attr_key, attr_value):
-        self.text_attributes[attr_key] = attr_value
+        self._text_attributes[attr_key] = attr_value
 
     def get_attribute(self, attr_key):
-        return self.text_attributes[attr_key]
+        return self._text_attributes[attr_key]
 
     def set_control_field(self, attr_field, attr_field_value):
-        if attr_field in self.control_fields:
+        if attr_field in self._control_fields:
             self.__setattr__(attr_field, attr_field_value)
 
     def get_control_field(self, attr_field):
-        if attr_field in self.control_fields:
+        if attr_field in self._control_fields:
             return self.__getattribute__(attr_field)
 
     def get_sampling_rate(self):

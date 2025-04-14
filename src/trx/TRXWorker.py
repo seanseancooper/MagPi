@@ -66,10 +66,10 @@ class TRXWorker:
     def process_cell(self, sgnl):
         """ update static fields, tests"""
 
-        if sgnl.text_attributes['ALPHATAG'] == '' or None:
-            sgnl.text_attributes['ALPHATAG'] = "*MISSING ALPHATAG*"
+        if sgnl._text_attributes['ALPHATAG'] == '' or None:
+            sgnl._text_attributes['ALPHATAG'] = "*MISSING ALPHATAG*"
 
-        self.attributes = sgnl.text_attributes.copy()
+        self.attributes = sgnl._text_attributes.copy()
         self.ALPHATAG = self.attributes['ALPHATAG']
 
         return sgnl
@@ -82,7 +82,7 @@ class TRXWorker:
 
     def match(self, sgnl):
         """ process the matching freq and return data in it as a 'cell' """
-        if self.freq == float(sgnl.text_attributes['FREQ1']):
+        if self.freq == float(sgnl._text_attributes['FREQ1']):
             self.process_cell(sgnl)
             self.auto_unmute()
 
