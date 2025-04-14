@@ -89,7 +89,7 @@ class RabbitMQTRXProducer(threading.Thread):
     def run(self):
 
         self.created = datetime.now()
-        trx_logger.info('MQ TRX scanner started')
+        trx_logger.info('MQ TRX producer started')
         # move this to the controller:
         # t = threading.Thread(target=self.retriever.run)
         # t.start()
