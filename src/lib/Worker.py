@@ -21,7 +21,7 @@ class Worker:
         self.is_mute = False            # is muted
         self.tracked = False            # is in scanner.tracked_signals
 
-        self._text_attributes = {}       # mapping of worker attributes
+        self.text_attributes = {}       # mapping of worker attributes
 
         self.results = []               # a list of test results (this should be local to method)
         self.return_all = False         # return all/any
@@ -83,17 +83,17 @@ class Worker:
         self.DEBUG = scanner.config['DEBUG']
 
     def get_text_attributes(self):
-        return self._text_attributes
+        return self.text_attributes
 
     def get_text_attribute(self, a):
-        return self._text_attributes[a]
+        return self.text_attributes[a]
 
     def set_text_attribute(self, a, v):
-        self._text_attributes[a] = v
+        self.text_attributes[a] = v
 
     def set_text_attributes(self, text_data):
         def aggregate(k, v):
-            self._text_attributes[k] = v
+            self.text_attributes[k] = v
         [aggregate(k, str(v)) for k, v in text_data.items()]
 
     def make_signalpoint(self, worker_id, id, signal):
