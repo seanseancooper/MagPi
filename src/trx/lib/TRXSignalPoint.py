@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta
 import numpy as np
 import librosa
@@ -5,6 +6,7 @@ from librosa import feature
 
 from src.lib.Signal import Signal
 from src.lib.SignalPoint import SignalPoint
+
 from src.lib.utils import format_time
 
 
@@ -17,6 +19,7 @@ class TRXSignalPoint(SignalPoint):
     """
     def __init__(self, worker_id, lon, lat, sgnl, text_data, audio_data=None, signal_type="object", sr=48000):
         super().__init__(lon, lat, sgnl)
+        self._id = uuid.uuid4()
         self._worker_id = worker_id
         self._signal_type = signal_type         # object || continuous
 
@@ -87,24 +90,24 @@ class TRXSignalPoint(SignalPoint):
 
     def get(self):
         return {
-            "created"           : format_time(self._created, "%Y-%m-%d %H:%M:%S.%f"),
             "id"                : str(self._id),
+            "signal_type"       : self._signal_type,
             "lon"               : self._lon,
             "lat"               : self._lat,
             "sgnl"              : self._sgnl,
+            "created"           : format_time(self._created, "%Y-%m-%d %H:%M:%S.%f"),
             "updated"           : str(self.updated),
             "elapsed"           : str(self.elapsed),
+
             "is_mute"           : self.is_mute,
             "tracked"           : self.tracked,
 
-            "signal_type"       : self._signal_type,
-
             # "signal_data"       : [_ for _ in self._signal_data] if self._signal_data is not None else None,
-            "audio_data"        : self._audio_data.tolist() if self._audio_data is not None else None,
-            "text_data"         : {k: v for k, v in self._text_attributes.items()},
-            "sr"                : self.get_sampling_rate(),
+            # "audio_data"        : self._audio_data.tolist() if self._audio_data is not None else None,
+            "text_attributes"   : {k: v for k, v in self._text_attributes.items()},
+            # "sr"                : self.get_sampling_rate(),
 
-            "frequency_features": self._audio_frequency_features,
+            # "frequency_features": self._audio_frequency_features,
         }
 
     @staticmethod
