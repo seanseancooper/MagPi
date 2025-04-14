@@ -203,7 +203,18 @@ class WifiScanner(threading.Thread):
     def run(self):
 
         self.created = datetime.now()
-        # self.stats =  {}
+
+        self.stats = {
+            'created'      : format_time(self.created, self.config['TIME_FORMAT']),
+            'updated'      : format_time(self.updated, self.config['TIME_FORMAT']),
+            'elapsed'      : format_delta(self.elapsed, self.config['TIME_FORMAT']),
+            'polling_count': self.polling_count,
+            'lat'          : self.lat,
+            'lon'          : self.lon,
+            'workers'      : len(self.workers),
+            'tracked'      : len(self.tracked_signals),
+            'ghosts'       : len(self.ghost_signals),
+        }
 
         wifi_started.send(self)
         speech_logger.info('wifi started')
@@ -238,6 +249,7 @@ class WifiScanner(threading.Thread):
 
                 if self.polling_count % 10 == 0:
                     speech_logger.info(f'{len(self.parsed_signals)} signals, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
+
                 print(f"WifiScanner [{self.polling_count}] "
                       f"{format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
                       f"{format_delta(self.elapsed, self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
