@@ -90,9 +90,9 @@ class TRXMQProducer(threading.Thread):
 
         self.created = datetime.now()
         trx_logger.info('MQ TRX scanner started')
-        # maybe move this to the controller?
-        t = threading.Thread(target=self.retriever.run)
-        t.start()
+        # move this to the controller:
+        # t = threading.Thread(target=self.retriever.run)
+        # t.start()
 
         while True:
             scanned = self.retriever.scan()
