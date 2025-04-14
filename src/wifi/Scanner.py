@@ -1,16 +1,11 @@
 import threading
 import time
-import json
 from datetime import datetime, timedelta
 from collections import defaultdict
 
-from flask.signals import Namespace
-from contextlib import contextmanager
-
 from src.config import readConfig
-
 from src.lib.utils import get_location, format_time, format_delta
-from src.wifi.lib.wifi_utils import write_to_scanlist, print_signals
+from src.lib.utils import write_to_scanlist, print_signals
 
 from src.lib.SignalPoint import SignalPoint
 from src.lib.Worker import Worker
@@ -18,7 +13,6 @@ from src.lib.Worker import Worker
 import logging
 
 logger_root = logging.getLogger('root')
-x_logger = logging.getLogger('x_logger')
 speech_logger = logging.getLogger('speech_logger')
 
 
@@ -31,14 +25,13 @@ class Scanner(threading.Thread):
         self.retriever = None
 
         self.searchmap = {}
-        self.stats = {}                         # not yet used.
 
         self.parsed_signals = []
         ''' all items represented as a list of dictionaries.  '''
-
         self.workers = []                       # list of workers assigned to monitor a discrete signal.
         self.tracked_signals = []               # parsed_signals currently being tracked.
         self.ghost_signals = []                 # signals no longer received, but tracked -- 'ghost' signals
+
         self.signal_cache = defaultdict(list)   # a mapping of lists of SignalPoint for all signals received.
         self.signal_cache_max = 160             # max size of these lists of SignalPoint. overridden via config
 
@@ -68,7 +61,7 @@ class Scanner(threading.Thread):
                 mod = getattr(mod, comp)
             return mod
         except AttributeError as e:
-            x_logger.fatal(f'no retriever found {e}')
+            logger_root.fatal(f'no retriever found {e}')
             exit(1)
 
     def configure(self, config_file):
@@ -83,58 +76,50 @@ class Scanner(threading.Thread):
         self.OUTDIR = self.config['OUTFILE_PATH']
         self.signal_cache_max = self.config.get('SIGNAL_CACHE_MAX', self.signal_cache_max)
 
-        # IDEA: worker append itself when created.
         [self.workers.append(Worker(ID)) for ID in self.searchmap.keys()]
-        [self.config_worker(worker) for worker in self.workers]
+        [worker.config_worker(worker) for worker in self.workers]
 
-    def config_worker(self, worker): # move to worker. 
-        worker.scanner = self
-        worker.config = self.config
-        worker.created = datetime.now()
-        worker.cache_max = max(int(self.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -(self.config.get('SIGNAL_CACHE_MAX')))
-        worker.DEBUG = self.config['DEBUG']
-
-    def get_worker(self, bssid):
+    def get_worker(self, id):
         worker = None
         try:
-            worker = [worker for worker in self.workers if worker.bssid == bssid.upper()][0]
+            worker = [worker for worker in self.workers if worker.id == id.upper()][0]
             if worker:
                 return worker
         except IndexError:
-            worker = Worker(bssid)
-            self.config_worker(worker)
+            worker = Worker(id)
+            worker.config_worker(self)
             self.workers.append(worker)
             worker.run()
         finally:
             return worker
 
-    def get_cell(self, bssid):
-        cell = [_ for _ in self.parsed_signals if _['BSSID'] == bssid][0]
+    def get_cell(self, id):
+        cell = [_ for _ in self.parsed_signals if _['ID'] == id][0]
         return cell
 
-    def make_signalpoint(self, worker_id, bssid, signal):
-        sgnlPt = SignalPoint(worker_id, bssid, self.lon, self.lat, signal)
-        self.signal_cache[bssid].append(sgnlPt)
+    def make_signalpoint(self, worker_id, id, signal):
+        sgnlPt = SignalPoint(worker_id, id, self.lon, self.lat, signal)
+        self.signal_cache[id].append(sgnlPt)
 
-        while len(self.signal_cache[bssid]) >= self.signal_cache_max:
-            self.signal_cache[bssid].pop(0)
+        while len(self.signal_cache[id]) >= self.signal_cache_max:
+            self.signal_cache[id].pop(0)
 
-    def update(self, bssid):
+    def update(self, id):
         _signals = []
-        """ put bssid associated signal data into a map as an element in a list of _signals """
-        self.worker_to_sgnl(self.get_worker(bssid), self.get_worker(bssid).get())
-        _signals.append(self.get_worker(bssid).get())
+        """ put id associated signal data into a map as an element in a list of _signals """
+        self.get_worker(id).worker_to_sgnl(self.get_worker(id), self.get_worker(id).get())
+        _signals.append(self.get_worker(id).get())
 
     def update_ghosts(self):
         """ find, load and update ghosts """
         tracked = frozenset([x for x in self.tracked_signals])
-        parsed = frozenset([key['BSSID'] for key in self.parsed_signals])
+        parsed = frozenset([key['ID'] for key in self.parsed_signals])
         self.ghost_signals = tracked.difference(parsed)
 
         def update_ghost(item):
             self.get_worker(item).signal = -99
             self.get_worker(item).updated = datetime.now()
-            # self.make_signalpoint(self.get_worker(item).id, self.get_worker(item).bssid, self.get_worker(item).signal)
+            self.make_signalpoint(self.get_worker(item).id, self.get_worker(item).id, self.get_worker(item).signal)
 
         [update_ghost(item) for item in self.ghost_signals]
 
@@ -146,46 +131,27 @@ class Scanner(threading.Thread):
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
 
-        def worker_to_sgnl(self, sgnl, worker):
-            """ update sgnl data map with current info from worker """
-            sgnl['id'] = worker.id
-            sgnl['Signal'] = worker.signal
-
-            # this is formatting for luxon.js, but is not clean.
-            sgnl['created'] = format_time(worker.created, "%Y-%m-%d %H:%M:%S")
-            sgnl['updated'] = format_time(worker.updated, "%Y-%m-%d %H:%M:%S")
-            sgnl['elapsed'] = format_delta(worker.elapsed, self.config.get('TIME_FORMAT', "%H:%M:%S"))
-
-            sgnl['is_mute'] = worker.is_mute
-            sgnl['tracked'] = worker.tracked
-            sgnl['signal_cache'] = [sgnl.get() for sgnl in self.signal_cache[worker.bssid]]
-            sgnl['results'] = [json.dumps(result) for result in worker.test_results]
-
-        [worker_to_sgnl(self.get_worker(sgnl['BSSID']), sgnl) for sgnl in self.parsed_signals]
+        [self.get_worker(sgnl['ID']).worker_to_sgnl(self.get_worker(sgnl['ID']), sgnl) for sgnl in self.parsed_signals]
         return self.parsed_signals
 
     def get_tracked_signals(self):
         """ update, transform and return a list of 'rehydrated' tracked signals """
-        return [self.update(bssid) for bssid in self.tracked_signals]
+        return [self.update(id) for id in self.tracked_signals]
 
     def get_ghost_signals(self):
         """ update, transform and return a list of 'rehydrated' ghost signals """
         return [self.update(item) for item in self.ghost_signals]
-
 
     def stop(self):
         write_to_scanlist(self.config, self.get_tracked_signals())
         [worker.stop() for worker in self.workers]
         self.parsed_signals.clear()
         self.tracked_signals.clear()
-        x_logger.info(f"[{__name__}]: Scanner stopped. {self.polling_count} iterations.")
+        logger_root.info(f"[{__name__}]: Scanner stopped. {self.polling_count} iterations.")
 
-    @contextmanager
     def run(self):
 
         self.created = datetime.now()
-        # self.stats =  {}
-
         speech_logger.info('scanner started')
 
         while True:
@@ -198,10 +164,11 @@ class Scanner(threading.Thread):
                 get_location(self)
 
                 def blacklist(sgnl):
-                    if sgnl['BSSID'] in self.blacklist.keys():
+                    if sgnl['ID'] in self.blacklist.keys():
                         try:
                             self.parsed_signals.remove(sgnl)
                         except Exception: pass
+
                 [blacklist(sgnl) for sgnl in self.parsed_signals.copy()]
 
                 if self.config['PRINT_SIGNALS']:
@@ -217,6 +184,7 @@ class Scanner(threading.Thread):
 
                 if self.polling_count % 10 == 0:
                     speech_logger.info(f'{len(self.parsed_signals)} scanned, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
+
                 print(f"Scanner [{self.polling_count}] "
                       f"{format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
                       f"{format_delta(self.elapsed, self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
@@ -225,8 +193,8 @@ class Scanner(threading.Thread):
                       f"{len(self.ghost_signals)} ghosts")
 
                 self.polling_count += 1
-                time.sleep(self.config.get('SCAN_TIMEOUT', 5))
             else:
                 speech_logger.info(f'looking for data {self.polling_count} ...')
                 print(f"looking for data [{self.polling_count}] {format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))}...")
-                time.sleep(5)
+
+            time.sleep(self.config.get('SCAN_TIMEOUT', 5))

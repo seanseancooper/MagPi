@@ -10,8 +10,7 @@ from contextlib import contextmanager
 from src.config import readConfig
 
 from src.lib.utils import get_location, format_time, format_delta
-from src.wifi.lib.wifi_utils import write_to_scanlist, print_signals
-
+from src.lib.utils import write_to_scanlist, print_signals
 from src.wifi.lib.WifiSignalPoint import WifiSignalPoint
 from src.wifi.WifiWorker import WifiWorker
 

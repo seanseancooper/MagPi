@@ -1,10 +1,7 @@
 import os
 import xml.etree.ElementTree as ET
-from datetime import datetime
-import json
 
 from src.config import CONFIG_PATH, readConfig
-from src.lib.utils import make_path, write_file
 from src.wifi.lib.iw_parse import matching_line
 
 import logging
@@ -55,50 +52,6 @@ def get_timing(cell):
         return ""
     return time
 
-
-def print_table(table):
-    # Functional black magic.
-    widths = list(map(max, map(lambda l: map(len, l), zip(*table))))
-
-    justified_table = []
-    for line in table:
-        justified_line = []
-        for i, el in enumerate(line):
-            try:
-                if isinstance(el, str):
-                    justified_line.append(el.ljust(widths[i] + 2))
-                if isinstance(el, list):
-                    pass  # don't deal with lists of signal_cache
-            except AttributeError:
-                pass  # I got an 'el' that doesn't 'justify'
-
-        justified_table.append(justified_line)
-
-    for line in justified_table:
-        print("\t".join(line))
-
-
-def print_signals(sgnls, columns):
-    table = [columns]
-
-    def print_signal(sgnl):
-        sgnl_properties = []
-
-        def make_cols(column):
-            try:
-                # make boolean a str to print (needs 'width').
-                if isinstance(sgnl[column], bool):
-                    sgnl_properties.append(str(sgnl[column]))
-                else:
-                    sgnl_properties.append(sgnl[column])
-            except KeyError as e:
-                print(f"KeyError getting column for {e}")
-
-        [make_cols(column) for column in columns]
-        table.append(sgnl_properties)
-
-    [print_signal(sgnl) for sgnl in sgnls]
-    print_table(table)
 
 def compare_MFCC():
     # TODO: compare_MFCC(), Was in Scanner
@@ -182,15 +135,6 @@ def append_to_outfile(cls, config, cell):
     }
 
     json_logger.info({cell['BSSID']: formatted})
-
-
-def write_to_scanlist(config, searchmap):
-    """Write current SEARCHMAP out as JSON"""
-    make_path(config.get('OUTFILE_PATH', "out"))
-    _time = datetime.now().strftime(config.get('DATETIME_FORMAT', "%Y%m%d_%H%M%S"))
-    if len(searchmap) > 0:  # don't write nothing; write something.
-        # todo: process this as above....
-        return write_file(config['OUTFILE_PATH'], "scanlist_" + _time + ".json", json.dumps(searchmap, indent=1), "x")
 
 
 def commit_mapping(config, mapping):
