@@ -14,12 +14,12 @@ class FrameObjekt:
         self.prev_tag = None                                            # [string: object tracking] tag of nearest FrameObjekt from the previous frame
 
         # features
-        self.avg_loc = np.array([0, 0], dtype=np.int32)                 # [tuple {x,y}: object segmentation] mean x, y location of *this* contour
-        self.rect = None                                                # [tuple {x, y, w, h}: object segmentation] bounding rects of contours in this frame
+        self._avg_loc = np.array([0, 0], dtype=np.int32)                 # [tuple {x,y}: object segmentation] mean x, y location of *this* contour
+        self._rect = None                                                # [tuple {x, y, w, h}: object segmentation] bounding rects of contours in this frame
         self.lat = 0.0                                                  # latitude
         self.lon = 0.0                                                  # longitude
 
-        # post-processed features
+        # post-processed features (setters/getters)
         self.frame_rate = 0.0
         self.frame_period = 0.0
         self.frame_shape = None                                         # [ndarray: container] shape of current frame
@@ -57,10 +57,10 @@ class FrameObjekt:
             'tag'        : f.tag,
             'prev_tag'   : f.prev_tag,
 
-            'rect'       : f.rect,
-            'avg_loc'    : f.avg_loc.tolist(),
-            'lat'        : f.lat,
-            'lon'        : f.lon,
+            'rect'       : f.get_rect,
+            'avg_loc'    : f.get_avg_loc.tolist(),
+            'lat'        : f.get_lat_lon()[0],
+            'lon'        : f.get_lat_lon()[1],
         }
 
     @staticmethod
@@ -73,8 +73,8 @@ class FrameObjekt:
         frame_obj.tag = d['tag']
         frame_obj.prev_tag = d['prev_tag']
 
-        frame_obj.rect = tuple(d['rect']) if d['rect'] else None
-        frame_obj.avg_loc = np.array(d['avg_loc'])
+        frame_obj._rect = tuple(d['rect']) if d['rect'] else None
+        frame_obj._avg_loc = np.array(d['avg_loc'])
         frame_obj.lat = d['lat']
         frame_obj.lon = d['lon']
 
@@ -89,6 +89,15 @@ class FrameObjekt:
         tag = f"{f_id}_{str(uuid.uuid4())}"
         return tag
 
+    def get_rect(self):
+        return self._rect
+    
+    def get_avg_loc(self):
+        return self._avg_loc
+    
+    def get_lat_lon(self):
+        return [self.lat, self.lon]
+
     def get(self):
         # metadata and post-processed features.
         return {
@@ -96,8 +105,8 @@ class FrameObjekt:
                 'created'           : str(self.created.isoformat()),
                 'tag'               : str(self.tag),
 
-                'avg_loc'           : str(self.avg_loc),    # self.avg_loc.tolist()
-                'rect'              : str(self.rect),       # a string???
+                'avg_loc'           : str(self._avg_loc),    # self.avg_loc.tolist()
+                'rect'              : str(self._rect),       # a string???
                 'lat'               : self.lat,
                 'lon'               : self.lon,
 

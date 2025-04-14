@@ -106,11 +106,11 @@ class Trilaterator(threading.Thread):
         return scanner.signal_cache.get(UniqId)
 
     def getLocationsForSignalPoints(self, SignalPoints: list):
-        return [pt.getLatLon() for pt in SignalPoints]
+        return [pt.get_lat_lon() for pt in SignalPoints]
 
     def getDistancesForSignalPoints(self, initial_location, SignalPointList):
         # list of distances per SignalPoint to initial_location
-        pt_locs = [sp.getLatLon() for sp in SignalPointList]
+        pt_locs = [sp.get_lat_lon() for sp in SignalPointList]
         return [self.get_LatLonDistance(initial_location, pt) for pt in pt_locs]
 
     def get_LatLonDistance(self, LatLon1, LatLon2):
@@ -120,8 +120,8 @@ class Trilaterator(threading.Thread):
 
     def getSignalPointDistance(self, s1: WifiSignalPoint, s2: WifiSignalPoint):
         # I think this should work for both, but do we really want a superclass 'SignalPoint'?
-        [lat1, lon1] = s1.getLatLon()
-        [lat2, lon2] = s2.getLatLon()
+        [lat1, lon1] = s1.get_lat_lon()
+        [lat2, lon2] = s2.get_lat_lon()
         return self.geographical_distance(lat1, lon1, lat2, lon2)
 
     def mse(self, x, locations, distances):

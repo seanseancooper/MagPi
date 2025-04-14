@@ -152,8 +152,8 @@ class FrameObjektEncoder(threading.Thread):
         Y = make_grey_data(wall, rect_array)
         self.set_frame_delta(X, Y)
 
-        encoded_rect = np.divide((np.asarray(self.frame_obj.rect)), rect_array)
-        encoded_avg_loc = np.divide((np.asarray(self.frame_obj.avg_loc)), loc_array)
+        encoded_rect = np.divide((np.asarray(self.frame_obj._rect)), rect_array)
+        encoded_avg_loc = np.divide((np.asarray(self.frame_obj._avg_loc)), loc_array)
 
         norm_numerical_features = self.mm_scaler.fit_transform(numerical_features)
         lat_lon_features = self.encode_lat_lon(self.frame_obj.lat, self.frame_obj.lon)

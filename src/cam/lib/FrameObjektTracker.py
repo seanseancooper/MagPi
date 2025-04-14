@@ -22,8 +22,8 @@ def print_frame(o, origin):
             f"\t{o.tag}"
             f"\t{o.prev_tag}"
 
-            f"\to.avg_loc: {str(o.avg_loc)}"
-            f"\to.rect:{str(o.rect).ljust(10, ' ')}"       
+            f"\to.avg_loc: {str(o._avg_loc)}"
+            f"\to.rect:{str(o._rect).ljust(10, ' ')}"       
             f"\to.lat: {o.lat}"
             f"\to.lon: {o.lon}"
     )
@@ -103,14 +103,14 @@ class FrameObjektTracker(object):
 
     def init_o(self, wall, rectangle, frame_stats):
         o = FrameObjekt.create(self.f_id)
-        o.avg_loc = self.avg_loc
-        o.rect = rectangle
+        o._avg_loc = self.avg_loc
+        o._rect = rectangle
 
         o.wall = wall        # put the wall on a temp filesystem and use the tag for the name
 
         # get_location(self)
-        o.lat = self.lat
-        o.lon = self.lon
+        o._lat = self.lat
+        o._lon = self.lon
 
         o.frame_rate = frame_stats['capture_frame_rate']
         o.frame_period = frame_stats['capture_frame_period']
@@ -127,7 +127,7 @@ class FrameObjektTracker(object):
         # is the current distance within a range of the
         # median of distances for the last thing with a tag?
         o.close = is_in_range(o.distance, o.distances_mean, self.l_delta_pcnt * o.distances_mean)
-        o.inside = is_inside(o.avg_loc, o.rect)                                 # is the ml inside rect?
+        o.inside = is_inside(o._avg_loc, o._rect)                                 # is the ml inside rect?
         o.delta_range = self.f_delta_pcnt * o.distances_mean                    # percentage of px difference
 
     def label_locations(self, frame, wall, frame_stats):
@@ -177,7 +177,9 @@ class FrameObjektTracker(object):
             label_encoder = LabelEncoder()
 
             oN = self.init_o(wall, self.rectangle, frame_stats)
-            features = np.array([[    oN.rect[0], oN.rect[1], oN.rect[2], oN.rect[3], oN.avg_loc[0], oN.avg_loc[1]    ]])
+            loc = oN.get_avg_loc()
+            rect = oN.get_rect()
+            features = np.array([[rect[0], rect[1], rect[2], rect[3], loc[0], loc[1]]])
 
             # Collect past tracked objects for training
             if self.tracked:
@@ -185,7 +187,14 @@ class FrameObjektTracker(object):
                 # this is a regression problem; what does the CART tree need? do normalize of data.
                 # include latency [o.frame_rate, o.frame_period]
 
-                training_data = np.array([[    o.rect[0], o.rect[1], o.rect[2], o.rect[3], o.avg_loc[0], o.avg_loc[1]    ] for o in self.tracked.values()])
+                training_data = np.array([[o.rect[0],
+                                           o.rect[1],
+                                           o.rect[2],
+                                           o.rect[3],
+                                           o.avg_loc[0],
+                                           o.avg_loc[1]
+                                           ] for o in self.tracked.values()])
+
                 training_labels = [o.tag for o in self.tracked.values()]
 
                 numeric_labels = label_encoder.fit_transform(training_labels)

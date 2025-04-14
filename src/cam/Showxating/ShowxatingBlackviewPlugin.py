@@ -94,8 +94,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
 
             for i, _ in enumerate(p.tracked):
                 o = p.tracked.get(_)
-                x = o.avg_loc[0]
-                y = o.avg_loc[1]
+                x = o._avg_loc[0]
+                y = o._avg_loc[1]
                 item = f'{o.tag[-12:]} [{x},{y}]'
                 pt = x, y
                 # yellow dot: items being tracked
