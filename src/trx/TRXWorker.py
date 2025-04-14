@@ -52,6 +52,16 @@ class TRXWorker:
                 # "tests"         : [x for x in self.test_results]
         }
 
+    def config_worker(self, scanner):
+        self.retriever = scanner
+        self.config = scanner.config
+        self.created = datetime.now()
+        self.DEBUG = scanner.config.get('DEBUG', False)
+        self.cache_max = max(
+            int(scanner.config.get('SIGNAL_CACHE_LOG_MAX', -5)),
+            -scanner.config.get('SIGNAL_CACHE_MAX', 150)
+        )
+
     def process_cell(self, sgnl):
         """ update static fields, tests"""
 

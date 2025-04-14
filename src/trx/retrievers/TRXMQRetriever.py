@@ -48,23 +48,13 @@ class TRXMQRetriever(threading.Thread):
 
         for freq in self.tracked_signals.keys():
             worker = TRXWorker(freq)
-            self.config_worker(worker)
+            worker.config_worker(self)
             self.workers.append(worker)
 
         self.DEBUG = self.config.get('DEBUG')
 
         self.start_scanner()
         self.start_consumer()
-
-    def config_worker(self, worker):
-        worker.retriever = self
-        worker.config = self.config
-        worker.created = datetime.now()
-        worker.DEBUG = self.config.get('DEBUG', False)
-        worker.cache_max = max(
-            int(self.config.get('SIGNAL_CACHE_LOG_MAX', -5)),
-            -self.config.get('SIGNAL_CACHE_MAX', 150)
-        )
 
     def start_scanner(self):
         self.scanner = TRXMQProducer()
