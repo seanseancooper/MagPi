@@ -11,8 +11,8 @@ wifi_logger = logging.getLogger('wifi_logger')
 
 class TRXWorker:
     """
-    TRXWorker: match a radio frequency from the TRX-1 when it receives. These are 'intermittent'
-    signals, not continuous ones.
+    TRXWorker: match a radio frequency from the TRX-1 when it receives.
+    These are 'intermittent' signals, not continuous ones.
     """
 
     def __init__(self, freq):
