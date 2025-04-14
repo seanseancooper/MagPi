@@ -1,6 +1,9 @@
 from datetime import datetime, timedelta
 import json
+
+from src.lib.SignalPoint import SignalPoint
 from src.lib.utils import format_time, format_delta
+from src.wifi.lib.wifi_utils import append_to_outfile, json_logger
 
 
 class Worker:
@@ -59,6 +62,13 @@ class Worker:
         self.cache_max = max(int(scanner.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -(scanner.config.get('SIGNAL_CACHE_MAX')))
         self.DEBUG = scanner.config['DEBUG']
 
+    def make_signalpoint(self, worker_id, id, signal):
+        sgnlPt = SignalPoint(self.scanner.lon, self.scanner.lat, signal)
+        self.scanner.signal_cache[id].append(sgnlPt)
+
+        while len(self.scanner.signal_cache[id]) >= self.scanner.signal_cache_max:
+            self.scanner.signal_cache[id].pop(0)
+
     def worker_to_sgnl(self, sgnl, worker):
         """ update sgnl data map with current info from worker """
         sgnl['id'] = worker.id
@@ -73,3 +83,181 @@ class Worker:
         sgnl['tracked'] = worker.tracked
         sgnl['signal_cache'] = [sgnl.get() for sgnl in self.scanner.signal_cache[worker.id]]
         sgnl['results'] = [json.dumps(result) for result in worker.test_results]
+
+    def process_cell(self, cell):
+        """ update static fields, tests"""
+
+        if cell['SSID'] == '' or None:
+            cell['SSID'] = "*HIDDEN SSID*"
+
+        self.ssid = cell['SSID']
+        self.vendor = cell['Vendor']
+        self.channel = cell['Channel']
+        self.frequency = cell['Frequency']
+        self.quality = cell['Quality']
+        self.is_encrypted = cell['Encryption']
+        self.signal = cell['Signal']
+        self.update(cell)
+
+        def test(cell):
+            # TODO: use this as an entrypoint to a discrete test in a test
+            # framework that would return T or F.
+            # need to identify the test...
+            # provides [{testname: result}, {...}]
+            try:
+                tests = self.scanner.searchmap[self.id]['tests']
+                # return all results or only ones that passed?
+                self.return_all = self.scanner.searchmap[self.id]['return_all']
+
+                [[self.results.append(eval(str(v.strip() + t_v.strip()))) for t_k, t_v in tests.items() if k == t_k] for k, v in cell.items()]
+
+                while len(self.results) > len(tests):
+                    self.results.pop(0)
+
+                self.test_results = zip(tests, self.results)
+
+                # if self.return_all:
+                #     return all(self.results)
+                # else:
+                #     return any(self.results)
+            except KeyError:
+                return True  # no test, np
+
+            return True
+
+        return cell if test(cell) else None
+
+    def update(self, sgnl):
+        """ updates *dynamic* fields"""
+        self.updated = datetime.now()
+        self.elapsed = self.updated - self.created
+        self.tracked = self.id in self.scanner.tracked_signals
+        self.scanner.make_signalpoint(self.id, self.id, int(sgnl.get('Signal', -99)))
+        # self._signal_cache_frequency_features = self.extract_signal_cache_features(
+        #         [pt.getSgnl() for pt in self.scanner.signal_cache[self.id]]
+        # )
+
+    def get__signal_cache_frequency_features(self):
+        return self._signal_cache_frequency_features
+
+    def match(self, cell):
+        """ match BSSID, derive the 'id' and set mute status """
+        if self.id.upper() == cell['ID'].upper():
+            self.id = str(self.id).replace(':', '').lower()
+            self.process_cell(cell)
+            self.auto_unmute()
+
+    def mute(self):
+        from src.lib.utils import mute
+        # SIGNAL: MUTE/UNMUTE
+        return mute(self)
+
+    def signal_vec(self):
+        yield [pt.getSgnl() for pt in self.scanner.signal_cache[self.id]][self.cache_max:]
+
+    def auto_unmute(self):
+        """ polled function to UNMUTE signals AUTOMATICALLY after the MUTE_TIME. """
+        if self.config['MUTE_TIME'] > 0:
+            if datetime.now() - self.updated > timedelta(seconds=self.config['MUTE_TIME']):
+                self.is_mute = False
+                # SIGNAL: AUTO UNMUTE
+
+    def add(self, bssid):
+
+        try:
+            worker = self.scanner.get_worker(bssid)
+
+            if worker:
+                worker.tracked = True
+                self.scanner.tracked_signals.append(bssid)
+                if worker not in self.scanner.workers:
+                    self.scanner.workers.append(worker)
+                # SIGNAL: ADDED ITEM
+                return True
+
+            return False
+        except IndexError:
+            return False
+
+    def remove(self, bssid):
+        _copy = self.scanner.tracked_signals.copy()
+        self.scanner.tracked_signals.clear()
+        [self.add(remaining) for remaining in _copy if remaining != bssid]
+        # SIGNAL: REMOVED ITEM
+        return True
+
+    def stop(self):
+        if self.tracked:
+
+            def append_to_outfile(cls, config, cell):
+                """Append found cells to a rolling JSON list"""
+                from src.lib.utils import format_time, format_delta
+                # unwrap the cell and format the dates, guids and whatnot.
+                # {'EE:55:A8:24:B1:0A':
+                #   {
+                #   'id': 'ee55a824b10a',
+                #   'name': 'Goodtimes Entertainment Inc.',
+                #   'created': '2025-03-12 00:36:07',
+                #   'updated': '2025-03-12 00:36:10',
+                #   'elapsed': '00:00:03',
+                #   'Vendor': 'UNKNOWN',
+                #   'Channel': 11,
+                #   'Frequency': 5169,
+                #   'Signal': -89,
+                #   'Quality': 11,
+                #   'Encryption': True,
+                #   'is_mute': False,
+                #   'tracked': True,
+                #   'signal_cache': [
+                #       {
+                #       'created': '2025-03-12 00:36:07.511398',
+                #       'id': '6fb74555-e1f5-440a-9c42-f5649a536279',
+                #       'worker_id': 'ee55a824b10a',
+                #       'lon': -105.068195,
+                #       'lat': 39.9168,
+                #       'sgnl': -89
+                #       },
+                #       {'created': '2025-03-12 00:36:10.641924',
+                #       'id': '18967444-39bf-4082-9aa4-d833fbb9ed28',
+                #       'worker_id': 'ee55a824b10a',
+                #       'lon': -105.068021,
+                #       'lat': 39.916915,
+                #       'sgnl': -89
+                #       }
+                #   ],
+                #   'tests': []
+                #   }
+                # }
+                #
+                # config.get('CREATED_FORMATTER', '%Y-%m-%d %H:%M:%S')
+                # config.get(UPDATED_FORMATTER', '%Y-%m-%d %H:%M:%S')
+                # config.get(ELAPSED_FORMATTER', '%H:%M:%S')
+
+                # format created timestamp in signals
+                # SGNL_CREATED_FORMAT: "%Y-%m-%d %H:%M:%S.%f"
+                formatted = {
+                    "id"          : cell['id'],
+                    "SSID"        : cell['SSID'],
+                    "BSSID"       : cell['BSSID'],
+                    "created"     : cell['created'],
+                    "updated"     : cell['updated'],
+                    "elapsed"     : cell['elapsed'],
+                    "Vendor"      : cell['Vendor'],
+                    "Channel"     : cell['Channel'],
+                    "Frequency"   : cell['Frequency'],
+                    "Signal"      : cell['Signal'],
+                    "Quality"     : cell['Quality'],
+                    "Encryption"  : cell['Encryption'],
+                    "is_mute"     : cell['is_mute'],
+                    "tracked"     : cell['tracked'],
+                    "signal_cache": [pt.get() for pt in cls.scanner.signal_cache[cell['BSSID']]][cls.cache_max:],
+                    "tests"       : [x for x in cell['tests']]
+                }
+
+                json_logger.info({cell['BSSID']: formatted})
+
+            append_to_outfile(self, self.config, self.get())
+
+    def run(self):
+        """ match a BSSID and populate data """
+        [self.match(sgnl) for sgnl in self.scanner.parsed_signals]

@@ -6,8 +6,6 @@ from collections import defaultdict
 from src.config import readConfig
 from src.lib.utils import get_location, format_time, format_delta
 from src.lib.utils import write_to_scanlist, print_signals
-
-from src.lib.SignalPoint import SignalPoint
 from src.lib.Worker import Worker
 
 import logging
@@ -97,13 +95,6 @@ class Scanner(threading.Thread):
         cell = [_ for _ in self.parsed_signals if _['ID'] == id][0]
         return cell
 
-    def make_signalpoint(self, worker_id, id, signal):
-        sgnlPt = SignalPoint(worker_id, id, self.lon, self.lat, signal)
-        self.signal_cache[id].append(sgnlPt)
-
-        while len(self.signal_cache[id]) >= self.signal_cache_max:
-            self.signal_cache[id].pop(0)
-
     def update(self, id):
         _signals = []
         """ put id associated signal data into a map as an element in a list of _signals """
@@ -119,7 +110,7 @@ class Scanner(threading.Thread):
         def update_ghost(item):
             self.get_worker(item).signal = -99
             self.get_worker(item).updated = datetime.now()
-            self.make_signalpoint(self.get_worker(item).id, self.get_worker(item).id, self.get_worker(item).signal)
+            self.get_worker(item).make_signalpoint(self.get_worker(item).id, self.get_worker(item).id, self.get_worker(item).signal)
 
         [update_ghost(item) for item in self.ghost_signals]
 
