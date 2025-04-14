@@ -18,7 +18,7 @@ class SignalPoint(object):
     def getId(self):
         return self._id
 
-    def getLatLon(self):
+    def get_lat_lon(self):
         return self._lat, self._lon
 
     def getSgnl(self):

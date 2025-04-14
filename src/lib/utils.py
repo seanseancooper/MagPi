@@ -94,6 +94,7 @@ def runOSCommand(command: list):
 
 def get_location(locator):
     """ gets location from GPS endpoint"""
+    # disallow setting SignalPoint type _lat, _lon fields?
     try:
         resp = requests.get(locator.config.get('GPS_ENDPOINT', 'http://gps.localhost:5004/position'))
         position = json.loads(resp.text)
