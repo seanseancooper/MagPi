@@ -75,7 +75,7 @@ class Scanner(threading.Thread):
         self.signal_cache_max = self.config.get('SIGNAL_CACHE_MAX', self.signal_cache_max)
 
         [self.workers.append(Worker(ID)) for ID in self.searchmap.keys()]
-        [worker.config_worker(worker) for worker in self.workers]
+        [worker.config_worker(self) for worker in self.workers]
 
     def get_worker(self, id):
         worker = None
@@ -104,7 +104,7 @@ class Scanner(threading.Thread):
     def update_ghosts(self):
         """ find, load and update ghosts """
         tracked = frozenset([x for x in self.tracked_signals])
-        parsed = frozenset([key['ID'] for key in self.parsed_signals])
+        parsed = frozenset([key['id'] for key in self.parsed_signals])
         self.ghost_signals = tracked.difference(parsed)
 
         def update_ghost(item):
