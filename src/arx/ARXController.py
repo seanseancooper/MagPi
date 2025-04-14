@@ -77,7 +77,6 @@ class ARXController(threading.Thread):
                 #     # loop = asyncio.get_event_loop()
                 #     # loop.run_until_complete(consumer.consume())
                 #     consumer.consume()
-                #
                 # except Exception as e:
                 #     print(f'controller consumer failed : {e}')
                 #     pass
@@ -94,13 +93,15 @@ class ARXController(threading.Thread):
                     print(f'controller producer failed : {e}')
                     pass
 
-                metadata = consumer.get_metadata()     # potentially array, a Signal() or LIST of type
-                print(f'metadata :{metadata}')
-                audio_data = consumer.get_data()       # potentially array, a Signal() or LIST of type
-                print(f'audio_data :{audio_data}')
+                frame = consumer.get_frame()     # potentially array, a Signal() or LIST of type
+                print(f'metadata: {frame}')
+                # metadata = consumer.get_metadata()     # potentially array, a Signal() or LIST of type
+                # print(f'metadata :{metadata}')
+                # audio_data = consumer.get_data()       # potentially array, a Signal() or LIST of type
+                # print(f'audio_data :{audio_data}')
 
-                # message = consumer.get_message()       # potentially array, a Signal() or LIST of type
-                # print(f'message :{message}')
+                message = consumer.get_message()       # potentially array, a Signal() or LIST of type
+                print(f'message: {message}')
 
             atexit.register(stop)
 
