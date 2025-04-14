@@ -20,7 +20,7 @@ class ARXMQProvider(threading.Thread):
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
-        # self.rmq = RabbitMQProducer(self.config['QUEUE_NAME'])
+        self.rmq = RabbitMQProducer(self.config['QUEUE_NAME'])
         self.DEBUG = self.config.get('DEBUG')
         print('configured provider.')
 
@@ -38,11 +38,11 @@ class ARXMQProvider(threading.Thread):
             data = arxs.get_audio_data()
             frame = metadata, data
 
-            print(f'sending zmq')
-            self.send_frame(frame)
+            # print(f'sending zmq')
+            # self.send_frame(frame)
 
-            # print(f'sending rmq....')
-            # self.send_message(message)
+            print(f'sending rmq')
+            self.send_message(message)
 
         except Exception as e:
             print(f'{e}')
