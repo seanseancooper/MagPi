@@ -14,12 +14,16 @@ class Worker:
         self.id = ''                    # filled if match(), marks 'SignalPoint'.
         self.name = ''                  # Human readable name of Wifi access point.
 
-        self.vendor = ''
-        self.channel = ''
-        self.frequency = ''
-        self.quality = ''
-        self.signal = ''
-        self.is_encrypted = False
+
+        # use text_attributes
+        # self.vendor = ''
+        # self.channel = ''
+        # self.frequency = ''
+        # self.quality = ''
+        # self.signal = ''
+        # self.is_encrypted = False
+
+
 
         self.created = datetime.now()   # when signal was found
         self.updated = datetime.now()   # when signal was last reported
@@ -42,12 +46,12 @@ class Worker:
                 "created"       : format_time(self.created, "%Y-%m-%d %H:%M:%S"),
                 "updated"       : format_time(self.updated, "%Y-%m-%d %H:%M:%S"),
                 "elapsed"       : format_delta(self.elapsed, "%H:%M:%S"),
-                "Vendor"        : self.vendor,
-                "Channel"       : self.channel,
-                "Frequency"     : self.frequency,
-                "Signal"        : self.signal,
-                "Quality"       : self.quality,
-                "Encryption"    : self.is_encrypted,
+                # "Vendor"        : self.vendor,
+                # "Channel"       : self.channel,
+                # "Frequency"     : self.frequency,
+                # "Signal"        : self.signal,
+                # "Quality"       : self.quality,
+                # "Encryption"    : self.is_encrypted,
                 "is_mute"       : self.is_mute,
                 "tracked"       : self.tracked,
                 "signal_cache"  : [pt.get() for pt in self.scanner.signal_cache[self.id]][self.cache_max:],
@@ -87,16 +91,18 @@ class Worker:
     def process_cell(self, cell):
         """ update static fields, tests"""
 
-        if cell['SSID'] == '' or None:
-            cell['SSID'] = "*HIDDEN SSID*"
+        # make these into 'text_attributes'
+        # if cell['SSID'] == '' or None:
+        #     cell['SSID'] = "*HIDDEN SSID*"
 
-        self.ssid = cell['SSID']
-        self.vendor = cell['Vendor']
-        self.channel = cell['Channel']
-        self.frequency = cell['Frequency']
-        self.quality = cell['Quality']
-        self.is_encrypted = cell['Encryption']
-        self.signal = cell['Signal']
+        # self.ssid = cell['SSID']
+        # self.vendor = cell['Vendor']
+        # self.channel = cell['Channel']
+        # self.frequency = cell['Frequency']
+        # self.quality = cell['Quality']
+        # self.is_encrypted = cell['Encryption']
+        # self.signal = cell['Signal']
+
         self.update(cell)
 
         def test(cell):
