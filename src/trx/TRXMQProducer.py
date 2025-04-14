@@ -95,11 +95,11 @@ class TRXMQProducer(threading.Thread):
         t.start()
 
         while True:
-            scanned = self.retriever.get_scan()
+            scanned = self.retriever.scan()
             if scanned:
                 self.producer.publish_message(scanned)
 
 if __name__ == '__main__':
-    scanner = MQTRXProducer()
+    scanner = TRXMQProducer()
     scanner.configure('trx.json')
     scanner.run()
