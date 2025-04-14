@@ -14,23 +14,23 @@ class Worker:
         self.id = ''                    # filled if match(), marks 'SignalPoint'.
         self.name = ''                  # Human readable name of Wifi access point.
 
-
-        # use text_attributes
-        # self.vendor = ''
-        # self.channel = ''
-        # self.frequency = ''
-        # self.quality = ''
-        # self.signal = ''
-        # self.is_encrypted = False
-
-
-
         self.created = datetime.now()   # when signal was found
         self.updated = datetime.now()   # when signal was last reported
         self.elapsed = timedelta()      # time signal has been tracked.
 
         self.is_mute = False            # is muted
         self.tracked = False            # is in scanner.tracked_signals
+
+        self._text_attributes = {}       # mapping of worker attributes
+
+        # "Vendor"        : self.vendor,
+        # "Channel"       : self.channel,
+        # "Frequency"     : self.frequency,
+        # "Signal"        : self.signal,
+        # "Quality"       : self.quality,
+        # "Encryption"    : self.is_encrypted,
+        # "lon"           : self._lon,
+        # "lat"           : self._lat,
 
         self.results = []               # a list of test results (this should be local to method)
         self.return_all = False         # return all/any
@@ -42,18 +42,16 @@ class Worker:
 
     def get(self):
         return {"id"            : self.id,
-                "SSID"          : self.name,
+                "name"          : self.name,
                 "created"       : format_time(self.created, "%Y-%m-%d %H:%M:%S"),
                 "updated"       : format_time(self.updated, "%Y-%m-%d %H:%M:%S"),
                 "elapsed"       : format_delta(self.elapsed, "%H:%M:%S"),
-                # "Vendor"        : self.vendor,
-                # "Channel"       : self.channel,
-                # "Frequency"     : self.frequency,
-                # "Signal"        : self.signal,
-                # "Quality"       : self.quality,
-                # "Encryption"    : self.is_encrypted,
+
                 "is_mute"       : self.is_mute,
                 "tracked"       : self.tracked,
+
+                "text_attributes"   : self.get_text_attributes(),
+
                 "signal_cache"  : [pt.get() for pt in self.scanner.signal_cache[self.id]][self.cache_max:],
                 "frequency_features"  : self._signal_cache_frequency_features,
                 "tests"         : [x for x in self.test_results]
@@ -66,12 +64,32 @@ class Worker:
         self.cache_max = max(int(scanner.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -5)
         self.DEBUG = scanner.config['DEBUG']
 
+    def get_text_attributes(self):
+        return self._text_attributes
+
+    def get_text_attribute(self, a):
+        return self._text_attributes[a]
+
+    def set_text_attribute(self, a, v):
+        self._text_attributes[a] = v
+
+    def set_text_attributes(self, text_data):
+        def aggregate(k, v):
+            self._text_attributes[k] = v
+
+        [aggregate(k, str(v)) for k, v in text_data.items()]
+
+
+
     def make_signalpoint(self, worker_id, id, signal):
         sgnlPt = SignalPoint(self.scanner.lon, self.scanner.lat, signal)
         self.scanner.signal_cache[id].append(sgnlPt)
 
         while len(self.scanner.signal_cache[id]) >= self.scanner.signal_cache_max:
             self.scanner.signal_cache[id].pop(0)
+
+
+
 
     def worker_to_sgnl(self, sgnl, worker):
         """ update sgnl data map with current info from worker """
