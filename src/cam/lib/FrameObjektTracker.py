@@ -22,8 +22,8 @@ def print_frame(o, origin):
             f"\t{o.tag}"
             f"\t{o.prev_tag}"
 
-            f"\to.avg_loc: {str(o._avg_loc)}"
-            f"\to.rect:{str(o._rect).ljust(10, ' ')}"       
+            f"\to._avg_loc: {str(o._avg_loc)}"
+            f"\to._rect:{str(o._rect).ljust(10, ' ')}"       
             f"\to.lat: {o.lat}"
             f"\to.lon: {o.lon}"
     )
@@ -134,7 +134,7 @@ class FrameObjektTracker(object):
         """ find elements 'tag' by euclidean distance """
 
         labeled = []
-        p_ml = [self.tracked.get(o_tag).avg_loc for o_tag in list(self.tracked.keys())]
+        p_ml = [self.tracked.get(o_tag)._avg_loc for o_tag in list(self.tracked.keys())]
 
         if len(p_ml) == 1:
             o1 = self.init_o(wall, self.rectangle, frame_stats)
@@ -187,12 +187,12 @@ class FrameObjektTracker(object):
                 # this is a regression problem; what does the CART tree need? do normalize of data.
                 # include latency [o.frame_rate, o.frame_period]
 
-                training_data = np.array([[o.rect[0],
-                                           o.rect[1],
-                                           o.rect[2],
-                                           o.rect[3],
-                                           o.avg_loc[0],
-                                           o.avg_loc[1]
+                training_data = np.array([[o._rect[0],
+                                           o._rect[1],
+                                           o._rect[2],
+                                           o._rect[3],
+                                           o._avg_loc[0],
+                                           o._avg_loc[1]
                                            ] for o in self.tracked.values()])
 
                 training_labels = [o.tag for o in self.tracked.values()]
