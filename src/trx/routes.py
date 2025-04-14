@@ -1,8 +1,8 @@
 from flask import Blueprint, redirect, jsonify
 
-from src.trx.TRXMQProducer import MQTRXProducer
+from src.trx.TRXMQProducer import TRXMQProducer
 
-trxRet = MQTRXProducer()
+trxRet = TRXMQProducer()
 trxRet.configure('trx.json')
 
 trx_bp = Blueprint(
