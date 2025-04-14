@@ -25,7 +25,7 @@
 			"INTERFACE": "wlan0"
 		},
 		{
-			"SCAN_TIMEOUT": 0.5
+			"SCAN_TIMEOUT": 2
 		},
 		{
 			"VIEW_TIMEOUT": 30

@@ -377,9 +377,9 @@ function createConcentric(source, coordinate, circles, signal_color, strength, c
 
         concentricFeature.setStyle(getConcentricStyle(signal_color));
 
-        concentricFeature.set('LINE0', cell.attributes['ALPHATAG']  + '\n', true);
-        concentricFeature.set('LINE1', cell.attributes['FREQ1'] != null? cell.attributes['FREQ1'] + 'Mhz\n':cell.attributes['FREQ2'] + 'Mhz\n', true);
-        concentricFeature.set('LINE2', cell.attributes['SITE'], true);
+        concentricFeature.set('LINE0', cell.text_attributes['ALPHATAG']  + '\n', true);
+        concentricFeature.set('LINE1', cell.text_attributes['FREQ1'] != null? cell.text_attributes['FREQ1'] + 'Mhz\n':cell.text_attributes['FREQ2'] + 'Mhz\n', true);
+        concentricFeature.set('LINE2', cell.text_attributes['SITE'], true);
 
         source.addFeature(concentricFeature);
     }
@@ -527,7 +527,7 @@ function animate(coordinate) {
                     }
                 });
             };
-            /*
+            //
             if (_signals.trx) {
                 _signals.trx.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
@@ -547,7 +547,7 @@ function animate(coordinate) {
                     }
                 });
             }
-
+            /*
             if (_signals.sdr.length > 0) {
                 _signals.sdr.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
