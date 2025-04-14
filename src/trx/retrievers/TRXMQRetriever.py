@@ -58,17 +58,17 @@ class TRXMQRetriever(threading.Thread):
 
     def start_scanner(self):
         self.scanner = TRXMQProducer()
-        self.scanner.configure('net.json')
+        self.scanner.configure('trx.json')
         t = threading.Thread(target=self.scanner.run, daemon=True)
         t.start()
 
     def start_consumer(self):
-        self.consumer = RabbitMQAsyncConsumer('trx_queue')  # make configurable
+        self.consumer = RabbitMQAsyncConsumer(self.config['TRX_QUEUE'])  # make configurable
         t = threading.Thread(target=self.consumer.run, daemon=True)
         t.start()
 
     def scan(self):
-        """ scan trx interface"""
+        """ scan MQ for messages """
         trx_logger.info('MQ TRX retriever started')
         try:
             return self.consumer.data or []

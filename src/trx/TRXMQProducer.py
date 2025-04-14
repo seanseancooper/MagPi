@@ -68,7 +68,7 @@ class TRXMQProducer(threading.Thread):
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
-        golden_retriever = self.get_retriever("retrievers." + self.config['MQ_TRX_RETRIEVER'])
+        golden_retriever = self.get_retriever("retrievers." + self.config['TRX_RETRIEVER'])
         self.retriever = golden_retriever()
         self.retriever.configure(config_file)
 
@@ -83,7 +83,7 @@ class TRXMQProducer(threading.Thread):
             self.config_worker(worker)
             self.workers.append(worker)
 
-        self.producer = RabbitMQProducer(self.config['MQ_TRX_QUEUE'])
+        self.producer = RabbitMQProducer(self.config['TRX_QUEUE'])
 
     @contextmanager
     def run(self):

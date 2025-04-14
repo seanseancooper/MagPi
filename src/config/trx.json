@@ -24,10 +24,13 @@
 			"SIGNAL_CACHE_MAX": 300
 		},
 		{
-			"MQ_TRX_RETRIEVER": "TRXUSBRetriever"
+			"TRX_RETRIEVER": "TRXUSBRetriever"
 		},
 		{
-			"MQ_TRX_QUEUE": "trx_queue"
+			"TRX_QUEUE": "trx_queue"
+		},
+		{
+			"USB_POLL_INTERVAL": 1
 		},
 		{
 			"DEVICE": "/dev/cu.URT1"
@@ -40,9 +43,6 @@
 		},
 		{
 			"STOPBITS": "serial.STOPBITS_ONE"
-		},
-		{
-			"USB_POLL_INTERVAL": 1
 		},
 		{
 			"BYTESIZE": "serial.EIGHTBITS"
