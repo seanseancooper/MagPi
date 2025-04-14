@@ -59,7 +59,7 @@ class Worker:
         self.scanner = scanner
         self.config = scanner.config
         self.created = datetime.now()
-        self.cache_max = max(int(scanner.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -(scanner.config.get('SIGNAL_CACHE_MAX')))
+        self.cache_max = max(int(scanner.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -5)
         self.DEBUG = scanner.config['DEBUG']
 
     def make_signalpoint(self, worker_id, id, signal):
@@ -141,8 +141,8 @@ class Worker:
         return self._signal_cache_frequency_features
 
     def match(self, cell):
-        """ match BSSID, derive the 'id' and set mute status """
-        if self.id.upper() == cell['ID'].upper():
+        """ match id, derive the 'id' and set mute status """
+        if self.id.upper() == cell['id'].upper():
             self.id = str(self.id).replace(':', '').lower()
             self.process_cell(cell)
             self.auto_unmute()
@@ -250,14 +250,14 @@ class Worker:
                     "Encryption"  : cell['Encryption'],
                     "is_mute"     : cell['is_mute'],
                     "tracked"     : cell['tracked'],
-                    "signal_cache": [pt.get() for pt in cls.scanner.signal_cache[cell['BSSID']]][cls.cache_max:],
+                    "signal_cache": [pt.get() for pt in cls.scanner.signal_cache[cell['id']]][cls.cache_max:],
                     "tests"       : [x for x in cell['tests']]
                 }
 
-                json_logger.info({cell['BSSID']: formatted})
+                json_logger.info({cell['id']: formatted})
 
             append_to_outfile(self, self.config, self.get())
 
     def run(self):
-        """ match a BSSID and populate data """
+        """ match an ID and populate data """
         [self.match(sgnl) for sgnl in self.scanner.parsed_signals]
