@@ -1,6 +1,6 @@
 import threading
 
-from src.net.rabbitMQ.RabbitMQTRXProducer import RabbitMQTRXProducer
+from src.trx.TRXProducer import RabbitMQTRXProducer
 
 from src.config import readConfig
 from src.net.rabbitMQ.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
