@@ -13,7 +13,7 @@ trx_logger = logging.getLogger('trx_logger')
 speech_logger = logging.getLogger('speech_logger')
 
 
-class TRXMQProducer(threading.Thread):
+class RabbitMQTRXProducer(threading.Thread):
 
     """ MQTRXProducer class; poll the serial/USB for signals. """
     def __init__(self):
@@ -68,7 +68,7 @@ class TRXMQProducer(threading.Thread):
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
-        golden_retriever = self.get_retriever("retrievers." + self.config['TRX_RETRIEVER'])
+        golden_retriever = self.get_retriever("retrievers." + self.config['MQ_TRX_RETRIEVER'])
         self.retriever = golden_retriever()
         self.retriever.configure(config_file)
 
@@ -83,7 +83,7 @@ class TRXMQProducer(threading.Thread):
             self.config_worker(worker)
             self.workers.append(worker)
 
-        self.producer = RabbitMQProducer(self.config['TRX_QUEUE'])
+        self.producer = RabbitMQProducer(self.config['MQ_TRX_QUEUE'])
 
     @contextmanager
     def run(self):
@@ -100,6 +100,6 @@ class TRXMQProducer(threading.Thread):
                 self.producer.publish_message(scanned)
 
 if __name__ == '__main__':
-    scanner = TRXMQProducer()
-    scanner.configure('trx.json')
-    scanner.run()
+    producer = RabbitMQTRXProducer()
+    producer.configure('net.json')
+    producer.run()

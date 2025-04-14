@@ -1,7 +1,6 @@
-from datetime import datetime
 import threading
 
-from src.trx.TRXMQProducer import TRXMQProducer
+from src.net.rabbitMQ.RabbitMQTRXProducer import RabbitMQTRXProducer
 
 from src.config import readConfig
 from src.net.rabbitMQ.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
@@ -57,7 +56,7 @@ class TRXMQRetriever(threading.Thread):
         self.start_consumer()
 
     def start_scanner(self):
-        self.scanner = TRXMQProducer()
+        self.scanner = RabbitMQTRXProducer()
         self.scanner.configure('trx.json')
         t = threading.Thread(target=self.scanner.run, daemon=True)
         t.start()
