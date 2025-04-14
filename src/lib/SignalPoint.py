@@ -15,7 +15,10 @@ class SignalPoint(object):
         self._lat = lat
         self._sgnl = sgnl               # a discrete value
 
-    def getId(self):
+    def get_created(self):
+        return self._created
+
+    def get_id(self):
         return self._id
 
     def get_lat_lon(self):

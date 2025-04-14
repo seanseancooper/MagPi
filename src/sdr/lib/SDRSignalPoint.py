@@ -57,7 +57,7 @@ class SDRSignalPoint(SignalPoint):
             "sgnl": self._sgnl,
         }
         if self._audio_data is not None:
-            data["audio_sampling_rate"] = self._sr
+            data["sr"] = self._sr
             data["audio_data"] = self._audio_data.tolist()  # Assuming audio data is a numpy array
         if self._array_data is not None:
             data["array_data"] = self._array_data.tolist()  # Assuming array data is a numpy array

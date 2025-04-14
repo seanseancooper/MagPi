@@ -14,8 +14,8 @@ class FrameObjekt:
         self.prev_tag = None                                            # [string: object tracking] tag of nearest FrameObjekt from the previous frame
 
         # features
-        self._avg_loc = np.array([0, 0], dtype=np.int32)                 # [tuple {x,y}: object segmentation] mean x, y location of *this* contour
-        self._rect = None                                                # [tuple {x, y, w, h}: object segmentation] bounding rects of contours in this frame
+        self._avg_loc = np.array([0, 0], dtype=np.int32)                # [tuple {x,y}: object segmentation] mean x, y location of *this* contour
+        self._rect = None                                               # [tuple {x, y, w, h}: object segmentation] bounding rects of contours in this frame
         self.lat = 0.0                                                  # latitude
         self.lon = 0.0                                                  # longitude
 
@@ -49,7 +49,7 @@ class FrameObjekt:
 
     @staticmethod
     def frameobjekt_to_dict(f):
-        """Convert FrameObjekt to a serializable dictionary for MQ/FrameObjektEncode"""
+        """Convert FrameObjekt to a serializable dictionary w/o processing"""
         return {
             'f_id'       : f.f_id,
             'frame_shape': f.frame_shape,
@@ -65,7 +65,7 @@ class FrameObjekt:
 
     @staticmethod
     def dict_to_frameobjekt(d):
-        """Convert dictionary back to FrameObjekt for MQ"""
+        """Convert dictionary back to FrameObjekt to be processed offline"""
         frame_obj = FrameObjekt.create(d['f_id'])
         frame_obj.f_id = d['f_id']
         frame_obj.frame_shape = tuple(d['frame_shape'])

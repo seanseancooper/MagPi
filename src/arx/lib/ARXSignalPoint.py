@@ -14,7 +14,7 @@ class ARXSignalPoint(SignalPoint):
     """
     def __init__(self, worker_id, lon, lat, sgnl):
         super().__init__(lon, lat, sgnl)
-        self._worker_id = worker_id or 'ARXRecorder'
+        self._worker_id = worker_id
         self._signal_type = 'continuous'
         
         self._audio_data = None                   # potentially an array, a Signal() or LIST of type

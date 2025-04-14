@@ -119,7 +119,6 @@ class Trilaterator(threading.Thread):
         return self.geographical_distance(lat1, lon1, lat2, lon2)
 
     def getSignalPointDistance(self, s1: WifiSignalPoint, s2: WifiSignalPoint):
-        # I think this should work for both, but do we really want a superclass 'SignalPoint'?
         [lat1, lon1] = s1.get_lat_lon()
         [lat2, lon2] = s2.get_lat_lon()
         return self.geographical_distance(lat1, lon1, lat2, lon2)

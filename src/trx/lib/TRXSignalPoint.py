@@ -25,7 +25,7 @@ class TRXSignalPoint(SignalPoint):
         self.tracked = False
         self.is_mute = False
 
-        self._text_attributes = {}               # object (default): intermittent text from hardware, see aggregate(k, v)
+        self._text_attributes = {}              # object (default): intermittent text from hardware, see aggregate(k, v)
         self._audio_data = audio_data           # continuous: intermittent audio data as a Signal
         self._sr = sr                           # need config, and ability to ad hoc change
 
@@ -63,6 +63,7 @@ class TRXSignalPoint(SignalPoint):
             self._sgnl = 0.0 # set to peak db in audio
         elif self._signal_type == "continuous" and self._audio_data is not None:
             # set sr, make Signal. use audio data and extract_audio_features
+            # Note may not have audio yet; was there some 'directive' to 'record'?.
             signal = Signal(audio_data, self._id, sr=self._sr)
             self._audio_frequency_features = self.extract_audio_frequency_features(signal.get_data(), signal.get_sr())
 
@@ -72,6 +73,12 @@ class TRXSignalPoint(SignalPoint):
     def set_audio_data(self, audio_data):
         self._audio_data = Signal(audio_data, self._id, sr=self._sr)
         self._audio_frequency_features = self.extract_audio_frequency_features(audio_data, self._sr)
+
+    def set_sampling_rate(self, sr):
+        self._sr = sr
+
+    def get_sampling_rate(self):
+        return self._sr
 
     def update(self, tracked):
         self.updated = datetime.now()
@@ -95,6 +102,7 @@ class TRXSignalPoint(SignalPoint):
             # "signal_data"       : [_ for _ in self._signal_data] if self._signal_data is not None else None,
             "audio_data"        : self._audio_data.tolist() if self._audio_data is not None else None,
             "text_data"         : {k: v for k, v in self._text_attributes.items()},
+            "sr"                : self.get_sampling_rate(),
 
             "frequency_features": self._audio_frequency_features,
         }
