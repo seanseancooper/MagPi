@@ -78,21 +78,7 @@ def wifi_config():
 #  TODO: let other apps emit stats as well
 @wifi_bp.route('/stats', methods=['GET'], subdomain='wifi')
 def wifi_stats():
-    from src.lib.utils import format_time, format_delta
-
-    # placeholder; this should already be a map called stats in s. I want to be able to add to that map adhoc.
-    stats = {
-        'created': format_time(s.created, s.config['TIME_FORMAT']),
-        'updated': format_time(s.updated, s.config['TIME_FORMAT']),
-        'elapsed': format_delta(s.elapsed, s.config['TIME_FORMAT']),
-        'polling_count': s.polling_count,
-        'lat': s.lat,
-        'lon': s.lon,
-        'workers': len(s.workers),
-        'tracked': len(s.tracked_signals),
-        'ghosts': len(s.ghost_signals),
-    }
-    return jsonify(stats)
+    return jsonify(s.stats)
 
 
 @wifi_bp.route('/stop', methods=['POST'], subdomain='wifi')
