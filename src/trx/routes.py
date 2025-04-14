@@ -20,34 +20,34 @@ def index():
 @trx_bp.route("/scan", methods=['GET'], subdomain="trx")
 def trx_scan():
     """ returns most recent item scanned """
-    return jsonify(trxRet.scan())
+    return jsonify(trxRet.retriever.scan())
 
 
 @trx_bp.route("/scanned", methods=['GET'], subdomain="trx")
 def trx_scanned():
-    return jsonify(trxRet.get_scanned())
+    return jsonify(trxRet.retriever.get_scanned())
 
 
 @trx_bp.route("/tracked", methods=['GET'], subdomain="trx")
 def trx_tracked():
-    return jsonify(trxRet.get_tracked())
+    return jsonify(trxRet.retriever.get_tracked())
 
 
 @trx_bp.route('/add/<id>', methods=['GET', 'POST'], subdomain="trx")
 def add(id):
-    if trxRet.add(id):
+    if trxRet.retriever.add(id):
         return "OK", 200
     return "", 404
 
 
 @trx_bp.route('/mute/<id>', methods=['GET', 'POST'], subdomain="trx")
 def mute(id):
-    return str(trxRet.mute(id)), 200
+    return str(trxRet.retriever.mute(id)), 200
 
 
 @trx_bp.route('/remove/<id>', methods=['GET', 'POST'], subdomain="trx")
 def remove(id):
-    if trxRet.remove(id):
+    if trxRet.retriever.remove(id):
         return "OK", 200
     return "", 404
 
@@ -76,7 +76,7 @@ def trx_stats():
 
 @trx_bp.route('/stop', methods=['POST'], subdomain='wifi')
 def trx_stop():
-    return trxRet.stop()
+    return trxRet.retriever.stop()
 
 
 @trx_bp.route('/write', methods=['POST'], subdomain='wifi')
