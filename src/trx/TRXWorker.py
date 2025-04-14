@@ -39,17 +39,18 @@ class TRXWorker:
         self.DEBUG = False
 
     def get(self):
-        return {"ALPHATAG"      : self.ALPHATAG,
-                "freq"          : self.freq,
+        return {
+            "ALPHATAG"      : self.ALPHATAG,
+            "freq"          : self.freq,
 
-                "created"       : format_time(self.created, self.config.get('TIMER_FORMAT', "%H:%M:%S")),
-                "updated"       : format_time(self.updated, self.config.get('TIMER_FORMAT', "%H:%M:%S")),
-                "elapsed"       : format_delta(self.elapsed, self.config.get('TIMER_FORMAT', "%H:%M:%S")),
+            "created"       : format_time(self.created, self.config.get('TIMER_FORMAT', "%H:%M:%S")),
+            "updated"       : format_time(self.updated, self.config.get('TIMER_FORMAT', "%H:%M:%S")),
+            "elapsed"       : format_delta(self.elapsed, self.config.get('TIMER_FORMAT', "%H:%M:%S")),
 
-                "is_mute"       : str(self.is_mute),
-                "tracked"       : str(self.tracked),
-                # "signal_cache"  : [pt for pt in self.retriever.signal_cache[self.freq]][self.cache_max:],
-                # "tests"         : [x for x in self.test_results]
+            "is_mute"       : str(self.is_mute),
+            "tracked"       : str(self.tracked),
+            # "signal_cache"  : [pt for pt in self.retriever.signal_cache[self.freq]][self.cache_max:],
+            # "tests"         : [x for x in self.test_results]
         }
 
     def config_worker(self, scanner):
