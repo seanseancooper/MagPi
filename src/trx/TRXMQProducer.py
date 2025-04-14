@@ -20,7 +20,7 @@ class TRXMQProducer(threading.Thread):
         super().__init__()
 
         self.config = {}
-        self.worker_id = 'MQTRXScanner'
+        self.worker_id = 'TRXMQProducer'
         self.signal_cache = []
         self.workers = []
         self.tracked_signals = {}
