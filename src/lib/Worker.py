@@ -146,7 +146,7 @@ class Worker:
         #         [pt.getSgnl() for pt in self.scanner.signal_cache[self.id]]
         # )
 
-    def get__signal_cache_frequency_features(self):
+    def get_signal_cache_frequency_features(self):
         return self._signal_cache_frequency_features
 
     def match(self, cell):
