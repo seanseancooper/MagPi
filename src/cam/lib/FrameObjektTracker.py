@@ -108,7 +108,7 @@ class FrameObjektTracker(object):
 
         o.wall = wall        # put the wall on a temp filesystem and use the tag for the name
 
-        get_location(self)
+        # get_location(self)
         o.lat = self.lat
         o.lon = self.lon
 
