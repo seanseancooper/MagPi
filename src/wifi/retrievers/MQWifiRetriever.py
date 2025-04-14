@@ -67,7 +67,7 @@ class MQWifiRetriever(threading.Thread):
         t = threading.Thread(target=self.consumer.run, daemon=True)
         t.start()
 
-    def scan_wifi(self):
+    def scan(self):
         """ scan configured wifi interface using iwlist """
         try:
             return self.consumer.data or []

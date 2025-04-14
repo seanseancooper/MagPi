@@ -60,7 +60,7 @@ class RabbitMQWifiScanner(threading.Thread):
         speech_logger.info('MQ WiFi scanner started')
 
         while True:
-            scanned = self.retriever.scan_wifi()
+            scanned = self.retriever.scan()
             if len(scanned) > 0:
                 self.producer.publish_message(scanned)
 

@@ -211,7 +211,7 @@ class WifiScanner(threading.Thread):
 
         while True:
 
-            scanned = self.retriever.scan_wifi()
+            scanned = self.retriever.scan()
 
             if len(scanned) > 0:
                 self.parse_signals(scanned)

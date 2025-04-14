@@ -38,7 +38,7 @@ class MacOSAirportWifiRetriever(threading.Thread):
         self.DEBUG = False
 
     @staticmethod
-    def scan_wifi():
+    def scan():
         """ scan wifi using airport """
         try:
             # airport is being deprecated! This is only for development if available.

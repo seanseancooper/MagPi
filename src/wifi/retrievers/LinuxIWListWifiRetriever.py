@@ -26,7 +26,7 @@ class LinuxIWListWifiRetriever(threading.Thread):
 
         self.DEBUG = False
 
-    def scan_wifi(self):
+    def scan(self):
         """ scan configured wifi interface using iwlist """
         # TODO: mock this with a file
         try:
