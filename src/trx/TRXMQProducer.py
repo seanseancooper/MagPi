@@ -13,7 +13,7 @@ trx_logger = logging.getLogger('trx_logger')
 speech_logger = logging.getLogger('speech_logger')
 
 
-class MQTRXProducer(threading.Thread):
+class TRXMQProducer(threading.Thread):
 
     """ MQTRXProducer class; poll the serial/USB for signals. """
     def __init__(self):
@@ -90,7 +90,7 @@ class MQTRXProducer(threading.Thread):
 
         self.created = datetime.now()
         trx_logger.info('MQ TRX scanner started')
-
+        # maybe move this to the controller?
         t = threading.Thread(target=self.retriever.run)
         t.start()
 

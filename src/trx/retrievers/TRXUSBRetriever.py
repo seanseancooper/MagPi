@@ -142,7 +142,6 @@ class TRXUSBRetriever(threading.Thread):
             return [sgnl for sgnl in self.signal_cache if str(sgnl._id) == f][0]
 
         sgnl = find(uniqId)
-        # SIGNAL: MUTE/UNMUTE
         return mute(sgnl)
 
     def auto_unmute(self, sgnl):
@@ -150,7 +149,6 @@ class TRXUSBRetriever(threading.Thread):
         if self.config['MUTE_TIME'] > 0:
             if datetime.now() - sgnl.updated > timedelta(seconds=self.config['MUTE_TIME']):
                 sgnl.is_mute = False
-                # SIGNAL: AUTO UNMUTE
 
     def add(self, uniqId):
 

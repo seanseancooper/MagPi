@@ -1,7 +1,7 @@
 from datetime import datetime
 import threading
 
-from src.trx.MQTRXProducer import MQTRXProducer
+from src.trx.TRXMQProducer import TRXMQProducer
 
 from src.config import readConfig
 from src.net.rabbitMQ.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
@@ -14,7 +14,7 @@ logger_root = logging.getLogger('root')
 trx_logger = logging.getLogger('trx_logger')
 
 
-class MQTRXRetriever(threading.Thread):
+class TRXMQRetriever(threading.Thread):
     """ MQ TRX Retriever class """
     def __init__(self):
         super().__init__()
@@ -67,7 +67,7 @@ class MQTRXRetriever(threading.Thread):
         )
 
     def start_scanner(self):
-        self.scanner = MQTRXProducer()
+        self.scanner = TRXMQProducer()
         self.scanner.configure('net.json')
         t = threading.Thread(target=self.scanner.run, daemon=True)
         t.start()
@@ -77,7 +77,7 @@ class MQTRXRetriever(threading.Thread):
         t = threading.Thread(target=self.consumer.run, daemon=True)
         t.start()
 
-    def scan_trx(self):
+    def scan(self):
         """ scan trx interface"""
         trx_logger.info('MQ TRX retriever started')
         try:
