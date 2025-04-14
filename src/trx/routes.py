@@ -21,7 +21,7 @@ def index():
 @trx_bp.route("/scan", methods=['GET'], subdomain="trx")
 def trx_scan():
     """ returns most recent item scanned """
-    return jsonify(trxRet.get_scan())
+    return jsonify(trxRet.scan())
 
 
 @trx_bp.route("/scanned", methods=['GET'], subdomain="trx")
