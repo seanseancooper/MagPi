@@ -44,6 +44,7 @@ class GPSController(threading.Thread):
                 routes.node.build()
 
             routes.node.run()  #  start the js_gps_ret service on :3000
+
             os.chdir('../')
             routes.gpsRet.run()
         except KeyboardInterrupt:

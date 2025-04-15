@@ -5,6 +5,8 @@ import threading
 import json
 import logging
 import time
+
+
 from gpsdclient import GPSDClient
 
 from src.config import readConfig
@@ -115,6 +117,28 @@ class GPSRetriever(threading.Thread):
                                }
                 self.update()
                 time.sleep(self.config.get('RETRIEVER_TIMEOUT', 1))
+
+    @register_retriever
+    def JSGPSRetriever(self, *, c, **retriever_args):
+
+        import requests
+
+        while True:
+            time.sleep(self.config.get('RETRIEVER_TIMEOUT', 1))
+            res = requests.get('http://localhost:3000')
+            result = json.loads(res.text)
+
+            self.result = {"lat": result['lat'],
+                           "lon": result['lon'],
+                           "heading": 0.0,
+                           "track": 0.0,
+                           "speed": 0.0,
+                           "altitude": 0.0,
+                           "climb": 0.0,
+                           "time":  datetime.now().__format__(self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f'))
+                           }
+            self.update()
+
 
     def gps_result(self):
         return self.result
