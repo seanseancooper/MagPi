@@ -30,12 +30,6 @@ class TRXMQProducer(threading.Thread):
         self.updated = datetime.now()
         self.elapsed = timedelta()              # elapsed time since created
 
-        self.device = None
-        self.rate = 115200
-        self.parity = None
-        self.bytesize = 8
-        self.stopbits = 1
-
         self.polling_count = 0
         self.lat = 0.0
         self.lon = 0.0
@@ -71,12 +65,6 @@ class TRXMQProducer(threading.Thread):
         golden_retriever = self.get_retriever("retrievers." + self.config['TRX_RETRIEVER'])
         self.retriever = golden_retriever()
         self.retriever.configure(config_file)
-
-        self.device = self.config['DEVICE']
-        self.rate = self.config['RATE']
-        self.parity = self.config['PARITY']
-        self.bytesize = self.config['BYTESIZE']
-        self.stopbits = self.config['STOPBITS']
 
         for freq in self.tracked_signals.keys():
             worker = TRXWorker(freq)

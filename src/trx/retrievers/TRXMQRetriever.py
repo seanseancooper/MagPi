@@ -26,12 +26,6 @@ class TRXMQRetriever(threading.Thread):
         self.scanner = None  # make configurable
         self.consumer = None  # make configurable
 
-        self.device = None
-        self.rate = 115200
-        self.parity = None
-        self.bytesize = 8
-        self.stopbits = 1
-
         self.stats = {}                         # new, not yet used
         self.parsed_signals = []                # signals represented as a list of dictionaries.
 
@@ -39,11 +33,6 @@ class TRXMQRetriever(threading.Thread):
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
-        self.device = self.config['DEVICE']
-        self.rate = self.config['RATE']
-        self.parity = eval(self.config['PARITY'])
-        self.bytesize = eval(self.config['BYTESIZE'])
-        self.stopbits = eval(self.config['STOPBITS'])
 
         for freq in self.tracked_signals.keys():
             worker = TRXWorker(freq)
