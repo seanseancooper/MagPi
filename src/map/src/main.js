@@ -14,8 +14,6 @@ import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
 import {toStringHDMS, toStringXY, degreesToStringHDMS} from 'ol/coordinate.js';
 import {transform as xform, fromLonLat, toLonLat} from 'ol/proj.js';
 import {Heatmap as HeatmapLayer} from 'ol/layer.js';
-//import {JSONFeature as JSONFeature} from 'ol/format/JSONFeature.js'; <-- abstract, doesn't import. read direct from response
-//import 'js_gps_ret/index.js'
 
 
 /*
@@ -182,30 +180,22 @@ if (enable_hardware) {
     }, 1000);
 };
 
-//geolocation.on('change', function (evt) {
-//    if (!enable_hardware) {
-//        const coordJS = geolocation.getPosition();
-//        var jsCoords = toLonLat(coordJS);
-//        coordinate = jsCoords;
-//        animate(jsCoords);
-//        update(jsCoords);
-//    }
-//});
-
 geolocation.on('change', function () {
-  const coordJS = geolocation.getPosition();
-  const jsCoords = toLonLat(coordJS);
-  const payload = {
-    lon: jsCoords[0],
-    lat: jsCoords[1]
-  };
-  console.log("hi " + payload['lon'] + ", " + payload['lat']);
-  // Send coords to Node server
-  fetch('http://localhost:3000', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
+
+    const coordJS = geolocation.getPosition();
+    const jsCoords = toLonLat(coordJS);
+    const payload = {
+        lon: jsCoords[0],
+        lat: jsCoords[1]
+    };
+
+    // Send coords to Node server
+    fetch('http://localhost:3000', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    // console.log("hi " + payload['lon'] + ", " + payload['lat']);
 });
 
 geolocation.on('error', function (error) {
