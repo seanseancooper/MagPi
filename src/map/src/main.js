@@ -15,14 +15,14 @@ import {toStringHDMS, toStringXY, degreesToStringHDMS} from 'ol/coordinate.js';
 import {transform as xform, fromLonLat, toLonLat} from 'ol/proj.js';
 import {Heatmap as HeatmapLayer} from 'ol/layer.js';
 //import {JSONFeature as JSONFeature} from 'ol/format/JSONFeature.js'; <-- abstract, doesn't import. read direct from response
-//import publisher from 'js_gps_ret/index.js'
+//import 'js_gps_ret/index.js'
 
 
 /*
 docs @ https://openlayers.org/en/latest/apidoc/
 */
 
-const enable_hardware = true;
+const enable_hardware = false;
 var fix;
 var click = 0;
 var features = [];
@@ -199,7 +199,7 @@ geolocation.on('change', function () {
     lon: jsCoords[0],
     lat: jsCoords[1]
   };
-
+  console.log("hi " + payload['lon'] + ", " + payload['lat']);
   // Send coords to Node server
   fetch('http://localhost:3000', {
     method: 'POST',
@@ -207,7 +207,6 @@ geolocation.on('change', function () {
     body: JSON.stringify(payload)
   });
 });
-
 
 geolocation.on('error', function (error) {
     if  (!enable_hardware) {
@@ -499,7 +498,7 @@ function animate(coordinate) {
             var source = v_layer.getSource();
             source.clear();
 
-            if (_signals.wifi) {
+            if (_signals.wifi > null) {
                 _signals.wifi.forEach(function(cell) {
 
                     if (!cell.is_mute && cell.tracked){
@@ -527,8 +526,8 @@ function animate(coordinate) {
                     }
                 });
             };
-            //
-            if (_signals.trx) {
+
+            if (_signals.trx > null) {
                 _signals.trx.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
 
@@ -537,7 +536,7 @@ function animate(coordinate) {
 
                         var _color = colorUniqId(uniqId, ':');
                         var lonlat = fromLonLat([cell.lon, cell.lat]);
-                        var sgnlStrength = -77; // WHERE FROM???
+                        var sgnlStrength = -77; // WHERE FROM?!
                         var numConcentrics = 10;
 
                         var p_signal_color = 'rgba(' + _color + ', 1.0)';
@@ -548,7 +547,7 @@ function animate(coordinate) {
                 });
             }
             /*
-            if (_signals.sdr.length > 0) {
+            if (_signals.sdr) {
                 _signals.sdr.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
                         console.log('SDR: ' +  cell);
@@ -558,7 +557,7 @@ function animate(coordinate) {
                 });
             }
 
-            if (_signals.cam.length > 0) {
+            if (_signals.cam) {
                 _signals.cam.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
                         console.log('CAM: ' +  cell);
@@ -568,7 +567,7 @@ function animate(coordinate) {
                 });
             }
 
-            if (_signals.arx.length > 0) {
+            if (_signals.arx) {
                 _signals.arx.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
                         console.log('ARX: ' +  cell);
@@ -578,7 +577,7 @@ function animate(coordinate) {
                 });
             }
 
-            if (_signals.net.length > 0) {
+            if (_signals.net) {
                 _signals.net.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
                         console.log('NET: ' +  cell);
