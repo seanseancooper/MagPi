@@ -51,7 +51,7 @@ class TRXMQRetriever(threading.Thread):
         t.start()
 
     def start_consumer(self):
-        self.consumer = RabbitMQAsyncConsumer(self.config['TRX_QUEUE'])  # make configurable
+        self.consumer = RabbitMQAsyncConsumer(self.config['TRX_QUEUE'])
         t = threading.Thread(target=self.consumer.run, daemon=True)
         t.start()
 
