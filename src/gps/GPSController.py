@@ -38,6 +38,13 @@ class GPSController(threading.Thread):
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
 
+            import os
+            os.chdir('js_gps_ret/')
+            if routes.gpsRet.config['NODE_BUILD'] is True:
+                routes.node.build()
+
+            routes.node.run()  #  start the js_gps_ret service on :3000
+            os.chdir('../')
             routes.gpsRet.run()
         except KeyboardInterrupt:
             pass

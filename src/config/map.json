@@ -3,9 +3,6 @@
 			"DEBUG": false
 		},
 		{
-			"BUILD": true
-		},
-		{
 			"SERVER_NAME": "localhost:5005"
 		},
 		{
@@ -24,7 +21,7 @@
 			"NODE_START_COMMAND": ["npm", "start"]
 		},
 		{
-			"NODE_BUILD": false
+			"NODE_BUILD": true
 		},
 		{
 			"NODE_BUILD_COMMAND": ["npm", "run", "build"]

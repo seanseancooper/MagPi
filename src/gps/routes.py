@@ -6,6 +6,11 @@ from src.gps.lib.Trilaterator import Trilaterator
 gpsRet = GPSRetriever()
 gpsRet.configure('gps.json')
 
+# node js_gps_ret service on :3000
+from src.map.lib.NodeRunner import NodeRunner
+node = NodeRunner()
+node.configure('map.json')
+
 trilaterator = Trilaterator()
 trilaterator.configure('gps.json')
 trilaterator.retriever = gpsRet

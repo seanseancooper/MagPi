@@ -12,6 +12,15 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
+			"NODE_START_COMMAND": ["node"]
+		},
+		{
+			"NODE_BUILD": false
+		},
+		{
+			"NODE_BUILD_COMMAND": ["node"]
+		},
+		{
 			"GPS_HOST": "10.99.77.1"
 		},
 		{

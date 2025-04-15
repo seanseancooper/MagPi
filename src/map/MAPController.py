@@ -44,6 +44,8 @@ class MAPController(threading.Thread):
                 routes.node.build()
 
             # start elastic instance/cluster docker container.
+
+            # start the map node services on :5173
             routes.node.run()
             routes.mapAgg.run()
 
