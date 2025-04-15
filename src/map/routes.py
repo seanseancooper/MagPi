@@ -7,7 +7,7 @@ mapAgg = MAPAggregator()
 non_config_files = ['arx.json', 'cam.json', 'ebs.json', 'gps.json', 'mot.json', 'view.json']
 mapAgg.configure('map.json', non_config_files=non_config_files)
 
-from src.map.lib.NodeRunner import NodeRunner
+from src.lib.NodeRunner import NodeRunner
 
 node = NodeRunner()
 node.configure('map.json')
