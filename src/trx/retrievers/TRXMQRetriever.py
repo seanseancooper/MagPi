@@ -23,8 +23,8 @@ class TRXMQRetriever(threading.Thread):
         self.workers = []
         self.tracked_signals = {}
 
-        self.scanner = None  # make configurable
-        self.consumer = None  # make configurable
+        self.scanner = None                     # make configurable
+        self.consumer = None                    # make configurable
 
         self.stats = {}                         # new, not yet used
         self.parsed_signals = []                # signals represented as a list of dictionaries.
