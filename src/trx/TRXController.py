@@ -21,8 +21,8 @@ class TRXController(threading.Thread):
 
         with app.app_context():
             if __name__ == '__main__':
-                app.config['SERVER_NAME'] = routes.trxProd.config['SERVER_NAME']
-                app.config['DEBUG'] = routes.trxProd.config['DEBUG']
+                app.config['SERVER_NAME'] = routes.trxRet.config['SERVER_NAME']
+                app.config['DEBUG'] = routes.trxRet.config['DEBUG']
                 app.register_blueprint(routes.trx_bp)
             return app
 
@@ -31,17 +31,14 @@ class TRXController(threading.Thread):
             import atexit
 
             def stop():
-                routes.trxProd.stop()
+                routes.trxRet.stop()
 
             atexit.register(stop)
 
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
 
-                t = threading.Thread(target=routes.trxProd.retriever.run)
-                t.start()
-
-            routes.trxProd.run()
+            routes.trxRet.run()
         except KeyboardInterrupt:
             pass
 
