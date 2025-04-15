@@ -1,21 +1,28 @@
 ARX (ARXSignalPoint, ZeroMQ):
-    ARXRecorder manufatcures ARXSignalPoint.
-    ARXSignalPoint to output file.
-    ARXSignalPoint ZeroMQ to ARXAudioEncoder
+    [DONE] ARXRecorder manufactures ARXSignalPoint.
+    [DONE] ARXSignalPoint to output file.
+    [IP] ARXSignalPoint ZeroMQ to ARXAudioEncoder
     project-keyword-spotter integration? feasible, alt. solution
     Elasticsearch mappings?
-    Processing germane to audio:back to original requirements + new ideas.
+    [IP] Processing germane to audio:back to original requirements + new ideas.
     Local ML Models germane to audio.
 
 BLU:
     NOT STARTED
 
-CAM (FrameObjekt, RabbitMQ(events)?, ImageZMQ(images)):
+CAM (FrameObjekt, RabbitMQ(events)?, ZeroMQ(images)):
     automate FrameObjektTracker output analysis: design a processing chain based on MQ.
     Choose Models; hugging face.
-    Encoding frames using FrameObjektEncoder: what fields are encoded, and how analyzed.
-    FrameObjekt ImageZMQ messaging: in progress.
+    [IP] Encoding frames using FrameObjektEncoder: what fields are encoded, and how analyzed.
+    FrameObjekt ZeroMQ messaging: in progress.
     FrameObjektEncoder Elasticsearch mappings: on hold.
+
+    Integrate a Wifi security cameras as secondary source; hardcode it to IR.
+        - overlay processed IR images as outlines (see in the dark)
+    Integrate a hardware camera as tertiary source; perhaps a license plate reader.
+        - overlay processed IR images as outlines (see in the dark)
+
+    Camera switching?
 
 CAN:
     NOT STARTED: ideas
@@ -25,16 +32,15 @@ CONFIG:
         class configuration: look for a configuration file at the same level as a class (overides class fields only), named 'class.json' where class is the name of the class.
         module configuration: look for a configuration for the module, in a dir called 'config'. This overides any 'class.json' class configuration if it exists.
         global configuration: look for a configuration file in 'config' directory, named 'module.json': this overides module config)
-    poetential benefits vs. compleity added
+    potential benefits vs. complexity added
 
 EBS:
     configure text logging
-    MCP Model Context Protocol client for my project.
+    Speech Service client.
 
 GPS (MapAggregator, REST, class?):
-    Trilaterator! Testdata and map symbology.
-    implement GPS via JS: Delayed.
-    GPS via hardware
+    Trilaterator! Test data and map symbology.
+    GPS hardware build.
 
 LIB:
     code review: there is junk here and things to add.
@@ -43,37 +49,38 @@ MAP (MapAggregator, read configs, test REST endpoints and pull data [AGGREGATOR_
     Elastic Integration:
         Elastic pull()
     MapAggregator refresh; read from rabbitMQ, not REST
-    hyperspectral imaging: BLOCKED DUE TO ENVIRONMENT
+    Hyperspectral imaging: BLOCKED DUE TO ENVIRONMENT
 
 MOT:
     NEVER STARTED; may go away again.
 
 NET:
-    Directory structure for each, including ELK.
-        ImageZMQ
-        ZeroMQ
-        RabbitMQ:
-        ElasticSearch:
-            data mapping. Dense vectors, nested data, types
-            what about EAVs, object/NoSQL?
+    Directory structure for ElasticSearch:
+    ElasticSearch data mapping. Dense vectors, nested data, types
+        what about EAVs, object/NoSQL?
     Dashboard URL in template: too where/what?
+    MCP integration with LLM: pass data and prompts to LLM, have it generate results as JSON data
+        - direct manipulation of internal mappings?
+        - augmented data (extra rows in tables, overlay symbology in maps
+        - AR in CAM module?
+        -
 
 PSX:
     NOT STARTED. Pyshark. Ideas? Visualizations? Stats? GPT?
 
 SDR (SDRSignalPoint, RabbitMQ(vector, text), ZeroMQ(Signal)):
-    Reciever modifications: assignable frequency, bandwidth
+    Receiver modifications: assignable frequency, bandwidth
 
     A thing that looks at a block of spectrum, finds the peaks in the EM
     and tunes an SDRWorker() reciever to the peak frequency, recording it as a Signal().
 
-    Enccapsulate an SDR signal in a Signal type.
+    [DONE] Encapsulate an SDR signal in a Signal type.
     SignalPoint processing zeroMQ
-    ARXAudioEncoder via MQ! not a local method. offline proccessing...
+    ARXAudioEncoder via MQ! not a local method. offline processing...
     Elasticsearch mappings
 
 TRX (TRXSignalPoint, RabbitMQ (object), ZeroMQ(Signal)):
-    TRXUSBRetriever docker solution: on hold.
+    TRXUSBRetriever docker solution
     TRXSerialRetriever may be kaput on Mac? Verify this.
     TRXSignalPoint mappings
 
@@ -82,8 +89,9 @@ VIEW (ViewController, REST):
     Integrate SDR: jupyterlite w/ matplotlib inline + custom javascript vertical waterfall served via node.
 
 WIFI (WifiSignalPoint, RabbitMQ):
-    Refactor Wifisscanner to read ALL SignalPoint types from MQ.
-        Tabulator subsorting??
+    [IP] Factor Scanner to read ALL SignalPoint types.
+    [IP] Assign the Scanner instance a SignalPoint type to configure it.
+    [IP] Continue Worker class
 
 DOCKER:
     TRX:docker_trx: dockerfile and compose update: works, add spice where needed.
@@ -94,7 +102,14 @@ DOCKER:
         Kibana dashboards: component to read serialized json output on filesystem.
 
     NET:docker_rabbitMQ: dockerfile and compose updates: works, add spice where needed.
+    MAP & GPS node process configuration: hosts, ports, jinja templates.
 
-    node processes.
+SignalPoint Hierarchy [IP]:
+    Signal: Default text attributes, data of T (immutable)
+    SignalPoint: Base class (id, lat, lon, sgnl)
+        ARXSignalPoint:  Continuous Recorded Audio Data
+        SDRSignalPoint:  Text attributes, Structured Array/Object data
+        TRXSignalPoint:  Text attributes and ARXSignalPoint Data
+        WifiSignalPoint: Continuous Vector Signal data
 
-
+FrameObjekt: CAM Image Container.
