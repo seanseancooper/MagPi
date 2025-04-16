@@ -15,7 +15,7 @@ class SDRSignalPoint(SignalPoint):
     def __init__(self, worker_id, lon, lat, sgnl, array_data=None, audio_data=None, sr=48000):
         super().__init__(lon, lat, sgnl)
         self._worker_id = worker_id
-        self._signal_type = None                # 'array' | 'audio' | 'both' ??
+        self._signal_type = None                # 'array' | 'audio' | 'both' Emission type (radar, voice, data)
 
         self._audio_data = audio_data
         self._sr = sr

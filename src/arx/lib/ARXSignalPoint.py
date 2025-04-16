@@ -15,11 +15,11 @@ class ARXSignalPoint(SignalPoint):
     def __init__(self, worker_id, lon, lat, sgnl):
         super().__init__(lon, lat, sgnl)
         self._worker_id = worker_id
-        self._signal_type = 'continuous'
+        self._signal_type = 'continuous'                    # Emission type (radar, voice, data)
         
-        self._audio_data = None                   # potentially an array, a Signal() or LIST of type
+        self._audio_data = None                             # potentially an array, a Signal() or LIST of type
         self._sr = None
-        self._audio_frequency_features = None                 # a mapping of features, or LIST of mappings
+        self._audio_frequency_features = None               # a mapping of features, or LIST of mappings
 
         self._text_attributes = {}
         self._text_attributes.update({

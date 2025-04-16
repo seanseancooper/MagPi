@@ -12,7 +12,7 @@ class WifiSignalPoint(SignalPoint):
         super().__init__(lon, lat, sgnl)
         self._bssid = bssid
         self._worker_id = worker_id
-        self._signal_type = 'continuous'
+        self._signal_type = 'continuous' # Emission type (radar, voice, 'data')
 
     def get(self):
         return {

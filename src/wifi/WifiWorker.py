@@ -63,6 +63,25 @@ class WifiWorker:
     #  opposed to stationary; features may be
     #  location, signal_cache, Vendor, Quality?
 
+
+
+    #     Spectral Analysis Features to Extract for Each Signal [scipy.signal, numpy.fft]:
+    #     Feature                         : Description
+    #
+    #     Mean signal power               : Average strength
+    #     Variance                        : Signal stability
+    #     FFT Peak/Dominant Frequency     : Periodic behavior
+    #     Auto-correlation lag            : Repetitions
+    #     Coherence with other signals    : Time-dependent similarity
+    #     Rolling correlation window      : Pairwise time-varying relationships [pandas.rolling().corr()]
+    #     Mean signal power               : Average strength
+    #
+    #     PCA / UMAP | sklearn, umap-learn
+    #     Clustering | sklearn.cluster
+    #     Mutual Information | sklearn.metrics.mutual_info_score
+
+
+
     @staticmethod
     def extract_signal_cache_features(norm_signal_cache, sampling_rate=1):
 

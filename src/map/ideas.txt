@@ -1,0 +1,14 @@
+Library : Purpose
+pip install rioxarray xarray earthpy geopandas shapely pyproj  {DONE}
+
+rioxarray               : Read geospatial raster (e.g., GeoTIFF) as xarray DataArrays
+xarray                  : Multidimensional array manipulation (time, bands, etc.)
+earthpy                 : Visualization, NDVI calculation, band stacking
+geopandas               : Vector geometry (shapefiles, masks, zoning)
+shapely / pyproj        : Geometry ops, projections
+scikit-learn / PyTorch  : Modeling / learning with fused features
+
+
+We need container types for geospatial raster, Vector geometry, and multidimensional arrays.
+
+

@@ -6,6 +6,23 @@ class SDRAnalyzer:
     #  Fast Fourier Transform (FFT): FFT converts a time-series signal into a set of frequency components.
     #     We use it to extract dominant frequencies, spectral power, and energy concentration.
     # compute_fft_features(signal_values, sampling_rate=1)
+    #
+    #
+    #     Spectral Analysis Features to Extract for Each Signal [scipy.signal, numpy.fft]:
+    #     Feature                         : Description
+    #
+    #     Mean signal power               : Average strength
+    #     Variance                        : Signal stability
+    #     FFT Peak/Dominant Frequency     : Periodic behavior
+    #     Auto-correlation lag            : Repetitions
+    #     Coherence with other signals    : Time-dependent similarity
+    #     Rolling correlation window      : Pairwise time-varying relationships [pandas.rolling().corr()]
+    #     Mean signal power               : Average strength
+    #
+    #     PCA / UMAP | sklearn, umap-learn
+    #     Clustering | sklearn.cluster
+    #     Mutual Information | sklearn.metrics.mutual_info_score
+
 
     def __init__(self, data, sr=2.048e6, center_freq=100e6, fft_size=512, num_rows=500):
         self._data = data

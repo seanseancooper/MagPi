@@ -7,6 +7,14 @@ from src.wifi.lib.wifi_utils import append_to_outfile, json_logger
 
 
 class Worker:
+    # 🧩 Modeling Components
+
+    # 1. Signal Sources as Agents
+    # Each emitter can be modeled as an agent with:
+    #
+
+    #     Repetition, pattern, schedule: Worker() could support 'period' data via EAV tables of events; need event 'types'? & tests
+    #     Signal fingerprint (modulation, bandwidth, power, etc.)
 
     def __init__(self, id):
         self.config = {}

@@ -21,7 +21,7 @@ class TRXSignalPoint(SignalPoint):
         super().__init__(lon, lat, sgnl)
         self._id = uuid.uuid4()
         self._worker_id = worker_id
-        self._signal_type = signal_type         # object || continuous
+        self._signal_type = signal_type         # object || continuous Emission type (radar, voice, data): This is in line with the SignalPoint type
 
         self.updated = datetime.now()           # when signal was last reported
         self.elapsed = timedelta()              # time signal has been tracked.

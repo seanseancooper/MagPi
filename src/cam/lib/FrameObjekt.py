@@ -4,6 +4,7 @@ import uuid
 
 
 class FrameObjekt:
+    """ a type for raster images of ... """
 
     def __init__(self, f_id):
 
