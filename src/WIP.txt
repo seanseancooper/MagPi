@@ -1,8 +1,6 @@
 "Because I'm bored and this is hard."
 
 arx (ARXSignalPoint, ZeroMQ):
-    [DONE] ARXRecorder manufactures ARXSignalPoint.
-    [DONE] ARXSignalPoint to output file.
     [IP] ARXSignalPoint ZeroMQ to ARXAudioEncoder
     IDEA: project-keyword-spotter integration? feasible? alt. solution --> MCP
     Elasticsearch mappings?
@@ -19,7 +17,8 @@ arx (ARXSignalPoint, ZeroMQ):
     Behavior-based  | Emission pattern, silence periods, handoff behavior
 
 BLU:
-    NOT STARTED: likley use SDR for this.
+    NOT STARTED: likely too use SDR for this and not have a module.
+    idea: features unique to 'Bluetooth' signals (special identifiers)
 
 cam (FrameObjekt, RabbitMQ(events)?, ZeroMQ(images)):
     automate FrameObjektTracker output analysis: design a processing chain based on MQ.
@@ -87,7 +86,6 @@ sdr (SDRSignalPoint, RabbitMQ(vector, text), ZeroMQ(Signal)):
     IDEA: A thing that looks at a block of spectrum, finds the peaks in the EM
         and tunes an SDRWorker() receiver to the peak frequency, recording it as a Signal().
 
-    [DONE] Encapsulate an SDR signal in a Signal type.
     SignalPoint processing zeroMQ
     ARXAudioEncoder via MQ! not a local method. offline processing...
     Elasticsearch mappings
@@ -113,7 +111,6 @@ trx (TRXSignalPoint, RabbitMQ (object), ZeroMQ(Signal)):
     Category        | Feature Examples
     Geolocation     | Direction of arrival (DoA), location estimates, altitude
     Behavior-based  | Emission pattern, silence periods, handoff behavior
-
 
 view (ViewController, REST):
     Integrate Kibana: blocker is elastic https
