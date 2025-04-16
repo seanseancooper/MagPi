@@ -77,7 +77,7 @@ class TRXMQProducer(threading.Thread):
     def run(self):
 
         self.created = datetime.now()
-        trx_logger.info('MQ TRX producer started')
+        trx_logger.info('TRXMQProducer started')
 
         while True:
             scanned = self.retriever.scan()
