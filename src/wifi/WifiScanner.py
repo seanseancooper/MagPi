@@ -93,7 +93,7 @@ class WifiScanner(threading.Thread):
         [self.config_worker(worker) for worker in self.workers]
 
     def config_worker(self, worker):
-        worker.scanner = self
+        worker.producer = self
         worker.config = self.config
         worker.created = datetime.now()
         worker.cache_max = max(int(self.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -(self.config.get('SIGNAL_CACHE_MAX')))
