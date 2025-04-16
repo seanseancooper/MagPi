@@ -1,10 +1,9 @@
 import threading
-
-from src.trx.TRXProducer import TRXMQProducer
+from datetime import datetime, timedelta
 
 from src.config import readConfig
 from src.net.rabbitMQ.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
-
+from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
 import logging
 
 from src.trx.TRXWorker import TRXWorker
@@ -23,13 +22,28 @@ class TRXMQRetriever(threading.Thread):
         self.workers = []
         self.tracked_signals = {}
 
-        self.scanner = None                     # make configurable
-        self.consumer = None                    # make configurable
+        self.created = datetime.now()
+        self.updated = datetime.now()
+        self.elapsed = timedelta()              # elapsed time since created
+
+        self.producer = None
+        self.consumer = None
+        self.out = None
 
         self.stats = {}                         # new, not yet used
         self.parsed_signals = []                # signals represented as a list of dictionaries.
 
         self.DEBUG = False
+
+    def config_worker(self, worker):
+        worker.retriever = self
+        worker.config = self.config
+        worker.created = datetime.now()
+        worker.DEBUG = self.config.get('DEBUG', False)
+        worker.cache_max = max(
+            int(self.config.get('SIGNAL_CACHE_LOG_MAX', -5)),
+            -self.config.get('SIGNAL_CACHE_MAX', 150)
+        )
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
@@ -41,19 +55,16 @@ class TRXMQRetriever(threading.Thread):
 
         self.DEBUG = self.config.get('DEBUG')
 
-        self.start_scanner()
+        self.producer = RabbitMQProducer(self.config['TRX_QUEUE'])
         self.start_consumer()
-
-    def start_scanner(self):
-        self.scanner = TRXMQProducer()
-        self.scanner.configure('trx.json')
-        t = threading.Thread(target=self.scanner.run, daemon=True)
-        t.start()
 
     def start_consumer(self):
         self.consumer = RabbitMQAsyncConsumer(self.config['TRX_QUEUE'])
         t = threading.Thread(target=self.consumer.run, daemon=True)
         t.start()
+
+    def stop(self):
+        print("Retriever stopping...")
 
     def scan(self):
         """ scan MQ for messages """

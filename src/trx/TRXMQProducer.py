@@ -14,7 +14,6 @@ speech_logger = logging.getLogger('speech_logger')
 
 
 class TRXMQProducer(threading.Thread):
-
     """ MQTRXProducer class; poll the serial/USB for signals. """
     def __init__(self):
         super().__init__()
