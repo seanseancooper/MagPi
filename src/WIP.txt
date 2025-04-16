@@ -113,7 +113,7 @@ trx (TRXSignalPoint, RabbitMQ (object), ZeroMQ(Signal)):
 
 view (ViewController, REST):
     Integrate Kibana: blocker is elastic https
-    Integrate SDR: jupyterlite w/ matplotlib inline + custom javascript vertical waterfall served via node.
+    Integrate SDR: Bokeh, jupyterlite w/ matplotlib inline + custom javascript vertical waterfall served via node.
     rename to "VUU"???
 
 WX:
