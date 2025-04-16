@@ -1,11 +1,10 @@
 import threading
 from datetime import datetime, timedelta
-from contextlib import contextmanager
 from src.config import readConfig
+from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
 
 import logging
 
-from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
 
 logger_root = logging.getLogger('root')
 wifi_logger = logging.getLogger('wifi_logger')
@@ -19,13 +18,13 @@ class RabbitMQWifiScanner(threading.Thread):
         super().__init__()
 
         self.config = {}
-        self.retriever = None
 
         self.created = datetime.now()
         self.updated = datetime.now()
         self.elapsed = timedelta()              # elapsed time since created
         self.parsed_signals = []
 
+        self.retriever = None
         self.producer = None
 
     @staticmethod
@@ -53,7 +52,6 @@ class RabbitMQWifiScanner(threading.Thread):
     def parse_signals(self, readlines):
         self.parsed_signals = self.retriever.get_parsed_cells(readlines)
 
-    @contextmanager
     def run(self):
 
         self.created = datetime.now()
@@ -66,5 +64,5 @@ class RabbitMQWifiScanner(threading.Thread):
 
 if __name__ == '__main__':
     scanner = RabbitMQWifiScanner()
-    scanner.configure('wifi.json')
+    scanner.configure('net.json')
     scanner.run()

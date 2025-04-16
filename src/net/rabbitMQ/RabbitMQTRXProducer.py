@@ -1,37 +1,32 @@
 import threading
 from datetime import datetime, timedelta
-from contextlib import contextmanager
 from src.config import readConfig
+from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
+from src.trx.TRXWorker import TRXWorker
 
 import logging
 
-from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
-from src.trx.TRXWorker import TRXWorker
 
 logger_root = logging.getLogger('root')
 trx_logger = logging.getLogger('trx_logger')
 speech_logger = logging.getLogger('speech_logger')
 
 
-class TRXMQProducer(threading.Thread):
+class RabbitMQTRXProducer(threading.Thread):
     """ MQTRXProducer class; poll the serial/USB for signals. """
     def __init__(self):
         super().__init__()
 
         self.config = {}
-        self.worker_id = 'TRXMQProducer'
-        self.signal_cache = []
-        self.workers = []
-        self.tracked_signals = {}
-        self.out = None
+
+        self.worker_id = 'RabbitMQTRXProducer'
 
         self.created = datetime.now()
         self.updated = datetime.now()
         self.elapsed = timedelta()              # elapsed time since created
+        self.workers = []
+        self.tracked_signals = {}
 
-        self.polling_count = 0
-        self.lat = 0.0
-        self.lon = 0.0
         self.retriever = None
         self.producer = None
 
@@ -48,6 +43,20 @@ class TRXMQProducer(threading.Thread):
             trx_logger.fatal(f'no retriever found {e}')
             exit(1)
 
+    def configure(self, config_file):
+        readConfig(config_file, self.config)
+
+        golden_retriever = self.get_retriever("retrievers." + self.config['MQ-TRX_RETRIEVER'])
+        self.retriever = golden_retriever()
+        self.retriever.configure(config_file)
+
+        for freq in self.tracked_signals.keys():
+            worker = TRXWorker(freq)
+            self.config_worker(worker)
+            self.workers.append(worker)
+
+        self.producer = RabbitMQProducer(self.config['MQ_TRX_QUEUE'])
+
     def config_worker(self, worker):
         worker.retriever = self
         worker.config = self.config
@@ -58,25 +67,10 @@ class TRXMQProducer(threading.Thread):
             -self.config.get('SIGNAL_CACHE_MAX', 150)
         )
 
-    def configure(self, config_file):
-        readConfig(config_file, self.config)
-
-        golden_retriever = self.get_retriever("retrievers." + self.config['TRX_RETRIEVER'])
-        self.retriever = golden_retriever()
-        self.retriever.configure(config_file)
-
-        for freq in self.tracked_signals.keys():
-            worker = TRXWorker(freq)
-            self.config_worker(worker)
-            self.workers.append(worker)
-
-        self.producer = RabbitMQProducer(self.config['TRX_QUEUE'])
-
-    @contextmanager
     def run(self):
 
         self.created = datetime.now()
-        trx_logger.info('TRXMQProducer started')
+        speech_logger.info('MQ TRX scanner started')
 
         while True:
             scanned = self.retriever.scan()
@@ -84,6 +78,6 @@ class TRXMQProducer(threading.Thread):
                 self.producer.publish_message(scanned)
 
 if __name__ == '__main__':
-    producer = TRXMQProducer()
-    producer.configure('trx.json')
+    producer = RabbitMQTRXProducer()
+    producer.configure('net.json')
     producer.run()

@@ -1,24 +1,21 @@
 import threading
 from datetime import datetime, timedelta
-
 from src.config import readConfig
 from src.net.rabbitMQ.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
-from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
-import logging
-
 from src.trx.TRXWorker import TRXWorker
+
+import logging
 
 logger_root = logging.getLogger('root')
 trx_logger = logging.getLogger('trx_logger')
 
 
-class TRXMQRetriever(threading.Thread):
+class RabbitMQTRXConsumer(threading.Thread):
     """ MQ TRX Retriever class """
     def __init__(self):
         super().__init__()
 
         self.config = {}
-        self.interface = None
         self.workers = []
         self.tracked_signals = {}
 
@@ -26,14 +23,24 @@ class TRXMQRetriever(threading.Thread):
         self.updated = datetime.now()
         self.elapsed = timedelta()              # elapsed time since created
 
-        self.producer = None
+        self.retriever = None
         self.consumer = None
         self.out = None
 
-        self.stats = {}                         # new, not yet used
-        self.parsed_signals = []                # signals represented as a list of dictionaries.
-
         self.DEBUG = False
+
+    @staticmethod
+    def get_retriever(name):
+
+        try:
+            components = name.split('.')
+            mod = __import__(components[0])
+            for comp in components[1:]:
+                mod = getattr(mod, comp)
+            return mod
+        except AttributeError as e:
+            trx_logger.fatal(f'no retriever found {e}')
+            exit(1)
 
     def config_worker(self, worker):
         worker.retriever = self
@@ -48,6 +55,10 @@ class TRXMQRetriever(threading.Thread):
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
+        golden_retriever = self.get_retriever("retrievers." + self.config['MQ_TRX_RETRIEVER'])
+        self.retriever = golden_retriever()
+        self.retriever.configure(config_file)
+
         for freq in self.tracked_signals.keys():
             worker = TRXWorker(freq)
             worker.config_worker(self)
@@ -55,7 +66,6 @@ class TRXMQRetriever(threading.Thread):
 
         self.DEBUG = self.config.get('DEBUG')
 
-        self.producer = RabbitMQProducer(self.config['TRX_QUEUE'])
         self.start_consumer()
 
     def start_consumer(self):
@@ -73,3 +83,8 @@ class TRXMQRetriever(threading.Thread):
             return self.consumer.data or []
         except Exception as e:
             trx_logger.error(f"[{__name__}]: Exception: {e}")
+
+if __name__ == '__main__':
+    consumer = RabbitMQTRXConsumer()
+    consumer.configure('net.json')
+    consumer.scan()
