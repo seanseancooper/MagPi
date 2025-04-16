@@ -24,7 +24,7 @@
 			"SIGNAL_CACHE_MAX": 300
 		},
 		{
-			"TRX_RETRIEVER": "TRXMQRetriever"
+			"TRX_RETRIEVER": "TRXUSBRetriever"
 		},
 		{
 			"TRX_QUEUE": "trx_queue"
