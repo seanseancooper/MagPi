@@ -14,7 +14,7 @@ class TRXWorker:
     TRXWorker: match a radio frequency from the TRX-1 when it receives.
     These are 'intermittent' signals, not continuous ones.
     """
-
+    # idea: FEED SIGNALPOINT TEXT DATA INTO A LLM
 
     #     CAN I Spectral Analysis Features to Extract for Each Signal [scipy.signal, numpy.fft]:
     #     Feature                         : Description
