@@ -1,3 +1,5 @@
+keyword-spotter integration via remote model --> MCP
+
 3. Pattern Learning
 Use statistical or ML models to find structure:
     Clustering: Find recurring emission types or behaviors (DBSCAN, k-means)

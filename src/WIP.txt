@@ -4,10 +4,13 @@ arx (ARXSignalPoint, ZeroMQ):
     [DONE] ARXRecorder manufactures ARXSignalPoint.
     [DONE] ARXSignalPoint to output file.
     [IP] ARXSignalPoint ZeroMQ to ARXAudioEncoder
-    project-keyword-spotter integration? feasible, alt. solution
+    IDEA: project-keyword-spotter integration? feasible? alt. solution --> MCP
     Elasticsearch mappings?
     [IP] Processing germane to audio:back to original requirements + new ideas.
-    Local ML Models germane to audio.
+    IDEA: ML Models germane to audio, speech and sound analysis (AudioEncoder subproject)
+        text_attribute parsing
+        audio transcription: speech to text.
+        vocal 'stress' analysis.
 
     ARXEncoder
     Category        | Feature Examples
@@ -20,16 +23,16 @@ BLU:
 
 cam (FrameObjekt, RabbitMQ(events)?, ZeroMQ(images)):
     automate FrameObjektTracker output analysis: design a processing chain based on MQ.
-    Choose Models; hugging face.
+
     [IP] Encoding frames using FrameObjektEncoder: what fields are encoded, and how analyzed.
+        -  models @ huggingface.
     FrameObjekt ZeroMQ messaging: in progress.
     FrameObjektEncoder Elasticsearch mappings: on hold.
 
-    Integrate a Wifi security cameras as secondary source; hardcode it to IR.
+    Integrate a Wifi security IR camera as secondary source.
         - overlay processed IR images as outlines (see in the dark)
-    Integrate a hardware camera as tertiary source; perhaps a license plate reader.
-        - overlay processed IR images as outlines (see in the dark)
-
+    Integrate a hardware camera as tertiary source;
+        - perhaps a magnifiged ROI/license plate reader?
     Camera switching?
 
 CAN:
@@ -44,7 +47,7 @@ config:
 
 ebs:
     configure text logging
-    Speech Service client.
+    IDeA: Speech Service client using MCP?
 
 gps (MapAggregator, REST, class?):
     Trilaterator! Test data and map symbology.
@@ -65,7 +68,7 @@ ML:
 MOT[DELETED]
 
 net:
-    Directory structure for ElasticSearch:
+    Directory structure for ElasticSearch assets.
     ElasticSearch data mapping. Dense vectors, nested data, types
         what about EAVs, object/NoSQL?
     Dashboard URL in template: too where/what?
@@ -81,8 +84,8 @@ PSX:
 sdr (SDRSignalPoint, RabbitMQ(vector, text), ZeroMQ(Signal)):
     Receiver modifications: assignable frequency, bandwidth
 
-    A thing that looks at a block of spectrum, finds the peaks in the EM
-    and tunes an SDRWorker() reciever to the peak frequency, recording it as a Signal().
+    IDEA: A thing that looks at a block of spectrum, finds the peaks in the EM
+        and tunes an SDRWorker() receiver to the peak frequency, recording it as a Signal().
 
     [DONE] Encapsulate an SDR signal in a Signal type.
     SignalPoint processing zeroMQ
@@ -104,6 +107,7 @@ trx (TRXSignalPoint, RabbitMQ (object), ZeroMQ(Signal)):
     TRXUSBRetriever docker solution
     TRXSerialRetriever may be kaput on Mac? Verify this.
     TRXSignalPoint mappings
+    text_attribute/audio transcription.
 
     TRXEncoder
     Category        | Feature Examples
@@ -163,7 +167,7 @@ SignalPoint Hierarchy [DESIGN IN PROGRESS]:
 
     FrameObjekt: CAM Image Container.
 
-    1. Signal Sources as "Agents" [see notes in Worker];
+    1. Signal Sources as "Agents" -- idea: see Worker();
     Each emitter can be modeled as an agent with:
 
         Location (lat, lon)
