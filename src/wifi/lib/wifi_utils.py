@@ -130,7 +130,7 @@ def append_to_outfile(cls, config, cell):
                 "Encryption"  : cell['Encryption'],
                 "is_mute"     : cell['is_mute'],
                 "tracked"     : cell['tracked'],
-                "signal_cache": [pt.get() for pt in cls.scanner.signal_cache[cell['BSSID']]] [cls.cache_max:],
+                "signal_cache": [pt.get() for pt in cls.producer.signal_cache[cell['BSSID']]] [cls.cache_max:],
                 "tests"       : [x for x in cell['tests']]
     }
 

@@ -12,7 +12,7 @@ class WifiWorker:
 
     def __init__(self, bssid):
         self.config = {}
-        self.scanner = None
+        self.producer = None
         self.id = ''                    # filled if match(), based on BSSID; marks 'SignalPoint'.
         self.bssid = bssid              # MAC ADDRESS. used in object lookups and coloring UI
         self.ssid = ''                  # Human readable name of Wifi access point.
@@ -54,7 +54,7 @@ class WifiWorker:
                 "Encryption"    : self.is_encrypted,
                 "is_mute"       : self.is_mute,
                 "tracked"       : self.tracked,
-                "signal_cache"  : [pt.get() for pt in self.scanner.signal_cache[self.bssid]][self.cache_max:],
+                "signal_cache"  : [pt.get() for pt in self.producer.signal_cache[self.bssid]][self.cache_max:],
                 "frequency_features"  : self._signal_cache_frequency_features,
                 "tests"         : [x for x in self.test_results]
         }
@@ -152,9 +152,9 @@ class WifiWorker:
             # need to identify the test...
             # provides [{testname: result}, {...}]
             try:
-                tests = self.scanner.searchmap[self.bssid]['tests']
+                tests = self.producer.searchmap[self.bssid]['tests']
                 # return all results or only ones that passed?
-                self.return_all = self.scanner.searchmap[self.bssid]['return_all']
+                self.return_all = self.producer.searchmap[self.bssid]['return_all']
 
                 [[self.results.append(eval(str(v.strip() + t_v.strip()))) for t_k, t_v in tests.items() if k == t_k] for k, v in cell.items()]
 
@@ -178,10 +178,10 @@ class WifiWorker:
         """ updates *dynamic* fields"""
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
-        self.tracked = self.bssid in self.scanner.tracked_signals
-        self.scanner.make_signalpoint(self.id, self.bssid, int(sgnl.get('Signal', -99)))
+        self.tracked = self.bssid in self.producer.tracked_signals
+        self.producer.make_signalpoint(self.id, self.bssid, int(sgnl.get('Signal', -99)))
         self._signal_cache_frequency_features = self.extract_signal_cache_features(
-                [pt.getSgnl() for pt in self.scanner.signal_cache[self.bssid]]
+                [pt.getSgnl() for pt in self.producer.signal_cache[self.bssid]]
         )
 
     def get_signal_cache_frequency_features(self):
@@ -200,7 +200,7 @@ class WifiWorker:
         return mute(self)
 
     def signal_vec(self):
-        yield [pt.getSgnl() for pt in self.scanner.signal_cache[self.bssid]][self.cache_max:]
+        yield [pt.getSgnl() for pt in self.producer.signal_cache[self.bssid]][self.cache_max:]
 
     def auto_unmute(self):
         """ polled function to UNMUTE signals AUTOMATICALLY after the MUTE_TIME. """
@@ -212,13 +212,13 @@ class WifiWorker:
     def add(self, bssid):
 
         try:
-            worker = self.scanner.get_worker(bssid)
+            worker = self.producer.get_worker(bssid)
 
             if worker:
                 worker.tracked = True
-                self.scanner.tracked_signals.append(bssid)
-                if worker not in self.scanner.workers:
-                    self.scanner.workers.append(worker)
+                self.producer.tracked_signals.append(bssid)
+                if worker not in self.producer.workers:
+                    self.producer.workers.append(worker)
                 # SIGNAL: ADDED ITEM
                 return True
 
@@ -227,8 +227,8 @@ class WifiWorker:
             return False
 
     def remove(self, bssid):
-        _copy = self.scanner.tracked_signals.copy()
-        self.scanner.tracked_signals.clear()
+        _copy = self.producer.tracked_signals.copy()
+        self.producer.tracked_signals.clear()
         [self.add(remaining) for remaining in _copy if remaining != bssid]
         # SIGNAL: REMOVED ITEM
         return True
@@ -239,5 +239,5 @@ class WifiWorker:
 
     def run(self):
         """ match a BSSID and populate data """
-        [self.match(sgnl) for sgnl in self.scanner.parsed_signals]
+        [self.match(sgnl) for sgnl in self.producer.parsed_signals]
 
