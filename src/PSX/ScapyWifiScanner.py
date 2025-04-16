@@ -21,23 +21,24 @@ def signal_exit(signal, frame):
     print("Signal exit")
     sys.exit(1)
 
-
-def usage():
-    if len(sys.argv) < 3:
-        print("\nUsage:")
-        print("\twifi-scanner.py -i <interface>\n")
-        sys.exit(1)
-
+# def usage():
+#     if len(sys.argv) < 3:
+#         print("\nUsage:")
+#         print("\twifi-scanner.py -i <interface>\n")
+#         sys.exit(1)
 
 def sniffpackets(packet):
     try:
-        SRCMAC = packet[0].addr2
-        DSTMAC = packet[0].addr1
+        SRCMAC = packet[0].fields['src']
+        DSTMAC = packet[0].fields['dst']
         BSSID = packet[0].addr3
+        print(f'packet: {str(packet)}')
     except:
         print("Cannot read MAC address")
-        print(str(packet).encode("hex"))
-        sys.exc_clear()
+        # print(str(packet).encode("hex"))
+        print(str(packet))
+        # sys.exc_clear()
+        sys.exc_info()
 
     try:
         SSIDSize = packet[0][Dot11Elt].len
@@ -80,6 +81,7 @@ def sniffpackets(packet):
 def init_process():
     global ssid_list
     ssid_list = {}
+
     global s
     s = conf.L2socket(iface=newiface)
 
@@ -96,21 +98,19 @@ def setup_monitor(iface):
     return iface
 
 
-def check_root():
-    if not os.geteuid() == 0:
-        print("Run as root.")
-        exit(1)
+# def check_root():
+#     if not os.geteuid() == 0:
+#         print("Run as root.")
+#         exit(1)
 
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
-    usage()
-    check_root()
-    parameters = {sys.argv[1]: sys.argv[2]}
-    if "mon" not in str(parameters["-i"]):
-        newiface = setup_monitor(parameters["-i"])
-    else:
-        newiface = str(parameters["-i"])
+    # usage()
+    # check_root()
+
+    newiface = None
     init_process()
+
     print("Sniffing on interface " + str(newiface) + "...\n")
     sniff(iface=newiface, prn=sniffpackets, store=0)
