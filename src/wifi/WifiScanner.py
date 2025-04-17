@@ -1,7 +1,7 @@
 import threading
 import time
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 
 from flask.signals import Namespace
@@ -14,7 +14,7 @@ from src.lib.utils import write_to_scanlist, print_signals
 from src.wifi.lib.WifiSignalPoint import WifiSignalPoint
 from src.wifi.WifiWorker import WifiWorker
 
-from src.wifi.lib.WifiElasticMappingTransformer import ElasticIntegration as ElasticIntegration
+from src.wifi.lib.WifiElasticMappingTransformer import WifiElasticMappingTransformer as ElasticIntegration
 
 import logging
 
@@ -53,6 +53,7 @@ class WifiScanner(threading.Thread):
         self.sort_order = "Signal"              # sort order for printed output; consider not support printing.
         self.reverse = False                    # reverse the sort...
 
+        self.tz = None                          # NEW: timezone
         self.created = datetime.now()
         self.updated = datetime.now()
         self.elapsed = timedelta()              # elapsed time since created
@@ -89,6 +90,7 @@ class WifiScanner(threading.Thread):
         self.DEBUG = self.config['DEBUG']
         self.OUTDIR = self.config['OUTFILE_PATH']
         self.signal_cache_max = self.config.get('SIGNAL_CACHE_MAX', self.signal_cache_max)
+        self.tz = timezone(timedelta(hours=self.config['INDEX_TIMEDELTA']), name=self.config['INDEX_TZ'])
 
         # IDEA: worker append itself when created.
         [self.workers.append(WifiWorker(BSSID)) for BSSID in self.searchmap.keys()]
@@ -214,8 +216,8 @@ class WifiScanner(threading.Thread):
         while True:
 
             self.stats = {
-                'created'      : format_time(self.created, self.config['TIME_FORMAT']),
-                'updated'      : format_time(self.updated, self.config['TIME_FORMAT']),
+                'created'      : format_time(self.created.astimezone(self.tz).isoformat(), self.config['TIME_FORMAT']),
+                'updated'      : format_time(self.updated.astimezone(self.tz).isoformat(), self.config['TIME_FORMAT']),
                 'elapsed'      : format_delta(self.elapsed, self.config['TIME_FORMAT']),
                 'polling_count': self.polling_count,
                 'lat'          : self.lat,
@@ -258,7 +260,7 @@ class WifiScanner(threading.Thread):
                     speech_logger.info(f'{len(self.parsed_signals)} signals, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
 
                 print(f"WifiScanner [{self.polling_count}] "
-                      f"{format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
+                      f"{format_time(datetime.now().astimezone(self.tz).isoformat(), self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
                       f"{format_delta(self.elapsed, self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
                       f"{len(self.parsed_signals)} signals, "
                       f"{len(self.tracked_signals)} tracked, "

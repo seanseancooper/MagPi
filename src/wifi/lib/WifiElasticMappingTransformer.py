@@ -1,7 +1,7 @@
 import json
 from datetime import datetime, timedelta, timezone
 from src.net.elastic.ElasticClientProvider import ElasticClient as ElasticClient
-from src.net.lib.net_utils import WifiWorkerParser
+from WifiWorkerParser import WifiWorkerParser
 from src.config import readConfig
 
 
@@ -12,7 +12,7 @@ class WifiElasticMappingTransformer:
         self.client = None
         self.worker_index_mapping = None
         self.signals_index_mapping = None
-        self.tz = None                      # this needs too move UP so everybody can have tz
+        self.tz = None
         self._seen = []
         self.config = {}
 
@@ -47,7 +47,6 @@ class WifiElasticMappingTransformer:
             "Quality"  : int(worker_data['Quality']),
 
             "is_mute": worker_data['is_mute'],
-            # "signal_cache": self.get_doc(signal_data[-1])
             "signal_cache": [self.get_signalpoint(signal) for signal in signal_data]
         }
 
@@ -82,7 +81,6 @@ class WifiElasticMappingTransformer:
                     "Signal"   : int(worker_data['Signal']),
                     "Quality"  : int(worker_data['Quality']),
                     "signal_cache": [self.get_signalpoint(signal) for signal in signal_data]
-                    # "signal_cache": [signal for signal in signal_data]
                 }
 
                 # Index worker document
@@ -94,7 +92,7 @@ class WifiElasticMappingTransformer:
 
     def get_signalpoint(self, sgnl):
 
-        # transform created representations to have a timezone
+        # transforms created representations to have a timezone
         sgnl_created_time = datetime.strptime(sgnl["created"], "%Y-%m-%d %H:%M:%S")
         sgnl["created"] = sgnl_created_time.astimezone(self.tz).isoformat()
 
