@@ -1,2 +1,7 @@
 # we are not decrypting encrypted data, but a PyShark
-# module is something that could be added
+# module is something that could be added.
+#
+# Added ScapyScanner: this works, need understand hw I want to use it if ar all. This
+# Scapy is designed to create network attacks; that's not the focus, but one possible
+# use for this tool.
+#
