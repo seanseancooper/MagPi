@@ -12,7 +12,7 @@ trx_logger = logging.getLogger('trx_logger')
 speech_logger = logging.getLogger('speech_logger')
 
 
-class RabbitMQTRXProducer(threading.Thread):
+class RabbitMQTRXScanner(threading.Thread):
     """ MQTRXProducer class; poll the serial/USB for signals. """
     def __init__(self):
         super().__init__()
@@ -78,6 +78,6 @@ class RabbitMQTRXProducer(threading.Thread):
                 self.producer.publish_message(scanned)
 
 if __name__ == '__main__':
-    producer = RabbitMQTRXProducer()
-    producer.configure('net.json')
-    producer.run()
+    scanner = RabbitMQTRXScanner()
+    scanner.configure('net.json')
+    scanner.run()

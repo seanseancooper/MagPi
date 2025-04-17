@@ -43,11 +43,11 @@ class RabbitMQWifiScanner(threading.Thread):
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
-        golden_retriever = self.get_retriever("retrievers." + self.config['WIFI_RETRIEVER'])
+        golden_retriever = self.get_retriever("retrievers." + self.config['MQ_WIFI_RETRIEVER'])
         self.retriever = golden_retriever()
         self.retriever.configure(config_file)
 
-        self.producer = RabbitMQProducer(self.config['WIFI_QUEUE'])
+        self.producer = RabbitMQProducer(self.config['MQ_WIFI_QUEUE'])
 
     def parse_signals(self, readlines):
         self.parsed_signals = self.retriever.get_parsed_cells(readlines)
