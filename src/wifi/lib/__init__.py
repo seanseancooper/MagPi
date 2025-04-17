@@ -1,1 +1,1 @@
-from ElasticIntegration import ElasticIntegration
+from WifiElasticMappingTransformer import ElasticIntegration

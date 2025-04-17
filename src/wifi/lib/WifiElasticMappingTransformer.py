@@ -5,14 +5,14 @@ from src.net.lib.net_utils import WifiWorkerParser
 from src.config import readConfig
 
 
-class ElasticIntegration:
+class WifiElasticMappingTransformer:
 
     def __init__(self):
 
         self.client = None
         self.worker_index_mapping = None
         self.signals_index_mapping = None
-        self.tz = None
+        self.tz = None                      # this needs too move UP so everybody can have tz
         self._seen = []
         self.config = {}
 
@@ -146,7 +146,7 @@ class ElasticIntegration:
 
 if __name__ == '__main__':
 
-    e = ElasticIntegration()
+    e = WifiElasticMappingTransformer()
     it = WifiWorkerParser
     e.configure()
     # push 'training data' into elastic.
