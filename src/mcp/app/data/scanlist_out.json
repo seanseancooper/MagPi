@@ -1,0 +1,120 @@
+[
+  {
+  "id": "00254dead00",
+  "SSID": "Alpha",
+  "BSSID": "00:25:42:DE:AD:00",
+  "created": "2025-04-01 20:29:19",
+  "updated": "2025-04-01 20:36:06",
+  "elapsed": "00:06:46",
+  "Vendor": "Pittasoft",
+  "Channel": 1,
+  "Frequency": 1041,
+  "Signal": -33,
+  "Quality": 69,
+  "Encryption": true,
+  "is_mute": false,
+  "tracked": true,
+  "signal_cache": [
+       {
+    "created": "2025-03-13 11:33:59",
+    "id": "c97b2f3f-b4a1-4649-a5ee-8603f2bc768e",
+    "worker_id": "00254dead00",
+    "lon": -105.067966,
+    "lat": 39.917161,
+    "sgnl": -99
+   },
+   {
+    "created": "2025-03-13 11:34:03",
+    "id": "873a8545-a72a-46a2-997f-ed6afe1f14c5",
+    "worker_id": "00254dead00",
+    "lon": -105.068147,
+    "lat": 39.917045,
+    "sgnl": -69
+   },
+   {
+    "created": "2025-03-13 11:34:08",
+    "id": "6f5f1efd-cb9d-4269-a1cc-c7f3d149f1ca",
+    "worker_id": "00254dead00",
+    "lon": -105.068295,
+    "lat": 39.916938,
+    "sgnl": -79
+   },
+   {
+    "created": "2025-03-13 11:34:13",
+    "id": "454638ce-25e9-4dca-b427-5f5535e4e7b6",
+    "worker_id": "00254dead00",
+    "lon": -105.068486,
+    "lat": 39.916797,
+    "sgnl": -89
+   },
+   {
+    "created": "2025-03-13 11:34:18",
+    "id": "02accb46-b11b-42ec-8ae4-0dcfa33d8df5",
+    "worker_id": "00254dead00",
+    "lon": -105.068668,
+    "lat": 39.916763,
+    "sgnl": -99
+   }
+  ],
+  "tests": []
+},
+  {
+  "id": "00254dead01",
+  "SSID": "Bravo",
+  "BSSID": "00:25:42:DE:AD:01",
+  "created": "2025-04-01 20:29:19",
+  "updated": "2025-04-01 20:36:06",
+  "elapsed": "00:06:46",
+  "Vendor": "Pittasoft",
+  "Channel": 1,
+  "Frequency": 1041,
+  "Signal": -33,
+  "Quality": 69,
+  "Encryption": true,
+  "is_mute": false,
+  "tracked": true,
+  "signal_cache": [
+   {
+    "created": "2025-03-13 11:33:59",
+    "id": "432a2c0e-6162-4492-b298-815e65f2dad8",
+    "worker_id": "00254dead01",
+    "lon": -105.067966,
+    "lat": 39.917161,
+    "sgnl": -59
+   },
+   {
+    "created": "2025-03-13 11:34:03",
+    "id": "0613fa50-d81e-48ad-a253-a8ebc77a6c23",
+    "worker_id": "00254dead01",
+    "lon": -105.068147,
+    "lat": 39.917045,
+    "sgnl": -59
+   },
+   {
+    "created": "2025-03-13 11:34:08",
+    "id": "000f4ef5-fed2-47d6-8f5a-30b143530d22",
+    "worker_id": "00254dead01",
+    "lon": -105.068295,
+    "lat": 39.916938,
+    "sgnl": -58
+   },
+   {
+    "created": "2025-03-13 11:34:13",
+    "id": "8add1a8a-a5b8-41c2-9afe-61941d9beb6d",
+    "worker_id": "00254dead01",
+    "lon": -105.068486,
+    "lat": 39.916797,
+    "sgnl": -59
+   },
+   {
+    "created": "2025-03-13 11:34:18",
+    "id": "7fdd47b0-8d21-423e-ad2d-32525296c29b",
+    "worker_id": "00254dead01",
+    "lon": -105.068668,
+    "lat": 39.916763,
+    "sgnl": -59
+   }
+  ],
+  "tests": []
+}
+]

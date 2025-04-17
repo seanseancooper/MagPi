@@ -1,4 +1,4 @@
-keyword-spotter integration via remote model --> MCP
+keyword-spotter integration via remote model --> MCP (perhaps)
 
 3. Pattern Learning
 Use statistical or ML models to find structure:
@@ -24,5 +24,4 @@ Once models learn normal behavior:
     #     Markov Chains or Bayesian Networks to model expected vs. unexpected sequences
     #     Anomaly detection for spotting new patterns (e.g., movement prep)
 
-
-See also MCP integrations in DEV folder.
+See new MCP integration basic structure.
