@@ -14,7 +14,7 @@ from src.lib.utils import write_to_scanlist, print_signals
 from src.wifi.lib.WifiSignalPoint import WifiSignalPoint
 from src.wifi.WifiWorker import WifiWorker
 
-from src.wifi.lib.WifiElasticMappingTransformer import WifiElasticMappingTransformer as ElasticIntegration
+from src.net.elastic.ElasticMappingTransformer import ElasticMappingTransformer as ElasticIntegration
 
 import logging
 

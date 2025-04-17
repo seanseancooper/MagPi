@@ -1,1 +1,1 @@
-from WifiElasticMappingTransformer import ElasticIntegration
+from src.net.elastic.ElasticMappingTransformer import ElasticMappingTransformer

@@ -25,7 +25,7 @@
 			"INTERFACE": "wlan0"
 		},
 		{
-			"SCAN_TIMEOUT": 2
+			"SCAN_TIMEOUT": 1
 		},
 		{
 			"VIEW_TIMEOUT": 30
@@ -50,6 +50,109 @@
 		},
 		{
 			"return_all": true
+		},
+		{
+			"WORKER_INDEX_MAPPING": {
+				"mappings": {
+					"properties": {
+						"id"          : {"type": "keyword"},
+						"SSID"        : {"type": "wildcard"},
+						"BSSID"       : {"type": "wildcard"},
+						"created"     : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
+						"updated"     : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
+						"elapsed"     : {"type": "date", "format": "HH:mm:ss"},
+						"Vendor"      : {"type": "keyword"},
+						"Channel"     : {"type": "integer"},
+						"Frequency"   : {"type": "integer"},
+						"Signal"      : {"type": "integer"},
+						"Quality"     : {"type": "integer"},
+						"Encryption"  : {"type": "boolean"},
+						"is_mute"     : {"type": "boolean"},
+						"tracked"     : {"type": "boolean"},
+						"signal_cache": {
+							"type"      : "nested",
+							"properties": {
+								"created"  : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
+								"id"       : {"type": "keyword"},
+								"worker_id": {"type": "keyword"},
+								"location" : {"type": "geo_point"},
+								"sgnl"     : {"type": "integer"}
+							}
+						},
+						"tests"       : {"type": "keyword"}
+					}
+				}
+			}
+		},
+		{
+			"WORKER_VECTOR_INDEX_MAPPING": {
+				"mappings": {
+					"properties": {
+						"id"			: { "type": "keyword" },
+						"SSID"			: { "type": "keyword" },
+						"BSSID"			: { "type": "keyword" },
+						"created"		: { "type": "date", "format": "yyyy-MM-dd HH:mm:ss" },
+						"updated"		: { "type": "date", "format": "yyyy-MM-dd HH:mm:ss" },
+						"elapsed"		: { "type": "date", "format": "HH:mm:ss" },
+						"Vendor"		: { "type": "keyword" },
+						"Channel"		: { "type": "integer" },
+						"Frequency"		: { "type": "integer" },
+						"Signal"		: { "type": "integer" },
+						"Quality"		: { "type": "integer" },
+						"Encryption"	: { "type": "boolean" },
+						"is_mute"		: { "type": "boolean" },
+						"tracked"		: { "type": "boolean" },
+						"signal_cache"	: {
+						"type"			: "nested",
+							"properties": {
+								"created"	: { "type": "date", "format": "yyyy-MM-dd HH:mm:ss" },
+								"id"		: { "type": "keyword" },
+								"worker_id"	: { "type": "keyword" },
+								"location"	: { "type": "geo_point" },
+								"sgnl"		: {
+									"type": "dense_vector",
+									"dims": 1
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"SIGNALS_INDEX_MAPPING": {
+				"mappings": {
+					"properties": {
+						"created"  : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
+						"id"       : {"type": "keyword"},
+						"worker_id": {"type": "keyword"},
+						"location" : {"type": "geo_point"},
+						"sgnl"     : {"type": "integer"}
+					}
+				}
+			}
+		},
+		{
+			"SIGNALS_VECTOR_INDEX_MAPPING": {
+			  	"mappings": {
+					"properties": {
+						"created"	: { "type": "date", "format": "yyyy-MM-dd HH:mm:ss" },
+						"id"		: { "type": "keyword" },
+						"worker_id"	: { "type": "keyword" },
+						"location"	: { "type": "geo_point" },
+						"sgnl": {
+							"type": "dense_vector",
+							"dims": 1
+						}
+					}
+				}
+			}
+		},
+		{
+			"INDEX_TIMEDELTA": 6
+		},
+		{
+			"INDEX_TZ": "MST"
 		},
 		{
 			"COLUMNS": [
