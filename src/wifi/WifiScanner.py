@@ -14,6 +14,8 @@ from src.lib.utils import write_to_scanlist, print_signals
 from src.wifi.lib.WifiSignalPoint import WifiSignalPoint
 from src.wifi.WifiWorker import WifiWorker
 
+from src.wifi.lib.ElasticIntegration import ElasticIntegration as ElasticIntegration
+
 import logging
 
 wifi_signals = Namespace()
@@ -204,24 +206,29 @@ class WifiScanner(threading.Thread):
 
         self.created = datetime.now()
 
-        self.stats = {
-            'created'      : format_time(self.created, self.config['TIME_FORMAT']),
-            'updated'      : format_time(self.updated, self.config['TIME_FORMAT']),
-            'elapsed'      : format_delta(self.elapsed, self.config['TIME_FORMAT']),
-            'polling_count': self.polling_count,
-            'lat'          : self.lat,
-            'lon'          : self.lon,
-            'workers'      : len(self.workers),
-            'tracked'      : len(self.tracked_signals),
-            'ghosts'       : len(self.ghost_signals),
-        }
-
         wifi_started.send(self)
         speech_logger.info('wifi started')
+        integ = ElasticIntegration()
+        integ.configure()
 
         while True:
 
+            self.stats = {
+                'created'      : format_time(self.created, self.config['TIME_FORMAT']),
+                'updated'      : format_time(self.updated, self.config['TIME_FORMAT']),
+                'elapsed'      : format_delta(self.elapsed, self.config['TIME_FORMAT']),
+                'polling_count': self.polling_count,
+                'lat'          : self.lat,
+                'lon'          : self.lon,
+                'workers'      : len(self.workers),
+                'tracked'      : len(self.tracked_signals),
+                'ghosts'       : len(self.ghost_signals),
+            }
+
             scanned = self.retriever.scan()
+
+            if integ and len(self.tracked_signals) > 0:
+                integ.push(self.tracked_signals)
 
             if len(scanned) > 0:
                 self.parse_signals(scanned)

@@ -1,11 +1,11 @@
 import json
 from datetime import datetime, timedelta, timezone
-from elasticsearch import Elasticsearch
+from src.net.elastic.ElasticClientProvider import ElasticClient as ElasticClient
 from src.net.lib.net_utils import WifiWorkerParser
 from src.config import readConfig
 
 
-class ElasticSearchIntegration:
+class ElasticIntegration:
 
     def __init__(self):
 
@@ -17,29 +17,21 @@ class ElasticSearchIntegration:
         self.config = {}
 
     def configure(self):
-        readConfig('net.json', self.config)
-        try:
-            self.client = Elasticsearch(
-                    self.config['ELASTIC_HOST'],
-                    ca_certs=self.config['ELASTIC_CERT'],
-                    basic_auth=(self.config['ELASTIC_USERNAME'], self.config['ELASTIC_PASSWORD']),
-            )
-        except ConnectionRefusedError:
-            pass
+
+        readConfig('wifi.json', self.config)
+
+        provider = ElasticClient()
+        self.client = provider.get_client('net.json')
 
         self.worker_index_mapping = self.config['WORKER_INDEX_MAPPING']
         self.signals_index_mapping = self.config['SIGNALS_INDEX_MAPPING']
         self.tz = timezone(timedelta(hours=self.config['INDEX_TIMEDELTA']), name=self.config['INDEX_TZ'])
 
         if self.client:
-            print(f"Connected to Elasticsearch: {self.client.info()}")
             # Create workers index, ignore warning that it exists.
             self.client.indices.create(index='workers', body=self.worker_index_mapping, ignore=400)
-        else:
-            print(f"Failed to connect to Elasticsearch. It is online?")
-            exit(1)
 
-    def update_worker(self, worker_data, signal_data):
+    def update_wifi_worker(self, worker_data, signal_data):
 
         # transform 'updated' representation to have a timezone
         worker_updated_time = datetime.strptime(worker_data['updated'], self.config['DATETIME_FORMAT'])
@@ -56,7 +48,7 @@ class ElasticSearchIntegration:
 
             "is_mute": worker_data['is_mute'],
             # "signal_cache": self.get_doc(signal_data[-1])
-            "signal_cache": [self.get_doc(signal) for signal in signal_data]
+            "signal_cache": [self.get_signalpoint(signal) for signal in signal_data]
         }
 
         worker_index = f"worker_{worker_data['id']}"
@@ -70,7 +62,7 @@ class ElasticSearchIntegration:
             signal_data = parser.get_signal_data()
 
             if worker_data['id'] in self._seen:
-                self.update_worker(worker_data, signal_data)
+                self.update_wifi_worker(worker_data, signal_data)
             else:
                 # Insert worker data
                 worker_id = worker_data['id']
@@ -89,7 +81,7 @@ class ElasticSearchIntegration:
                     "Frequency": int(worker_data['Frequency']),
                     "Signal"   : int(worker_data['Signal']),
                     "Quality"  : int(worker_data['Quality']),
-                    "signal_cache": [self.get_doc(signal) for signal in signal_data]
+                    "signal_cache": [self.get_signalpoint(signal) for signal in signal_data]
                     # "signal_cache": [signal for signal in signal_data]
                 }
 
@@ -100,7 +92,7 @@ class ElasticSearchIntegration:
                 signals_index = f"{worker_data['id']}_signals"
                 self.client.indices.create(index=signals_index, body=self.signals_index_mapping, ignore=400)
 
-    def get_doc(self, sgnl):
+    def get_signalpoint(self, sgnl):
 
         # transform created representations to have a timezone
         sgnl_created_time = datetime.strptime(sgnl["created"], "%Y-%m-%d %H:%M:%S")
@@ -127,7 +119,7 @@ class ElasticSearchIntegration:
             def _index(idx, sgnl):
                 """ index, signalpoint """
 
-                signal_doc = self.get_doc(sgnl)
+                signal_doc = self.get_signalpoint(sgnl)
                 self.client.index(index=idx, id=sgnl["id"], document=signal_doc)
 
             if worker_data['id'] in self._seen:
@@ -141,17 +133,10 @@ class ElasticSearchIntegration:
         try:
             self.process_workers(data)
             self.process_signals(data)
-            print(f"Data pushed successfully: {datetime.now().astimezone(self.tz).isoformat()}")
+            print(f"Data pushed: {datetime.now().astimezone(self.tz).isoformat()}")
         except Exception as ex:
             print(f"Data push failed: {ex}")
-
-        # Save index requests for debugging
-        # print(f"Export located @ {self.config['OUTFILE_PATH']}")
-        # with open(os.path.abspath(self.config['OUTFILE_PATH']) + "/" + self.config['OUT_FILE'], 'w') as f:
-        #     f.write("\n".join(self.index_requests))
-
-        # with open('/Users/scooper/PycharmProjects/MagPi/src/net/signals_requests.json', 'w') as f:
-        #     f.write("\n".join(self.signals_requests))
+            exit(1)
 
     def pull(self, mod='wifi'):
         # get current list of elastic worker_id indexes from elastic (less 201s)
@@ -159,12 +144,12 @@ class ElasticSearchIntegration:
         # run queries and get data.
         pass
 
-
 if __name__ == '__main__':
 
-    e = ElasticSearchIntegration()
+    e = ElasticIntegration()
+    it = WifiWorkerParser
     e.configure()
     # push 'training data' into elastic.
-    with open('/Users/scooper/PycharmProjects/MagPi/dev/wifi/training_data/scanlists_out.json', 'r') as f:
+    with open('/dev/wifi/training_data/scanlists_out.json', 'r') as f:
         data = json.load(f)
-        e.push(data)
+        e.client.push(data)

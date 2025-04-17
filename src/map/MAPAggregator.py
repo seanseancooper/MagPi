@@ -6,8 +6,6 @@ import time
 from datetime import datetime, timedelta
 import requests
 
-from src.net.ElasticSearchIntegration import ElasticSearchIntegration
-
 from src.config import CONFIG_PATH, readConfig
 import logging
 map_logger = logging.getLogger('gps_logger')
@@ -52,9 +50,6 @@ class MAPAggregator(threading.Thread):
             self.modules.append(mod)
             readConfig(os.path.basename(module_config), self.module_configs[mod])
 
-        # self.elastic = ElasticSearchIntegration()
-        # self.elastic.configure()
-
     def register_modules(self):
         """ discover 'live' module REST contexts """
         self.live_modules.clear()
@@ -76,9 +71,6 @@ class MAPAggregator(threading.Thread):
             data = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
             if data.ok:
                 self.module_data[mod] = data.json()
-                # if self.elastic:
-                #     self.elastic.push(self.module_data[mod])
-                #     self.elastic.pull(mod)
         except Exception as e:
             map_logger.warning(f'Data Aggregator Warning [{mod}]! {e}')
 
