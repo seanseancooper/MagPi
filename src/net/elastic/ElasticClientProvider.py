@@ -15,19 +15,35 @@ class ElasticClient:
 
         global client
         readConfig(config_file, self.config)
-
-        try:
+        test = Elasticsearch(
+                self.config['ELASTIC_HOST'],
+                ca_certs=self.config['ELASTIC_CERT'],
+                basic_auth=(self.config['ELASTIC_USERNAME'], self.config['ELASTIC_PASSWORD']),
+                max_retries=0,
+        )
+        if test.ping():
             client = Elasticsearch(
                     self.config['ELASTIC_HOST'],
                     ca_certs=self.config['ELASTIC_CERT'],
                     basic_auth=(self.config['ELASTIC_USERNAME'], self.config['ELASTIC_PASSWORD']),
+                    # request_timeout=3.0,
+                    # dead_node_backoff_factor=1.0,
+                    # max_dead_node_backoff=float,
+                    max_retries=2,
+                    # retry_on_status=int,
+                    # retry_on_timeout=bool,
+                    # sniff_on_start =False,
+                    # sniff_before_requests=bool,
+                    # sniff_on_node_failure=False,
+                    # sniff_timeout=float,
+                    # min_delay_between_sniffing=float,
+                    # timeout=3.0,
+                    # sniffer_timeout=float,
+                    # sniff_on_connection_fail=bool,
             )
 
-            if client:
+            if client.info():
                 print(f"Connected to Elasticsearch: {client.info()}")
                 return client
-            else:
-                print(f"Failed to connect to Elasticsearch. It is online?")
-
-        except ConnectionRefusedError:
-            pass
+        else:
+            print(f"Elasticsearch is offline!")
