@@ -22,7 +22,7 @@
 			"ELASTIC_USERNAME": "elastic"
 		},
 		{
-			"ELASTIC_PASSWORD": "EnAfNe5Xo=rlbzn__HOK"
+			"ELASTIC_PASSWORD": "K9EQVoq98+T7bJGzAgIv"
 		},
 		{
 			"ELASTIC_DASHBOARD_URL": "https://localhost:5601/app/dashboards#/view/9356de6a-e03a-4482-ae21-46ffe2de6d79?embed=true&_g=(refreshInterval%3A(pause%3A!t%2Cvalue%3A60000)%2Ctime%3A(from%3Anow-1h%2Cto%3Anow))&show-query-input=true&show-time-filter=true"
