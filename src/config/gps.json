@@ -33,7 +33,7 @@
 			"TEST_FILE": "./lib/TEST_FILE.txt"
 		},
 		{
-			"RETRIEVER_METHOD": "JSGPSRetriever"
+			"RETRIEVER_METHOD": "DummyGPSRetriever"
 		},
 		{
 			"RETRIEVER_TIMEOUT": 1
