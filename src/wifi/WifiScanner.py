@@ -218,8 +218,8 @@ class WifiScanner(threading.Thread):
         while True:
 
             self.stats = {
-                'created'      : format_time(self.created.astimezone(self.tz).isoformat(), self.config['TIME_FORMAT']),
-                'updated'      : format_time(self.updated.astimezone(self.tz).isoformat(), self.config['TIME_FORMAT']),
+                'created'      : format_time(self.created, self.config['TIME_FORMAT']),
+                'updated'      : format_time(self.updated, self.config['TIME_FORMAT']),
                 'elapsed'      : format_delta(self.elapsed, self.config['TIME_FORMAT']),
                 'polling_count': self.polling_count,
                 'lat'          : self.lat,
@@ -232,7 +232,10 @@ class WifiScanner(threading.Thread):
             scanned = self.retriever.scan()
 
             if integ and len(self.tracked_signals) > 0:
-                integ.push(self.tracked_signals)
+                integ.push(
+                    # push tracked Workers, not just worker_id.
+                    [sgnl for sgnl in self.get_parsed_signals() if sgnl['tracked'] is True]
+                )
 
             if len(scanned) > 0:
                 self.parse_signals(scanned)
