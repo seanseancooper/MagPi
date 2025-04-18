@@ -13,10 +13,7 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
-			"SCANNER_RETRIEVER": "MQWifiRetriever"
-		},
-		{
-			"WIFI_RETRIEVER": "MacOSAirportWifiRetriever"
+			"SCANNER_RETRIEVER": "MacOSAirportWifiRetriever"
 		},
 		{
 			"WIFI_QUEUE": "wifi_queue"
