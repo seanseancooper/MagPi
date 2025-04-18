@@ -13,6 +13,7 @@ from src.lib.utils import get_location, format_time, format_delta
 from src.lib.utils import write_to_scanlist, print_signals
 from src.wifi.lib.WifiSignalPoint import WifiSignalPoint
 from src.wifi.WifiWorker import WifiWorker
+from src.wifi.lib.WifiWorkerParser import WifiWorkerParser
 
 from src.net.elastic.ElasticMappingTransformer import ElasticMappingTransformer as ElasticIntegration
 
@@ -210,8 +211,9 @@ class WifiScanner(threading.Thread):
 
         wifi_started.send(self)
         speech_logger.info('wifi started')
-        integ = ElasticIntegration()
-        integ.configure()
+
+        integ = ElasticIntegration(WifiWorkerParser)
+        integ.configure('wifi.json')
 
         while True:
 
@@ -260,7 +262,7 @@ class WifiScanner(threading.Thread):
                     speech_logger.info(f'{len(self.parsed_signals)} signals, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
 
                 print(f"WifiScanner [{self.polling_count}] "
-                      f"{format_time(datetime.now().astimezone(self.tz).isoformat(), self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
+                      f"{format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
                       f"{format_delta(self.elapsed, self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
                       f"{len(self.parsed_signals)} signals, "
                       f"{len(self.tracked_signals)} tracked, "
