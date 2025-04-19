@@ -40,7 +40,7 @@ const requestListener = (req, res) => {
 
 const server = http.createServer(requestListener);
 
-// set this host:port using config
+//todo: set this host:port using config; perhaps this is index.js.j2 and a template??
 let server_host = 'localhost';
 let server_port = 3000;
 

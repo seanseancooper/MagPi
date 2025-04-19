@@ -125,7 +125,7 @@ class GPSRetriever(threading.Thread):
 
         while True:
             time.sleep(self.config.get('RETRIEVER_TIMEOUT', 1))
-            res = requests.get('http://localhost:3000')
+            res = requests.get('http://localhost:3000')             # todo: make configurable [JSGPSRetriever_endpoint]
             result = json.loads(res.text)
 
             self.result = {"lat": result['lat'],
