@@ -28,11 +28,11 @@ def kills_pids_and_kids(pid):
         ps = psutil.Process(pid)
         [_.send_signal(signal.SIGTERM) for _ in ps.children(recursive=True)]
         ps.terminate()
-        gps_logger.info(f"pid {pid} killed.")
+        gps_logger.info(f"[{__name__}]: pid {pid} killed.")
         return True
 
     except psutil.NoSuchProcess:
-        gps_logger.warning(f"Failed to find pid:{pid} to kill.")
+        gps_logger.warning(f"[{__name__}]: Failed to find pid:{pid} to kill.")
 
 
 
