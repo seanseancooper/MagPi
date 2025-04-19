@@ -35,7 +35,7 @@ class Scanner(threading.Thread):
         self.signal_cache_max = 160             # max size of these lists of SignalPoint. overridden via config
 
         self.blacklist = {}                     # ignored signals
-        self.sort_order = "Signal"              # sort order for printed output; consider not support printing.
+        self.sort_order = None                  # sort order for printed output; consider not support printing.
         self.reverse = False                    # reverse the sort...
 
         self.created = datetime.now()
@@ -43,12 +43,14 @@ class Scanner(threading.Thread):
         self.elapsed = timedelta()              # elapsed time since created
         self.polling_count = 0                  # iterations in this run.
 
-        self.lat = 0.0                     # this lat; used in SignalPoint creation
-        self.lon = 0.0                    # this lon; used in SignalPoint creation
+        self.lat = 0.0                          # this lat; used in SignalPoint creation
+        self.lon = 0.0                          # this lon; used in SignalPoint creation
 
         self._OUTFILE = None
         self.OUTDIR = None
         self.DEBUG = False
+        self.SIGNAL_IDENT_FIELD = None
+        self.SIGNAL_STRENGTH_FIELD = None
 
     @staticmethod
     def get_retriever(name):
@@ -69,11 +71,16 @@ class Scanner(threading.Thread):
         golden_retriever = self.get_retriever("retrievers." + self.config['SCANNER_RETRIEVER'])
         self.retriever = golden_retriever()
         self.retriever.configure(config_file)
+
         self.searchmap = self.config['SEARCHMAP']
         self.blacklist = self.config['BLACKLIST']
         self.DEBUG = self.config['DEBUG']
         self.OUTDIR = self.config['OUTFILE_PATH']
         self.signal_cache_max = self.config.get('SIGNAL_CACHE_MAX', self.signal_cache_max)
+
+        self.SIGNAL_IDENT_FIELD = 'BSSID'
+        self.SIGNAL_STRENGTH_FIELD = 'Signal'
+        self.sort_order = self.SIGNAL_STRENGTH_FIELD
 
         [self.workers.append(Worker(ID)) for ID in self.searchmap.keys()]
         [worker.config_worker(self) for worker in self.workers]
@@ -105,7 +112,7 @@ class Scanner(threading.Thread):
     def update_ghosts(self):
         """ find, load and update ghosts """
         tracked = frozenset([x for x in self.tracked_signals])
-        parsed = frozenset([key['id'] for key in self.parsed_signals])
+        parsed = frozenset([key[f'{self.SIGNAL_IDENT_FIELD}'] for key in self.parsed_signals])
         self.ghost_signals = tracked.difference(parsed)
 
         def update_ghost(item):
@@ -123,7 +130,7 @@ class Scanner(threading.Thread):
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
 
-        [self.get_worker(sgnl['ID']).worker_to_sgnl(self.get_worker(sgnl['ID']), sgnl) for sgnl in self.parsed_signals]
+        [self.get_worker(sgnl[f'{self.SIGNAL_IDENT_FIELD}']).worker_to_sgnl(sgnl, self.get_worker(sgnl[f'{self.SIGNAL_IDENT_FIELD}'])) for sgnl in self.parsed_signals]
         return self.parsed_signals
 
     def get_tracked_signals(self):
@@ -176,7 +183,7 @@ class Scanner(threading.Thread):
                 get_location(self)
 
                 def blacklist(sgnl):
-                    if sgnl['ID'] in self.blacklist.keys():
+                    if sgnl[f'{self.SIGNAL_IDENT_FIELD}'] in self.blacklist.keys():
                         try:
                             self.parsed_signals.remove(sgnl)
                         except Exception: pass

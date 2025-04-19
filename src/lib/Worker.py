@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import json
 
 from src.lib.SignalPoint import SignalPoint
 from src.lib.utils import format_time, format_delta
@@ -11,8 +10,6 @@ class Worker:
 
     # 1. Signal Sources as Agents
     # Each emitter can be modeled as an agent with:
-    #
-
     #     Repetition, pattern, schedule: Worker() could support 'period' data via EAV tables of events; need event 'types'? & tests
     #     Signal fingerprint (modulation, bandwidth, power, etc.)
 
@@ -28,6 +25,7 @@ class Worker:
 
         self.is_mute = False            # is muted
         self.tracked = False            # is in scanner.tracked_signals
+        self.signal = None              # is in scanner.tracked_signals
 
         self._text_attributes = {}       # mapping of worker attributes
 
@@ -39,48 +37,33 @@ class Worker:
 
         self.DEBUG = False
 
-    def worker_to_sgnl(self, sgnl, worker):
+    def worker_to_sgnl(self, sgnl, worker): # this doesn't RETURN a signal, it populates one
         """ update sgnl data map with current info from worker """
-        sgnl['id'] = worker.id
-        sgnl['Signal'] = worker.signal
+        sgnl[f'{self.scanner.SIGNAL_IDENT_FIELD}'] = worker.id
+        sgnl['name'] = worker.name
 
         # this is formatting for luxon.js, but is not clean.
         sgnl['created'] = format_time(worker.created, "%Y-%m-%d %H:%M:%S")
         sgnl['updated'] = format_time(worker.updated, "%Y-%m-%d %H:%M:%S")
         sgnl['elapsed'] = format_delta(worker.elapsed, self.config.get('TIME_FORMAT', "%H:%M:%S"))
 
+        sgnl[self.scanner.SIGNAL_STRENGTH_FIELD] = worker.signal
         sgnl['is_mute'] = worker.is_mute
         sgnl['tracked'] = worker.tracked
-        sgnl['signal_cache'] = [sgnl.get() for sgnl in self.scanner.signal_cache[worker.id]]
-        sgnl['results'] = [json.dumps(result) for result in worker.test_results]
+        sgnl['text_attributes'] = worker.get_text_attributes()
 
-    @staticmethod
-    def worker_to_dict(worker):
-        """ calculates on arxs """
-        return  {
-            "id"                        : worker.id,
-            "name"                      : worker.name,
-            "created"                   : format_time(worker.created, "%Y-%m-%d %H:%M:%S"),
-            "updated"                   : format_time(worker.updated, "%Y-%m-%d %H:%M:%S"),
-            "elapsed"                   : format_delta(worker.elapsed, "%H:%M:%S"),
-
-            "is_mute"                   : worker.is_mute,
-            "tracked"                   : worker.tracked,
-            "text_attributes"           : worker.get_text_attributes(),
-        }
-
-    def get(self):
+    def get(self): # returns the current worker state or whatever is passed in
         return {
-            "id"                    : self.id,
-            "name"                  : self.name,
-            "created"               : format_time(self.created, "%Y-%m-%d %H:%M:%S"),
-            "updated"               : format_time(self.updated, "%Y-%m-%d %H:%M:%S"),
-            "elapsed"               : format_delta(self.elapsed, "%H:%M:%S"),
+            f"{self.scanner.SIGNAL_IDENT_FIELD}"                    : self.id,
+            "name"                                                  : self.name,
+            "created"                                               : format_time(self.created, "%Y-%m-%d %H:%M:%S"),
+            "updated"                                               : format_time(self.updated, "%Y-%m-%d %H:%M:%S"),
+            "elapsed"                                               : format_delta(self.elapsed, "%H:%M:%S"),
 
-            "is_mute"               : self.is_mute,
-            "tracked"               : self.tracked,
-
-            "text_attributes"       : self.get_text_attributes(),
+            f"{self.scanner.SIGNAL_STRENGTH_FIELD}"                 : self.signal,
+            "is_mute"                                               : self.is_mute,
+            "tracked"                                               : self.tracked,
+            "text_attributes"                                       : self.get_text_attributes(),
         }
 
     def config_worker(self, scanner):
@@ -149,7 +132,7 @@ class Worker:
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
         self.tracked = self.id in self.scanner.tracked_signals
-        self.scanner.make_signalpoint(self.id, self.id, int(sgnl.get('Signal', -99)))
+        self.scanner.make_signalpoint(self.id, self.id, int(sgnl.get(self.scanner.SIGNAL_STRENGTH_FIELD, -99)))
         # self._signal_cache_frequency_features = self.extract_signal_cache_features(
         #         [pt.getSgnl() for pt in self.scanner.signal_cache[self.id]]
         # )
@@ -159,8 +142,8 @@ class Worker:
 
     def match(self, cell):
         """ match id, derive the 'id' and set mute status """
-        if self.id.upper() == cell['id'].upper():
-            self.id = str(self.id).replace(':', '').lower()
+        if self.id.upper() == cell[f'{self.scanner.SIGNAL_IDENT_FIELD}'].upper():
+            self.id = str(cell[f'{self.scanner.SIGNAL_IDENT_FIELD}']).replace(':', '').lower()
             self.process_cell(cell)
             self.auto_unmute()
 
@@ -202,7 +185,7 @@ class Worker:
     def stop(self):
         if self.tracked:
 
-            def append_to_outfile(cls, config, cell):
+            def append_to_outfile(cls, config, cell):  # use workers instead here.
                 """Append found cells to a rolling JSON list"""
                 from src.lib.utils import format_time, format_delta
                 # unwrap the cell and format the dates, guids and whatnot.
@@ -249,17 +232,15 @@ class Worker:
                 # format created timestamp in signals
                 # SGNL_CREATED_FORMAT: "%Y-%m-%d %H:%M:%S.%f"
                 formatted = {
-                    "id"          : cell['id'],
-                    "SSID"        : cell['SSID'],
-                    "BSSID"       : cell['BSSID'],
-                    "created"     : cell['created'],
-                    "updated"     : cell['updated'],
-                    "elapsed"     : cell['elapsed'],
-                    # "text_attributes":
-                    "is_mute"     : cell['is_mute'],
-                    "tracked"     : cell['tracked'],
-                    "signal_cache": [pt.get() for pt in cls.producer.signal_cache[cell['id']]][cls.cache_max:],
-                    "tests"       : [x for x in cell['tests']]
+                    "id"                                                : cell[f'{self.scanner.SIGNAL_IDENT_FIELD}'],
+                    "name"                                              : cell[f'ssid'],
+                    "created"                                           : cell['created'],
+                    "updated"                                           : cell['updated'],
+                    "elapsed"                                           : cell['elapsed'],
+                    f"{self.scanner.SIGNAL_STRENGTH_FIELD}"             : cell[f'{self.scanner.SIGNAL_STRENGTH_FIELD}'],
+                    "is_mute"                                           : cell['is_mute'],
+                    "tracked"                                           : cell['tracked'],
+                    "text_attributes"                                   : self.get_text_attributes()
                 }
 
                 json_logger.info({cell['id']: formatted})
