@@ -1,1 +1,1 @@
-from src.net.elastic.ElasticMappingTransformer import ElasticMappingTransformer
+from src.wifi.lib.ElasticMappingTransformer import ElasticMappingTransformer

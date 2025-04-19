@@ -15,7 +15,7 @@ from src.wifi.lib.WifiSignalPoint import WifiSignalPoint
 from src.wifi.WifiWorker import WifiWorker
 from src.wifi.lib.WifiWorkerParser import WifiWorkerParser
 
-from src.net.elastic.ElasticMappingTransformer import ElasticMappingTransformer as ElasticIntegration
+from src.wifi.lib.ElasticMappingTransformer import ElasticMappingTransformer as ElasticIntegration
 
 import logging
 

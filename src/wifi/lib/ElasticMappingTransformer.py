@@ -163,6 +163,6 @@ if __name__ == '__main__':
     e = ElasticMappingTransformer(mapTxfmr)  # <-- pass it a transformer ()
     e.configure('wifi.json')
     # push 'training data' into elastic.
-    with open('/Users/scooper/PycharmProjects/MagPi/dev/wifi/training_data/scanlists_out.json', 'r') as f:
+    with open('/dev/wifi/training_data/scanlists_out.json', 'r') as f:
         data = json.load(f)
         e.push(data)
