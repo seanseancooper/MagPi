@@ -10,8 +10,7 @@ from src.config import readConfig
 import requests
 import json
 
-from src.wifi.lib import WifiSignalPoint
-from src.trx.lib import TRXSignalPoint
+from src.lib import SignalPoint
 
 
 class Trilaterator(threading.Thread):
@@ -94,7 +93,7 @@ class Trilaterator(threading.Thread):
         self.initial_location = self.retriever.result['lat'], self.retriever.result['lon']
 
     def getSignalPointsForBSSID(self, BSSID):
-        # WifiSignalPoint: goto MAPAggregator context
+        # SignalPoint: goto MAPAggregator context
         resp = requests.get(f'http://wifi.localhost:5006/scan/{BSSID}')
         # resp = requests.get(f'http://map.localhost:5006/data/wifi')
         cache = json.dumps(resp)
@@ -118,7 +117,7 @@ class Trilaterator(threading.Thread):
         [lat2, lon2] = LatLon2
         return self.geographical_distance(lat1, lon1, lat2, lon2)
 
-    def getSignalPointDistance(self, s1: WifiSignalPoint, s2: WifiSignalPoint):
+    def getSignalPointDistance(self, s1: SignalPoint, s2: SignalPoint):
         [lat1, lon1] = s1.get_lat_lon()
         [lat2, lon2] = s2.get_lat_lon()
         return self.geographical_distance(lat1, lon1, lat2, lon2)
@@ -154,10 +153,10 @@ class Trilaterator(threading.Thread):
 
     def run(self):
         # not sure how I plan to use this. trilat only one
-        # seems not as useful as a grooup, so perhaps this
-        # should be a list if items? Also, whhat to do about
+        # seems not as useful as a group, so perhaps this
+        # should be a list if items? Also, what to do about
         # symbology? How does this fit into other things
-        # geoloocated? this might be threaded, might not;
+        # geolocated? this might be threaded, might not;
         # ...what's happening?
         self.set_target('SOME_BSSID_HERE')
         self.get_initial_location()
