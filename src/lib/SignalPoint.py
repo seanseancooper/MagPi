@@ -28,6 +28,9 @@ class SignalPoint(object):
     def get_lat_lon(self):
         return self._lat, self._lon
 
+    def get_lon_lat(self):
+        return self._lon, self._lat
+
     def getSgnl(self):
         return self._sgnl
 
