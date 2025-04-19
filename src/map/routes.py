@@ -1,6 +1,8 @@
 from flask import Blueprint, redirect, render_template, jsonify
 
+from src.gps.GPSRetriever import GPSRetriever
 from src.map.MAPAggregator import MAPAggregator
+from src.map.lib.Trilaterator import Trilaterator
 
 mapAgg = MAPAggregator()
 # TODO: the config hasn't been read yet, how can these be configurable?
@@ -11,6 +13,13 @@ from src.lib.NodeRunner import NodeRunner
 
 node = NodeRunner()
 node.configure('map.json')
+
+trilaterator = Trilaterator()
+trilaterator.configure('gps.json')
+gpsRet = GPSRetriever()
+gpsRet.configure('gps.json')
+trilaterator.retriever = gpsRet
+
 
 map_bp = Blueprint(
         'map_bp', __name__, subdomain='map',
@@ -58,3 +67,8 @@ def aggregated_by_module_context(mod, context):
     """ redirect to a specific context of a module """
     return redirect('http://' + mod + '.' + mapAgg.module_configs[mod]['SERVER_NAME'] + '/' + context, code=302)
 
+
+@map_bp.route("/<BSSID>/triltaterate", methods=['GET'], subdomain="gps")
+def gps_trilaterate(BSSID):
+    trilaterator.set_target(BSSID)
+    return trilaterator.result
