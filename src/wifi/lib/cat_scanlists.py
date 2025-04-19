@@ -11,8 +11,8 @@ import random
 import numpy as np
 
 # Example values for generating random data
-SSIDs = ["DIRECT-a1-HP M477 LaserJet", "CCOB_Library", "Home_Network", "Guest_WiFi", "Office_WiFi"]
-vendors = ["UNKNOWN", "Extreme Networks Headquarters", "Cisco", "Netgear", "TP-Link"]
+SSIDs = ["Larry", "Moe", "Curly", "Shemp", "SToOges_Wifi"]
+vendors = ["UNKNOWN", "Extreme", "Cisco", "Netgear", "TP-Link"]
 channels = list(range(1, 12))
 frequencies = list(range(2400, 2500))
 signals = list(range(-100, 0))
