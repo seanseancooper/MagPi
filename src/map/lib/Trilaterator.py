@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import numpy as np
 from scipy.optimize import minimize
 
-from src.lib.utils import format_time, format_delta
+from src.lib.utils import get_location, format_time, format_delta
 from src.config import readConfig
 import requests
 import json
@@ -27,12 +27,12 @@ class Trilaterator(threading.Thread):
         self.updated = datetime.now()   # when signal was last reported
         self.elapsed = timedelta()      # time signal has been tracked.
 
-        self.initial_location = []      # from current GPS or injected
         self.locations = []             #
         self.distances = []
 
         self.target = None              # BSSID to trilaterate
-        self.retriever = None           # uses the context GPSRetriever...
+        self.lat = 0.0                  # uses the context GPSRetriever...
+        self.lon = 0.0                  # uses the context GPSRetriever...
         self.result = None
 
     def get(self):
@@ -89,11 +89,7 @@ class Trilaterator(threading.Thread):
     def set_target(self, target):
         self.target = target
 
-    def get_initial_location(self):
-        self.initial_location = self.retriever.result['lat'], self.retriever.result['lon']
-
     def getSignalPointsForBSSID(self, BSSID):
-        # SignalPoint: goto MAPAggregator context
         resp = requests.get(f'http://wifi.localhost:5006/scan/{BSSID}')
         # resp = requests.get(f'http://map.localhost:5006/data/wifi')
         cache = json.dumps(resp)
@@ -158,12 +154,13 @@ class Trilaterator(threading.Thread):
         # symbology? How does this fit into other things
         # geolocated? this might be threaded, might not;
         # ...what's happening?
-        self.set_target('SOME_BSSID_HERE')
-        self.get_initial_location()
-        BSSID, sgnlPts = self.getSignalPointsForBSSID(self.target)  # get the list of sp for BSSID_TARGeT
-        self.locations = self.getLocationsForSignalPoints(sgnlPts)
-        self.distances = self.getDistancesForSignalPoints(self.initial_location, sgnlPts)
-        self.result = self.trilaterate(self.initial_location, self.locations, self.distances)
 
+        get_location(self)
+        BSSID, sgnlPts = self.getSignalPointsForBSSID(self.target)
+
+        self.locations = self.getLocationsForSignalPoints(sgnlPts)
+        self.distances = self.getDistancesForSignalPoints([self.lat, self.lon], sgnlPts)
+
+        self.result = self.trilaterate([self.lat, self.lon], self.locations, self.distances)
         print(f'result: {self.result}')
 

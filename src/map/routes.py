@@ -68,7 +68,8 @@ def aggregated_by_module_context(mod, context):
     return redirect('http://' + mod + '.' + mapAgg.module_configs[mod]['SERVER_NAME'] + '/' + context, code=302)
 
 
-@map_bp.route("/<BSSID>/triltaterate", methods=['GET'], subdomain="gps")
+@map_bp.route("/<BSSID>/triltaterate", methods=['GET'], subdomain='map')
 def gps_trilaterate(BSSID):
     trilaterator.set_target(BSSID)
+    trilaterator.run()
     return trilaterator.result
