@@ -190,7 +190,7 @@ class WifiScanner(threading.Thread):
 
         from lib.cat_scanlists import cat_scanlists
         archive = '/_out'
-        output = '/dev/wifi/training_data/scanlists_out.json'
+        output = '/Users/scooper/PycharmProjects/MagPiDev/wifi/training_data/scanlists_out.json'
         cat = cat_scanlists(archive, output)
 
         cat.read()

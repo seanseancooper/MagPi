@@ -3,9 +3,24 @@ import glob
 import uuid
 from src.lib.utils import format_time
 from src.wifi.lib.wifi_utils import vendorsMacs_XML, proc_vendors
-from datetime import datetime
+from datetime import datetime, timedelta
 from src.config import readConfig
 from src.lib.utils import get_location
+import random
+
+import numpy as np
+
+# Example values for generating random data
+SSIDs = ["DIRECT-a1-HP M477 LaserJet", "CCOB_Library", "Home_Network", "Guest_WiFi", "Office_WiFi"]
+vendors = ["UNKNOWN", "Extreme Networks Headquarters", "Cisco", "Netgear", "TP-Link"]
+channels = list(range(1, 12))
+frequencies = list(range(2400, 2500))
+signals = list(range(-100, 0))
+qualities = list(np.multiply(np.array([range(0, 100)]), np.array(signals).T))
+encryption = [True, False]
+is_mute = [True, False]
+tracked = [True, False]
+
 
 class cat_scanlists:
 
@@ -75,7 +90,7 @@ class cat_scanlists:
                     print(f'skipped scanlist {scanlist} {e}')
         print(f'{datetime.now().isoformat()} @ [{self.lon}, {self.lat}]: processed {self.scanlist_total} scanlists, ', end='')
 
-    def write(self, add_signals=False):
+    def write(self, add_signals=False, generate_signalpoints=False):
         with open(self.output_file, 'w') as f:
             f.write('[\n')
 
@@ -100,6 +115,38 @@ class cat_scanlists:
                     record['Signal'] = record.get('Signal') or -99
                     record['Quality'] = record.get('Quality') or 0
 
+                    def process_sgnl(sgnl):
+                        return {
+                            "created": sgnl.get('created', record['created']),   # this should match the created date of the record
+                            "id": sgnl.get('id', str(uuid.uuid4())),
+                            "worker_id": record['id'],
+                            "lon": sgnl.get('lon', self.lon),
+                            "lat": sgnl.get('lat', self.lat),
+                            "sgnl": sgnl.get('sgnl', -99)
+                        }
+
+                    def generate_signal():
+                        base_lat = 39.915
+                        base_lon = -105.065
+                        spread = 0.003
+
+                        offset_lat = random.uniform(-spread, spread)
+                        offset_lon = random.uniform(-spread, spread)
+
+                        return {
+                            "created"  : (datetime.utcnow() - timedelta(minutes=random.randint(1, 1000))).isoformat(),
+                            "id"       : str(uuid.uuid4()),
+                            "worker_id": record['id'],
+                            "lat"      : round(base_lat + offset_lat, 6),
+                            "lon"      : round(base_lon + offset_lon, 6),
+                            "sgnl"     : random.choice(signals)
+                        }
+
+                    if generate_signalpoints:
+                        cache = [generate_signal() for _ in range(10)]
+                    else:
+                        cache = [process_sgnl(x) for x in record.get('signal_cache')] if add_signals is True else []
+
                     out = {
                          "id"           : record['id'],
                          "SSID"         : record['SSID'],
@@ -117,20 +164,9 @@ class cat_scanlists:
                          "Encryption"   : bool(record.get('Encryption', True)),
                          "is_mute"      : False,
                          "tracked"      : True,
-                         "signal_cache" : [process_sgnl(x) for x in record.get('signal_cache', [])] if add_signals is True else [],
+                         "signal_cache" : cache,
                          "tests"        : [x for x in record.get('tests', [x for x in record.get('results', [])])]  if add_signals is True else []
                     }
-
-                    def process_sgnl(sgnl):
-
-                        return {
-                            "created": sgnl.get('created', record['created']),   # this should match the created date of the record
-                            "id": sgnl.get('id', str(uuid.uuid4())),
-                            "worker_id": record['id'],
-                            "lon": sgnl.get('lon', self.lon),
-                            "lat": sgnl.get('lat', self.lat),
-                            "sgnl": sgnl.get('sgnl', -99)
-                        }
 
                     f.write(json.dumps(out, indent=2))
                     self.total += 1
@@ -148,12 +184,12 @@ class cat_scanlists:
 
 
 if __name__ == "__main__":
-    archive = '/Users/scooper/PycharmProjects/MagPi/dev/wifi/scanlist_archive/'
-    output = '/Users/scooper/PycharmProjects/MagPi/dev/wifi/training_data/scanlists_out.json'
+    archive = '/Users/scooper/PycharmProjects/MagPiDev/wifi/scanlist_archive/'
+    output =  '/Users/scooper/PycharmProjects/MagPiDev/wifi/training_data/scanlists_out.json'
     # archive = '_out'
     # output = 'dev/wifi/training_data/scanlists_out.json'
     cat = cat_scanlists(archive, output)
 
     cat.read()
-    cat.write(add_signals=True)
+    cat.write(add_signals=True, generate_signalpoints=True)
 
