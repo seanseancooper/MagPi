@@ -90,22 +90,29 @@ class Trilaterator(threading.Thread):
         self.target = target
 
     def getSignalPointsForBSSID(self, BSSID):
-        resp = requests.get(f'http://wifi.localhost:5006/scan/{BSSID}')
+        # resp = requests.get(f'http://wifi.localhost:5006/scan/{BSSID}')
         # resp = requests.get(f'http://map.localhost:5006/data/wifi')
-        cache = json.dumps(resp)
-        sgnlpts = cache['signal_cache']
-        return BSSID, sgnlpts  # make it internal: self.signal_cache[BSSID] = json.dumps(resp)
+        # cache = json.dumps(resp)
+
+        with open('/Users/scooper/PycharmProjects/MagPi/dev/wifi/training_data/scanlists_out.json', 'r') as f:
+            cache = json.load(f)
+        signals = []
+
+        for signal in cache:
+            if BSSID.lower() == signal['BSSID'].lower():
+                signals.append({signal['BSSID']: signal['signal_cache']})
+        return BSSID, signals[0][BSSID]
 
     def getSignalPointsForUniqId(self, UniqId, scanner):
         # TRXSignalPoint, et, al.
         return scanner.signal_cache.get(UniqId)
 
-    def getLocationsForSignalPoints(self, SignalPoints: list):
-        return [pt.get_lat_lon() for pt in SignalPoints]
+    def getLocationsForSignalPoints(self, pts: list):
+        return [[pt.get('lat'), pt.get('lon')] for pt in pts]
 
-    def getDistancesForSignalPoints(self, initial_location, SignalPointList):
+    def getDistancesForSignalPoints(self, initial_location, pts):
         # list of distances per SignalPoint to initial_location
-        pt_locs = [sp.get_lat_lon() for sp in SignalPointList]
+        pt_locs = [[pt.get('lat'), pt.get('lon')] for pt in pts]
         return [self.get_LatLonDistance(initial_location, pt) for pt in pt_locs]
 
     def get_LatLonDistance(self, LatLon1, LatLon2):
@@ -162,5 +169,28 @@ class Trilaterator(threading.Thread):
         self.distances = self.getDistancesForSignalPoints([self.lat, self.lon], sgnlPts)
 
         self.result = self.trilaterate([self.lat, self.lon], self.locations, self.distances)
-        print(f'result: {self.result}')
+        print(f'result: {self.result}\n')
+        exit(0)
+
+if __name__ == '__main__':
+    trilaterator = Trilaterator()
+
+    # "SSID": "Audi_NVR_Wifi",
+    # "BSSID": "00:0C:E5:4E:32:28",
+    trilaterator.set_target('00:0C:E5:4E:32:28')
+    # result: [39.91552102 - 105.05769364]
+
+    # "SSID": "HotspotEFF7",
+    # "BSSID": "00:54:AF:51:EF:F7",
+    # trilaterator.set_target('00:54:AF:51:EF:F7')
+    # result: [  39.91552102 -105.05769364]
+
+    # "SSID": "Hotspot8557",
+    # "BSSID": "00:54:AF:53:85:57",
+    # result: [  39.91552102 -105.05769364]
+    # trilaterator.set_target('00:54:AF:53:85:57')
+
+    t = threading.Thread(target=trilaterator.run)
+    t.start()
+
 
