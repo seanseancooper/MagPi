@@ -1,13 +1,39 @@
 import os
+import signal
 import threading
-
 import logging
 import time
 
-from src.lib.utils import runOSCommand
-from src.config import CONFIG_PATH, readConfig
+import psutil
 
-map_logger = logging.getLogger('gps_logger')
+from src.lib.utils import runOSCommand
+from src.config import readConfig
+
+gps_logger = logging.getLogger('gps_logger')
+DEADCODES = (psutil.STATUS_DEAD, psutil.STATUS_ZOMBIE,)
+
+
+def kills_pids_and_kids(pid):
+    """
+    Removes a pid and all children representing a display process from
+    the _processes dict. As deadly as it sounds; it's static so it can
+    be called externally to the class instance.
+
+    :param pid: process id to be found and removed
+    :exception NoSuchProcess
+    :return True if successful
+    """
+    try:
+
+        ps = psutil.Process(pid)
+        [_.send_signal(signal.SIGTERM) for _ in ps.children(recursive=True)]
+        ps.terminate()
+        gps_logger.info(f"pid {pid} killed.")
+        return True
+
+    except psutil.NoSuchProcess:
+        gps_logger.warning(f"Failed to find pid:{pid} to kill.")
+
 
 
 class NodeRunner(threading.Thread):
@@ -28,9 +54,9 @@ class NodeRunner(threading.Thread):
     def build(self):
         if runOSCommand(self.config['NODE_BUILD_COMMAND']) > 0:
             time.sleep(5)
-            map_logger.info(f"[{__name__}]: OK")
+            gps_logger.info(f"[{__name__}]: OK")
         else:
-            map_logger.error(f"[{__name__}]: FAIL! Verify NODE_BUILD_COMMAND: {self.config['NODE_BUILD_COMMAND']} "
+            gps_logger.error(f"[{__name__}]: FAIL! Verify NODE_BUILD_COMMAND: {self.config['NODE_BUILD_COMMAND']} "
                              f" is correctly formed.")
 
     def run(self):
@@ -38,12 +64,17 @@ class NodeRunner(threading.Thread):
         self.pid = runOSCommand(self.config['NODE_START_COMMAND'])
         if self.pid > 0:
             os.chdir(home)
-            map_logger.info(f"[{__name__}]: OK {self.pid}")
+            gps_logger.info(f"[{__name__}]: OK {self.pid}")
 
             return self.pid
         else:
-            map_logger.error(f"[{__name__}]: FAIL! Verify NODE_START_COMMAND: {self.config['NODE_START_COMMAND']} "
+            gps_logger.error(f"[{__name__}]: FAIL! Verify NODE_START_COMMAND: {self.config['NODE_START_COMMAND']} "
                              f"is correctly formed.")
+
+    def stop(self):
+        if self.pid > 0:
+            return kills_pids_and_kids(self.pid)
+            
 
 
 if __name__ == '__main__':

@@ -32,6 +32,7 @@ class GPSController(threading.Thread):
 
             def stop():
                 routes.gpsRet.stop()
+                routes.node.stop()
 
             atexit.register(stop)
 

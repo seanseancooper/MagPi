@@ -32,6 +32,7 @@ class MAPController(threading.Thread):
 
             def stop():
                 routes.mapAgg.stop()
+                routes.node.stop()
 
             atexit.register(stop)
 
