@@ -8,18 +8,6 @@ from src.config import readConfig
 from src.lib.utils import get_location
 import random
 
-import numpy as np
-
-# Example values for generating random data
-SSIDs = ["Larry", "Moe", "Curly", "Shemp", "SToOges_Wifi"]
-vendors = ["UNKNOWN", "Extreme", "Cisco", "Netgear", "TP-Link"]
-channels = list(range(1, 12))
-frequencies = list(range(2400, 2500))
-signals = list(range(-100, 0))
-qualities = list(range(0, 100))
-encryption = [True, False]
-is_mute = [True, False]
-tracked = [True, False]
 
 
 class cat_scanlists:
@@ -129,6 +117,7 @@ class cat_scanlists:
                         base_lat = 39.915
                         base_lon = -105.065
                         spread = 0.003
+                        signals = list(range(-100, 0))
 
                         offset_lat = random.uniform(-spread, spread)
                         offset_lon = random.uniform(-spread, spread)
@@ -143,8 +132,10 @@ class cat_scanlists:
                         }
 
                     if generate_signalpoints:
+                        # give everybody synthetic signalpoints
                         cache = [generate_signal() for _ in range(10)]
                     else:
+                        # give everybody synthetic signalpoints
                         cache = [process_sgnl(x) for x in record.get('signal_cache')] if add_signals is True else []
 
                     out = {
@@ -180,7 +171,13 @@ class cat_scanlists:
                     print(f'omitted {record} {a}')
             f.write(']\n')
 
-        print(f'mapped {self.total} signals {add_signals} for {len(self.mapped_workers)} records.')
+        if generate_signalpoints:
+            if add_signals:
+                print(f'generated {self.total} signals for {len(self.mapped_workers)} records.')
+            else:
+                print(f'mapped {self.total} signals for {len(self.mapped_workers)} records w/o signalpoints.')
+        else:
+            print(f'mapped {self.total} signals {add_signals} for {len(self.mapped_workers)} records.')
 
 
 if __name__ == "__main__":
