@@ -132,8 +132,8 @@ class Trilaterator(threading.Thread):
         mse = 0.0
         for location, distance in zip(locations, distances):
             distance_calculated = self.great_circle_distance(x[0], x[1], location[0], location[1])
-            # mse += math.pow(distance_calculated - distance, 2.0)
-            mse += np.sum((distance_calculated - distance) ** 2)
+            mse += math.pow(distance_calculated - distance, 2.0)
+            # mse += np.sum((distance_calculated - distance) ** 2)
         print(f"Evaluating at {x}: MSE={mse / len(distances)}")
         return mse / len(distances)
 
@@ -185,35 +185,23 @@ class Trilaterator(threading.Thread):
 
 if __name__ == '__main__':
     trilaterator = Trilaterator()
-    #
-    # # trilaterator.set_target('00:0C:E5:4E:32:28')
-    # # trilaterator.set_target('00:54:AF:51:EF:F7')
-    # trilaterator.set_target('08:33:ED:D9:48:BF')
-    # # trilaterator.set_target('00:54:AF:53:85:57')
-    #
-    # t = threading.Thread(target=trilaterator.run)
-    # t.start()
-    #
-
-    # 39.915995, -105.071787 124-138 Main St, Broomfield, CO 80020
-    # 39.915778, -105.062450 Broomfield, Colorado 80020
-    # 39.920994, -105.070153 Descombes Dr, Broomfield, CO 80020
-
-
-    locations = [
-        [39.915995, -105.071787],
-        [39.915778, -105.062450],
-        [39.915778, -105.062450],
-    ]
+    trilaterator.configure('gps.json')
 
     # Example:
     # Let's say you have the following coordinates:
     # Point A: 37.7749° N, 122.4194° W (San Francisco)
     # Point B: 40.7128° N, 74.0060° W (New York)
+    locations = [
+        [40.7128, -74.0060]
+    ]
+
+    distances = trilaterator.getDistancesForSignalPoints([37.7749, -122.4194], [{"lat": l[0], "lon": l[1]} for l in locations])
+
+    result = trilaterator.trilaterate([37.7749, -122.4194], locations, distances)
+    print(" position:", [trilaterator.lat, trilaterator.lon])
+    print("locations:", locations)
+
     # Using an online calculator or a programming script with the Haversine formula,
     # the great circle distance between San Francisco and New York would be approximately 3,396 kilometers.
-
-    distances = trilaterator.getDistancesForSignalPoints([39.0, -105.0], [{"lat": l[0], "lon": l[1]} for l in locations])  # Roughly ~15 km
-
-    result = trilaterator.trilaterate([39.0, -105.0], locations, distances)
+    print("distances:", distances)
     print("Estimated location:", result)
