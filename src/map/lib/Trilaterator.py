@@ -30,9 +30,10 @@ class Trilaterator(threading.Thread):
         self.locations = []             #
         self.distances = []
 
-        self.target = None              # BSSID to trilaterate
-        self.lat = 0.0                  # uses the context GPSRetriever...
-        self.lon = 0.0                  # uses the context GPSRetriever...
+        self.target = None              # id to trilaterate
+
+        self.lat = 39.916895                    # uses the context GPSRetriever...
+        self.lon = -105.068699                  # uses the context GPSRetriever...
         self.result = None
 
     def get(self):
@@ -59,7 +60,6 @@ class Trilaterator(threading.Thread):
 
     @staticmethod
     def great_circle_distance(latitudeA, longitudeA, latitudeB, longitudeB):
-
         # Degrees to radians
         phi1 = math.radians(latitudeA)
         lambda1 = math.radians(longitudeA)
@@ -94,7 +94,7 @@ class Trilaterator(threading.Thread):
         # resp = requests.get(f'http://map.localhost:5006/data/wifi')
         # cache = json.dumps(resp)
 
-        with open('/Users/scooper/PycharmProjects/MagPi/dev/wifi/training_data/scanlists_out.json', 'r') as f:
+        with open('/Users/scooper/PycharmProjects/MagPiDev/wifi/training_data/scanlists_out.json', 'r') as f:
             cache = json.load(f)
         signals = []
 
@@ -132,26 +132,37 @@ class Trilaterator(threading.Thread):
         mse = 0.0
         for location, distance in zip(locations, distances):
             distance_calculated = self.great_circle_distance(x[0], x[1], location[0], location[1])
-            mse += math.pow(distance_calculated - distance, 2.0)
-            # alt. mse += np.sum((distance_calculated - distance) ** 2)
+            # mse += math.pow(distance_calculated - distance, 2.0)
+            mse += np.sum((distance_calculated - distance) ** 2)
+        print(f"Evaluating at {x}: MSE={mse / len(distances)}")
         return mse / len(distances)
 
     def trilaterate(self, initial_location, locations, distances):
 
-        # initial_location: (lat, lon)         <-- the current location
+        # initial_location: (lat, lon)          <-- the current location
         # locations: [ (lat1, long1), ... ]     <-- list of SignalPoints
         # distances: [ distance1,     ... ]     <-- list of distances per SignalPoint to initial_location
         result = minimize(
-                self.mse,                                   # The error function reference
-                initial_location,                           # The initial guess
-                args=(locations, distances),                # Additional parameters for mse
-                method='L-BFGS-B',                          # The optimisation algorithm
-                options={
-                    'ftol'   : 1e-5,                        # Tolerance
-                    'maxiter': 1e+7                         # Maximum iterations
-                })
-        location = result.x
+                self.mse,                                   # The function to be minimized
+                initial_location,                           # initial guess
+                args=(locations, distances),                # parameters for self.mse
 
+                method='Nelder-Mead',
+                options={
+                    'xatol'  : 1e-8,
+                    'fatol'  : 1e-8,
+                    'maxiter': 10000
+                }
+
+                # method='L-BFGS-b',                          # The minimization method
+                # options={
+                #     'ftol'   : 1e-5,                        # Tolerance
+                #     'maxiter': 1e+7                         # Maximum iterations
+                # }
+        )
+
+        location = result.x
+        print(result.pop('message'))
         return location
 
     def run(self):
@@ -162,35 +173,47 @@ class Trilaterator(threading.Thread):
         # geolocated? this might be threaded, might not;
         # ...what's happening?
 
-        get_location(self)
+        # get_location(self)
         BSSID, sgnlPts = self.getSignalPointsForBSSID(self.target)
 
         self.locations = self.getLocationsForSignalPoints(sgnlPts)
         self.distances = self.getDistancesForSignalPoints([self.lat, self.lon], sgnlPts)
 
         self.result = self.trilaterate([self.lat, self.lon], self.locations, self.distances)
-        print(f'result: {self.result}\n')
+        print(f'{[self.lat, self.lon]} target:{self.target}  result: {self.result} \nlocations:{self.locations}\ndistances:{self.distances}\n')
         exit(0)
 
 if __name__ == '__main__':
     trilaterator = Trilaterator()
+    #
+    # # trilaterator.set_target('00:0C:E5:4E:32:28')
+    # # trilaterator.set_target('00:54:AF:51:EF:F7')
+    # trilaterator.set_target('08:33:ED:D9:48:BF')
+    # # trilaterator.set_target('00:54:AF:53:85:57')
+    #
+    # t = threading.Thread(target=trilaterator.run)
+    # t.start()
+    #
 
-    # "SSID": "Audi_NVR_Wifi",
-    # "BSSID": "00:0C:E5:4E:32:28",
-    trilaterator.set_target('00:0C:E5:4E:32:28')
-    # result: [39.91552102 - 105.05769364]
-
-    # "SSID": "HotspotEFF7",
-    # "BSSID": "00:54:AF:51:EF:F7",
-    # trilaterator.set_target('00:54:AF:51:EF:F7')
-    # result: [  39.91552102 -105.05769364]
-
-    # "SSID": "Hotspot8557",
-    # "BSSID": "00:54:AF:53:85:57",
-    # result: [  39.91552102 -105.05769364]
-    # trilaterator.set_target('00:54:AF:53:85:57')
-
-    t = threading.Thread(target=trilaterator.run)
-    t.start()
+    # 39.915995, -105.071787 124-138 Main St, Broomfield, CO 80020
+    # 39.915778, -105.062450 Broomfield, Colorado 80020
+    # 39.920994, -105.070153 Descombes Dr, Broomfield, CO 80020
 
 
+    locations = [
+        [39.915995, -105.071787],
+        [39.915778, -105.062450],
+        [39.915778, -105.062450],
+    ]
+
+    # Example:
+    # Let's say you have the following coordinates:
+    # Point A: 37.7749° N, 122.4194° W (San Francisco)
+    # Point B: 40.7128° N, 74.0060° W (New York)
+    # Using an online calculator or a programming script with the Haversine formula,
+    # the great circle distance between San Francisco and New York would be approximately 3,396 kilometers.
+
+    distances = trilaterator.getDistancesForSignalPoints([39.0, -105.0], [{"lat": l[0], "lon": l[1]} for l in locations])  # Roughly ~15 km
+
+    result = trilaterator.trilaterate([39.0, -105.0], locations, distances)
+    print("Estimated location:", result)
