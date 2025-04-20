@@ -8,11 +8,14 @@ class WifiSignalPoint(SignalPoint):
     The 'id' field uniquely represents a specific point.
     The 'worker_id' is derived from the BSSID of the AP that produced it.
     """
-    def __init__(self, worker_id, bssid, lon, lat, sgnl):
+    def __init__(self, worker_id, lon, lat, sgnl, bssid=None):
         super().__init__(lon, lat, sgnl)
         self._bssid = bssid
         self._worker_id = worker_id
         self._signal_type = 'continuous' # Emission type (radar, voice, 'data')
+
+    def set_bssid(self, bssid):
+        self._bssid = bssid
 
     def get(self):
         return {

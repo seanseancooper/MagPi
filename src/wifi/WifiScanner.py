@@ -123,7 +123,7 @@ class WifiScanner(threading.Thread):
         return cell
 
     def make_signalpoint(self, worker_id, bssid, signal):
-        sgnlPt = WifiSignalPoint(worker_id, bssid, self.lon, self.lat, signal)
+        sgnlPt = WifiSignalPoint(worker_id, self.lon, self.lat, signal, bssid=bssid)
         self.signal_cache[bssid].append(sgnlPt)
 
         while len(self.signal_cache[bssid]) >= self.signal_cache_max:

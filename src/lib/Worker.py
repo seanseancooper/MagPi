@@ -3,7 +3,9 @@ from datetime import datetime, timedelta
 from src.lib.SignalPoint import SignalPoint
 from src.lib.utils import format_time, format_delta
 from src.wifi.lib.wifi_utils import append_to_outfile, json_logger
+import logging
 
+wifi_logger = logging.getLogger('wifi_logger')
 
 class Worker:
     # 🧩 Modeling Components
@@ -13,10 +15,11 @@ class Worker:
     #     Repetition, pattern, schedule: Worker() could support 'period' data via EAV tables of events; need event 'types'? & tests
     #     Signal fingerprint (modulation, bandwidth, power, etc.)
 
-    def __init__(self, id):
+    def __init__(self, ident):
         self.config = {}
         self.scanner = None
         self.id = ''                    # filled if match(), marks 'SignalPoint' type.
+        self.ident = ident              # used in object lookups and coloring UI
         self.name = ''                  # Human readable name of asset.
 
         self.created = datetime.now()   # when signal was found
@@ -25,8 +28,8 @@ class Worker:
 
         self.is_mute = False            # is muted
         self.tracked = False            # is in scanner.tracked_signals
-        self.signal = None              # is in scanner.tracked_signals
 
+        self.signal = None              # is in scanner.tracked_signals
         self._text_attributes = {}       # mapping of worker attributes
 
         self.results = []               # a list of test results (this should be local to method)
@@ -39,9 +42,9 @@ class Worker:
 
     def worker_to_sgnl(self, sgnl, worker): # this doesn't RETURN a signal, it populates one
         """ update sgnl data map with current info from worker """
-        sgnl[f'{self.scanner.SIGNAL_IDENT_FIELD}'] = worker.id
+        sgnl['id'] = worker.id
         sgnl['name'] = worker.name
-
+        sgnl[f'{self.scanner.SIGNAL_IDENT_FIELD}'] = worker.ident
         # this is formatting for luxon.js, but is not clean.
         sgnl['created'] = format_time(worker.created, "%Y-%m-%d %H:%M:%S")
         sgnl['updated'] = format_time(worker.updated, "%Y-%m-%d %H:%M:%S")
@@ -54,8 +57,9 @@ class Worker:
 
     def get(self): # returns the current worker state or whatever is passed in
         return {
-            f"{self.scanner.SIGNAL_IDENT_FIELD}"                    : self.id,
+            "id"                                                    : self.id,
             "name"                                                  : self.name,
+            f"{self.scanner.SIGNAL_IDENT_FIELD}"                    : self.ident,
             "created"                                               : format_time(self.created, "%Y-%m-%d %H:%M:%S"),
             "updated"                                               : format_time(self.updated, "%Y-%m-%d %H:%M:%S"),
             "elapsed"                                               : format_delta(self.elapsed, "%H:%M:%S"),
@@ -87,12 +91,20 @@ class Worker:
             self._text_attributes[k] = v
         [aggregate(k, str(v)) for k, v in text_data.items()]
 
-    def make_signalpoint(self, worker_id, id, signal):
-        sgnlPt = SignalPoint(self.scanner.lon, self.scanner.lat, signal)
-        self.scanner.signal_cache[id].append(sgnlPt)
+    def make_signalpoint(self, worker_id, ident, signal):
+        # import the SignalPoint type
+        SignalPointType = self.scanner.get_retriever(self.scanner.config['SIGNALPOINT_TYPE'])
+        # ARXSignalPoint    (self, worker_id, lon, lat, sgnl)
+        # WifiSignalPoint   (self, worker_id, lon, lat, sgnl, bssid=None)
+        # SDRSignalPoint    (self, worker_id, lon, lat, sgnl, array_data=None, audio_data=None, sr=48000)
+        # TRXSignalPoint    (self, worker_id, lon, lat, sgnl, text_data={}, audio_data=None, signal_type="object", sr=48000)
 
-        while len(self.scanner.signal_cache[id]) >= self.scanner.signal_cache_max:
-            self.scanner.signal_cache[id].pop(0)
+        # create an item of the type
+        sgnlPt = SignalPointType(worker_id=worker_id, lon=self.scanner.lon, lan=self.scanner.lat, sgnl=signal)
+        self.scanner.signal_cache[ident].append(sgnlPt)
+
+        while len(self.scanner.signal_cache[ident]) >= self.scanner.signal_cache_max:
+            self.scanner.signal_cache[ident].pop(0)
 
     def process_cell(self, cell):
         """ update static fields, tests"""
@@ -105,9 +117,9 @@ class Worker:
             # need to identify the test...
             # provides [{testname: result}, {...}]
             try:
-                tests = self.scanner.searchmap[self.id]['tests']
+                tests = self.scanner.searchmap[self.ident]['tests']
                 # return all results or only ones that passed?
-                self.return_all = self.scanner.searchmap[self.id]['return_all']
+                self.return_all = self.scanner.searchmap[self.ident]['return_all']
 
                 [[self.results.append(eval(str(v.strip() + t_v.strip()))) for t_k, t_v in tests.items() if k == t_k] for k, v in cell.items()]
 
@@ -131,8 +143,8 @@ class Worker:
         """ updates *dynamic* fields"""
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
-        self.tracked = self.id in self.scanner.tracked_signals
-        self.scanner.make_signalpoint(self.id, self.id, int(sgnl.get(self.scanner.SIGNAL_STRENGTH_FIELD, -99)))
+        self.tracked = self.ident in self.scanner.tracked_signals
+        self.scanner.make_signalpoint(self.id, self.ident, int(sgnl.get(self.scanner.SIGNAL_STRENGTH_FIELD, -99)))
         # self._signal_cache_frequency_features = self.extract_signal_cache_features(
         #         [pt.getSgnl() for pt in self.scanner.signal_cache[self.id]]
         # )
@@ -142,8 +154,8 @@ class Worker:
 
     def match(self, cell):
         """ match id, derive the 'id' and set mute status """
-        if self.id.upper() == cell[f'{self.scanner.SIGNAL_IDENT_FIELD}'].upper():
-            self.id = str(cell[f'{self.scanner.SIGNAL_IDENT_FIELD}']).replace(':', '').lower()
+        if self.ident.upper() == cell[f'{self.scanner.SIGNAL_IDENT_FIELD}'].upper():
+            self.ident = str(cell[f'{self.scanner.SIGNAL_IDENT_FIELD}']).replace(':', '').lower()
             self.process_cell(cell)
             self.auto_unmute()
 
@@ -152,7 +164,7 @@ class Worker:
         return mute(self)
 
     def signal_vec(self):
-        yield [pt.getSgnl() for pt in self.scanner.signal_cache[self.id]][self.cache_max:]
+        yield [pt.getSgnl() for pt in self.scanner.signal_cache[self.ident]][self.cache_max:]
 
     def auto_unmute(self):
         """ polled function to UNMUTE signals AUTOMATICALLY after the MUTE_TIME. """
@@ -233,10 +245,11 @@ class Worker:
                 # SGNL_CREATED_FORMAT: "%Y-%m-%d %H:%M:%S.%f"
                 formatted = {
                     "id"                                                : cell[f'{self.scanner.SIGNAL_IDENT_FIELD}'],
-                    "name"                                              : cell[f'ssid'],
+                    # "name"                                              : cell[f'ssid'],
                     "created"                                           : cell['created'],
                     "updated"                                           : cell['updated'],
                     "elapsed"                                           : cell['elapsed'],
+
                     f"{self.scanner.SIGNAL_STRENGTH_FIELD}"             : cell[f'{self.scanner.SIGNAL_STRENGTH_FIELD}'],
                     "is_mute"                                           : cell['is_mute'],
                     "tracked"                                           : cell['tracked'],
