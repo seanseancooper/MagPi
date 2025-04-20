@@ -32,8 +32,8 @@ class Trilaterator(threading.Thread):
 
         self.target = None              # id to trilaterate
 
-        self.lat = 39.916895                    # uses the context GPSRetriever...
-        self.lon = -105.068699                  # uses the context GPSRetriever...
+        self.lat = 0.0                  # uses the context GPSRetriever...
+        self.lon = 0.0                  # uses the context GPSRetriever...
         self.result = None
 
     def get(self):
@@ -45,6 +45,7 @@ class Trilaterator(threading.Thread):
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
+        get_location(self)
 
     @staticmethod
     def geographical_distance(latitudeA, longitudeA, latitudeB, longitudeB):
@@ -134,7 +135,7 @@ class Trilaterator(threading.Thread):
             distance_calculated = self.great_circle_distance(x[0], x[1], location[0], location[1])
             mse += math.pow(distance_calculated - distance, 2.0)
             # mse += np.sum((distance_calculated - distance) ** 2)
-        print(f"Evaluating at {x}: MSE={mse / len(distances)}")
+        # print(f"Evaluating at {x}: MSE={mse / len(distances)}")
         return mse / len(distances)
 
     def trilaterate(self, initial_location, locations, distances):
@@ -192,16 +193,55 @@ if __name__ == '__main__':
     # Point A: 37.7749° N, 122.4194° W (San Francisco)
     # Point B: 40.7128° N, 74.0060° W (New York)
     locations = [
-        [40.7128, -74.0060]
+        [40.7128, -74.0060] # Point B: 40.7128° N, 74.0060° W (New York)
     ]
 
+    # Point A: 37.7749° N, 122.4194° W (San Francisco)
     distances = trilaterator.getDistancesForSignalPoints([37.7749, -122.4194], [{"lat": l[0], "lon": l[1]} for l in locations])
-
     result = trilaterator.trilaterate([37.7749, -122.4194], locations, distances)
+
+    # Using an online calculator or a programming script with the Haversine formula,
+    # the great circle distance between San Francisco and New York would be approximately 3,396 kilometers.
+    print("SF-NYC distance:", distances)
+    print(" position:", [trilaterator.lat, trilaterator.lon])
+    print("locations:", locations)
+    print("Estimated location:", result)
+    ################################################################################################
+    trilaterator = Trilaterator()
+    trilaterator.configure('gps.json')
+
+    locations = [
+        [40.7128, -74.0060] # Point B: 40.7128° N, 74.0060° W (New York)
+    ]
+
+    # Point A: (current location)
+    distances = trilaterator.getDistancesForSignalPoints([trilaterator.lat, trilaterator.lon], [{"lat": l[0], "lon": l[1]} for l in locations])
+    result = trilaterator.trilaterate([trilaterator.lat, trilaterator.lon], locations, distances)
+    print("NYC distance:", distances)
     print(" position:", [trilaterator.lat, trilaterator.lon])
     print("locations:", locations)
 
     # Using an online calculator or a programming script with the Haversine formula,
     # the great circle distance between San Francisco and New York would be approximately 3,396 kilometers.
-    print("distances:", distances)
     print("Estimated location:", result)
+    ################################################################################################
+    trilaterator = Trilaterator()
+    trilaterator.configure('gps.json')
+
+    locations = [
+        [37.7749, -122.4194] # Point B: 37.7749° N, 122.4194° W (San Francisco)
+    ]
+
+    # Point A: (current location)
+    distances = trilaterator.getDistancesForSignalPoints([trilaterator.lat, trilaterator.lon], [{"lat": l[0], "lon": l[1]} for l in locations])
+    result = trilaterator.trilaterate([trilaterator.lat, trilaterator.lon], locations, distances)
+    # Using an online calculator or a programming script with the Haversine formula,
+    # the great circle distance between San Francisco and New York would be approximately 3,396 kilometers.
+    print("SF distance:", distances)
+    print(" position:", [trilaterator.lat, trilaterator.lon])
+    print("locations:", locations)
+
+    print("Estimated location:", result)
+
+
+
