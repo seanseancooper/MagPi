@@ -109,18 +109,18 @@ class Scanner(threading.Thread):
         self.get_worker(id).worker_to_sgnl(self.get_worker(id), self.get_worker(id).get())
         _signals.append(self.get_worker(id).get())
 
-    def update_ghosts(self):
+    def get_ghosts(self):
         """ find, load and update ghosts """
         tracked = frozenset([x for x in self.tracked_signals])
         parsed = frozenset([key[f'{self.SIGNAL_IDENT_FIELD}'] for key in self.parsed_signals])
         self.ghost_signals = tracked.difference(parsed)
 
-        def update_ghost(item):
+        def _ghost(item):
             self.get_worker(item).signal = -99
             self.get_worker(item).updated = datetime.now()
             self.get_worker(item).make_signalpoint(self.get_worker(item).id, self.get_worker(item).id, self.get_worker(item).signal)
 
-        [update_ghost(item) for item in self.ghost_signals]
+        [_ghost(item) for item in self.ghost_signals]
 
     def parse_signals(self, readlines):
         self.parsed_signals = self.retriever.get_parsed_cells(readlines)
