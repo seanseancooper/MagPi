@@ -1,0 +1,3 @@
+[submodule "app/mcp-webui/webui"]
+	path = app/mcp-webui/webui
+	url = https://github.com/open-webui/open-webui.git
