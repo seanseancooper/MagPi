@@ -17,7 +17,7 @@ class TRXSignalPoint(SignalPoint):
     This class encapsulates audio_data as a Signal with a default sampling rate of 48Khz.
     Extracts frequency features locally; there would be special processing for audio data of this type.
     """
-    def __init__(self, worker_id, lon, lat, sgnl, text_data, audio_data=None, signal_type="object", sr=48000):
+    def __init__(self, worker_id, lon, lat, sgnl, text_data: dict, audio_data=None, signal_type="object", sr=48000):
         super().__init__(lon, lat, sgnl)
         self._id = uuid.uuid4()
         self._worker_id = worker_id
@@ -28,7 +28,7 @@ class TRXSignalPoint(SignalPoint):
         self.tracked = False
         self.is_mute = False
 
-        self._text_attributes = {}              # object (default): intermittent text from hardware, see aggregate(k, v)
+        self._text_attributes = text_data       # object (default): intermittent text from hardware, see aggregate(k, v)
         self._audio_data = audio_data           # continuous: intermittent audio data as a Signal
         self._sr = sr                           # need config, and ability to ad hoc change
 
