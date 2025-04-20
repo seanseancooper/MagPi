@@ -13,6 +13,18 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
+			"SCANNER": "Scanner"
+		},
+		{
+			"SIGNALPOINT_TYPE": "WifiSignalPoint"
+		},
+		{
+			"SIGNAL_IDENT_FIELD": "BSSID"
+		},
+		{
+			"SIGNAL_STRENGTH_FIELD": "Signal"
+		},
+		{
 			"SCANNER_RETRIEVER": "MacOSAirportWifiRetriever"
 		},
 		{
