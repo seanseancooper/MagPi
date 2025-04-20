@@ -1,4 +1,7 @@
+from datetime import datetime, timedelta
 import os
+import random
+import uuid
 import xml.etree.ElementTree as ET
 
 from src.config import CONFIG_PATH, readConfig
@@ -53,21 +56,6 @@ def get_timing(cell):
     return time
 
 
-def compare_MFCC():
-    # TODO: compare_MFCC(), Was in Scanner
-    pass
-
-
-def analyze_periodicity():
-    # TODO: analyze_periodicity(), Was in Scanner
-    pass
-
-
-def get_MFCC():
-    # TODO: get_MFCC(), Was in Worker
-    pass
-
-
 def generate_signal(worker_id):
     base_lat = 39.915
     base_lon = -105.065
@@ -78,7 +66,7 @@ def generate_signal(worker_id):
     offset_lon = random.uniform(-spread, spread)
 
     return {
-        "created"  : (datetime.utcnow() - timedelta(minutes=random.randint(1, 1000))).isoformat(),
+        "created"  : (datetime.now() - timedelta(minutes=random.randint(1, 1000))).isoformat(),
         "id"       : str(uuid.uuid4()),
         "worker_id": worker_id,
         "lat"      : round(base_lat + offset_lat, 6),
