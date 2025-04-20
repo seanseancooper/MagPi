@@ -2,12 +2,11 @@ import json
 import glob
 import uuid
 from src.lib.utils import format_time
-from src.wifi.lib.wifi_utils import vendorsMacs_XML, proc_vendors
+from src.wifi.lib.wifi_utils import vendorsMacs_XML, proc_vendors, generate_signal
 from datetime import datetime, timedelta
 from src.config import readConfig
 from src.lib.utils import get_location
 import random
-
 
 
 class cat_scanlists:
@@ -113,27 +112,9 @@ class cat_scanlists:
                             "sgnl": sgnl.get('sgnl', -99)
                         }
 
-                    def generate_signal():
-                        base_lat = 39.915
-                        base_lon = -105.065
-                        spread = 0.003
-                        signals = list(range(-100, 0))
-
-                        offset_lat = random.uniform(-spread, spread)
-                        offset_lon = random.uniform(-spread, spread)
-
-                        return {
-                            "created"  : (datetime.utcnow() - timedelta(minutes=random.randint(1, 1000))).isoformat(),
-                            "id"       : str(uuid.uuid4()),
-                            "worker_id": record['id'],
-                            "lat"      : round(base_lat + offset_lat, 6),
-                            "lon"      : round(base_lon + offset_lon, 6),
-                            "sgnl"     : random.choice(signals)
-                        }
-
                     if generate_signalpoints:
                         # give everybody synthetic signalpoints
-                        cache = [generate_signal() for _ in range(10)]
+                        cache = [generate_signal(record['id']) for _ in range(10)]
                     else:
                         # give everybody synthetic signalpoints
                         cache = [process_sgnl(x) for x in record.get('signal_cache')] if add_signals is True else []

@@ -68,6 +68,25 @@ def get_MFCC():
     pass
 
 
+def generate_signal(worker_id):
+    base_lat = 39.915
+    base_lon = -105.065
+    spread = 0.003
+    signals = list(range(-100, 0))
+
+    offset_lat = random.uniform(-spread, spread)
+    offset_lon = random.uniform(-spread, spread)
+
+    return {
+        "created"  : (datetime.utcnow() - timedelta(minutes=random.randint(1, 1000))).isoformat(),
+        "id"       : str(uuid.uuid4()),
+        "worker_id": worker_id,
+        "lat"      : round(base_lat + offset_lat, 6),
+        "lon"      : round(base_lon + offset_lon, 6),
+        "sgnl"     : random.choice(signals)
+    }
+
+
 def append_to_outfile(cls, config, cell):
     """Append found cells to a rolling JSON list"""
     from src.lib.utils import format_time, format_delta
