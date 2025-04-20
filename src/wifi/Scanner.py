@@ -78,8 +78,8 @@ class Scanner(threading.Thread):
         self.OUTDIR = self.config['OUTFILE_PATH']
         self.signal_cache_max = self.config.get('SIGNAL_CACHE_MAX', self.signal_cache_max)
 
-        self.SIGNAL_IDENT_FIELD = 'BSSID'
-        self.SIGNAL_STRENGTH_FIELD = 'Signal'
+        self.SIGNAL_IDENT_FIELD = self.config['SIGNAL_IDENT_FIELD']
+        self.SIGNAL_STRENGTH_FIELD = self.config['SIGNAL_STRENGTH_FIELD']
         self.sort_order = self.SIGNAL_STRENGTH_FIELD
 
         [self.workers.append(Worker(ID)) for ID in self.searchmap.keys()]
@@ -88,7 +88,7 @@ class Scanner(threading.Thread):
     def get_worker(self, id):
         worker = None
         try:
-            worker = [worker for worker in self.workers if worker.id == id.upper()][0]
+            worker = [worker for worker in self.workers if worker.ident == id.upper()][0]
             if worker:
                 return worker
         except IndexError:
@@ -118,7 +118,7 @@ class Scanner(threading.Thread):
         def _ghost(item):
             self.get_worker(item).signal = -99
             self.get_worker(item).updated = datetime.now()
-            self.get_worker(item).make_signalpoint(self.get_worker(item).id, self.get_worker(item).id, self.get_worker(item).signal)
+            self.get_worker(item).make_signalpoint(self.get_worker(item).ident, self.get_worker(item).ident, self.get_worker(item).signal)
 
         [_ghost(item) for item in self.ghost_signals]
 
