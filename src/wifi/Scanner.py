@@ -179,7 +179,7 @@ class Scanner(threading.Thread):
 
             if len(scanned) > 0:
                 self.parse_signals(scanned)
-                self.update_ghosts()
+                self.get_ghosts()
                 get_location(self)
 
                 def blacklist(sgnl):
