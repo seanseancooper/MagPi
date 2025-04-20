@@ -149,18 +149,18 @@ class WifiScanner(threading.Thread):
         self.update_sgnl_dynamics(self.get_worker(bssid).get(), self.get_worker(bssid))
         _signals.append(self.get_worker(bssid).get())
 
-    def update_ghosts(self):
+    def get_ghosts(self):
         """ find, load and update ghosts """
         tracked = frozenset([x for x in self.tracked_signals])
         parsed = frozenset([key['BSSID'] for key in self.parsed_signals])
         self.ghost_signals = tracked.difference(parsed)
 
-        def update_ghost(item):
+        def _ghost(item):
             self.get_worker(item).signal = -99
             self.get_worker(item).updated = datetime.now()
             self.make_signalpoint(self.get_worker(item).id, self.get_worker(item).bssid, self.get_worker(item).signal)
 
-        [update_ghost(item) for item in self.ghost_signals]
+        [_ghost(item) for item in self.ghost_signals]
 
     def parse_signals(self, readlines):
         self.parsed_signals = self.retriever.get_parsed_cells(readlines)
@@ -239,7 +239,7 @@ class WifiScanner(threading.Thread):
 
             if len(scanned) > 0:
                 self.parse_signals(scanned)
-                self.update_ghosts()
+                self.get_ghosts()
                 get_location(self)
 
                 def blacklist(sgnl):
