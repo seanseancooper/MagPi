@@ -3,7 +3,7 @@ import random
 import uuid
 
 
-class FAKETRXUSBRetriever:
+class XRXSignalGenerator:
 
     def __init__(self):
         self.freq = None
@@ -38,7 +38,7 @@ class FAKETRXUSBRetriever:
             offset_lon = random.uniform(-spread, spread)
 
             return {
-                "created"  : (datetime.utcnow() - timedelta(minutes=random.randint(1, 1000))).isoformat(),
+                "created"  : (datetime.utcnow() - datetime.timedelta(minutes=random.randint(1, 1000))).isoformat(),
                 "id"       : str(uuid.uuid4()),
                 "worker_id": worker_id,
                 "lat"      : round(base_lat + offset_lat, 6),
@@ -50,7 +50,7 @@ class FAKETRXUSBRetriever:
         def generate_worker():
             worker_id = str(uuid.uuid4())
             data = {
-                "id"        : worker_id,
+                "worker_id" : worker_id,
                 "SSID"      : random.choice(SSIDs),
                 "BSSID"     : ":".join(["{:02X}".format(random.randint(0, 255)) for _ in range(6)]),
                 "created"   : (datetime.datetime.utcnow() - datetime.timedelta(minutes=random.randint(1, 1000))).strftime('%H:%M:%S'),
@@ -64,12 +64,12 @@ class FAKETRXUSBRetriever:
                 "Encryption": random.choice(encryption),
                 "is_mute"   : random.choice(is_mute),
                 "tracked"   : random.choice(tracked),
-                "signal_cache": [generate_signal_cache(worker_id) for _ in range(160)]
+                "signal_cache": [generate_signal_cache(worker_id) for _ in range(30)]
             }
 
             return data
 
         # Generate 30 worker records
         print(f'scanning on frequency: {self.freq}')
-        return [generate_worker() for _ in range(30)]
+        yield [generate_worker() for _ in range(len(SSIDs))]
 
