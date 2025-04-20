@@ -29,12 +29,20 @@ class FAKETRXUSBRetriever:
 
         # Function to generate a random signal cache entry
         def generate_signal_cache(worker_id):
+            base_lat = 39.915
+            base_lon = -105.065
+            spread = 0.003
+            signals = list(range(-100, 0))
+
+            offset_lat = random.uniform(-spread, spread)
+            offset_lon = random.uniform(-spread, spread)
+
             return {
-                "datetime" : (datetime.datetime.utcnow() - datetime.timedelta(minutes=random.randint(1, 1000))).isoformat(),
+                "created"  : (datetime.utcnow() - timedelta(minutes=random.randint(1, 1000))).isoformat(),
                 "id"       : str(uuid.uuid4()),
                 "worker_id": worker_id,
-                "lon"      : round(random.uniform(-105.068000, -105.060000), 6),
-                "lat"      : round(random.uniform(39.910000, 39.920000), 6),
+                "lat"      : round(base_lat + offset_lat, 6),
+                "lon"      : round(base_lon + offset_lon, 6),
                 "sgnl"     : random.choice(signals)
             }
 
