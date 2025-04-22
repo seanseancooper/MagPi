@@ -19,7 +19,7 @@ class WifiSignalPoint(SignalPoint):
 
     def get(self):
         return {
-            "created"           : format_time(self._created, "%Y-%m-%d %H:%M:%S.%f"),
+            "created"           : format_time(self._created, "%Y-%m-%d %H:%M:%S"),
             "id"                : str(self._id),
             "worker_id"         : self._worker_id,
             "bssid"             : self._bssid,
