@@ -16,7 +16,7 @@
 			"SCANNER": "Scanner"
 		},
 		{
-			"SIGNALPOINT_TYPE": "WifiSignalPoint"
+			"SIGNALPOINT_TYPE": "src.wifi.lib.WifiSignalPoint"
 		},
 		{
 			"SIGNAL_IDENT_FIELD": "BSSID"
@@ -25,7 +25,7 @@
 			"SIGNAL_STRENGTH_FIELD": "Signal"
 		},
 		{
-			"SCANNER_RETRIEVER": "MacOSAirportWifiRetriever"
+			"SCANNER_RETRIEVER": "MQWifiRetriever"
 		},
 		{
 			"WIFI_QUEUE": "wifi_queue"
@@ -79,7 +79,6 @@
 						"is_mute"     : {"type": "boolean"},
 						"tracked"     : {"type": "boolean"},
 						"signal_cache": {
-							"type"      : "nested",
 							"properties": {
 								"created"  : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
 								"id"       : {"type": "keyword"},
@@ -195,7 +194,7 @@
 			"TIMER_FORMAT": "%H:%M:%S"
 		},
 		{
-			"DATETIME_FORMAT": "%Y%m%d_%H%M%S"
+			"DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S"
 		},
 		{
 			"XML_SIGNAL_DEBUG": false
