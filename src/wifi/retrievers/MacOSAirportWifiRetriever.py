@@ -99,7 +99,8 @@ class MacOSAirportWifiRetriever(threading.Thread):
 
         def close_element(d, errorByteIndex):
             # move me
-            DOCTYPE = self.config['DOCTYPE']
+            # DOCTYPE = self.config['DOCTYPE']
+            DOCTYPE = '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">				<plist version="1.0">		<array></array>		</plist>'
 
             if d is not None:
                 if len(d) > 0:
@@ -107,8 +108,6 @@ class MacOSAirportWifiRetriever(threading.Thread):
                     # [data += str(f"</{v}>") for v in reversed(_elements.values())]
                     for v in reversed(_elements.values()):
                         data = data + str(f"</{v}>")
-                        if self.DATA_DEBUG:
-                            wifi_logger.debug(f"[{__name__}]: >> {data}")
                     return data
             else:
                 return DOCTYPE
@@ -118,8 +117,6 @@ class MacOSAirportWifiRetriever(threading.Thread):
         parser.EndElementHandler = end_element
 
         try:
-            if self.PARSE_DEBUG:
-                wifi_logger.debug(f"[{__name__}]: PARSE: >> {xml_data}")
             parser.Parse(xml_data, True)
             root = ET.fromstring(xml_data)
         except ExpatError:
@@ -127,8 +124,6 @@ class MacOSAirportWifiRetriever(threading.Thread):
         except TypeError:
             root = ET.fromstring(close_element(xml_data, parser.ErrorByteIndex))
 
-        if self.ROOT_DEBUG:
-            wifi_logger.debug(f"[{__name__}]: ROOT: >> {root}")
         return root
 
     def get_parsed_cells(self, airport_data):
@@ -194,7 +189,7 @@ class MacOSAirportWifiRetriever(threading.Thread):
 
                 # convert to Ghz band
                 FREQUENCY = int(item.get('CAPABILITIES', -1))
-
+                QUALITY = None
                 try:
                     QUALITY = abs(RSSI + 100) or 0
                 except Exception as e:
@@ -226,7 +221,7 @@ class MacOSAirportWifiRetriever(threading.Thread):
                     'BSSID'     : BSSID,
                     'Signal'    : RSSI,
                     'Channel'   : CHANNEL,
-                    "Frequency" : FREQUENCY,
+                    'Frequency' : FREQUENCY,
                     'Quality'   : QUALITY,
                     'Encryption': SECURITY,
                     'Vendor'    : VENDOR,
