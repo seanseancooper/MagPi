@@ -29,6 +29,7 @@ class SDRSignalPoint(SignalPoint):
         self.tracked = False
         self.is_mute = False
 
+        # this needs to goto a worker proocess
         self._ctrl_record = False
         self._ctrl_analyze = False
         self._ctrl_demux = False
