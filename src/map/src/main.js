@@ -190,7 +190,7 @@ geolocation.on('change', function () {
     };
 
     // Send coords to Node server
-    fetch('http://localhost:3000', {
+    fetch('http://localhost:5014', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
