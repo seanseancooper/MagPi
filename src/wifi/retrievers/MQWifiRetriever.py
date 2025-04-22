@@ -51,3 +51,9 @@ class MQWifiRetriever(threading.Thread):
             return self.consumer.data or []
         except Exception as e:
             wifi_logger.error(f"[{__name__}]: Exception: {e}")
+
+
+    def get_parsed_cells(self, airport_data):
+        from src.wifi.retrievers.MacOSAirportWifiRetriever import MacOSAirportWifiRetriever
+        return MacOSAirportWifiRetriever.get_parsed_cells(MacOSAirportWifiRetriever(), airport_data)
+
