@@ -15,6 +15,10 @@ vc_bp = Blueprint(
         static_folder=viewContainer.config['STATIC_FOLDER']
 )
 
+@vc_bp.route('/favicon.ico', subdomain='view')
+def favicon():
+    return '', 204
+
 
 @vc_bp.route('/')
 def index():
