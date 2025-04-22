@@ -125,7 +125,6 @@ class ElasticMappingTransformer:
             _index(signals_index, self.signals_data[-1])
         else:
             [_index(signals_index, signal) for signal in self.signals_data if self.signals_data]
-            self._seen.append(worker_data['id'])
 
     def push(self, data):
         """ method entrypoint for elastic indexing """
