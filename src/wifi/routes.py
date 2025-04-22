@@ -2,9 +2,9 @@ from flask import Blueprint, redirect, render_template, jsonify
 import logging
 
 from src.wifi.WifiScanner import WifiScanner
-scanner = WifiScanner()
+from src.wifi.Scanner import Scanner
 
-# from src.wifi.Scanner import Scanner
+scanner = WifiScanner()
 # scanner = Scanner()
 
 scanner.configure('wifi.json')
