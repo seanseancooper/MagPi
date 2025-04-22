@@ -155,3 +155,18 @@ def print_signals(sgnls, columns):
 
     [print_signal(sgnl) for sgnl in sgnls]
     print_table(table)
+
+def get_me(o):
+
+    # Get the fields and their values
+    fields = o.get_fields()
+    mapped = {}
+
+    for field, value in fields.items():
+        mapped[field]  = value
+
+    return mapped
+
+
+def get_me():
+    return None
