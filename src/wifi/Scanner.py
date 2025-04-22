@@ -49,6 +49,7 @@ class Scanner(threading.Thread):
         self._OUTFILE = None
         self.OUTDIR = None
         self.DEBUG = False
+        self.SIGNALPOINT_TYPE = None
         self.SIGNAL_IDENT_FIELD = None
         self.SIGNAL_STRENGTH_FIELD = None
 
@@ -78,6 +79,7 @@ class Scanner(threading.Thread):
         self.OUTDIR = self.config['OUTFILE_PATH']
         self.signal_cache_max = self.config.get('SIGNAL_CACHE_MAX', self.signal_cache_max)
 
+        self.SIGNALPOINT_TYPE = self.config.get('SIGNALPOINT_TYPE', 'SignalPoint')
         self.SIGNAL_IDENT_FIELD = self.config['SIGNAL_IDENT_FIELD']
         self.SIGNAL_STRENGTH_FIELD = self.config['SIGNAL_STRENGTH_FIELD']
         self.sort_order = self.SIGNAL_STRENGTH_FIELD
@@ -85,31 +87,31 @@ class Scanner(threading.Thread):
         [self.workers.append(Worker(ID)) for ID in self.searchmap.keys()]
         [worker.config_worker(self) for worker in self.workers]
 
-    def get_worker(self, id):
+    def get_worker(self, ident):
         worker = None
         try:
-            worker = [worker for worker in self.workers if worker.ident == id.upper()][0]
+            worker = [worker for worker in self.workers if worker.ident == ident.upper()][0]
             if worker:
                 return worker
         except IndexError:
-            worker = Worker(id)
+            worker = Worker(ident)
             worker.config_worker(self)
             self.workers.append(worker)
             worker.run()
         finally:
             return worker
 
-    def get_cell(self, id):
-        cell = [_ for _ in self.parsed_signals if _['ID'] == id][0]
+    def get_cell(self, ident):
+        cell = [_ for _ in self.parsed_signals if _[f'{self.SIGNAL_IDENT_FIELD}'] == ident][0]
         return cell
 
-    def update(self, id):
+    def update(self, ident):
         _signals = []
         """ put id associated signal data into a map as an element in a list of _signals """
-        self.get_worker(id).worker_to_sgnl(self.get_worker(id), self.get_worker(id).get())
-        _signals.append(self.get_worker(id).get())
+        self.get_worker(ident).worker_to_sgnl(self.get_worker(ident).get(), self.get_worker(ident))
+        _signals.append(self.get_worker(ident).get())
 
-    def get_ghosts(self):
+    def load_ghosts(self):
         """ find, load and update ghosts """
         tracked = frozenset([x for x in self.tracked_signals])
         parsed = frozenset([key[f'{self.SIGNAL_IDENT_FIELD}'] for key in self.parsed_signals])
@@ -130,7 +132,7 @@ class Scanner(threading.Thread):
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
 
-        [self.get_worker(sgnl[f'{self.SIGNAL_IDENT_FIELD}']).worker_to_sgnl(sgnl, self.get_worker(sgnl[f'{self.SIGNAL_IDENT_FIELD}'])) for sgnl in self.parsed_signals]
+        [self.get_worker(sgnl[f'{self.SIGNAL_IDENT_FIELD}']).worker_to_sgnl( self.get_worker(sgnl[f'{self.SIGNAL_IDENT_FIELD}']), sgnl) for sgnl in self.parsed_signals]
         return self.parsed_signals
 
     def get_tracked_signals(self):
@@ -149,6 +151,17 @@ class Scanner(threading.Thread):
         logger_root.info(f"[{__name__}]: Scanner stopped. {self.polling_count} iterations.")
 
     def report(self):
+
+        if self.polling_count % 10 == 0:
+            speech_logger.info(
+                f'{len(self.parsed_signals)} scanned, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
+
+        if self.config['PRINT_SIGNALS']:
+            try:
+                print_signals(self.parsed_signals, list(self.parsed_signals[0].keys()))
+            except IndexError:
+                pass
+
         # get from stats....
         print(f"Scanner [{self.polling_count}] "
               f"{format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
@@ -157,55 +170,56 @@ class Scanner(threading.Thread):
               f"{len(self.tracked_signals)} tracked, "
               f"{len(self.ghost_signals)} ghosts")
 
+                # f"{self.stats['elapsed']} "
+                # f"{self.stats['workers']} scanned, "
+                # f"{self.stats['tracked']} tracked, "
+                # f"{self.stats['ghosts']} ghosts")
+
+    def blacklist_signals(self, sgnl):
+        if sgnl[f'{self.SIGNAL_IDENT_FIELD}'] in self.blacklist.keys():
+            try:
+                self.parsed_signals.remove(sgnl)
+            except Exception:
+                pass
+
     def run(self):
 
         self.created = datetime.now()
         speech_logger.info('scanner started')
 
-        self.stats = {
-            'created'      : format_time(self.created, self.config['TIME_FORMAT']),
-            'updated'      : format_time(self.updated, self.config['TIME_FORMAT']),
-            'elapsed'      : format_delta(self.elapsed, self.config['TIME_FORMAT']),
-            'polling_count': self.polling_count,
-            'lat'          : self.lat,
-            'lon'          : self.lon,
-            'workers'      : len(self.workers),
-            'tracked'      : len(self.tracked_signals),
-            'ghosts'       : len(self.ghost_signals),
-        }
-
         while True:
+
+            self.stats = {
+                'created'      : format_time(self.created, self.config['TIME_FORMAT']),
+                'updated'      : format_time(self.updated, self.config['TIME_FORMAT']),
+                'elapsed'      : format_delta(self.elapsed, self.config['TIME_FORMAT']),
+                'polling_count': self.polling_count,
+                'lat'          : self.lat,
+                'lon'          : self.lon,
+                'workers'      : len(self.workers),
+                'tracked'      : len(self.tracked_signals),
+                'ghosts'       : len(self.ghost_signals),
+            }
+
             scanned = self.retriever.scan()
 
             if len(scanned) > 0:
                 self.parse_signals(scanned)
-                self.get_ghosts()
+                self.load_ghosts()
                 get_location(self)
 
-                def blacklist(sgnl):
-                    if sgnl[f'{self.SIGNAL_IDENT_FIELD}'] in self.blacklist.keys():
-                        try:
-                            self.parsed_signals.remove(sgnl)
-                        except Exception: pass
+                [self.blacklist_signals(sgnl) for sgnl in self.parsed_signals.copy()]
 
-                [blacklist(sgnl) for sgnl in self.parsed_signals.copy()]
-
-                if self.config['PRINT_SIGNALS']:
-                    if self.config['SORT_SIGNALS']:
-                        self.parsed_signals.sort(key=lambda el: el[self.sort_order], reverse=self.reverse)
-                    try:
-                        print_signals(self.parsed_signals, list(self.parsed_signals[0].keys()))
-                    except IndexError: pass
+                if self.config['SORT_SIGNALS']:
+                    self.parsed_signals.sort(key=lambda el: el[self.sort_order], reverse=self.reverse)
 
                 [worker.run() for worker in self.workers]
+
                 self.updated = datetime.now()
                 self.elapsed = self.updated - self.created
-
-                if self.polling_count % 10 == 0:
-                    speech_logger.info(f'{len(self.parsed_signals)} scanned, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
-
                 self.report()
                 self.polling_count += 1
+
             else:
                 speech_logger.info(f'looking for data {self.polling_count} ...')
                 print(f"looking for data [{self.polling_count}] {format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))}...")
