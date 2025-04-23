@@ -166,7 +166,3 @@ def get_me(o):
         mapped[field]  = value
 
     return mapped
-
-
-def get_me():
-    return None
