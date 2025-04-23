@@ -4,8 +4,8 @@ import logging
 from src.wifi.WifiScanner import WifiScanner
 from src.wifi.Scanner import Scanner
 
-scanner = WifiScanner()
-# scanner = Scanner()
+# scanner = WifiScanner()
+scanner = Scanner()
 
 scanner.configure('wifi.json')
 
