@@ -62,6 +62,7 @@ class Worker:
         sgnl['signal_cache'] = [x.get() for x in self.scanner.signal_cache[worker.ident]]
 
     def config_worker(self, scanner):
+        """ worker append itself, pulls config when created. """
         self.scanner = scanner
         self.config = scanner.config
         self.created = datetime.now()
