@@ -5,8 +5,9 @@ from src.lib.SignalPoint import SignalPoint
 class WifiSignalPoint(SignalPoint):
     """
     Class to encapsulate a Wifi signal captured at a point.
-    The 'id' field uniquely represents a specific point.
-    The 'worker_id' is derived from the BSSID of the AP that produced it.
+    The 'id' field uniquely represents a specific point and is filled in the super when created.
+    The 'worker_id' is derived from the BSSID of the AP that produced the signal.
+    The 'bssid' is the BSSID of the AP that produced the signal.
     """
     def __init__(self, worker_id, lon, lat, sgnl, bssid=None):
         super().__init__(lon, lat, sgnl)
