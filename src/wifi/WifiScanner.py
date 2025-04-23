@@ -249,8 +249,8 @@ class WifiScanner(threading.Thread):
                         except Exception: pass
                 [blacklist(sgnl) for sgnl in self.parsed_signals.copy()]
 
-                if self.config['PRINT_SIGNALS']:
-                    if self.config['SORT_SIGNALS']:
+                if self.config['PRINT_CELLS']:
+                    if self.config['SORT_CELLS']:
                         self.parsed_signals.sort(key=lambda el: el[self.sort_order], reverse=self.reverse)
                     try:
                         print_signals(self.parsed_signals, list(self.parsed_signals[0].keys()))
