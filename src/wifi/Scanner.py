@@ -85,6 +85,7 @@ class Scanner(threading.Thread):
         self.SIGNALPOINT_TYPE = self.config.get('SIGNALPOINT_TYPE', 'SignalPoint')
         self.SIGNAL_IDENT_FIELD = self.config['SIGNAL_IDENT_FIELD']
         self.SIGNAL_STRENGTH_FIELD = self.config['SIGNAL_STRENGTH_FIELD']
+
         self.sort_order = self.SIGNAL_STRENGTH_FIELD
 
         [self.workers.append(Worker(ID)) for ID in self.searchmap.keys()]
