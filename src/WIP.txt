@@ -49,7 +49,7 @@ ebs:
     IDeA: Speech Service client using MCP?
 
 gps (MapAggregator, REST, class?):
-    Trilaterator! Test data and map symbology.
+
     GPS hardware build.
 
 lib:
@@ -60,9 +60,38 @@ map (MapAggregator, read configs, test REST endpoints and pull data [AGGREGATOR_
         Elastic pull()
     MapAggregator refresh; read from rabbitMQ, not REST
     Hyperspectral imaging: BLOCKED DUE TO ENVIRONMENT
+    Trilaterator: wifi data is the problem. the points need ~300m separation to resolve.
+        Can this be achieved by scaling the data?
 
-ML:
-    New. See ideas.
+mcp:
+    IDEAS:
+    keyword-spotter integration via remote model --> MCP (perhaps)
+
+    3. Pattern Learning
+    Use statistical or ML models to find structure:
+        Clustering: Find recurring emission types or behaviors (DBSCAN, k-means)
+        Classification: Identify known emitters or mission profiles
+        Sequence modeling: Use HMMs or LSTMs to learn time-based sequences of events
+        Anomaly detection: Spot rare or covert behavior
+
+    4. Prediction & Inference
+    Once models learn normal behavior:
+        Predict next signal in a sequence
+        Infer emitter identity or intent
+        Detect prep for operations or movement
+        Spot spoofing or jamming attempts
+
+        # 2. Temporal Event Sequences
+        # Use time-series to model:
+        #     Emission patterns
+        #     Inter-event intervals (e.g., radar → data uplink → artillery)
+
+        # 3. Probabilistic Inference Engine
+        # Apply:
+        #     Markov Chains or Bayesian Networks to model expected vs. unexpected sequences
+        #     Anomaly detection for spotting new patterns (e.g., movement prep)
+
+    MCP AUTOMATIC DOCKER STARTUP: Ensure the container is available and is a setting in the container startup.
 
 MOT[DELETED]
 
