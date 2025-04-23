@@ -16,16 +16,25 @@
 			"SCANNER": "Scanner"
 		},
 		{
+			"SCANNER_RETRIEVER": "MacOSAirportWifiRetriever"
+		},
+		{
 			"SIGNALPOINT_TYPE": "src.wifi.lib.WifiSignalPoint"
 		},
 		{
-			"SIGNAL_IDENT_FIELD": "BSSID"
+			"CELL_IDENT_FIELD": "BSSID"
 		},
 		{
-			"SIGNAL_STRENGTH_FIELD": "Signal"
+			"CELL_STRENGTH_FIELD": "Signal"
 		},
 		{
-			"SCANNER_RETRIEVER": "MQWifiRetriever"
+			"CELL_SORT_FIELD": "Signal"
+		},
+		{
+			"PRINT_CELLS": false
+		},
+		{
+			"SORT_CELS": true
 		},
 		{
 			"WIFI_QUEUE": "wifi_queue"
@@ -47,12 +56,6 @@
 		},
 		{
 			"SIGNAL_CACHE_MAX": 162
-		},
-		{
-			"PRINT_SIGNALS": false
-		},
-		{
-			"SORT_SIGNALS": true
 		},
 		{
 			"MUTE_TIME": 999999
