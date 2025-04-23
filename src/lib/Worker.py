@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from src.arx.lib.ARXSignalPoint import ARXSignalPoint
 from src.lib.utils import format_time, format_delta, get_me
 from src.sdr.lib.SDRSignalPoint import SDRSignalPoint
 from src.trx.lib.TRXSignalPoint import TRXSignalPoint
@@ -22,7 +23,7 @@ class Worker:
         self.config = {}
         self.scanner = None
         self.id = None                  # filled if match(), 'marks' SignalPoint type.
-        self.ident = ident              # used in object lookups and coloring UI, self.scanner.SIGNAL_IDENT_FIELD
+        self.ident = ident              # used in object lookups and coloring UI, self.scanner.CELL_IDENT_FIELD
 
         self.created = datetime.now()   # when signal was found
         self.updated = datetime.now()   # when signal was last reported
@@ -67,7 +68,7 @@ class Worker:
     def set_text_attributes(self, text_data):
         def aggregate(k, v):
             self._text_attributes[k] = v
-            if k not in [self.scanner.SIGNAL_IDENT_FIELD, self.scanner.SIGNAL_STRENGTH_FIELD, 'text_attributes']:
+            if k not in [self.scanner.CELL_IDENT_FIELD, self.scanner.CELL_STRENGTH_FIELD, 'text_attributes', 'signal_cache']:
                 text_data.pop(k)
         [aggregate(k, str(v)) for k, v in text_data.copy().items()]
 
@@ -86,16 +87,23 @@ class Worker:
                 wifi_logger.fatal(f'no retriever found {e}')
                 exit(1)
 
+        # do this better!!!
+        # introspect the module name and get the type
+        # eval the type in the configuration
+        # introspect the text_attributes & fields and get the type
+
+        # SignalPoint       (self, lon, lat, sgnl)
         SignalPointType = get_retriever(self.scanner.config['SIGNALPOINT_TYPE'])
         kwargs = {}
         sgnlPt = None
-        # SignalPoint       (self, lon, lat, sgnl)
+
         # ARXSignalPoint    (self, worker_id, lon, lat, sgnl)
+        if SignalPointType.__name__ == 'src.arx.lib.ARXSignalPoint':
+            sgnlPt = ARXSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=signal)
 
         # WifiSignalPoint   (self, worker_id, lon, lat, sgnl, bssid=None)
         if SignalPointType.__name__ == 'src.wifi.lib.WifiSignalPoint':
-            kwargs["bssid"] =  self.get_text_attribute(self.scanner.SIGNAL_IDENT_FIELD)
-            # create a item of the type
+            kwargs["bssid"] =  self.get_text_attribute(self.scanner.CELL_IDENT_FIELD)
             sgnlPt = WifiSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=signal, **kwargs)
 
         # SDRSignalPoint    (self, worker_id, lon, lat, sgnl, array_data=None, audio_data=None, sr=48000)
@@ -103,15 +111,12 @@ class Worker:
             kwargs["array_data"] =  self.get_text_attribute('array_data'),
             kwargs["audio_data"] =  self.get_text_attribute('audio_data'),
             kwargs["sr"] =  self.get_text_attribute('sr'),
-            # create a item of the type
             sgnlPt = SDRSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=signal, **kwargs)
 
         # TRXSignalPoint    (self, worker_id, lon, lat, sgnl, text_data={}, audio_data=None, signal_type="object", sr=48000)
         if SignalPointType.__name__ == 'src.trx.lib.SDRSignalPoint':
             kwargs["text_data"] =  self.get_text_attribute('text_data'),
             kwargs["signal_type"] =  self.get_text_attribute('signal_type'),
-
-            # create a item of the type
             sgnlPt = TRXSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=signal, **kwargs)
 
         self.scanner.signal_cache[ident].append(sgnlPt)
@@ -157,7 +162,7 @@ class Worker:
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
         self.tracked = self.ident in self.scanner.tracked_signals
-        self.make_signalpoint(self.id, self.ident, int(sgnl.get(self.scanner.SIGNAL_STRENGTH_FIELD, -99)))
+        self.make_signalpoint(self.id, self.ident, int(sgnl.get(self.scanner.CELL_STRENGTH_FIELD, -99)))
         # self._signal_cache_frequency_features = self.extract_signal_cache_features(
         #         [pt.getSgnl() for pt in self.scanner.signal_cache[self.id]]
         # )
@@ -165,21 +170,18 @@ class Worker:
     def get_signal_cache_frequency_features(self):
         return self._signal_cache_frequency_features
 
-    def match(self, sgnl):
+    def match(self, cell):
         """ match id, derive the 'id' and set mute status """
-        if self.ident.upper() == sgnl[f'{self.scanner.SIGNAL_IDENT_FIELD}'].upper():
+        if self.ident.upper() == cell[f'{self.scanner.CELL_IDENT_FIELD}'].upper():
             if not self.id:
                 self.id = str(self.ident).replace(':', '').lower()
-            self.set_text_attributes(sgnl)
-            self.process_cell(sgnl)
+            self.set_text_attributes(cell)
+            self.process_cell(cell)
             self.auto_unmute()
 
     def mute(self):
         from src.lib.utils import mute
         return mute(self)
-
-    def signal_vec(self):
-        yield [pt.getSgnl() for pt in self.scanner.signal_cache[self.ident]][self.cache_max:]
 
     def auto_unmute(self):
         """ polled function to UNMUTE signals AUTOMATICALLY after the MUTE_TIME. """
@@ -212,68 +214,22 @@ class Worker:
     def stop(self):
         if self.tracked:
 
-            def append_to_outfile(cls, config, cell):  # use workers instead here.
+            def append_to_outfile(wrkr):
                 """Append found cells to a rolling JSON list"""
-                from src.lib.utils import format_time, format_delta
-                # unwrap the cell and format the dates, guids and whatnot.
-                # {'EE:55:A8:24:B1:0A':
-                #   {
-                #   'id': 'ee55a824b10a',
-                #   'name': 'Goodtimes Entertainment Inc.',
-                #   'created': '2025-03-12 00:36:07',
-                #   'updated': '2025-03-12 00:36:10',
-                #   'elapsed': '00:00:03',
-                #   'Vendor': 'UNKNOWN',
-                #   'Channel': 11,
-                #   'Frequency': 5169,
-                #   'Signal': -89,
-                #   'Quality': 11,
-                #   'Encryption': True,
-                #   'is_mute': False,
-                #   'tracked': True,
-                #   'signal_cache': [
-                #       {
-                #       'created': '2025-03-12 00:36:07.511398',
-                #       'id': '6fb74555-e1f5-440a-9c42-f5649a536279',
-                #       'worker_id': 'ee55a824b10a',
-                #       'lon': -105.068195,
-                #       'lat': 39.9168,
-                #       'sgnl': -89
-                #       },
-                #       {'created': '2025-03-12 00:36:10.641924',
-                #       'id': '18967444-39bf-4082-9aa4-d833fbb9ed28',
-                #       'worker_id': 'ee55a824b10a',
-                #       'lon': -105.068021,
-                #       'lat': 39.916915,
-                #       'sgnl': -89
-                #       }
-                #   ],
-                #   'tests': []
-                #   }
-                # }
-                #
-                # config.get('CREATED_FORMATTER', '%Y-%m-%d %H:%M:%S')
-                # config.get(UPDATED_FORMATTER', '%Y-%m-%d %H:%M:%S')
-                # config.get(ELAPSED_FORMATTER', '%H:%M:%S')
-
-                # format created timestamp in signals
-                # SGNL_CREATED_FORMAT: "%Y-%m-%d %H:%M:%S.%f"
                 formatted = {
-                    f"{self.scanner.SIGNAL_IDENT_FIELD}"                : cell[f'{self.scanner.SIGNAL_IDENT_FIELD}'],
-
-                    "created"                                           : cell['created'],
-                    "updated"                                           : cell['updated'],
-                    "elapsed"                                           : cell['elapsed'],
-
-                    "is_mute"                                           : cell['is_mute'],
-                    "tracked"                                           : cell['tracked'],
+                    f"{self.scanner.CELL_IDENT_FIELD}"  : wrkr[f'{self.scanner.CELL_IDENT_FIELD}'],
+                    "created"                           : wrkr['created'],
+                    "updated"                           : wrkr['updated'],
+                    "elapsed"                           : wrkr['elapsed'],
+                    "is_mute"                           : wrkr['is_mute'],
+                    "tracked"                           : wrkr['tracked'],
                 }
 
-                json_logger.info({cell['id']: formatted})
+                json_logger.info({wrkr['id']: formatted})
 
-            append_to_outfile(self, self.config, self.get())
+            append_to_outfile(self.get())
 
     def run(self):
         """ match an ID and populate data """
-        for sgnl in self.scanner.parsed_signals:
-            self.match(sgnl)
+        for cell in self.scanner.parsed_cells:
+            self.match(cell)

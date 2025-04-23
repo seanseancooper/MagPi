@@ -15,7 +15,7 @@ speech_logger = logging.getLogger('speech_logger')
 
 
 class Scanner(threading.Thread):
-    """Scanner class; poll, match ID and report as 'parsed_signals'. """
+    """Scanner class; poll, match ID and report as 'parsed_cells'. """
     def __init__(self):
         super().__init__()
 
@@ -25,11 +25,13 @@ class Scanner(threading.Thread):
         self.searchmap = {}
         self.stats =  {}
 
-        self.parsed_signals = []
+        self.parsed_cells = []                  # what scanner consumes
+        self.parsed_signals = []                # product of scanning
+
         ''' all items represented as a list of dictionaries.  '''
 
         self.workers = []                       # list of workers assigned to monitor a discrete signal.
-        self.tracked_signals = []               # parsed_signals currently being tracked.
+        self.tracked_signals = []               # parsed_cells currently being tracked.
         self.ghost_signals = []                 # signals no longer received, but tracked -- 'ghost' signals
         self.signal_cache = defaultdict(list)   # a mapping of lists of SignalPoint for all signals received.
         self.signal_cache_max = 160             # max size of these lists of SignalPoint. overridden via config
@@ -52,8 +54,10 @@ class Scanner(threading.Thread):
         self.DEBUG = False
 
         self.SIGNALPOINT_TYPE = None
-        self.SIGNAL_IDENT_FIELD = None
-        self.SIGNAL_STRENGTH_FIELD = None
+        self.CELL_IDENT_FIELD = None
+        self.CELL_STRENGTH_FIELD = None
+
+        self.scanned = None
 
     @staticmethod
     def get_retriever(name):
@@ -83,10 +87,10 @@ class Scanner(threading.Thread):
         self.tz = timezone(timedelta(hours=self.config['INDEX_TIMEDELTA']), name=self.config['INDEX_TZ'])
 
         self.SIGNALPOINT_TYPE = self.config.get('SIGNALPOINT_TYPE', 'SignalPoint')
-        self.SIGNAL_IDENT_FIELD = self.config['SIGNAL_IDENT_FIELD']
-        self.SIGNAL_STRENGTH_FIELD = self.config['SIGNAL_STRENGTH_FIELD']
+        self.CELL_IDENT_FIELD = self.config['CELL_IDENT_FIELD']
+        self.CELL_STRENGTH_FIELD = self.config['CELL_STRENGTH_FIELD']
 
-        self.sort_order = self.SIGNAL_STRENGTH_FIELD
+        self.sort_order = self.config['CELL_SORT_FIELD']
 
         [self.workers.append(Worker(ID)) for ID in self.searchmap.keys()]
         [worker.config_worker(self) for worker in self.workers]
@@ -105,29 +109,40 @@ class Scanner(threading.Thread):
         finally:
             return worker
 
-    def get_cell(self, ident):
-        cell = [_ for _ in self.parsed_signals if _[f'{self.SIGNAL_IDENT_FIELD}'] == ident][0]
-        return cell
-
     def load_ghosts(self):
-        """ find, load and update ghosts """
+        """ find 'ghost' signals, and update them """
         tracked = frozenset([x for x in self.tracked_signals])
-        parsed = frozenset([key[f'{self.SIGNAL_IDENT_FIELD}'] for key in self.parsed_signals])
+        parsed = frozenset([key[f'{self.CELL_IDENT_FIELD}'] for key in self.parsed_cells])
         self.ghost_signals = tracked.difference(parsed)
 
         def _ghost(item):
-            self.get_worker(item).signal = -99
-            self.get_worker(item).updated = datetime.now()
-            self.get_worker(item).make_signalpoint(self.get_worker(item).ident, self.get_worker(item).ident, self.get_worker(item).signal)
-            # self.get_worker(item).make_signalpoint(self.get_worker(item).id, self.get_worker(item).ident, self.get_worker(item).signal)
+            w = self.get_worker(item)
+            w.signal = -99
+            w.updated = datetime.now()
+            w.make_signalpoint(w.id, w.ident, w.signal)
 
         [_ghost(item) for item in self.ghost_signals]
+    
+    def parse_cells(self):
+        self.parsed_cells = self.retriever.get_parsed_cells(self.scanned)
 
-    def parse_signals(self, readlines):
-        self.parsed_signals = self.retriever.get_parsed_cells(readlines)
+        def _blacklist(sgnl):
+            if sgnl[f'{self.CELL_IDENT_FIELD}'] in self.blacklist.keys():
+                try:
+                    self.parsed_cells.remove(sgnl)
+                except Exception: pass
 
-    def wrkr_to_sgnl(self, worker, sgnl):  # this doesn't RETURN a signal, it populates one
-        """ update sgnl data map with current info from worker """
+        [_blacklist(sgnl) for sgnl in self.parsed_cells.copy()]  # remove BLACKLIST cells
+        
+        if self.sort_order:  # sort by CELL_SORT_FIELD for printing. See PRINT_CELLS
+            self.parsed_cells.sort(key=lambda el: el[self.sort_order], reverse=self.reverse)
+        
+        self.load_ghosts()  # handle tracked signals not detected during parsing.
+
+    def wrkr_to_sgnl(self, worker, sgnl):
+        """ update sgnl (a map) with the folling fields in the
+        current worker (an object created from a 'cell')note
+        this doesn't RETURN a signal type, it populates one """
         sgnl['worker_id'] = worker.id
 
         # this is formatting for luxon.js, but is not clean.
@@ -142,14 +157,15 @@ class Scanner(threading.Thread):
         sgnl['signal_cache'] = [x.get() for x in self.signal_cache[worker.ident]]
 
     def get_parsed_signals(self):
-        """ updates and returns ALL parsed SIGNALS """
+        """ =modify mappings in parsed_cells to include 'worker'
+        fields, update and return parsed_signals, sans type. """
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
-
-        # modify the mappings in parsed_signals to include worker fields...
-        for sgnl in self.parsed_signals:
-            wrkr = self.get_worker(sgnl[f'{self.SIGNAL_IDENT_FIELD}'])
+        self.parsed_signals = []
+        for sgnl in self.parsed_cells:
+            wrkr = self.get_worker(sgnl[f'{self.CELL_IDENT_FIELD}'])
             self.wrkr_to_sgnl(wrkr, sgnl)
+            self.parsed_signals.append(sgnl)
 
         return self.parsed_signals
 
@@ -160,17 +176,19 @@ class Scanner(threading.Thread):
 
     def get_tracked_signals(self):
         """ update, transform and return a list of 'rehydrated' tracked signals """
-        # return [self.update(id) for id in self.tracked_signals] // has idents, not ids
         return [self.update(ident) for ident in self.tracked_signals]
 
     def get_ghost_signals(self):
         """ update, transform and return a list of 'rehydrated' ghost signals """
-        return [self.update(item) for item in self.ghost_signals]
+        return [self.update(ident) for ident in self.ghost_signals]
+
+    def process_signals(self):
+        [worker.run() for worker in self.workers]
 
     def stop(self):
         write_to_scanlist(self.config, self.get_tracked_signals())
         [worker.stop() for worker in self.workers]
-        self.parsed_signals.clear()
+        self.parsed_cells.clear()
         self.tracked_signals.clear()
         logger_root.info(f"[{__name__}]: Scanner stopped. {self.polling_count} iterations.")
 
@@ -178,33 +196,22 @@ class Scanner(threading.Thread):
 
         if self.polling_count % 10 == 0:
             speech_logger.info(
-                f'{len(self.parsed_signals)} scanned, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
+                f'{len(self.parsed_cells)} scanned, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
 
-        if self.config['PRINT_SIGNALS']:
+        if self.config['PRINT_CELLS']:
             try:
-                print_signals(self.parsed_signals, list(self.parsed_signals[0].keys()))
+                print_signals(self.parsed_cells, list(self.parsed_cells[0].keys()))
             except IndexError:
                 pass
 
-        # get from stats....
         print(f"Scanner [{self.polling_count}] "
-              f"{format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
-              f"{format_delta(self.elapsed, self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
-              f"{len(self.parsed_signals)} scanned, "
-              f"{len(self.tracked_signals)} tracked, "
-              f"{len(self.ghost_signals)} ghosts")
-
-                # f"{self.stats['elapsed']} "
-                # f"{self.stats['workers']} scanned, "
-                # f"{self.stats['tracked']} tracked, "
-                # f"{self.stats['ghosts']} ghosts")
-
-    def blacklist_signals(self, sgnl):
-        if sgnl[f'{self.SIGNAL_IDENT_FIELD}'] in self.blacklist.keys():
-            try:
-                self.parsed_signals.remove(sgnl)
-            except Exception:
-                pass
+            f"{format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
+            f"{self.stats['elapsed']} "
+            f"[{self.stats['lat']}, {self.stats['lon']}] "
+            f"{self.stats['signals']} signals, "
+            f"{self.stats['workers']} workers, "
+            f"{self.stats['tracked']} tracked, "
+            f"{self.stats['ghosts']} ghosts")
 
     def run(self):
 
@@ -213,6 +220,8 @@ class Scanner(threading.Thread):
 
         while True:
 
+            get_location(self)
+
             self.stats = {
                 'created'      : format_time(self.created, self.config['TIME_FORMAT']),
                 'updated'      : format_time(self.updated, self.config['TIME_FORMAT']),
@@ -220,27 +229,22 @@ class Scanner(threading.Thread):
                 'polling_count': self.polling_count,
                 'lat'          : self.lat,
                 'lon'          : self.lon,
+                'signals'      : len(self.parsed_cells),
                 'workers'      : len(self.workers),
                 'tracked'      : len(self.tracked_signals),
                 'ghosts'       : len(self.ghost_signals),
             }
 
-            scanned = self.retriever.scan()
+            self.scanned = self.retriever.scan()
 
-            if len(scanned) > 0:
-                self.parse_signals(scanned)
-                self.load_ghosts()
-                get_location(self)
+            if len(self.scanned) > 0:
 
-                [self.blacklist_signals(sgnl) for sgnl in self.parsed_signals.copy()]
-
-                if self.config['SORT_SIGNALS']:
-                    self.parsed_signals.sort(key=lambda el: el[self.sort_order], reverse=self.reverse)
-
-                [worker.run() for worker in self.workers]
+                self.parse_cells()
+                self.process_signals()
 
                 self.updated = datetime.now()
                 self.elapsed = self.updated - self.created
+                
                 self.report()
                 self.polling_count += 1
 
@@ -248,4 +252,5 @@ class Scanner(threading.Thread):
                 speech_logger.info(f'looking for data {self.polling_count} ...')
                 print(f"looking for data [{self.polling_count}] {format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))}...")
 
+            # throttle MQ requests vs. further delay an I/O bound proccess that blocks....
             time.sleep(self.config.get('SCAN_TIMEOUT', 5))
