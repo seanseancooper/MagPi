@@ -109,12 +109,6 @@ class Scanner(threading.Thread):
         cell = [_ for _ in self.parsed_signals if _[f'{self.SIGNAL_IDENT_FIELD}'] == ident][0]
         return cell
 
-    def update(self, ident):
-        _signals = []
-        """ put id associated signal data into a map as an element in a list of _signals """
-        self.get_worker(ident).worker_to_sgnl(self.get_worker(ident).get(), self.get_worker(ident))
-        _signals.append(self.get_worker(ident).get())
-
     def load_ghosts(self):
         """ find, load and update ghosts """
         tracked = frozenset([x for x in self.tracked_signals])
@@ -125,23 +119,49 @@ class Scanner(threading.Thread):
             self.get_worker(item).signal = -99
             self.get_worker(item).updated = datetime.now()
             self.get_worker(item).make_signalpoint(self.get_worker(item).ident, self.get_worker(item).ident, self.get_worker(item).signal)
+            # self.get_worker(item).make_signalpoint(self.get_worker(item).id, self.get_worker(item).ident, self.get_worker(item).signal)
 
         [_ghost(item) for item in self.ghost_signals]
 
     def parse_signals(self, readlines):
         self.parsed_signals = self.retriever.get_parsed_cells(readlines)
 
+    def wrkr_to_sgnl(self, worker, sgnl):  # this doesn't RETURN a signal, it populates one
+        """ update sgnl data map with current info from worker """
+        sgnl['worker_id'] = worker.id
+
+        # this is formatting for luxon.js, but is not clean.
+        sgnl['created'] = format_time(worker.created, "%Y-%m-%d %H:%M:%S")
+        sgnl['updated'] = format_time(worker.updated, "%Y-%m-%d %H:%M:%S")
+        sgnl['elapsed'] = format_delta(worker.elapsed, self.config.get('TIME_FORMAT', "%H:%M:%S"))
+
+        sgnl['is_mute'] = worker.is_mute
+        sgnl['tracked'] = worker.tracked
+
+        sgnl['text_attributes'] = worker.get_text_attributes()
+        sgnl['signal_cache'] = [x.get() for x in self.signal_cache[worker.ident]]
+
     def get_parsed_signals(self):
         """ updates and returns ALL parsed SIGNALS """
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
 
-        [self.get_worker(sgnl[f'{self.SIGNAL_IDENT_FIELD}']).worker_to_sgnl( self.get_worker(sgnl[f'{self.SIGNAL_IDENT_FIELD}']), sgnl) for sgnl in self.parsed_signals]
+        # modify the mappings in parsed_signals to include worker fields...
+        for sgnl in self.parsed_signals:
+            wrkr = self.get_worker(sgnl[f'{self.SIGNAL_IDENT_FIELD}'])
+            self.wrkr_to_sgnl(wrkr, sgnl)
+
         return self.parsed_signals
+
+    def update(self, ident):
+        wrkr = self.get_worker(ident).get()
+        sgnl = self.get_worker(ident)
+        self.wrkr_to_sgnl(wrkr, sgnl)
 
     def get_tracked_signals(self):
         """ update, transform and return a list of 'rehydrated' tracked signals """
-        return [self.update(id) for id in self.tracked_signals]
+        # return [self.update(id) for id in self.tracked_signals] // has idents, not ids
+        return [self.update(ident) for ident in self.tracked_signals]
 
     def get_ghost_signals(self):
         """ update, transform and return a list of 'rehydrated' ghost signals """

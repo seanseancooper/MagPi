@@ -21,7 +21,7 @@ class Worker:
     def __init__(self, ident):
         self.config = {}
         self.scanner = None
-        self.id = ''                    # filled if match(), 'marks' SignalPoint type.
+        self.id = None                  # filled if match(), 'marks' SignalPoint type.
         self.ident = ident              # used in object lookups and coloring UI, self.scanner.SIGNAL_IDENT_FIELD
 
         self.created = datetime.now()   # when signal was found
@@ -43,23 +43,6 @@ class Worker:
 
     def get(self):
         return get_me(self)
-
-    def worker_to_sgnl(self, worker, sgnl): # this doesn't RETURN a signal, it populates one
-        """ update sgnl data map with current info from worker """
-        # sgnl['id'] = worker.id
-        sgnl[f'{self.scanner.SIGNAL_IDENT_FIELD}'] = worker.ident
-        sgnl[self.scanner.SIGNAL_STRENGTH_FIELD] = int(worker.get_text_attribute(self.scanner.SIGNAL_STRENGTH_FIELD))
-
-        # this is formatting for luxon.js, but is not clean.
-        sgnl['created'] = format_time(worker.created, "%Y-%m-%d %H:%M:%S")
-        sgnl['updated'] = format_time(worker.updated, "%Y-%m-%d %H:%M:%S")
-        sgnl['elapsed'] = format_delta(worker.elapsed, self.config.get('TIME_FORMAT', "%H:%M:%S"))
-
-        sgnl['is_mute'] = worker.is_mute
-        sgnl['tracked'] = worker.tracked
-
-        sgnl['text_attributes'] = worker.get_text_attributes()
-        sgnl['signal_cache'] = [x.get() for x in self.scanner.signal_cache[worker.ident]]
 
     def config_worker(self, scanner):
         """ worker append itself, pulls config when created. """
@@ -111,9 +94,9 @@ class Worker:
 
         # WifiSignalPoint   (self, worker_id, lon, lat, sgnl, bssid=None)
         if SignalPointType.__name__ == 'src.wifi.lib.WifiSignalPoint':
-            kwargs["bssid"] =  self.get_text_attribute(self.scanner.SIGNAL_IDENT_FIELD),
+            kwargs["bssid"] =  self.get_text_attribute(self.scanner.SIGNAL_IDENT_FIELD)
             # create a item of the type
-            sgnlPt = WifiSignalPoint(worker_id=ident, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=signal, **kwargs)
+            sgnlPt = WifiSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=signal, **kwargs)
 
         # SDRSignalPoint    (self, worker_id, lon, lat, sgnl, array_data=None, audio_data=None, sr=48000)
         if SignalPointType.__name__ == 'src.sdr.lib.SDRSignalPoint':
@@ -121,7 +104,7 @@ class Worker:
             kwargs["audio_data"] =  self.get_text_attribute('audio_data'),
             kwargs["sr"] =  self.get_text_attribute('sr'),
             # create a item of the type
-            sgnlPt = SDRSignalPoint(worker_id=ident, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=signal, **kwargs)
+            sgnlPt = SDRSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=signal, **kwargs)
 
         # TRXSignalPoint    (self, worker_id, lon, lat, sgnl, text_data={}, audio_data=None, signal_type="object", sr=48000)
         if SignalPointType.__name__ == 'src.trx.lib.SDRSignalPoint':
@@ -129,7 +112,7 @@ class Worker:
             kwargs["signal_type"] =  self.get_text_attribute('signal_type'),
 
             # create a item of the type
-            sgnlPt = TRXSignalPoint(worker_id=ident, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=signal, **kwargs)
+            sgnlPt = TRXSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=signal, **kwargs)
 
         self.scanner.signal_cache[ident].append(sgnlPt)
 
@@ -182,14 +165,13 @@ class Worker:
     def get_signal_cache_frequency_features(self):
         return self._signal_cache_frequency_features
 
-    def match(self, cell):
+    def match(self, sgnl):
         """ match id, derive the 'id' and set mute status """
-        if self.ident.upper() == cell[f'{self.scanner.SIGNAL_IDENT_FIELD}'].upper():
-
+        if self.ident.upper() == sgnl[f'{self.scanner.SIGNAL_IDENT_FIELD}'].upper():
             if not self.id:
-                self.id = str(cell[f'{self.scanner.SIGNAL_IDENT_FIELD}']).replace(':', '').lower()
-            self.set_text_attributes(cell)
-            self.process_cell(cell)
+                self.id = str(self.ident).replace(':', '').lower()
+            self.set_text_attributes(sgnl)
+            self.process_cell(sgnl)
             self.auto_unmute()
 
     def mute(self):
@@ -293,4 +275,5 @@ class Worker:
 
     def run(self):
         """ match an ID and populate data """
-        [self.match(sgnl) for sgnl in self.scanner.parsed_signals]
+        for sgnl in self.scanner.parsed_signals:
+            self.match(sgnl)
