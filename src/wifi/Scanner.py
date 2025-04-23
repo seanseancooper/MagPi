@@ -1,6 +1,6 @@
 import threading
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 
 from src.config import readConfig
@@ -27,10 +27,10 @@ class Scanner(threading.Thread):
 
         self.parsed_signals = []
         ''' all items represented as a list of dictionaries.  '''
+
         self.workers = []                       # list of workers assigned to monitor a discrete signal.
         self.tracked_signals = []               # parsed_signals currently being tracked.
         self.ghost_signals = []                 # signals no longer received, but tracked -- 'ghost' signals
-
         self.signal_cache = defaultdict(list)   # a mapping of lists of SignalPoint for all signals received.
         self.signal_cache_max = 160             # max size of these lists of SignalPoint. overridden via config
 
@@ -38,6 +38,7 @@ class Scanner(threading.Thread):
         self.sort_order = None                  # sort order for printed output; consider not support printing.
         self.reverse = False                    # reverse the sort...
 
+        self.tz = None                          # NEW: timezone
         self.created = datetime.now()
         self.updated = datetime.now()
         self.elapsed = timedelta()              # elapsed time since created
@@ -49,6 +50,7 @@ class Scanner(threading.Thread):
         self._OUTFILE = None
         self.OUTDIR = None
         self.DEBUG = False
+
         self.SIGNALPOINT_TYPE = None
         self.SIGNAL_IDENT_FIELD = None
         self.SIGNAL_STRENGTH_FIELD = None
@@ -78,6 +80,7 @@ class Scanner(threading.Thread):
         self.DEBUG = self.config['DEBUG']
         self.OUTDIR = self.config['OUTFILE_PATH']
         self.signal_cache_max = self.config.get('SIGNAL_CACHE_MAX', self.signal_cache_max)
+        self.tz = timezone(timedelta(hours=self.config['INDEX_TIMEDELTA']), name=self.config['INDEX_TZ'])
 
         self.SIGNALPOINT_TYPE = self.config.get('SIGNALPOINT_TYPE', 'SignalPoint')
         self.SIGNAL_IDENT_FIELD = self.config['SIGNAL_IDENT_FIELD']
