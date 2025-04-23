@@ -86,6 +86,7 @@ class WifiScanner(threading.Thread):
         golden_retriever = self.get_retriever("retrievers." + self.config['SCANNER_RETRIEVER'])
         self.retriever = golden_retriever()
         self.retriever.configure(config_file)
+
         self.searchmap = self.config['SEARCHMAP']
         self.blacklist = self.config['BLACKLIST']
         self.DEBUG = self.config['DEBUG']
