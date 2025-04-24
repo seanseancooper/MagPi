@@ -1,11 +1,14 @@
+import uuid
 from datetime import datetime, timedelta
 
 from src.arx.lib.ARXSignalPoint import ARXSignalPoint
-from src.lib.utils import format_time, format_delta, get_me
 from src.sdr.lib.SDRSignalPoint import SDRSignalPoint
 from src.trx.lib.TRXSignalPoint import TRXSignalPoint
 from src.wifi.lib.WifiSignalPoint import WifiSignalPoint
+
+from src.lib.utils import format_time, format_delta, get_me
 from src.wifi.lib.wifi_utils import append_to_outfile, json_logger
+
 import logging
 
 wifi_logger = logging.getLogger('wifi_logger')
@@ -41,9 +44,16 @@ class Worker:
         self._signal_cache_frequency_features = None
 
         self.DEBUG = False
+        self.TYPE = None
 
     def get(self):
         return get_me(self)
+
+    def get_type(self):
+        return self.TYPE
+
+    def set_type(self, TYPE):
+        self.TYPE = TYPE
 
     def config_worker(self, scanner):
         """ worker append itself, pulls config when created. """
@@ -68,56 +78,37 @@ class Worker:
     def set_text_attributes(self, text_data):
         def aggregate(k, v):
             self._text_attributes[k] = v
-            if k not in [self.scanner.CELL_IDENT_FIELD, self.scanner.CELL_STRENGTH_FIELD, 'text_attributes', 'signal_cache']:
+            if k not in [self.scanner.CELL_IDENT_FIELD, self.scanner.CELL_STRENGTH_FIELD]:
                 text_data.pop(k)
         [aggregate(k, str(v)) for k, v in text_data.copy().items()]
 
-    def make_signalpoint(self, worker_id, ident, signal):
-
-        # import the SignalPoint type
-        def get_retriever(name):
-
-            try:
-                components = name.split('.')
-                mod = __import__(components[0])
-                for comp in components[1:]:
-                    mod = getattr(mod, comp)
-                return mod
-            except AttributeError as e:
-                wifi_logger.fatal(f'no retriever found {e}')
-                exit(1)
-
-        # do this better!!!
-        # introspect the module name and get the type
-        # eval the type in the configuration
-        # introspect the text_attributes & fields and get the type
+    def make_signalpoint(self, worker_id, ident, sgnl):
 
         # SignalPoint       (self, lon, lat, sgnl)
-        SignalPointType = get_retriever(self.scanner.config['SIGNALPOINT_TYPE'])
         kwargs = {}
         sgnlPt = None
 
         # ARXSignalPoint    (self, worker_id, lon, lat, sgnl)
-        if SignalPointType.__name__ == 'src.arx.lib.ARXSignalPoint':
-            sgnlPt = ARXSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=signal)
+        if self.TYPE == 'arx':
+            sgnlPt = ARXSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=sgnl)
 
         # WifiSignalPoint   (self, worker_id, lon, lat, sgnl, bssid=None)
-        if SignalPointType.__name__ == 'src.wifi.lib.WifiSignalPoint':
+        if self.TYPE == 'wifi':
             kwargs["bssid"] =  self.get_text_attribute(self.scanner.CELL_IDENT_FIELD)
-            sgnlPt = WifiSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=signal, **kwargs)
+            sgnlPt = WifiSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=sgnl, **kwargs)
 
         # SDRSignalPoint    (self, worker_id, lon, lat, sgnl, array_data=None, audio_data=None, sr=48000)
-        if SignalPointType.__name__ == 'src.sdr.lib.SDRSignalPoint':
+        if self.TYPE == 'sdr':
             kwargs["array_data"] =  self.get_text_attribute('array_data'),
             kwargs["audio_data"] =  self.get_text_attribute('audio_data'),
             kwargs["sr"] =  self.get_text_attribute('sr'),
-            sgnlPt = SDRSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=signal, **kwargs)
+            sgnlPt = SDRSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=sgnl, **kwargs)
 
         # TRXSignalPoint    (self, worker_id, lon, lat, sgnl, text_data={}, audio_data=None, signal_type="object", sr=48000)
-        if SignalPointType.__name__ == 'src.trx.lib.SDRSignalPoint':
+        if self.TYPE == 'trx':
             kwargs["text_data"] =  self.get_text_attribute('text_data'),
             kwargs["signal_type"] =  self.get_text_attribute('signal_type'),
-            sgnlPt = TRXSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=signal, **kwargs)
+            sgnlPt = TRXSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=sgnl, **kwargs)
 
         self.scanner.signal_cache[ident].append(sgnlPt)
 
@@ -174,7 +165,9 @@ class Worker:
         """ match id, derive the 'id' and set mute status """
         if self.ident.upper() == cell[f'{self.scanner.CELL_IDENT_FIELD}'].upper():
             if not self.id:
-                self.id = str(self.ident).replace(':', '').lower()
+                # self.id = str(self.ident).replace(':', '').lower()
+                self.id = str(uuid.uuid1()).lower()
+                self.set_type(cell['type'])
             self.set_text_attributes(cell)
             self.process_cell(cell)
             self.auto_unmute()
