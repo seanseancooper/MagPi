@@ -53,7 +53,6 @@ class Scanner(threading.Thread):
         self.OUTDIR = None
         self.DEBUG = False
 
-        self.SIGNALPOINT_TYPE = None
         self.CELL_IDENT_FIELD = None
         self.CELL_STRENGTH_FIELD = None
 
@@ -86,7 +85,6 @@ class Scanner(threading.Thread):
         self.signal_cache_max = self.config.get('SIGNAL_CACHE_MAX', self.signal_cache_max)
         self.tz = timezone(timedelta(hours=self.config['INDEX_TIMEDELTA']), name=self.config['INDEX_TZ'])
 
-        self.SIGNALPOINT_TYPE = self.config.get('SIGNALPOINT_TYPE', 'SignalPoint')
         self.CELL_IDENT_FIELD = self.config['CELL_IDENT_FIELD']
         self.CELL_STRENGTH_FIELD = self.config['CELL_STRENGTH_FIELD']
 
@@ -125,6 +123,22 @@ class Scanner(threading.Thread):
     
     def parse_cells(self):
         self.parsed_cells = self.retriever.get_parsed_cells(self.scanned)
+        # the earliest I'd know a type based on field names in parsed
+
+        for cell in self.parsed_cells:
+            try: # not maintainable; see 'multibutton'
+                if cell['BSSID']:
+                    cell['type'] = 'wifi'
+                elif cell['ARX_TYPE']:
+                    cell['type'] = 'arx'
+                elif cell['SDR_TYPE']:
+                    cell['type'] = 'sdr'
+                elif cell['ALPHATAG']:
+                    cell['type'] = 'trx'
+                else:
+                    cell['type'] = 'generic'
+            except KeyError:
+                pass
 
         def _blacklist(sgnl):
             if sgnl[f'{self.CELL_IDENT_FIELD}'] in self.blacklist.keys():
@@ -140,10 +154,11 @@ class Scanner(threading.Thread):
         self.load_ghosts()  # handle tracked signals not detected during parsing.
 
     def wrkr_to_sgnl(self, worker, sgnl):
-        """ update sgnl (a map) with the folling fields in the
+        """ update sgnl (a map) with the following fields in the
         current worker (an object created from a 'cell')note
         this doesn't RETURN a signal type, it populates one """
         sgnl['worker_id'] = worker.id
+        sgnl['type'] = worker.TYPE
 
         # this is formatting for luxon.js, but is not clean.
         sgnl['created'] = format_time(worker.created, "%Y-%m-%d %H:%M:%S")
@@ -157,7 +172,7 @@ class Scanner(threading.Thread):
         sgnl['signal_cache'] = [x.get() for x in self.signal_cache[worker.ident]]
 
     def get_parsed_signals(self):
-        """ =modify mappings in parsed_cells to include 'worker'
+        """ modify mappings in parsed_cells to include 'worker'
         fields, update and return parsed_signals, sans type. """
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
