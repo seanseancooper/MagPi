@@ -12,6 +12,9 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
+			"MODULE_RETRIEVER": "src.trx.retrievers."
+		},
+		{
 			"TEST_FILE": "/Users/scooper/PycharmProjects/MagPi/dev/trx/TEST_FILE.csv"
 		},
 		{
@@ -24,7 +27,7 @@
 			"SIGNAL_CACHE_MAX": 300
 		},
 		{
-			"TRX_RETRIEVER": "TRXUSBRetriever"
+			"TRX_RETRIEVER": "src.trx.retrievers.TRXUSBRetriever"
 		},
 		{
 			"TRX_QUEUE": "trx_queue"

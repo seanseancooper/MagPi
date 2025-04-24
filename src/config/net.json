@@ -40,16 +40,19 @@
 			"TOKENS": 2
 		},
 		{
-			"MQ_TRX_RETRIEVER": "TRXUSBRetriever"
+			"MQ_TRX_RETRIEVER": "src.trx.retrievers.TRXUSBRetriever"
 		},
 		{
 			"MQ_TRX_QUEUE": "trx_queue"
 		},
 		{
-			"MQ_WIFI_RETRIEVER": "MacOSAirportWifiRetriever"
+			"MQ_WIFI_RETRIEVER": "src.wifi.retrievers.MacOSAirportWifiRetriever"
 		},
 		{
 			"MQ_WIFI_QUEUE": "wifi_queue"
+		},
+		{
+			"MODULE_RETRIEVER": "src.net.retrievers.NETRetriever"
 		},
 		{
 			"INTERFACE": "wlan0"
