@@ -43,7 +43,7 @@ class RabbitMQWifiScanner(threading.Thread):
     def configure(self, config_file):
         readConfig('net.json', self.config)
 
-        golden_retriever = self.get_retriever("retrievers." + self.config['MQ_WIFI_RETRIEVER'])
+        golden_retriever = self.get_retriever(self.config['MQ_WIFI_RETRIEVER'])
         self.retriever = golden_retriever()
         self.retriever.configure(config_file)
 
