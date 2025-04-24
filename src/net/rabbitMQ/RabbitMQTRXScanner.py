@@ -46,7 +46,7 @@ class RabbitMQTRXScanner(threading.Thread):
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
-        golden_retriever = self.get_retriever("retrievers." + self.config['MQ-TRX_RETRIEVER'])
+        golden_retriever = self.get_retriever(self.config['MQ_TRX_RETRIEVER'])
         self.retriever = golden_retriever()
         self.retriever.configure(config_file)
 
