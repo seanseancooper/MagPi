@@ -9,6 +9,9 @@
 			"MAP_HOST": "localhost:5173"
 		},
 		{
+			"MODULE_RETRIEVER": "src.map.retrievers.MAPRetriever"
+		},
+		{
 			"MAP_TEMPLATE": "map.html.j2"
 		},
 		{

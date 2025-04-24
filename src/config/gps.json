@@ -24,6 +24,9 @@
 			"GPS_HOST": "10.99.77.1"
 		},
 		{
+			"MODULE_RETRIEVER": "src.gps.retrievers.GPSRetriever"
+		},
+		{
 			"GPS_PORT": 80
 		},
 		{
