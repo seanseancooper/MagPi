@@ -1,4 +1,4 @@
-<div id="wifi" class="module_tab" style="position:relative;display:block;">
+<div id="scanner" class="module_tab" style="position:relative;display:block;">
     <script>
         peity.defaults.line = {
             delimiter: ",",
@@ -40,6 +40,8 @@
         };
 
         // Formatter to generate SSID Quality indicia
+        // todo: needs refactor to base color on configurable attribute
+
         var ssidFormatter = function(cell, params){
             var content = document.createElement("span");
 
@@ -51,7 +53,7 @@
             var percentValue;
 
             const data = cell.getRow().getData();
-            var value = data.Quality;
+            var value = data.text_attributes.Quality; // todo: make configurable
 
             if(isNaN(value) || typeof cell.getValue() === "undefined"){
                 return;
@@ -72,17 +74,17 @@
             index = Math.max(index, 0);
 
             let qualcolor = colors[index];
-            content.innerHTML = "<div id='SSID' style='position:absolute;left:10px;display:inline-block;'>" + data.SSID + "</div>&nbsp;<span id='quality_ind' class='' style='position:absolute;top:0px;left:0px;text-align:right;background:" + qualcolor + ";width:6px;height:24px;'>&nbsp;</span>";
+            content.innerHTML = "<div id='SSID' style='position:absolute;left:10px;display:inline-block;'>" + data.text_attributes.SSID + "</div>&nbsp;<span id='quality_ind' class='' style='position:absolute;top:0px;left:0px;text-align:right;background:" + qualcolor + ";width:6px;height:24px;'>&nbsp;</span>";
 
             return content
         };
     </script>
     <script>
-        var wifi = new Tabulator("#wifi", {
-            ajaxURL:"http://wifi.localhost:5006/scan",              // request URI
+        var scanner = new Tabulator("#scanner", {
+            ajaxURL:"{{ scanner.config.TEMPLATE_AJAX_URL  }}",      // request URI
             ajaxConfig:"GET",                                       // ajax config options go here
             dataLoaderLoading:dataLoaderLoading,                    // change "Loading" message to "&nbsp;"
-            index:"BSSID",                                          // use uniqId as index [dynamic]
+            index:"{{ scanner.CELL_IDENT_FIELD  }}",                // use CELL_IDENT_FIELD as index [dynamic]
 
             rowFormatter:function(row){
                 row.getElement().style = "height:24px";
@@ -103,35 +105,42 @@
 
                 {field:"tracked", width:102, formatter: function(cell, formatterParams) {
                     const data = cell.getRow().getData();
-                    const trgt = 'wifi';
+                    const trgt = 'wifi'; // todo: depends on signal type!!!
 
-                    var _color = colorUniqId(data.BSSID, ':');
+                    var _color = colorUniqId(data.{{ scanner.CELL_IDENT_FIELD  }}, ':');
                     var p_signal_color = 'rgba(' + _color + ', 1.0)';
                     var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
 
                     if (data.tracked == true) {
                         if (data.is_mute == false) {
-                            return "<button id='remove_button_" + data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
+                            return "<button id='remove_button_" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='width:24px;' class='trk_btn rem_button' value='"+data.{{ scanner.CELL_IDENT_FIELD  }}+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
                         } else {
-                            return "<button id='remove_button_" + data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
+                            return "<button id='remove_button_" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='width:24px;' class='trk_btn rem_button' value='"+data.{{ scanner.CELL_IDENT_FIELD  }}+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
                         }
                     } else {
-                        return "<button id='add_button_" + data.BSSID + "' style='width:96px;' class='trk_btn add_button button' value='"+data.BSSID+"' data-action='ADD' data-target=" + trgt + ">ADD</button>";
+                        return "<button id='add_button_" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='width:96px;' class='trk_btn add_button button' value='"+data.{{ scanner.CELL_IDENT_FIELD  }}+"' data-action='ADD' data-target=" + trgt + ">ADD</button>";
                     }
                 }},
-                {title:"SSID", field:"SSID", width:140, formatter:ssidFormatter, formatterParams:{
-                    field:"Quality",
-                    colors:["red", "orange", "yellow", "#008800", "#00FF00"]
-                }},
-                {title:"BSSID", field:"BSSID", width:120},
+
+                {title:"{{ scanner.CELL_IDENT_FIELD  }}", field:"{{ scanner.CELL_IDENT_FIELD  }}", width:120},
+                {title:"db", field:"{{ scanner.CELL_STRENGTH_FIELD  }}", width:30},
+
                 {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, sorter:"array", sorterParams:{
                     type:"length"
                 }},
-                {title:"db", field:"Signal", width:30},
-                {title:"Ch.", field:"Channel", width:50},
-                {title:"Freq.", field:"Frequency", width:70},
-                {title:"Sec.", field:"Encryption", formatter: "tickCross", width:30},
-                {title:"Vendor", field:"Vendor", width:100},
+
+
+
+                {title:"SSID", field:"text_attributes.SSID", width:140, formatter:ssidFormatter, formatterParams:{
+                    field:"Quality",
+                    colors:["red", "orange", "yellow", "#008800", "#00FF00"]
+                }},
+
+                {title:"Ch.", field:"text_attributes.Channel", width:50},
+                {title:"Freq.", field:"text_attributes.Frequency", width:70},
+                {title:"Sec.", field:"text_attributes.Encryption", formatter: "tickCross", width:30},
+                {title:"Vendor", field:"text_attributes.Vendor", width:100},
+
                 {title:"Elapsed", field:"elapsed", width:75},
                 {title:"Created", field:"created", width:75, formatter:"datetime", formatterParams:{
                     outputFormat:"HH:mm:ss",
