@@ -16,7 +16,10 @@
 			"SCANNER": "Scanner"
 		},
 		{
-			"SCANNER_RETRIEVER": "MacOSAirportWifiRetriever"
+			"TEMPLATE_AJAX_URL": "http://wifi.localhost:5006/scan"
+		},
+		{
+			"SCANNER_RETRIEVER": "MQWifiRetriever"
 		},
 		{
 			"SIGNALPOINT_TYPE": "src.wifi.lib.WifiSignalPoint"
