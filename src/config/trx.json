@@ -12,9 +12,6 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
-			"MODULE_RETRIEVER": "src.trx.retrievers."
-		},
-		{
 			"TEST_FILE": "/Users/scooper/PycharmProjects/MagPi/dev/trx/TEST_FILE.csv"
 		},
 		{
