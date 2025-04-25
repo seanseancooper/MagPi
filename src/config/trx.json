@@ -27,7 +27,7 @@
 			"SIGNAL_CACHE_MAX": 300
 		},
 		{
-			"TRX_RETRIEVER": "src.trx.retrievers.TRXUSBRetriever"
+			"MODULE_RETRIEVER": "src.trx.retrievers.TRXUSBRetriever"
 		},
 		{
 			"TRX_QUEUE": "trx_queue"
