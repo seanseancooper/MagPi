@@ -9,9 +9,6 @@
 			"TEMPLATE_FOLDER": "templates"
 		},
 		{
-			"MODULE_RETRIEVER": "src.cam.retrievers.CAMRetriever"
-		},
-		{
 			"STATIC_FOLDER": "static"
 		},
 		{
