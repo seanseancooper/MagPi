@@ -63,13 +63,14 @@ class ARXController(threading.Thread):
 
                 # print(f'arxs:\n{arxs.get()}')
 
+                # test consumer
                 # import asyncio
-                from src.arx.lib.ARXMQConsumer import ARXMQConsumer
-                consumer = ARXMQConsumer()
-                consumer.configure('arx.json')
+                # from src.arx.lib.ARXMQConsumer import ARXMQConsumer
+                # consumer = ARXMQConsumer()
+                # consumer.configure('arx.json')
                 # loop = asyncio.get_event_loop()
                 # loop.run_until_complete(consumer.consume())
-                consumer.consume()
+                # consumer.consume()
 
                 # try:
                 #     consumer = ARXMQConsumer()
@@ -90,18 +91,20 @@ class ARXController(threading.Thread):
                     provider.send_sgnlpt(arxs)
                     pass
                 except Exception as e:
-                    print(f'controller producer failed : {e}')
+                    print(f"ARXController 'producer' failed : {e}")
                     pass
 
-                frame = consumer.get_frame()     # potentially array, a Signal() or LIST of type
-                print(f'metadata: {frame}')
-                # metadata = consumer.get_metadata()     # potentially array, a Signal() or LIST of type
+                # test ZMQ consumer
+                # frame = consumer.get_frame()              # potentially array, a Signal() or LIST of type
+                # print(f'metadata: {frame}')
+                # metadata = consumer.get_metadata()        # potentially array, a Signal() or LIST of type
                 # print(f'metadata :{metadata}')
-                # audio_data = consumer.get_data()       # potentially array, a Signal() or LIST of type
+                # audio_data = consumer.get_data()          # potentially array, a Signal() or LIST of type
                 # print(f'audio_data :{audio_data}')
 
-                message = consumer.get_message()       # potentially array, a Signal() or LIST of type
-                print(f'message: {message}')
+                # test RabbitMQ consumer
+                # message = consumer.get_message()          # potentially array, a Signal() or LIST of type
+                # print(f'message: {message}')
 
             atexit.register(stop)
 
