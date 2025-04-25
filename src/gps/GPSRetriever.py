@@ -46,12 +46,18 @@ class GPSRetriever(threading.Thread):
         retrievers[self.__name__] = self
         return self
 
-    def get_retriever(self):
+    @staticmethod
+    def get_retriever(name):
+
         try:
-            retriever_plugin = eval("GPSRetriever." + self.config['RETRIEVER_METHOD'])
-            return retriever_plugin
+            components = name.split('.')
+            mod = __import__(components[0])
+            for comp in components[1:]:
+                mod = getattr(mod, comp)
+            return mod
         except AttributeError as e:
-            gps_logger.fatal(f'no retriever found {e}')
+            gps_logger.fatal(f'no retriever found {e} for {name}')
+            exit(1)
 
     def update(self):
         gps_logger.debug(f'{self.result}')
@@ -169,7 +175,7 @@ class GPSRetriever(threading.Thread):
 
     def run(self):
 
-        retriever = self.get_retriever()
+        retriever = self.get_retriever(self.config['MODULE_RETRIEVER'])
 
         self.thread = threading.Thread(
                 target=retriever,
