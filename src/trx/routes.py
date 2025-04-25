@@ -16,7 +16,7 @@ def get_retriever(name):
 
 config = {}
 readConfig('trx.json', config)
-golden_retriever = get_retriever(config['TRX_RETRIEVER'])
+golden_retriever = get_retriever(config['MODULE_RETRIEVER'])
 
 trxRet = golden_retriever()
 trxRet.configure('trx.json')
