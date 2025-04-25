@@ -16,7 +16,7 @@
 			"STATIC_URL_PATH": "static"
 		},
 		{
-			"AGGREGATOR_QUEUE": "wifi_queue"
+			"DATA_QUEUE": "data_queue"
 		},
 		{
 			"AGGREGATOR_TIMEOUT": 1.0
