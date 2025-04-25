@@ -33,7 +33,7 @@
 			"TEST_FILE": "./lib/TEST_FILE.txt"
 		},
 		{
-			"MODULE_RETRIEVER": "src.gps.GPSRetriever.JSGPSRetriever"
+			"GPS_MODULE_RETRIEVER": "src.gps.GPSRetriever.JSGPSRetriever"
 		},
 		{
 			"RETRIEVER_TIMEOUT": 1
