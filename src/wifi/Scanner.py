@@ -68,7 +68,7 @@ class Scanner(threading.Thread):
                 mod = getattr(mod, comp)
             return mod
         except AttributeError as e:
-            logger_root.fatal(f'no retriever found {e}')
+            logger_root.fatal(f'no retriever found {e} for {name}')
             exit(1)
 
     def configure(self, config_file):
