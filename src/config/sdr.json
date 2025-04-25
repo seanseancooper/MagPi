@@ -1,0 +1,146 @@
+{
+	"SDR": [
+		{
+			"DEBUG": false
+		},
+		{
+			"SERVER_NAME": "localhost:?"
+		},
+		{
+			"TEMPLATE_FOLDER": "templates"
+		},
+		{
+			"STATIC_FOLDER": "static"
+		},
+		{
+			"SCANNER": "Scanner"
+		},
+		{
+			"TEMPLATE_AJAX_URL": "http://sdr.localhost:5006/scan"
+		},
+		{
+			"MODULE_RETRIEVER": "src.sdr.retrievers.RTLSDRRetriever"
+		},
+		{
+			"SIGNALPOINT_TYPE": "src.sdr.lib.SDRSignalPoint"
+		},
+		{
+			"CELL_IDENT_FIELD": "?"
+		},
+		{
+			"CELL_STRENGTH_FIELD": "?"
+		},
+		{
+			"CELL_SORT_FIELD": "?"
+		},
+		{
+			"PRINT_CELLS": false
+		},
+		{
+			"SORT_CELLS": true
+		},
+		{
+			"SDR_QUEUE": "sdr_queue"
+		},
+		{
+			"INTERFACE": "?"
+		},
+		{
+			"SCAN_TIMEOUT": 1
+		},
+		{
+			"VIEW_TIMEOUT": 30
+		},
+		{
+			"GPS_ENDPOINT": "http://gps.localhost:5004/position"
+		},
+		{
+			"TOKENS": 2
+		},
+		{
+			"SIGNAL_CACHE_MAX": 162
+		},
+		{
+			"MUTE_TIME": 999999
+		},
+		{
+			"return_all": true
+		},
+		{
+			"WORKER_INDEX_MAPPING": {
+				"mappings": {
+					"properties": {
+						"id"          : {"type": "keyword"},
+
+						"created"     : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
+						"updated"     : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
+						"elapsed"     : {"type": "date", "format": "HH:mm:ss"},
+
+						"Signal"      : {"type": "integer"},
+
+						"is_mute"     : {"type": "boolean"},
+						"tracked"     : {"type": "boolean"},
+						"signal_cache": {
+							"properties": {
+								"created"  : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
+								"id"       : {"type": "keyword"},
+								"worker_id": {"type": "keyword"},
+								"location" : {"type": "geo_point"},
+								"sgnl"     : {"type": "integer"}
+							}
+						},
+						"tests"       : {"type": "keyword"}
+					}
+				}
+			}
+		},
+		{
+			"SIGNALS_INDEX_MAPPING": {
+				"mappings": {
+					"properties": {
+						"created"  : {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
+						"id"       : {"type": "keyword"},
+						"worker_id": {"type": "keyword"},
+						"location" : {"type": "geo_point"},
+						"sgnl"     : {"type": "integer"}
+					}
+				}
+			}
+		},
+		{
+			"INDEX_TIMEDELTA": 6
+		},
+		{
+			"INDEX_TZ": "MST"
+		},
+		{
+			"DATE_FORMAT": "%Y-%m-%d"
+		},
+		{
+			"TIME_FORMAT": "%H:%M:%S"
+		},
+		{
+			"TIMER_FORMAT": "%H:%M:%S"
+		},
+		{
+			"DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S"
+		},
+		{"SEARCHMAP":
+			{
+			}
+		},
+		{"BLACKLIST":
+            {
+            }
+        },
+		{
+			"SIGNAL_CACHE_LOG_MAX": -5
+		},
+		{
+			"OUTFILE_PATH": "../../_out"
+		},
+		{
+			"OUT_FILE": "sdr_found"
+		}
+	]
+}
