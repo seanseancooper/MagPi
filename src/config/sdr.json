@@ -19,9 +19,6 @@
 			"TEMPLATE_AJAX_URL": "http://sdr.localhost:5006/scan"
 		},
 		{
-			"MODULE_RETRIEVER": "src.sdr.retrievers.RTLSDRRetriever"
-		},
-		{
 			"SIGNALPOINT_TYPE": "src.sdr.lib.SDRSignalPoint"
 		},
 		{
