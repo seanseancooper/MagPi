@@ -11,7 +11,7 @@ from src.config import readConfig, CONFIG_PATH
 from src.lib.utils import format_time, format_delta
 import jinja2
 
-from src.view.retrievers.MQViewRetriever import MQViewRetriever
+from src.view.aggregator.MQAggregator import MQAggregator
 import logging
 
 logger_root = logging.getLogger('logger_root')
@@ -33,7 +33,7 @@ class ViewContainer(threading.Thread):
         self.live_modules = []
         self.dead_modules = []
 
-        self.retriever  = None
+        self.aggregator  = None
         self.module_parser = None
         self.module_stats = defaultdict(dict)
         self.module_configs = defaultdict(dict)
@@ -90,8 +90,8 @@ class ViewContainer(threading.Thread):
         self.title = f"MagPi ViewContainer: {[mod.upper() for mod in self.modules]}"
 
         try:
-            self.retriever = MQViewRetriever()
-            self.retriever.configure(config_file)
+            self.aggregator = MQAggregator()
+            self.aggregator.configure(config_file)
 
         except Exception as e:
             view_logger.error(f'MQ did load: {e}')
@@ -114,12 +114,14 @@ class ViewContainer(threading.Thread):
     def aggregate(self, mod):
         """ collect data and stats into aggregation """
 
-        if self.retriever:  # Use MQ
+        if self.aggregator:  # Use MQ 'DATA_QUEUE'
 
-            data = self.retriever.scan()
+            data = self.aggregator.aggregate()
 
             if data:
-                # use the module retriever to transform data to a list of maps
+                # use MODULE_RETRIEVER to transform data
+                # using the get_parse_cells() method of the retriever.
+                # This transforms data in an expected way; to a list of maps
                 config = self.module_configs[mod]
                 parser = self.get_retriever(config['MODULE_RETRIEVER'])
                 self.module_parser = parser()

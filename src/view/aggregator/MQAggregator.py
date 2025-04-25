@@ -9,7 +9,7 @@ logger_root = logging.getLogger('root')
 view_logger = logging.getLogger('view_logger')
 
 
-class MQViewRetriever(threading.Thread):
+class MQAggregator(threading.Thread):
     """ ViewController MQ data retriever """
 
     def __init__(self):
@@ -21,7 +21,7 @@ class MQViewRetriever(threading.Thread):
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
-        self.consumer = RabbitMQAsyncConsumer(self.config['AGGREGATOR_QUEUE'])
+        self.consumer = RabbitMQAsyncConsumer(self.config['DATA_QUEUE'])
         self.DEBUG = self.config.get('DEBUG')
         self.start_consumer()
 
@@ -29,8 +29,8 @@ class MQViewRetriever(threading.Thread):
         t = threading.Thread(target=self.consumer.run, daemon=True)
         t.start()
 
-    def scan(self):
-        """ get data from MQ """
+    def aggregate(self):
+        """ aggregated data from MQ """
         try:
             return self.consumer.data or []
         except Exception as e:
