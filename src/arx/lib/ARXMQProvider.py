@@ -38,8 +38,8 @@ class ARXMQProvider(threading.Thread):
             data = arxs.get_audio_data()
             frame = metadata, data
 
-            # print(f'sending zmq')
-            # self.send_frame(frame)
+            print(f'sending zmq')
+            self.send_frame(frame)
 
             print(f'sending rmq')
             self.send_message(message)
