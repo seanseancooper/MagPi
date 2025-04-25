@@ -24,9 +24,6 @@
 			"GPS_HOST": "10.99.77.1"
 		},
 		{
-			"MODULE_RETRIEVER": "src.gps.retrievers.GPSRetriever"
-		},
-		{
 			"GPS_PORT": 80
 		},
 		{
@@ -36,7 +33,7 @@
 			"TEST_FILE": "./lib/TEST_FILE.txt"
 		},
 		{
-			"RETRIEVER_METHOD": "JSGPSRetriever"
+			"MODULE_RETRIEVER": "src.gps.GPSRetriever.JSGPSRetriever"
 		},
 		{
 			"RETRIEVER_TIMEOUT": 1
