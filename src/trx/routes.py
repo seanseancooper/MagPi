@@ -14,6 +14,7 @@ def get_retriever(name):
         # root_logger.fatal(f'no retriever found {e}')
         exit(1)
 
+# scanning at the route level
 config = {}
 readConfig('trx.json', config)
 golden_retriever = get_retriever(config['MODULE_RETRIEVER'])
