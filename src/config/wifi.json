@@ -37,7 +37,7 @@
 			"PRINT_CELLS": false
 		},
 		{
-			"SORT_CELS": true
+			"SORT_CELLS": true
 		},
 		{
 			"WIFI_QUEUE": "wifi_queue"
