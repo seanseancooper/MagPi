@@ -11,7 +11,10 @@ from src.config import readConfig, CONFIG_PATH
 from src.lib.utils import format_time, format_delta
 import jinja2
 
+from src.view.retrievers.MQViewRetriever import MQViewRetriever
 import logging
+
+logger_root = logging.getLogger('logger_root')
 view_logger = logging.getLogger('view_logger')
 speech_logger = logging.getLogger('speech_logger')
 
@@ -30,6 +33,8 @@ class ViewContainer(threading.Thread):
         self.live_modules = []
         self.dead_modules = []
 
+        self.retriever  = None
+        self.module_parser = None
         self.module_stats = defaultdict(dict)
         self.module_configs = defaultdict(dict)
         self.module_data = defaultdict(dict)
@@ -47,6 +52,19 @@ class ViewContainer(threading.Thread):
             if "viewcontainer" not in g:
                 g.viewcontainer = ViewContainer()
             return g.viewcontainer
+
+    @staticmethod
+    def get_retriever(name):
+
+        try:
+            components = name.split('.')
+            mod = __import__(components[0])
+            for comp in components[1:]:
+                mod = getattr(mod, comp)
+            return mod
+        except AttributeError as e:
+            logger_root.fatal(f'no retriever found {e} for {name}')
+            exit(1)
 
     def configure(self, config_file, **kwargs):
 
@@ -71,6 +89,13 @@ class ViewContainer(threading.Thread):
 
         self.title = f"MagPi ViewContainer: {[mod.upper() for mod in self.modules]}"
 
+        try:
+            self.retriever = MQViewRetriever()
+            self.retriever.configure(config_file)
+
+        except Exception as e:
+            view_logger.error(f'MQ did load: {e}')
+
     def register_modules(self):
         """ discover 'live' module REST contexts """
         self.live_modules.clear()
@@ -88,12 +113,26 @@ class ViewContainer(threading.Thread):
 
     def aggregate(self, mod):
         """ collect data and stats into aggregation """
-        try:
-            data = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
-            if data.ok:
-                self.module_data[mod] = data.json()
-        except Exception as e:
-            view_logger.warning(f'Data Aggregator Warning [{mod}]! {e}')
+
+        if self.retriever:  # Use MQ
+
+            data = self.retriever.scan()
+
+            if data:
+                # use the module retriever to transform data to a list of maps
+                config = self.module_configs[mod]
+                parser = self.get_retriever(config['MODULE_RETRIEVER'])
+                self.module_parser = parser()
+                self.module_data[mod] = self.module_parser.get_parsed_cells(data)
+
+        else: # use REST
+
+            try:
+                data = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
+                if data.ok:
+                    self.module_data[mod] = data.json()
+            except Exception as e:
+                view_logger.warning(f'Data Aggregator Warning [{mod}]! {e}')
 
         try:
             stats = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'] + '/stats')
