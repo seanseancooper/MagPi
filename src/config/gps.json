@@ -36,7 +36,7 @@
 			"GPS_MODULE_RETRIEVER": "src.gps.GPSRetriever.JSGPSRetriever"
 		},
 		{
-			"RETRIEVER_TIMEOUT": 1
+			"GPS_RETRIEVER_TIMEOUT": 1
 		},
 		{
 			"DATE_FORMAT": "%Y-%m-%d"

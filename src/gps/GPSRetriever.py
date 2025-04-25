@@ -99,7 +99,7 @@ class GPSRetriever(threading.Thread):
                                        }
 
                         self.update()
-                        time.sleep(self.config.get('RETRIEVER_TIMEOUT', 1))
+                        time.sleep(self.config.get('GPS_RETRIEVER_TIMEOUT', 1))
             except OSError as e:
                 gps_logger.error(f"BlackviewGPSRetriever: {e}")  # unable to connect to Blackview
 
@@ -122,7 +122,7 @@ class GPSRetriever(threading.Thread):
                                "time":  datetime.now().__format__(self.config.get('DATETIME_FORMAT', '%Y-%m-%d %H:%M:%S.%f'))
                                }
                 self.update()
-                time.sleep(self.config.get('RETRIEVER_TIMEOUT', 1))
+                time.sleep(self.config.get('GPS_RETRIEVER_TIMEOUT', 1))
 
     @register_retriever
     def JSGPSRetriever(self, *, c, **retriever_args):
@@ -130,7 +130,7 @@ class GPSRetriever(threading.Thread):
         import requests
 
         while True:
-            time.sleep(self.config.get('RETRIEVER_TIMEOUT', 1))
+            time.sleep(self.config.get('GPS_RETRIEVER_TIMEOUT', 1))
             res = requests.get('http://localhost:5014')             # todo: make configurable [JSGPSRetriever_endpoint]
             result = json.loads(res.text)
 
