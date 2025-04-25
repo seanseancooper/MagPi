@@ -85,7 +85,6 @@
             ajaxConfig:"GET",                                       // ajax config options go here
             dataLoaderLoading:dataLoaderLoading,                    // change "Loading" message to "&nbsp;"
             index:"{{ scanner.CELL_IDENT_FIELD  }}",                // use CELL_IDENT_FIELD as index [dynamic]
-
             rowFormatter:function(row){
                 row.getElement().style = "height:24px";
             },
@@ -100,6 +99,23 @@
             },
 
             placeholder:"..." ,
+
+
+            /*
+            const data = cell.getRow().getData()['text_attributes'];
+            console.log(data);
+
+
+            data.forEach(function(attribute)  {
+                const attr_key = attribute.getKey();
+                const attr_val = attribute.getRows();
+
+                console.log("attr_key" + attr_key);
+                console.log("attr_val" + attr_val);
+
+                //return "{title:" + attr_key +", field:" + attr_val + ", width:50}",
+            });
+            */
 
             columns:[
 
@@ -129,8 +145,7 @@
                     type:"length"
                 }},
 
-
-
+                /*
                 {title:"SSID", field:"text_attributes.SSID", width:140, formatter:ssidFormatter, formatterParams:{
                     field:"Quality",
                     colors:["red", "orange", "yellow", "#008800", "#00FF00"]
@@ -140,6 +155,8 @@
                 {title:"Freq.", field:"text_attributes.Frequency", width:70},
                 {title:"Sec.", field:"text_attributes.Encryption", formatter: "tickCross", width:30},
                 {title:"Vendor", field:"text_attributes.Vendor", width:100},
+                */
+
 
                 {title:"Elapsed", field:"elapsed", width:75},
                 {title:"Created", field:"created", width:75, formatter:"datetime", formatterParams:{
