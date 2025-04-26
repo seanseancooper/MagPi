@@ -163,7 +163,7 @@ class GPSRetriever(threading.Thread):
 
     def run(self):
 
-        retriever = get_retriever(self.config['GPS_MODULE_RETRIEVER'])
+        self.retriever = get_retriever(self.config['GPS_MODULE_RETRIEVER'])
 
         self.thread = threading.Thread(
                 target=retriever,
