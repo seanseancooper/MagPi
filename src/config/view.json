@@ -29,15 +29,13 @@
 				"wifi",
 				"trx",
 				"cam",
-				"map",
-				"net"
+				"map"
 			]
 		},
 		{
 			"MODULE_TABS": {
 				"wifi": {
 					"scanner": 60,
-					"wifi": 60,
 					"tracked": 10,
 					"ghosts": 5
 				},
@@ -49,9 +47,6 @@
 				},
 				"map": {
 					"map": 0
-				},
-				"net": {
-					"net": 0
 				}
 			}
 		},
