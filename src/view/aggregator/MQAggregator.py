@@ -21,7 +21,7 @@ class MQAggregator(threading.Thread):
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
-        self.consumer = RabbitMQAsyncConsumer(self.config['DATA_QUEUE'])
+        self.consumer = RabbitMQAsyncConsumer(self.config['AGGREGATOR_DATA_QUEUE'])
         self.DEBUG = self.config.get('DEBUG')
         self.start_consumer()
 
