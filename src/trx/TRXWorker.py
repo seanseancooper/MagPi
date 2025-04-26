@@ -128,7 +128,7 @@ class TRXWorker:
                         worker.freq: {
                             "ALPHATAG"      : worker.ALPHATAG,
                             "tests"     : {},
-                            "return_all": True
+                            "RETURN_ALL": True
                         }
                     }
                 )
