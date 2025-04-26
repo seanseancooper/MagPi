@@ -1,18 +1,6 @@
 from flask import Blueprint, redirect, jsonify
 from src.config import readConfig
-
-
-def get_retriever(name):
-
-    try:
-        components = name.split('.')
-        mod = __import__(components[0])
-        for comp in components[1:]:
-            mod = getattr(mod, comp)
-        return mod
-    except AttributeError as e:
-        # root_logger.fatal(f'no retriever found {e}')
-        exit(1)
+from src.net.lib.net_utils import get_retriever
 
 # scanning at the route level
 config = {}

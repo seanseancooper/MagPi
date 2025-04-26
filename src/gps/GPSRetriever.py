@@ -12,6 +12,7 @@ from gpsdclient import GPSDClient
 from src.config import readConfig
 from src.gps.lib.BlackViewGPSClient import BlackViewGPSClient
 from src.lib.utils import format_time
+from src.net.lib.net_utils import get_retriever
 
 gps_logger = logging.getLogger('gps_logger')
 retrievers = {}
@@ -45,19 +46,6 @@ class GPSRetriever(threading.Thread):
         """ Register retriever methods """
         retrievers[self.__name__] = self
         return self
-
-    @staticmethod
-    def get_retriever(name):
-
-        try:
-            components = name.split('.')
-            mod = __import__(components[0])
-            for comp in components[1:]:
-                mod = getattr(mod, comp)
-            return mod
-        except AttributeError as e:
-            gps_logger.fatal(f'no retriever found {e} for {name}')
-            exit(1)
 
     def update(self):
         gps_logger.debug(f'{self.result}')
@@ -175,7 +163,7 @@ class GPSRetriever(threading.Thread):
 
     def run(self):
 
-        retriever = self.get_retriever(self.config['GPS_MODULE_RETRIEVER'])
+        retriever = get_retriever(self.config['GPS_MODULE_RETRIEVER'])
 
         self.thread = threading.Thread(
                 target=retriever,

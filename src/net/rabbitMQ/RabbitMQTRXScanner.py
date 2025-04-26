@@ -2,6 +2,7 @@ import threading
 from datetime import datetime, timedelta
 from src.config import readConfig
 from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
+from src.net.lib.net_utils import get_retriever
 from src.trx.TRXWorker import TRXWorker
 
 import logging
@@ -30,23 +31,10 @@ class RabbitMQTRXScanner(threading.Thread):
         self.retriever = None
         self.producer = None
 
-    @staticmethod
-    def get_retriever(name):
-
-        try:
-            components = name.split('.')
-            mod = __import__(components[0])
-            for comp in components[1:]:
-                mod = getattr(mod, comp)
-            return mod
-        except AttributeError as e:
-            trx_logger.fatal(f'no retriever found {e}')
-            exit(1)
-
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
-        golden_retriever = self.get_retriever(self.config['MQ_TRX_RETRIEVER'])
+        golden_retriever = get_retriever(self.config['MQ_TRX_RETRIEVER'])
         self.retriever = golden_retriever()
         self.retriever.configure(config_file)
 

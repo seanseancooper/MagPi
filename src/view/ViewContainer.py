@@ -9,6 +9,7 @@ import requests
 from src.config import readConfig, CONFIG_PATH
 
 from src.lib.utils import format_time, format_delta
+from src.net.lib.net_utils import get_retriever
 import jinja2
 
 from src.view.aggregator.MQAggregator import MQAggregator
@@ -52,19 +53,6 @@ class ViewContainer(threading.Thread):
             if "viewcontainer" not in g:
                 g.viewcontainer = ViewContainer()
             return g.viewcontainer
-
-    @staticmethod
-    def get_retriever(name):
-
-        try:
-            components = name.split('.')
-            mod = __import__(components[0])
-            for comp in components[1:]:
-                mod = getattr(mod, comp)
-            return mod
-        except AttributeError as e:
-            logger_root.fatal(f'no retriever found {e} for {name}')
-            exit(1)
 
     def configure(self, config_file, **kwargs):
 
@@ -123,7 +111,7 @@ class ViewContainer(threading.Thread):
                 # using the get_parse_cells() method of the retriever.
                 # This transforms data in an expected way; to a list of maps
                 config = self.module_configs[mod]
-                parser = self.get_retriever(config['MODULE_RETRIEVER'])
+                parser = get_retriever(config['MODULE_RETRIEVER'])
                 self.module_parser = parser()
                 self.module_data[mod] = self.module_parser.get_parsed_cells(data)
 

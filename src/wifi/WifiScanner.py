@@ -8,7 +8,7 @@ from flask.signals import Namespace
 from contextlib import contextmanager
 
 from src.config import readConfig
-
+from src.net.lib.net_utils import get_retriever
 from src.lib.utils import get_location, format_time, format_delta
 from src.lib.utils import write_to_scanlist, print_signals
 from src.wifi.lib.WifiSignalPoint import WifiSignalPoint
@@ -67,23 +67,10 @@ class WifiScanner(threading.Thread):
         self.OUTDIR = None
         self.DEBUG = False
 
-    @staticmethod
-    def get_retriever(name):
-
-        try:
-            components = name.split('.')
-            mod = __import__(components[0])
-            for comp in components[1:]:
-                mod = getattr(mod, comp)
-            return mod
-        except AttributeError as e:
-            wifi_logger.fatal(f'no retriever found {e}')
-            exit(1)
-
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
-        golden_retriever = self.get_retriever(self.config['MODULE_RETRIEVER'])
+        golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
         self.retriever = golden_retriever()
         self.retriever.configure(config_file)
 
