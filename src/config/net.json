@@ -52,9 +52,6 @@
 			"MQ_WIFI_QUEUE": "wifi_queue"
 		},
 		{
-			"MODULE_RETRIEVER": "src.net.retrievers.NETRetriever"
-		},
-		{
 			"INTERFACE": "wlan0"
 		},
 		{
