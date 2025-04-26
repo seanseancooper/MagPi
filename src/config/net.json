@@ -52,30 +52,6 @@
 			"INTERFACE": "wlan0"
 		},
 		{
-			"XML_SIGNAL_DEBUG": false
-		},
-		{
-			"XML_DATA_DEBUG": false
-		},
-		{
-			"XML_PARSE_DEBUG": false
-		},
-		{
-			"XML_ROOT_DEBUG": false
-		},
-		{
-			"XML_ELEMENT_DEBUG": false
-		},
-		{
-			"XML_FOUNDCELL_DEBUG": false
-		},
-		{
-			"XML_APPEND_DEBUG": false
-		},
-		{
-			"XML_PARSEDCELL_DEBUG": false
-		},
-		{
 			"DATE_FORMAT": "%Y-%m-%d"
 		},
 		{
