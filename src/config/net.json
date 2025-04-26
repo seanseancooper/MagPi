@@ -49,9 +49,6 @@
 			"MQ_WIFI_QUEUE": "wifi_queue"
 		},
 		{
-			"INTERFACE": "wlan0"
-		},
-		{
 			"DATE_FORMAT": "%Y-%m-%d"
 		},
 		{
