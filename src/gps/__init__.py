@@ -1,3 +1,4 @@
+from src.gps.GPSRetriever import GPSRetriever
 from src.gps.GPSController import GPSController
 from src.lib.rest_server import RESTServer
 
