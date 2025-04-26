@@ -21,7 +21,6 @@ class MacOSAirportWifiRetriever(threading.Thread):
         super().__init__()
 
         self.config = {}
-        self.interface = None
 
         self.stats = {}                         # new, not yet used
         self.parsed_signals = []                # signals represented as a list of dictionaries.
