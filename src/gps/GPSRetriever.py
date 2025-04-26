@@ -24,7 +24,7 @@ class GPSRetriever(threading.Thread):
         super().__init__()
         self.DEBUG = False
         self.config = {}
-        self.retriever_method = None
+        self.retriever = None
         self.retrieving = False
         self.thread = None
         self.result = defaultdict(dict)
