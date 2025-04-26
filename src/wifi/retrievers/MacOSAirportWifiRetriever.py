@@ -23,7 +23,8 @@ class MacOSAirportWifiRetriever(threading.Thread):
         self.config = {}
 
         self.stats = {}                         # new, not yet used
-        self.parsed_signals = []                # signals represented as a list of dictionaries.
+        self.parsed_cells = []                  # incomplete labels: cells represented as a list of dictionaries.
+        self.parsed_signals = []                # complete signals represented as a list of dictionaries.
 
         self.SIGNAL_DEBUG = False
         self.DATA_DEBUG = False
@@ -129,10 +130,10 @@ class MacOSAirportWifiRetriever(threading.Thread):
         """
 
         cells = [{}]
-        parsed_cells = []
+        self.parsed_cells = []
 
         if not airport_data:
-            return parsed_cells
+            return self.parsed_cells
 
         DOCTYPE = self.config['DOCTYPE']
         root = self.process_xml(airport_data, DOCTYPE)
@@ -230,9 +231,9 @@ class MacOSAirportWifiRetriever(threading.Thread):
                     wifi_logger.debug(f"[{__name__}]: FOUND CELL: >> {cell}")
 
         [parse_item(record) for record in root.iter('dict')]
-        [parsed_cells.append(cell) for cell in cells[2:]]
+        [self.parsed_cells.append(cell) for cell in cells[2:]]
 
         if self.PARSEDCELL_DEBUG:
-            wifi_logger.debug(f"[{__name__}]: PARSED_CELLS: >> {parsed_cells}")
+            wifi_logger.debug(f"[{__name__}]: PARSED_CELLS: >> {self.parsed_cells}")
 
-        return parsed_cells
+        return self.parsed_cells
