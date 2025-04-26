@@ -60,9 +60,9 @@ class TRXWorker:
             "ALPHATAG"      : self.ALPHATAG,
             "freq"          : self.freq,
 
-            "created"       : format_time(self.created, self.config.get('TIMER_FORMAT', "%H:%M:%S")),
-            "updated"       : format_time(self.updated, self.config.get('TIMER_FORMAT', "%H:%M:%S")),
-            "elapsed"       : format_delta(self.elapsed, self.config.get('TIMER_FORMAT', "%H:%M:%S")),
+            "created"       : format_time(self.created, self.config.get('TIME_FORMAT', "%H:%M:%S")),
+            "updated"       : format_time(self.updated, self.config.get('TIME_FORMAT', "%H:%M:%S")),
+            "elapsed"       : format_delta(self.elapsed, self.config.get('TIME_FORMAT', "%H:%M:%S")),
 
             "is_mute"       : str(self.is_mute),
             "tracked"       : str(self.tracked),
