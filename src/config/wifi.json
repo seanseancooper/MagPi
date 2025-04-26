@@ -22,7 +22,7 @@
 			"MODULE_RETRIEVER": "src.wifi.retrievers.MacOSAirportWifiRetriever"
 		},
 		{
-			"WIFI_QUEUE": "wifi_queue"
+			"LINUX_IWLIST_MODULE_RETRIEVER_INTERFACE": "wlan0"
 		},
 		{
 			"SIGNALPOINT_TYPE": "src.wifi.lib.WifiSignalPoint"
