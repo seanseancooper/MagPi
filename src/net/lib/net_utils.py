@@ -15,6 +15,6 @@ def get_retriever(name):
         for comp in components[1:]:
             mod = getattr(mod, comp)
         return mod
-    except AttributeError as e:
-        # logger_root.fatal(f'no retriever found {e}')
+    except AttributeError as a:
+        logger_root.fatal(f'Failed to load retriever {name} {a}')
         exit(1)
