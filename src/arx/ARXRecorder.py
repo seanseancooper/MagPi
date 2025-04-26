@@ -58,7 +58,7 @@ class ARXRecorder(threading.Thread):
             exit(1)
 
         readConfig(config_file, self.config)
-        # get_location(self) # save power. now.
+        get_location(self)
 
     def create_stream(self):
 
