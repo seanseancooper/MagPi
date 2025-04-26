@@ -128,7 +128,7 @@ class Worker:
             try:
                 tests = self.scanner.searchmap[self.ident]['tests']
                 # return all results or only ones that passed?
-                self.return_all = self.scanner.searchmap[self.ident]['return_all']
+                self.return_all = self.scanner.searchmap[self.ident]['RETURN_ALL']
 
                 [[self.results.append(eval(str(v.strip() + t_v.strip()))) for t_k, t_v in tests.items() if k == t_k] for k, v in cell.items()]
 
