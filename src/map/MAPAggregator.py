@@ -93,7 +93,7 @@ class MAPAggregator(threading.Thread):
                     self.module_data[mod] = {}
                 except KeyError: pass  # 'missing' is fine.
 
-            time.sleep(self.config.get('AGGREGATOR_TIMEOUT', .5))
+            time.sleep(self.config.get('MAP_AGGREGATOR_INTERVAL', .5))
 
 
 if __name__ == '__main__':
