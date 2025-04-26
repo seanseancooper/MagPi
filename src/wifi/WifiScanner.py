@@ -218,7 +218,7 @@ class WifiScanner(threading.Thread):
 
             scanned = self.retriever.scan()
 
-            if integ and len(self.tracked_signals) > 0:
+            if integ and len(self.tracked_signals) > 0: # should this happen later after 'self.parse_signals(scanned)'?
                 integ.push(
                     # push tracked Workers, not just worker_id.
                     [sgnl for sgnl in self.get_parsed_signals() if sgnl['tracked'] is True]
