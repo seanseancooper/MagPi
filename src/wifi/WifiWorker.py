@@ -154,7 +154,7 @@ class WifiWorker:
             try:
                 tests = self.producer.searchmap[self.bssid]['tests']
                 # return all results or only ones that passed?
-                self.return_all = self.producer.searchmap[self.bssid]['return_all']
+                self.return_all = self.producer.searchmap[self.bssid]['RETURN_ALL']
 
                 [[self.results.append(eval(str(v.strip() + t_v.strip()))) for t_k, t_v in tests.items() if k == t_k] for k, v in cell.items()]
 
