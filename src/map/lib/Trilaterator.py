@@ -38,9 +38,9 @@ class Trilaterator(threading.Thread):
 
     def get(self):
         return {
-            "created"       : format_time(self.created, self.config.get('TIMER_FORMAT', "%H:%M:%S")),
-            "updated"       : format_time(self.updated, self.config.get('TIMER_FORMAT', "%H:%M:%S")),
-            "elapsed"       : format_delta(self.elapsed, self.config.get('TIMER_FORMAT', "%H:%M:%S")),
+            "created"       : format_time(self.created, self.config.get('TIME_FORMAT', "%H:%M:%S")),
+            "updated"       : format_time(self.updated, self.config.get('TIME_FORMAT', "%H:%M:%S")),
+            "elapsed"       : format_delta(self.elapsed, self.config.get('TIME_FORMAT', "%H:%M:%S")),
         }
 
     def configure(self, config_file):
