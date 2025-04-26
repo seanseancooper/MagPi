@@ -3,6 +3,7 @@ import logging
 logger_root = logging.getLogger('root_logger')
 
 def get_retriever(name):
+    print(f'attempting to load retriever {name}')
     try:
         components = name.split('.')
         mod = __import__(components[0])
