@@ -1,5 +1,3 @@
-
-
 import logging
 
 logger_root = logging.getLogger('root_logger')
