@@ -26,7 +26,7 @@ class Scanner(threading.Thread):
         self.searchmap = {}
         self.stats =  {}
 
-        self.parsed_cells = []                  # what scanner consumes
+        self.parsed_cells = []                  # parsed cells from retirever...
         self.parsed_signals = []                # product of scanning
 
         ''' all items represented as a list of dictionaries.  '''
@@ -96,12 +96,14 @@ class Scanner(threading.Thread):
             return worker
 
     def load_ghosts(self):
-        """ find 'ghost' signals, and update them """
+        """ find 'ghost' signals (handle tracked signals not detected
+        during parsing), and make a signalpoint for them """
         tracked = frozenset([x for x in self.tracked_signals])
         parsed = frozenset([key[f'{self.CELL_IDENT_FIELD}'] for key in self.parsed_cells])
         self.ghost_signals = tracked.difference(parsed)
 
         def _ghost(item):
+            #
             w = self.get_worker(item)
             w.signal = -99
             w.updated = datetime.now()
@@ -110,8 +112,7 @@ class Scanner(threading.Thread):
         [_ghost(item) for item in self.ghost_signals]
     
     def parse_cells(self):
-        self.parsed_cells = self.retriever.get_parsed_cells(self.scanned)
-        # the earliest I'd know a type based on field names in parsed
+        """ classify, filter, sort and find missing signals in parsed_cells"""
 
         for cell in self.parsed_cells:
             try: # not maintainable; see 'multibutton'
@@ -129,6 +130,7 @@ class Scanner(threading.Thread):
                 pass
 
         def _blacklist(sgnl):
+            ''' removes items from *parsed_cells* so they are never evaluated in further processing. '''
             if sgnl[f'{self.CELL_IDENT_FIELD}'] in self.blacklist.keys():
                 try:
                     self.parsed_cells.remove(sgnl)
@@ -139,7 +141,7 @@ class Scanner(threading.Thread):
         if self.sort_order:  # sort by CELL_SORT_FIELD for printing. See PRINT_CELLS
             self.parsed_cells.sort(key=lambda el: el[self.sort_order], reverse=self.reverse)
         
-        self.load_ghosts()  # handle tracked signals not detected during parsing.
+        self.load_ghosts()
 
     def wrkr_to_sgnl(self, worker, sgnl):
         """ update sgnl (a map) with the following fields in the
@@ -162,8 +164,11 @@ class Scanner(threading.Thread):
     def get_parsed_signals(self):
         """ modify mappings in parsed_cells to include 'worker'
         fields, update and return parsed_signals, sans type. """
+
+        # move this to 'update-like' method. (update()?)
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
+
         self.parsed_signals = []
         for sgnl in self.parsed_cells:
             wrkr = self.get_worker(sgnl[f'{self.CELL_IDENT_FIELD}'])
@@ -191,7 +196,6 @@ class Scanner(threading.Thread):
     def stop(self):
         write_to_scanlist(self.config, self.get_tracked_signals())
         [worker.stop() for worker in self.workers]
-        self.parsed_cells.clear()
         self.tracked_signals.clear()
         logger_root.info(f"[{__name__}]: Scanner stopped. {self.polling_count} iterations.")
 
@@ -199,13 +203,7 @@ class Scanner(threading.Thread):
 
         if self.polling_count % 10 == 0:
             speech_logger.info(
-                f'{len(self.parsed_cells)} scanned, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
-
-        if self.config['PRINT_CELLS']:
-            try:
-                print_signals(self.parsed_cells, list(self.parsed_cells[0].keys()))
-            except IndexError:
-                pass
+                f'{len(self.retriever.get_parsed_cells(self.scanned))} scanned, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
 
         print(f"Scanner [{self.polling_count}] "
             f"{format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
@@ -232,7 +230,7 @@ class Scanner(threading.Thread):
                 'polling_count': self.polling_count,
                 'lat'          : self.lat,
                 'lon'          : self.lon,
-                'signals'      : len(self.parsed_cells),
+                'signals'      : len(self.retriever.get_parsed_cells(self.scanned)),
                 'workers'      : len(self.workers),
                 'tracked'      : len(self.tracked_signals),
                 'ghosts'       : len(self.ghost_signals),
@@ -242,6 +240,7 @@ class Scanner(threading.Thread):
 
             if len(self.scanned) > 0:
 
+                self.parsed_cells = self.retriever.get_parsed_cells(self.scanned)
                 self.parse_cells()
                 self.process_signals()
 
