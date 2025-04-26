@@ -30,7 +30,7 @@ class LinuxIWListWifiRetriever(threading.Thread):
         """ scan configured wifi interface using iwlist """
         # TODO: mock this with a file
         try:
-            process = subprocess.Popen(['iwlist', self.config['INTERFACE'], 'scan'],
+            process = subprocess.Popen(['iwlist', self.config['LINUX_IWLIST_MODULE_RETRIEVER_INTERFACE'], 'scan'],
                                        stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE,
                                        universal_newlines=True)
