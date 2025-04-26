@@ -9,9 +9,6 @@
 			"STOP_COMMAND": ["systemd/systemctl", "--user", "stop", "ebs"]
 		},
 		{
-			"TOKENS": 2
-		},
-		{
 			"INTERVAL": 300
 		},
 		{

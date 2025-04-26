@@ -37,9 +37,6 @@
 			"GPS_ENDPOINT": "http://gps.localhost:5004/position"
 		},
 		{
-			"TOKENS": 2
-		},
-		{
 			"MQ_TRX_RETRIEVER": "src.trx.retrievers.TRXUSBRetriever"
 		},
 		{

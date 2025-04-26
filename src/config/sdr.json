@@ -52,9 +52,6 @@
 			"GPS_ENDPOINT": "http://gps.localhost:5004/position"
 		},
 		{
-			"TOKENS": 2
-		},
-		{
 			"SIGNAL_CACHE_MAX": 162
 		},
 		{
