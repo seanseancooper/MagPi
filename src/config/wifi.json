@@ -1,5 +1,5 @@
 {
-	"SCANNER": [
+	"WIFI": [
 		{
 			"DEBUG": false
 		},
@@ -13,10 +13,7 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
-			"SCANNER": "Scanner"
-		},
-		{
-			"TEMPLATE_AJAX_URL": "http://wifi.localhost:5006/scan"
+			"SCANNER": "Tabulator"
 		},
 		{
 			"MODULE_RETRIEVER": "src.wifi.retrievers.MacOSAirportWifiRetriever"
@@ -37,34 +34,100 @@
 			"CELL_SORT_FIELD": "Signal"
 		},
 		{
+			"SIGNAL_CACHE_MAX": 162
+		},
+		{
+			"SIGNAL_CACHE_LOG_MAX": -5
+		},
+		{
+			"MUTE_TIME": 999999
+		},
+		{"SEARCHMAP":
+			{
+				"5C:5B:35:78:8B:64": {
+					"ssid": "HEATKTE",
+					"tests": {
+						"Signal": ">-30",
+						"Quality": ">90"
+					},
+					"RETURN_ALL": true
+				},
+				"5C:5B:35:78:8B:66": {
+					"ssid": "HEATKTE2",
+					"tests": {
+						"Signal": ">-30",
+						"Quality": ">90"
+					},
+					"RETURN_ALL": true
+				}
+			}
+		},
+		{"BLACKLIST":
+			{
+			}
+		},
+		{
 			"PRINT_CELLS": false
 		},
 		{
 			"SORT_CELLS": true
 		},
 		{
-			"INTERFACE": "wlan0"
-		},
-		{
 			"SCAN_TIMEOUT": 1
-		},
-		{
-			"VIEW_TIMEOUT": 30
 		},
 		{
 			"GPS_ENDPOINT": "http://gps.localhost:5004/position"
 		},
 		{
-			"TOKENS": 2
+			"TEMPLATE_AJAX_URL": "http://wifi.localhost:5006/scan"
 		},
 		{
-			"SIGNAL_CACHE_MAX": 162
+			"VIEW_TIMEOUT": 30
 		},
 		{
-			"MUTE_TIME": 999999
+			"VENDORMACS_FILE": "vendorMacs.xml"
 		},
 		{
-			"return_all": true
+			"DOCTYPE": "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\t\t\t\t<plist version=\"1.0\">\t\t<array></array>\t\t</plist>"
+		},
+		{
+			"XML_SIGNAL_DEBUG": false
+		},
+		{
+			"XML_DATA_DEBUG": false
+		},
+		{
+			"XML_PARSE_DEBUG": false
+		},
+		{
+			"XML_ROOT_DEBUG": false
+		},
+		{
+			"XML_ELEMENT_DEBUG": false
+		},
+		{
+			"XML_FOUNDCELL_DEBUG": false
+		},
+		{
+			"XML_APPEND_DEBUG": false
+		},
+		{
+			"XML_PARSEDCELL_DEBUG": false
+		},
+		{
+			"DATE_FORMAT": "%Y-%m-%d"
+		},
+		{
+			"TIME_FORMAT": "%H:%M:%S"
+		},
+		{
+			"DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S"
+		},
+		{
+			"INDEX_TIMEDELTA": 6
+		},
+		{
+			"INDEX_TZ": "MST"
 		},
 		{
 			"WORKER_INDEX_MAPPING": {
@@ -163,95 +226,7 @@
 			}
 		},
 		{
-			"INDEX_TIMEDELTA": 6
-		},
-		{
-			"INDEX_TZ": "MST"
-		},
-		{
-			"COLUMNS": [
-				"SSID",
-				"Quality",
-				"Channel",
-				"Frequency",
-				"Encryption",
-				"BSSID",
-				"Signal",
-				"Noise",
-				"BitRates",
-				"Mode",
-				"Last",
-				"Vendor"
-			]
-		},
-		{
-			"VENDORMACS_FILE": "vendorMacs.xml"
-		},
-		{
-			"DOCTYPE": "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\t\t\t\t<plist version=\"1.0\">\t\t<array></array>\t\t</plist>"
-		},
-		{
-			"DATE_FORMAT": "%Y-%m-%d"
-		},
-		{
-			"TIME_FORMAT": "%H:%M:%S"
-		},
-		{
-			"TIMER_FORMAT": "%H:%M:%S"
-		},
-		{
-			"DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S"
-		},
-		{
-			"XML_SIGNAL_DEBUG": false
-		},
-		{
-			"XML_DATA_DEBUG": false
-		},
-		{
-			"XML_PARSE_DEBUG": false
-		},
-		{
-			"XML_ROOT_DEBUG": false
-		},
-		{
-			"XML_ELEMENT_DEBUG": false
-		},
-		{
-			"XML_FOUNDCELL_DEBUG": false
-		},
-		{
-			"XML_APPEND_DEBUG": false
-		},
-		{
-			"XML_PARSEDCELL_DEBUG": false
-		},
-		{"SEARCHMAP":
-			{
-				"5C:5B:35:78:8B:64": {
-					"ssid": "HEATKTE",
-					"tests": {
-						"Signal": ">-30",
-						"Quality": ">90"
-					},
-					"return_all": true
-				},
-				"5C:5B:35:78:8B:66": {
-					"ssid": "HEATKTE2",
-					"tests": {
-						"Signal": ">-30",
-						"Quality": ">90"
-					},
-					"return_all": true
-				}
-			}
-		},
-		{"BLACKLIST":
-			{
-			}
-		},
-		{
-			"SIGNAL_CACHE_LOG_MAX": -5
+			"WIFI_QUEUE": "wifi_queue"
 		},
 		{
 			"OUTFILE_PATH": "../../_out"

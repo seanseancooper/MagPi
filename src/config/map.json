@@ -6,28 +6,28 @@
 			"SERVER_NAME": "localhost:5005"
 		},
 		{
-			"MAP_HOST": "localhost:5173"
+			"TEMPLATE_FOLDER": "templates"
 		},
 		{
 			"MAP_TEMPLATE": "map.html.j2"
 		},
 		{
-			"TEMPLATE_FOLDER": "templates"
+			"STATIC_FOLDER": "/static"
 		},
 		{
-			"STATIC_FOLDER": "/static"
+			"MAP_AGGREGATOR_INTERVAL": 1.0
+		},
+		{
+			"MAP_HOST": "localhost:5173"
 		},
 		{
 			"NODE_START_COMMAND": ["npm", "start"]
 		},
 		{
-			"NODE_BUILD": true
-		},
-		{
 			"NODE_BUILD_COMMAND": ["npm", "run", "build"]
 		},
 		{
-			"AGGREGATOR_TIMEOUT": 1.0
+			"NODE_BUILD": false
 		},
 		{
 			"DATE_FORMAT": "%Y-%m-%d"

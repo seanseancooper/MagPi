@@ -1,5 +1,6 @@
 {
-	"ARX": [{
+	"ARX": [
+		{
 			"DEBUG": false
 		},
 		{
@@ -33,7 +34,7 @@
 			"LATENCY": 0.1
 		},
 		{
-			"ARX_NAME": "arx_queue"
+			"ARX_QUEUE": "arx_queue"
 		},
 		{
 			"OUTFILE_NAME": "arx_audio"

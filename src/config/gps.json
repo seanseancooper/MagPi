@@ -1,24 +1,19 @@
 {
-	"GPS": [{
+	"GPS": [
+		{
 			"DEBUG": false
+		},
+		{
+			"TEST_FILE": "./lib/TEST_FILE.txt"
 		},
 		{
 			"SERVER_NAME": "localhost:5004"
 		},
 		{
-			"TEMPLATE_FOLDER": "templates"
+			"GPS_MODULE_RETRIEVER": "src.gps.GPSRetriever.JSGPSRetriever"
 		},
 		{
-			"STATIC_FOLDER": "static"
-		},
-		{
-			"NODE_START_COMMAND": ["npm", "start"]
-		},
-		{
-			"NODE_BUILD": false
-		},
-		{
-			"NODE_BUILD_COMMAND": ["npm", "run", "build"]
+			"GPS_RETRIEVER_TIMEOUT": 1
 		},
 		{
 			"GPS_HOST": "10.99.77.1"
@@ -29,15 +24,19 @@
 		{
 			"GPS_CONNECT_TIMEOUT": 10
 		},
+
+
 		{
-			"TEST_FILE": "./lib/TEST_FILE.txt"
+			"NODE_START_COMMAND": ["npm", "start"]
 		},
 		{
-			"GPS_MODULE_RETRIEVER": "src.gps.GPSRetriever.JSGPSRetriever"
+			"NODE_BUILD_COMMAND": ["npm", "run", "build"]
 		},
 		{
-			"GPS_RETRIEVER_TIMEOUT": 1
+			"NODE_BUILD": false
 		},
+
+
 		{
 			"DATE_FORMAT": "%Y-%m-%d"
 		},

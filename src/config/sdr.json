@@ -13,7 +13,7 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
-			"SCANNER": "Scanner"
+			"SCANNER": "Tabulator"
 		},
 		{
 			"TEMPLATE_AJAX_URL": "http://sdr.localhost:5006/scan"
@@ -56,9 +56,6 @@
 		},
 		{
 			"MUTE_TIME": 999999
-		},
-		{
-			"return_all": true
 		},
 		{
 			"WORKER_INDEX_MAPPING": {

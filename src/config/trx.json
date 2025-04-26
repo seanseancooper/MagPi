@@ -4,6 +4,12 @@
 			"DEBUG": false
 		},
 		{
+			"TEST_FILE": "/Users/scooper/PycharmProjects/MagPi/dev/trx/TEST_FILE.csv"
+		},
+		{
+			"TEST_FILE_TIME_MAX": 300
+		},
+		{
 			"SERVER_NAME": "localhost:5009"
 		},
 		{
@@ -13,25 +19,10 @@
 			"STATIC_FOLDER": "static"
 		},
 		{
-			"TEST_FILE": "/Users/scooper/PycharmProjects/MagPi/dev/trx/TEST_FILE.csv"
-		},
-		{
-			"TEST_FILE_TIME_MAX": 300
-		},
-		{
-			"MUTE_TIME": 30
-		},
-		{
-			"SIGNAL_CACHE_MAX": 300
+			"SCANNER": "Tabulator"
 		},
 		{
 			"MODULE_RETRIEVER": "src.trx.retrievers.TRXUSBRetriever"
-		},
-		{
-			"TRX_QUEUE": "trx_queue"
-		},
-		{
-			"USB_POLL_INTERVAL": 1
 		},
 		{
 			"DEVICE": "/dev/cu.URT1"
@@ -49,19 +40,7 @@
 			"BYTESIZE": "serial.EIGHTBITS"
 		},
 		{
-			"OUTFILE_NAME": "trx_out"
-		},
-		{
-			"OUTFILE_EXTENSION": ".wav"
-		},
-		{
-			"OUTFILE_PATH": "../../_out"
-		},
-		{
-			"DATETIME_FORMAT": "%Y%m%d_%H%M%S"
-		},
-		{
-			"DATE_FORMAT": "%m/%d/%Y"
+			"USB_POLL_INTERVAL": 1
 		},
 		{
 			"VENDOR_ID": "0x2a59"
@@ -70,7 +49,40 @@
 			"PRODUCT_ID": "0x10"
 		},
 		{
+			"CELL_IDENT_FIELD": "FREQ"
+		},
+		{
+			"CELL_STRENGTH_FIELD": "?"
+		},
+		{
+			"CELL_SORT_FIELD": "?"
+		},
+		{
+			"SIGNAL_CACHE_MAX": 300
+		},
+		{
+			"MUTE_TIME": 30
+		},
+		{
+			"DATE_FORMAT": "%m/%d/%Y"
+		},
+		{
 			"TIME_FORMAT": "%H:%M:%S"
+		},
+		{
+			"DATETIME_FORMAT": "%Y%m%d_%H%M%S"
+		},
+		{
+			"TRX_QUEUE": "trx_queue"
+		},
+		{
+			"OUTFILE_PATH": "../../_out"
+		},
+		{
+			"OUTFILE_NAME": "trx_out"
+		},
+		{
+			"OUTFILE_EXTENSION": ".wav"
 		}
 	]
 }
