@@ -1,9 +1,9 @@
 "Because I'm bored and this is hard."
 
 arx (ARXSignalPoint, ZeroMQ):
-    [IP] ARXSignalPoint ZeroMQ to ARXAudioEncoder
+    [DONE] ARXSignalPoint RabbitMq & ZeroMQ to ARXAudioEncoder
     IDEA: project-keyword-spotter integration? feasible? alt. solution --> MCP
-    Elasticsearch mappings?
+    [??] Elasticsearch mappings?
     [IP] Processing germane to audio:back to original requirements + new ideas.
     IDEA: ML Models germane to audio, speech and sound analysis (AudioEncoder subproject)
         text_attribute parsing
@@ -17,7 +17,7 @@ arx (ARXSignalPoint, ZeroMQ):
     Behavior-based  | Emission pattern, silence periods, handoff behavior
 
 BLU:
-    NOT STARTED: likely too use SDR for this and not have a module.
+    NOT STARTED: likely to use SDR for this and not have a module.
     idea: features unique to 'Bluetooth' signals (special identifiers)
 
 cam (FrameObjekt, RabbitMQ(events)?, ZeroMQ(images)):
@@ -49,16 +49,16 @@ ebs:
     IDeA: Speech Service client using MCP?
 
 gps (MapAggregator, REST, class?):
-
     GPS hardware build.
+    GPS as MAP submodule.
 
 lib:
     code review: there is junk here and things to add.
 
 map (MapAggregator, read configs, test REST endpoints and pull data [AGGREGATOR_TIMEOUT], class):
-    Elastic Integration:
-        Elastic pull()
-    MapAggregator refresh; read from rabbitMQ, not REST
+    [NO] Elastic Integration:
+    [NO] Elastic pull()
+    [IP] MapAggregator refresh; read from rabbitMQ, not REST
     Hyperspectral imaging: BLOCKED DUE TO ENVIRONMENT
     Trilaterator: wifi data is the problem. the points need ~300m separation to resolve.
         Can this be achieved by scaling the data?
@@ -92,8 +92,6 @@ mcp:
         #     Anomaly detection for spotting new patterns (e.g., movement prep)
 
     MCP AUTOMATIC DOCKER STARTUP: Ensure the container is available and is a setting in the container startup.
-
-MOT[DELETED]
 
 net:
     Directory structure for ElasticSearch assets.
@@ -151,8 +149,8 @@ WX:
 
 wifi (WifiSignalPoint, RabbitMQ):
     [IP] Factor Scanner to read ALL SignalPoint types.
-    [IP] Assign the Scanner instance a SignalPoint type to configure it.
-    [IP] Continue Worker class
+    [DONE] Assign the Scanner instance a SignalPoint type to configure it.
+    [DONE] Continue Worker class
 
     Category        | Feature Examples
     Power           | RSSI (signal strength), SNR (signal-to-noise ratio)
@@ -193,7 +191,7 @@ SignalPoint Hierarchy [DESIGN IN PROGRESS]:
 
     FrameObjekt: CAM Image Container.
 
-    1. Signal Sources as "Agents" -- idea: see Worker();
+    1. Signal Sources as "Agents" -- idea: see Worker(), SSET/Signal Semiotics
     Each emitter can be modeled as an agent with:
 
         Location (lat, lon)
