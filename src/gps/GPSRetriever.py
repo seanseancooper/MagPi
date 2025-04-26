@@ -166,7 +166,7 @@ class GPSRetriever(threading.Thread):
         self.retriever = get_retriever(self.config['GPS_MODULE_RETRIEVER'])
 
         self.thread = threading.Thread(
-                target=retriever,
+                target=self.retriever,
                 kwargs=dict(self=self, c=None, host=self.config['GPS_HOST'],
                             port=self.config['GPS_PORT'],
                             timeout=self.config['GPS_CONNECT_TIMEOUT']
