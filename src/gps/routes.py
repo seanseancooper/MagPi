@@ -13,8 +13,6 @@ node.configure('map.json')
 
 gps_bp = Blueprint(
         'gps_bp', __name__, subdomain='gps',
-        template_folder=gpsRet.config['TEMPLATE_FOLDER'],
-        static_folder=gpsRet.config['STATIC_FOLDER'],
         static_url_path='/static'
 )
 
