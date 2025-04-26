@@ -16,6 +16,10 @@ import logging
 arx_logger = logging.getLogger('arx_logger')
 
 def file_writing_thread(*, q, **soundfile_args):
+    """
+    Thread function to continuously write audio data from queue to a file.
+    Stops when it gets a `None` item.
+    """
     with sf.SoundFile(**soundfile_args) as f:
         while True:
             data = q.get()
@@ -24,7 +28,10 @@ def file_writing_thread(*, q, **soundfile_args):
             f.write(data)
 
 class ARXRecorder(threading.Thread):
-    ''' Passthrough recording '''
+    """
+    Audio recorder class that records audio input to a file,
+    monitors peak levels, and handles threading.
+    """
 
     def __init__(self):
         super().__init__()
@@ -36,24 +43,26 @@ class ARXRecorder(threading.Thread):
         self.is_mute = False
         self.created = datetime.now()
         self.updated = datetime.now()
-        self.elapsed = timedelta()              # elapsed time since created
+        self.elapsed = timedelta()  # elapsed time since creation
 
         self._worker_id = 'ARXRecorder'
 
         self._stream = None
         self.thread = None
         self.recording = self.previously_recording = False
-        self.audioq = queue.Queue() #DBUG unbounded queue
-        self.metering_q = queue.Queue(maxsize=1)
+        self.audioq = queue.Queue()  # Unbounded queue for audio frames
+        self.metering_q = queue.Queue(maxsize=1)  # Small queue for metering
         self.peak = 0.0
         self.meter = {'max': 1.0, 'peak_percentage': 0}
-        self.signal_cache = []   #DBUG an UNBOUNDED list of audio peaks?
+        self.signal_cache = []  # Cache of peaks (unbounded)
 
         self.lon = 0.0
         self.lat = 0.0
 
     def configure(self, config_file):
-
+        """
+        Loads configuration from file and sets location.
+        """
         if not config_file:
             exit(1)
 
@@ -61,7 +70,9 @@ class ARXRecorder(threading.Thread):
         get_location(self)
 
     def create_stream(self):
-
+        """
+        Creates and starts the audio input/output stream.
+        """
         if self._stream is not None:
             self._stream.close()
 
@@ -73,8 +84,7 @@ class ARXRecorder(threading.Thread):
         LATENCY = self.config.get('LATENCY', 0.1)
         CHANNELS = self.config.get('CHANNELS', 2)
 
-        self._stream = sd.Stream(device=(INPUT_DEVICE,
-                                         OUTPUT_DEVICE),
+        self._stream = sd.Stream(device=(INPUT_DEVICE, OUTPUT_DEVICE),
                                  samplerate=SR,
                                  blocksize=BLOCKSIZE,
                                  dtype=DTYPE,
@@ -85,6 +95,10 @@ class ARXRecorder(threading.Thread):
         self._stream.start()
 
     def streamCallback(self, indata, outdata, frames, time, status):
+        """
+        Callback executed for every audio block.
+        Pushes audio to queue for writing and updates peak metering.
+        """
         if status.input_overflow:
             self._input_overflows += 1
 
@@ -92,7 +106,7 @@ class ARXRecorder(threading.Thread):
             if not self.is_mute:
                 self.audioq.put(indata.copy())
             else:
-                # fill with silence..
+                # Push silence if muted
                 self.audioq.put(np.zeros(np.shape(indata.copy())))
             self.previously_recording = True
         else:
@@ -114,7 +128,9 @@ class ARXRecorder(threading.Thread):
         self.update_meter()
 
     def update_meter(self):
-
+        """
+        Updates the meter readings for audio peak levels.
+        """
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
 
@@ -126,12 +142,9 @@ class ARXRecorder(threading.Thread):
         return self.meter
 
     def after(self, ms, func=None, *args):
-        """Call function once after given time.
-
-        MS specifies the time in milliseconds. FUNC gives the
-        function which shall be called. Additional parameters
-        are given as parameters to the function call.  Return
-        identifier to cancel scheduling with after_cancel."""
+        """
+        Delayed call to a function after specified milliseconds.
+        """
         if not func:
             time.sleep(ms * 0.1)
             return None
@@ -143,61 +156,76 @@ class ARXRecorder(threading.Thread):
                 pass
 
     def wait_for_thread(self):
+        """
+        Waits until the file writing thread completes.
+        """
         self.after(10, self._wait_for_thread)
 
     def _wait_for_thread(self):
+        """
+        Helper method to join the writing thread.
+        """
         if self.thread.is_alive():
             self.wait_for_thread()
             return
         self.thread.join()
 
     def get_worker_id(self):
+        """
+        Returns the worker identifier.
+        """
         return self._worker_id
 
     def stop(self):
+        """
+        Stops recording and waits for thread completion.
+        """
         self.recording = False
         self.wait_for_thread()
         return self._OUTFILE
 
     def run(self):
+        """
+        Main method that starts recording audio to a file.
+        """
         self.recording = True
 
         if not os.path.exists(self.config['OUTFILE_PATH']):
             os.mkdir(self.config['OUTFILE_PATH'])
 
-        self._OUTFILE = os.path.join(self.config['OUTFILE_PATH'],
-                                     datetime.now().strftime(self.config['DATETIME_FORMAT']) +
-                                     "_" +
-                                     self.config['OUTFILE_NAME'] + self.config['OUTFILE_EXTENSION'])
+        self._OUTFILE = os.path.join(
+            self.config['OUTFILE_PATH'],
+            datetime.now().strftime(self.config['DATETIME_FORMAT']) +
+            "_" +
+            self.config['OUTFILE_NAME'] +
+            self.config['OUTFILE_EXTENSION']
+        )
         self.create_stream()
 
         self.thread = threading.Thread(
-                target=file_writing_thread,
-                kwargs=dict(
-                        file=self._OUTFILE,
-                        mode='w',
-                        samplerate=int(self._stream.samplerate),
-                        channels=self.config['CHANNELS'],
-                        q=self.audioq,
-                ),
-                # "Exception ignored in: <module 'threading'...":
-                # This cannot be a daemon and 'cut' files correctly
-                # due to the way it is being run.
-                daemon=False,
+            target=file_writing_thread,
+            kwargs=dict(
+                file=self._OUTFILE,
+                mode='w',
+                samplerate=int(self._stream.samplerate),
+                channels=self.config['CHANNELS'],
+                q=self.audioq,
+            ),
+            daemon=False,  # Important: non-daemon to finalize files correctly
         )
         self.thread.start()
 
-
 if __name__ == '__main__':
-
+    # Entry point when run as a standalone script
     arxRec = ARXRecorder()
     arxRec.configure('arx.json')
 
     def run() -> None:
         import atexit
         def stop():
-            arxRec.stop()  # required.
+            arxRec.stop()  # required cleanup
         atexit.register(stop)
 
         arxRec.run()
+
     run()
