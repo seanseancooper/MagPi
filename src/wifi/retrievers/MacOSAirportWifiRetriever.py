@@ -87,7 +87,7 @@ class MacOSAirportWifiRetriever(threading.Thread):
         else:
             return ""
 
-    def process_xml(self, xml_data):
+    def process_xml(self, xml_data, DOCTYPE):
         _elements = {}
 
         def start_element(name, attr):
@@ -98,9 +98,6 @@ class MacOSAirportWifiRetriever(threading.Thread):
                 _elements.popitem()
 
         def close_element(d, errorByteIndex):
-            # move me
-            # DOCTYPE = self.config['DOCTYPE']
-            DOCTYPE = '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">				<plist version="1.0">		<array></array>		</plist>'
 
             if d is not None:
                 if len(d) > 0:
@@ -138,7 +135,8 @@ class MacOSAirportWifiRetriever(threading.Thread):
         if not airport_data:
             return parsed_cells
 
-        root = self.process_xml(airport_data)
+        DOCTYPE = self.config['DOCTYPE']
+        root = self.process_xml(airport_data, DOCTYPE)
 
         def unwrap(record):
             u_record = {}
