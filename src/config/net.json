@@ -82,9 +82,6 @@
 			"TIME_FORMAT": "%H:%M:%S"
 		},
 		{
-			"TIMER_FORMAT": "%H:%M:%S"
-		},
-		{
 			"DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S"
 		},
 		{
