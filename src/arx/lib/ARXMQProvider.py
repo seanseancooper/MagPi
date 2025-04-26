@@ -20,7 +20,7 @@ class ARXMQProvider(threading.Thread):
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
-        self.rmq = RabbitMQProducer(self.config['QUEUE_NAME'])
+        self.rmq = RabbitMQProducer(self.config['ARX_QUEUE'])
         self.DEBUG = self.config.get('DEBUG')
         print('configured provider.')
 
