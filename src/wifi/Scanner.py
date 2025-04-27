@@ -196,20 +196,23 @@ class Scanner(threading.Thread):
         self.tracked_signals.clear()
         logger_root.info(f"[{__name__}]: Scanner stopped. {self.polling_count} iterations.")
 
-    def report(self):
+    def report(self, flag=None):
 
         if self.polling_count % 10 == 0:
             speech_logger.info(
                 f'{len(self.retriever.get_parsed_cells(self.scanned))} scanned, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
 
-        print(f"Scanner [{self.polling_count}] "
-            f"{format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
-            f"{self.stats['elapsed']} "
-            f"[{self.stats['lat']}, {self.stats['lon']}] "
-            f"{self.stats['signals']} signals, "
-            f"{self.stats['workers']} workers, "
-            f"{self.stats['tracked']} tracked, "
-            f"{self.stats['ghosts']} ghosts")
+        if not flag:
+            print(f"Scanner [{self.polling_count}] "
+                f"{format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
+                f"{self.stats['elapsed']} "
+                f"[{self.stats['lat']}, {self.stats['lon']}] "
+                f"{self.stats['signals']} signals, "
+                f"{self.stats['workers']} workers, "
+                f"{self.stats['tracked']} tracked, "
+                f"{self.stats['ghosts']} ghosts")
+        else:
+            print(f"looking for data [{self.polling_count}] {format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))}...")
 
     def run(self):
 
@@ -247,8 +250,8 @@ class Scanner(threading.Thread):
                 self.polling_count += 1
 
             else:
+                self.report(True)
                 speech_logger.info(f'looking for data {self.polling_count} ...')
-                print(f"looking for data [{self.polling_count}] {format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))}...")
 
             # throttle MQ requests vs. further delay an I/O bound proccess that blocks....
             time.sleep(self.config.get('SCAN_TIMEOUT', 5))
