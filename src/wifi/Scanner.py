@@ -253,5 +253,5 @@ class Scanner(threading.Thread):
                 self.report(True)
                 speech_logger.info(f'looking for data {self.polling_count} ...')
 
-            # throttle MQ requests vs. further delay an I/O bound proccess that blocks....
+            # throttle MQ requests vs. further delay an I/O bound process that blocks....
             time.sleep(self.config.get('SCAN_TIMEOUT', 5))
