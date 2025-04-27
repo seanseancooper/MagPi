@@ -232,8 +232,8 @@ class Scanner(threading.Thread):
                 'lon'          : self.lon,
                 'signals'      : len(self.retriever.get_parsed_cells(self.scanned)),
                 'workers'      : len(self.workers),
-                'tracked'      : len(self.tracked_signals),
-                'ghosts'       : len(self.ghost_signals),
+                'tracked'      : len(self.get_tracked_signals()),
+                'ghosts'       : len(self.get_ghost_signals()),
             }
 
             self.scanned = self.retriever.scan()
