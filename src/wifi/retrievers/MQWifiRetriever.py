@@ -22,7 +22,7 @@ class MQWifiRetriever(threading.Thread):
         self.scanner = None                     # want to use retriever methods
 
         self.stats = {}                         # new, not yet used
-        self.parsed_signals = []                # signals represented as a list of dictionaries.
+        self.parsed_cells = []                  # a list of 'cells' representing signals as dictionaries.
 
         self.DEBUG = False
 
