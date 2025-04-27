@@ -162,20 +162,7 @@ class Scanner(threading.Thread):
         sgnl['signal_cache'] = [x.get() for x in self.signal_cache[worker.ident]]
 
     def get_parsed_signals(self):
-        """ modify mappings in parsed_cells to include 'worker'
-        fields, update and return parsed_signals, sans type. """
-
-        # move this to 'update-like' method. (update()?)
-        self.updated = datetime.now()
-        self.elapsed = self.updated - self.created
-
-        self.parsed_signals = []
-        for sgnl in self.parsed_cells:
-            wrkr = self.get_worker(sgnl[f'{self.CELL_IDENT_FIELD}'])
-            self.wrkr_to_sgnl(wrkr, sgnl)
-            self.parsed_signals.append(sgnl)
-
-        return self.parsed_signals
+        return self.parsed_signals or []
 
     def update(self, ident):
         wrkr = self.get_worker(ident).get()
