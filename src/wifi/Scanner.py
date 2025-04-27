@@ -143,6 +143,16 @@ class Scanner(threading.Thread):
         
         self.load_ghosts()
 
+        """ 
+        process cells to include 'worker' fields making them signals 
+        to fill parsed_signals
+        """
+        self.parsed_signals.clear()
+        for sgnl in self.parsed_cells:
+            wrkr = self.get_worker(sgnl[f'{self.CELL_IDENT_FIELD}'])
+            self.wrkr_to_sgnl(wrkr, sgnl)
+            self.parsed_signals.append(sgnl)
+
     def wrkr_to_sgnl(self, worker, sgnl):
         """ update sgnl (a map) with the following fields in the
         current worker (an object created from a 'cell')note
