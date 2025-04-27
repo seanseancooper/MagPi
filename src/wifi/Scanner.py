@@ -188,6 +188,7 @@ class Scanner(threading.Thread):
         return [self.update(ident) for ident in self.ghost_signals]
 
     def process_signals(self):
+        """ workers match their cells, add attributes, and make signalpoint """
         [worker.run() for worker in self.workers]
 
     def stop(self):
