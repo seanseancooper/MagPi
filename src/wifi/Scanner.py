@@ -240,8 +240,7 @@ class Scanner(threading.Thread):
 
             if len(self.scanned) > 0:
 
-                self.parsed_cells = self.retriever.get_parsed_cells(self.scanned)
-                self.parse_cells()
+                self.process_cells()
                 self.process_signals()
 
                 self.updated = datetime.now()
