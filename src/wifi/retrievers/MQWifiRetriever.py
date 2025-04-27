@@ -18,7 +18,8 @@ class MQWifiRetriever(threading.Thread):
         self.config = {}
         self.interface = None
 
-        self.consumer = RabbitMQAsyncConsumer('wifi_queue')
+        self.consumer = None
+        self.scanner = None                     # want to use retriever methods
 
         self.stats = {}                         # new, not yet used
         self.parsed_signals = []                # signals represented as a list of dictionaries.
