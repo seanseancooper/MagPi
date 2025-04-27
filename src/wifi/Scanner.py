@@ -230,7 +230,7 @@ class Scanner(threading.Thread):
                 'polling_count': self.polling_count,
                 'lat'          : self.lat,
                 'lon'          : self.lon,
-                'signals'      : len(self.retriever.get_parsed_cells(self.scanned)),
+                'signals'      : len(self.get_parsed_signals()),
                 'workers'      : len(self.workers),
                 'tracked'      : len(self.get_tracked_signals()),
                 'ghosts'       : len(self.get_ghost_signals()),
