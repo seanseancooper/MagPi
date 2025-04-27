@@ -111,8 +111,9 @@ class Scanner(threading.Thread):
 
         [_ghost(item) for item in self.ghost_signals]
     
-    def parse_cells(self):
-        """ classify, filter, sort and find missing signals in parsed_cells"""
+    def process_cells(self):
+        """ retrieve, classify, filter, sort and find missing signals in parsed_cells"""
+        self.parsed_cells = self.retriever.get_parsed_cells(self.scanned)
 
         for cell in self.parsed_cells:
             try: # not maintainable; see 'multibutton'
