@@ -48,8 +48,6 @@ class RabbitMQWifiScanner(threading.Thread):
         while True:
             scanned = self.mq_wifi_retriever.scan()
             if len(scanned) > 0:
-                # self.parse_signals(scanned)
-                # [self.producer.publish_message(sgnl) for sgnl in self.parsed_signals] # if sgnl['tracked'] is True]
                 self.producer.publish_message(scanned)
 
 if __name__ == '__main__':
