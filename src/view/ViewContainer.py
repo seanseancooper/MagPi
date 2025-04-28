@@ -35,7 +35,7 @@ class ViewContainer(threading.Thread):
         self.dead_modules = []
 
         self.aggregator  = None
-        self.module_parser = None
+        self.module_retriever = None
         self.module_stats = defaultdict(dict)
         self.module_configs = defaultdict(dict)
         self.module_data = defaultdict(dict)
@@ -112,8 +112,8 @@ class ViewContainer(threading.Thread):
                 # This transforms data in an expected way; to a list of maps
                 config = self.module_configs[mod]
                 parser = get_retriever(config['MODULE_RETRIEVER'])
-                self.module_parser = parser()
-                self.module_data[mod] = self.module_parser.get_parsed_cells(data)
+                self.module_retriever = parser()
+                self.module_data[mod] = self.module_retriever.get_parsed_cells(data)
 
         else: # use REST
 
