@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 
 from src.config import readConfig
+from src.lib.instrumentation import timer
 from src.net.lib.net_utils import get_retriever
 from src.lib.utils import get_location, format_time, format_delta
 from src.lib.utils import write_to_scanlist, print_signals
@@ -61,10 +62,16 @@ class Scanner(threading.Thread):
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
+        MQ_AVAILABLE = False
 
-        golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
-        self.retriever = golden_retriever()
-        self.retriever.configure(config_file)
+        if MQ_AVAILABLE:
+            golden_retriever = get_retriever(self.config['MQ_MODULE_RETRIEVER'])
+            self.retriever = golden_retriever()
+        else:
+            golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
+            self.retriever = golden_retriever()
+
+        self.retriever.configure(config_file) # use the module config for the retriever
 
         self.searchmap = self.config['SEARCHMAP']
         self.blacklist = self.config['BLACKLIST']
@@ -95,6 +102,7 @@ class Scanner(threading.Thread):
         finally:
             return worker
 
+    @timer
     def load_ghosts(self):
         """ find 'ghost' signals (handle tracked signals not detected
         during parsing), and make a signalpoint for them """
@@ -103,7 +111,6 @@ class Scanner(threading.Thread):
         self.ghost_signals = tracked.difference(parsed)
 
         def _ghost(item):
-            #
             w = self.get_worker(item)
             w.signal = -99
             w.updated = datetime.now()
@@ -113,7 +120,6 @@ class Scanner(threading.Thread):
     
     def process_cells(self):
         """ retrieve, classify, filter, sort and find missing signals in parsed_cells"""
-        self.parsed_cells = self.retriever.get_parsed_cells(self.scanned)
 
         for cell in self.parsed_cells:
             try: # not maintainable; see 'multibutton'
@@ -141,7 +147,7 @@ class Scanner(threading.Thread):
         
         if self.sort_order:  # sort by CELL_SORT_FIELD for printing. See PRINT_CELLS
             self.parsed_cells.sort(key=lambda el: el[self.sort_order], reverse=self.reverse)
-        
+
         self.load_ghosts()
 
         """ 
@@ -175,6 +181,7 @@ class Scanner(threading.Thread):
     def get_parsed_signals(self):
         return self.parsed_signals or []
 
+    @timer
     def update(self, ident):
         wrkr = self.get_worker(ident).get()
         sgnl = self.get_worker(ident)
@@ -188,6 +195,7 @@ class Scanner(threading.Thread):
         """ update, transform and return a list of 'rehydrated' ghost signals """
         return [self.update(ident) for ident in self.ghost_signals]
 
+    @timer
     def process_signals(self):
         """ workers match their cells, add attributes, and make signalpoint """
         [worker.run() for worker in self.workers]
@@ -232,16 +240,16 @@ class Scanner(threading.Thread):
                 'polling_count': self.polling_count,
                 'lat'          : self.lat,
                 'lon'          : self.lon,
-                'signals'      : len(self.get_parsed_signals()),
+                'signals'      : len(self.parsed_signals),
                 'workers'      : len(self.workers),
-                'tracked'      : len(self.get_tracked_signals()),
-                'ghosts'       : len(self.get_ghost_signals()),
+                'tracked'      : len(self.tracked_signals),
+                'ghosts'       : len(self.ghost_signals),
             }
 
             self.scanned = self.retriever.scan()
 
             if len(self.scanned) > 0:
-
+                self.parsed_cells = self.retriever.get_parsed_cells(self.scanned)
                 self.process_cells()
                 self.process_signals()
 

@@ -168,7 +168,7 @@ class Worker:
                 # self.id = str(self.ident).replace(':', '').lower()
                 self.id = str(uuid.uuid1()).lower()
                 self.set_type(cell['type'])
-            self.set_text_attributes(cell)
+                self.set_text_attributes(cell)
             self.process_cell(cell)
             self.auto_unmute()
 
@@ -224,5 +224,4 @@ class Worker:
 
     def run(self):
         """ match an ID and populate data """
-        for cell in self.scanner.parsed_cells:
-            self.match(cell)
+        [self.match(cell) for cell in self.scanner.parsed_cells]
