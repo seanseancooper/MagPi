@@ -22,7 +22,7 @@ class Scanner(threading.Thread):
         super().__init__()
 
         self.config = {}
-        self.retriever = None
+        self.module_retriever = None
 
         self.searchmap = {}
         self.stats =  {}
@@ -66,12 +66,12 @@ class Scanner(threading.Thread):
 
         if MQ_AVAILABLE:
             golden_retriever = get_retriever(self.config['MQ_MODULE_RETRIEVER'])
-            self.retriever = golden_retriever()
+            self.module_retriever = golden_retriever()
         else:
             golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
-            self.retriever = golden_retriever()
+            self.module_retriever = golden_retriever()
 
-        self.retriever.configure(config_file) # use the module config for the retriever
+        self.module_retriever.configure(config_file) # use the module config for the retriever
 
         self.searchmap = self.config['SEARCHMAP']
         self.blacklist = self.config['BLACKLIST']
@@ -246,10 +246,10 @@ class Scanner(threading.Thread):
                 'ghosts'       : len(self.ghost_signals),
             }
 
-            self.scanned = self.retriever.scan()
+            self.scanned = self.module_retriever.scan()
 
             if len(self.scanned) > 0:
-                self.parsed_cells = self.retriever.get_parsed_cells(self.scanned)
+                self.parsed_cells = self.module_retriever.get_parsed_cells(self.scanned)
                 self.process_cells()
                 self.process_signals()
 
