@@ -42,7 +42,7 @@ class RabbitMQAsyncConsumer:
         try:
             if body:
                 self.data = str(body.decode())
-                net_logger.debug(self.data)
+                # net_logger.debug(self.data)
                 self.channel.basic_ack(delivery_tag=method.delivery_tag)
                 return self.data
 
