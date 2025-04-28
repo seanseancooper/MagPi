@@ -25,20 +25,20 @@ class RabbitMQWifiScanner(threading.Thread):
         self.elapsed = timedelta()              # elapsed time since created
         self.parsed_signals = []
 
-        self.retriever = None
+        self.mq_wifi_retriever = None
         self.producer = None
 
     def configure(self, config_file):
         readConfig('net.json', self.config)
 
         golden_retriever = get_retriever(self.config['MQ_WIFI_RETRIEVER'])
-        self.retriever = golden_retriever()
-        self.retriever.configure(config_file)
+        self.mq_wifi_retriever = golden_retriever()
+        self.mq_wifi_retriever.configure(config_file)
 
         self.producer = RabbitMQProducer(self.config['MQ_WIFI_QUEUE'])
 
     def parse_signals(self, readlines):
-        self.parsed_signals = self.retriever.get_parsed_cells(readlines)
+        self.parsed_signals = self.mq_wifi_retriever.get_parsed_cells(readlines)
 
     def run(self):
 
@@ -46,7 +46,7 @@ class RabbitMQWifiScanner(threading.Thread):
         speech_logger.info('MQ WiFi scanner started')
 
         while True:
-            scanned = self.retriever.scan()
+            scanned = self.mq_wifi_retriever.scan()
             if len(scanned) > 0:
                 # self.parse_signals(scanned)
                 # [self.producer.publish_message(sgnl) for sgnl in self.parsed_signals] # if sgnl['tracked'] is True]
