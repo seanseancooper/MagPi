@@ -19,6 +19,9 @@
 			"MODULE_RETRIEVER": "src.wifi.retrievers.MacOSAirportWifiRetriever"
 		},
 		{
+			"MQ_MODULE_RETRIEVER": "src.wifi.retrievers.MQWifiRetriever"
+		},
+		{
 			"LINUX_IWLIST_MODULE_RETRIEVER_INTERFACE": "wlan0"
 		},
 		{
@@ -73,7 +76,7 @@
 			"SORT_CELLS": true
 		},
 		{
-			"SCAN_TIMEOUT": 1
+			"SCAN_TIMEOUT": 0.5
 		},
 		{
 			"GPS_ENDPOINT": "http://gps.localhost:5004/position"
