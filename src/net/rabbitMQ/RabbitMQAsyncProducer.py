@@ -9,10 +9,10 @@ speech_logger = logging.getLogger('speech_logger')
 class RabbitMQAsyncProducer:
     """RabbitMQ Producer using SelectConnection (async)."""
     
-    def __init__(self):
+    def __init__(self, queue):
         self.connection = None
         self.channel = None
-        self.queue = None
+        self.queue = queue
 
     def on_channel_open(self, channel):
         """Callback when the channel is opened."""

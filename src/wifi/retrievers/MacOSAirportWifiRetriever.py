@@ -135,7 +135,7 @@ class MacOSAirportWifiRetriever(threading.Thread):
         if not airport_data:
             return self.parsed_cells
 
-        DOCTYPE = self.config['DOCTYPE']
+        DOCTYPE = "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\t\t\t\t<plist version=\"1.0\">\t\t<array></array>\t\t</plist>"  # self.config['DOCTYPE']
         root = self.process_xml(airport_data, DOCTYPE)
 
         def unwrap(record):

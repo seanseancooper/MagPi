@@ -16,7 +16,7 @@
 			"SCANNER": "Tabulator"
 		},
 		{
-			"MODULE_RETRIEVER": "src.wifi.retrievers.MacOSAirportWifiRetriever"
+			"MODULE_RETRIEVER": "src.wifi.retrievers.MQWifiRetriever"
 		},
 		{
 			"MQ_MODULE_RETRIEVER": "src.wifi.retrievers.MQWifiRetriever"
@@ -76,7 +76,7 @@
 			"SORT_CELLS": true
 		},
 		{
-			"SCAN_TIMEOUT": 0.5
+			"SCAN_TIMEOUT": 1.0
 		},
 		{
 			"GPS_ENDPOINT": "http://gps.localhost:5004/position"

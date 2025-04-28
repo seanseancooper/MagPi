@@ -2,6 +2,7 @@ import threading
 from datetime import datetime, timedelta
 from src.config import readConfig
 from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
+from src.net.rabbitMQ.RabbitMQAsyncProducer import RabbitMQAsyncProducer
 from src.net.lib.net_utils import get_retriever
 
 import logging
@@ -48,9 +49,9 @@ class RabbitMQWifiScanner(threading.Thread):
         while True:
             scanned = self.retriever.scan()
             if len(scanned) > 0:
-                self.parse_signals(scanned)
-                [self.producer.publish_message(sgnl) for sgnl in self.parsed_signals if sgnl['tracked'] is True]
-                # self.producer.publish_message(scanned)
+                # self.parse_signals(scanned)
+                # [self.producer.publish_message(sgnl) for sgnl in self.parsed_signals] # if sgnl['tracked'] is True]
+                self.producer.publish_message(scanned)
 
 if __name__ == '__main__':
     scanner = RabbitMQWifiScanner()

@@ -62,7 +62,7 @@ class Scanner(threading.Thread):
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
-        MQ_AVAILABLE = False
+        MQ_AVAILABLE = True
 
         if MQ_AVAILABLE:
             golden_retriever = get_retriever(self.config['MQ_MODULE_RETRIEVER'])
