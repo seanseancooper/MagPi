@@ -47,7 +47,7 @@ class RabbitMQAsyncConsumer:
                 return self.data
 
         except Exception as e:
-            net_logger.error(f"Failed to process message: {e}")
+            net_logger.error(f"[{__name__} Failed to process body: {e}")
 
     def run(self):
         """Start the asynchronous consumer."""

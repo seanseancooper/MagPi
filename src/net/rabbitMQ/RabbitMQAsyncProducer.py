@@ -49,9 +49,10 @@ class RabbitMQAsyncProducer:
                     delivery_mode=2  # Make message persistent
                 )
             )
+            net_logger.debug(f"Sent message {message} successfully")
             net_logger.info(f"Sent message successfully")
         except Exception as e:
-            net_logger.error(f"Failed to send message: {e}")
+            net_logger.error(f"[{__name__} Failed to process message {message}: {e}")
 
     def run(self):
             """Start the asynchronous producer."""
