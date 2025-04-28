@@ -210,7 +210,7 @@ class Scanner(threading.Thread):
 
         if self.polling_count % 10 == 0:
             speech_logger.info(
-                f'{len(self.retriever.get_parsed_cells(self.scanned))} scanned, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
+                f'{len(self.scanned)} scanned, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
 
         if not flag:
             print(f"Scanner [{self.polling_count}] "
