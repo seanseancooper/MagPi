@@ -2,7 +2,6 @@ import threading
 from datetime import datetime, timedelta
 from src.config import readConfig
 from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
-from src.net.rabbitMQ.RabbitMQAsyncProducer import RabbitMQAsyncProducer
 from src.net.lib.net_utils import get_retriever
 
 import logging

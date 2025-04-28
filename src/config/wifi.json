@@ -16,7 +16,7 @@
 			"SCANNER": "Tabulator"
 		},
 		{
-			"MODULE_RETRIEVER": "src.wifi.retrievers.MQWifiRetriever"
+			"MODULE_RETRIEVER": "src.wifi.retrievers.MacOSAirportWifiRetriever"
 		},
 		{
 			"MQ_MODULE_RETRIEVER": "src.wifi.retrievers.MQWifiRetriever"
