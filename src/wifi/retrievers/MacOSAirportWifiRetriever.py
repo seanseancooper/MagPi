@@ -30,10 +30,7 @@ class MacOSAirportWifiRetriever(threading.Thread):
         self.DATA_DEBUG = False
         self.PARSE_DEBUG = False
         self.ROOT_DEBUG = False
-        self.ELEMENT_DEBUG = False
-        self.FOUNDCELL_DEBUG = False
         self.APPEND_DEBUG = False
-        self.PARSEDCELL_DEBUG = False
 
         self.DEBUG = False
 
@@ -58,10 +55,7 @@ class MacOSAirportWifiRetriever(threading.Thread):
         self.DATA_DEBUG = self.config.get('XML_DATA_DEBUG')
         self.PARSE_DEBUG = self.config.get('XML_PARSE_DEBUG')
         self.ROOT_DEBUG = self.config.get('XML_ROOT_DEBUG')
-        self.ELEMENT_DEBUG = self.config.get('XML_ELEMENT_DEBUG')
-        self.FOUNDCELL_DEBUG = self.config.get('XML_FOUNDCELL_DEBUG')
         self.APPEND_DEBUG = self.config.get('XML_APPEND_DEBUG')
-        self.PARSEDCELL_DEBUG = self.config.get('XML_PARSEDCELL_DEBUG')
 
         self.DEBUG = self.config.get('DEBUG')
 
@@ -87,57 +81,58 @@ class MacOSAirportWifiRetriever(threading.Thread):
         else:
             return ""
 
-    def process_xml(self, xml_data, DOCTYPE):
-        _elements = {}
-
-        def start_element(name, attr):
-            _elements[parser.CurrentByteIndex] = name
-
-        def end_element(name):
-            if name:
-                _elements.popitem()
-
-        def close_element(d, errorByteIndex):
-
-            if d is not None:
-                if len(d) > 0:
-                    data = d[0:errorByteIndex]
-                    # [data += str(f"</{v}>") for v in reversed(_elements.values())]
-                    for v in reversed(_elements.values()):
-                        data = data + str(f"</{v}>")
-                    return data
-            else:
-                return DOCTYPE
-
-        parser = xml.parsers.expat.ParserCreate(encoding='latin-1')
-        parser.StartElementHandler = start_element
-        parser.EndElementHandler = end_element
-
-        try:
-            parser.Parse(xml_data, True)
-            root = ET.fromstring(xml_data)
-        except ExpatError:
-            root = ET.fromstring(close_element(xml_data, parser.ErrorByteIndex))
-        except TypeError:
-            root = ET.fromstring(close_element(xml_data, parser.ErrorByteIndex))
-
-        return root
-
-    def get_parsed_cells(self, airport_data):
+    @staticmethod
+    def get_parsed_cells(airport_data):
         """ Parses MacOS airport output into a list of networks
             @return list
                 properties:
         """
 
         cells = [{}]
-        self.parsed_cells = []
+        parsed_cells = []
 
         if not airport_data:
-            return self.parsed_cells
+            return parsed_cells
 
-        # self.config['DOCTYPE']
         DOCTYPE = "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\t\t\t\t<plist version=\"1.0\">\t\t<array></array>\t\t</plist>"
-        root = self.process_xml(airport_data, DOCTYPE)
+
+        def process_xml(xml_data, DOCTYPE):
+            _elements = {}
+
+            def start_element(name, attr):
+                _elements[parser.CurrentByteIndex] = name
+
+            def end_element(name):
+                if name:
+                    _elements.popitem()
+
+            def close_element(d, errorByteIndex):
+
+                if d is not None:
+                    if len(d) > 0:
+                        data = d[0:errorByteIndex]
+                        # [data += str(f"</{v}>") for v in reversed(_elements.values())]
+                        for v in reversed(_elements.values()):
+                            data = data + str(f"</{v}>")
+                        return data
+                else:
+                    return DOCTYPE
+
+            parser = xml.parsers.expat.ParserCreate(encoding='latin-1')
+            parser.StartElementHandler = start_element
+            parser.EndElementHandler = end_element
+
+            try:
+                parser.Parse(xml_data, True)
+                root = ET.fromstring(xml_data)
+            except ExpatError:
+                root = ET.fromstring(close_element(xml_data, parser.ErrorByteIndex))
+            except TypeError:
+                root = ET.fromstring(close_element(xml_data, parser.ErrorByteIndex))
+
+            return root
+
+        root = process_xml(airport_data, DOCTYPE)
 
         def unwrap(record):
             u_record = {}
@@ -157,9 +152,11 @@ class MacOSAirportWifiRetriever(threading.Thread):
 
                 if element_key and element_val:
                     u_record[element_key] = element_val
-                    if self.ELEMENT_DEBUG:
-                        wifi_logger.debug(f"[{__name__}]:(element_key: {element_key}, "
-                                          f"element.tag: {element.tag}, element.text: {element.text}")
+                    # wifi_logger.debug(f"[{__name__}]:("
+                    #                   f"element_key: {element_key}, "
+                    #                   f"element.tag: {element.tag}, "
+                    #                   f"element.text: {element.text}"
+                    #                   )
 
             return u_record
 
@@ -228,13 +225,11 @@ class MacOSAirportWifiRetriever(threading.Thread):
 
                 cells.append(cell)
 
-                if self.FOUNDCELL_DEBUG:
-                    wifi_logger.debug(f"[{__name__}]: FOUND CELL: >> {cell}")
+                # wifi_logger.debug(f"[{__name__}]: FOUND CELL: >> {cell}")
 
         [parse_item(record) for record in root.iter('dict')]
-        [self.parsed_cells.append(cell) for cell in cells[2:]]
+        [parsed_cells.append(cell) for cell in cells[2:]]
 
-        if self.PARSEDCELL_DEBUG:
-            wifi_logger.debug(f"[{__name__}]: PARSED_CELLS: >> {self.parsed_cells}")
+        # wifi_logger.debug(f"[{__name__}]: PARSED_CELLS: >> {parsed_cells}")
 
-        return self.parsed_cells
+        return parsed_cells

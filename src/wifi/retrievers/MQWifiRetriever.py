@@ -35,11 +35,11 @@ class MQWifiRetriever(threading.Thread):
         self.consumer = RabbitMQAsyncConsumer(self.config['WIFI_QUEUE'])
         self.start_consumer()
 
-    @staticmethod
-    def start_scanner():
-        scanner = RabbitMQWifiScanner()
-        scanner.configure('wifi.json')
-        t = threading.Thread(target=scanner.run, daemon=True)
+    # @staticmethod
+    def start_scanner(self):
+        self.scanner = RabbitMQWifiScanner()
+        self.scanner.configure('wifi.json')
+        t = threading.Thread(target=self.scanner.run, daemon=True)
         t.start()
 
     def start_consumer(self):
@@ -54,6 +54,5 @@ class MQWifiRetriever(threading.Thread):
             wifi_logger.error(f"[{__name__}]: Exception: {e}")
 
     def get_parsed_cells(self, airport_data):
-        from src.wifi.retrievers.MacOSAirportWifiRetriever import MacOSAirportWifiRetriever
-        return MacOSAirportWifiRetriever.get_parsed_cells(MacOSAirportWifiRetriever(), airport_data)
+        return self.scanner.mq_wifi_retriever.get_parsed_cells(airport_data)
 
