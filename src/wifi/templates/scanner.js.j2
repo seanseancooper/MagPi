@@ -79,6 +79,13 @@
             return content
         };
     </script>
+{% if container %}
+    {% set scanner = {} %}
+    {% set config = scanner.__setitem__("config", {}) %}
+    {% set CELL_IDENT_FIELD = scanner.__setitem__("CELL_IDENT_FIELD", "BSSID") %}
+    {% set CELL_STRENGTH_FIELD = scanner.__setitem__("CELL_STRENGTH_FIELD", "Signal") %}
+    {% set TEMPLATE_AJAX_URL = scanner.config.__setitem__("TEMPLATE_AJAX_URL", "http://wifi.localhost:5006/scan") %}
+{% endif %}
     <script>
         var scanner = new Tabulator("#scanner", {
             ajaxURL:"{{ scanner.config.TEMPLATE_AJAX_URL  }}",      // request URI
@@ -141,16 +148,18 @@
                 {title:"{{ scanner.CELL_IDENT_FIELD  }}", field:"{{ scanner.CELL_IDENT_FIELD  }}", width:120},
                 {title:"db", field:"{{ scanner.CELL_STRENGTH_FIELD  }}", width:30},
 
-                {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, sorter:"array", sorterParams:{
-                    type:"length"
-                }},
-
-                /*
+                // pull 'common name [scanner.CELL_NAME_FIELD] field out of text_attributes.
                 {title:"SSID", field:"text_attributes.SSID", width:140, formatter:ssidFormatter, formatterParams:{
                     field:"Quality",
                     colors:["red", "orange", "yellow", "#008800", "#00FF00"]
                 }},
 
+                {title:"db", field:"{{ scanner.CELL_STRENGTH_FIELD  }}", width:30},
+                {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, sorter:"array", sorterParams:{
+                    type:"length"
+                }},
+
+                // should 'iterate' text_attributes instead.
                 {title:"Ch.", field:"text_attributes.Channel", width:50},
                 {title:"Freq.", field:"text_attributes.Frequency", width:70},
                 {title:"Sec.", field:"text_attributes.Encryption", formatter: "tickCross", width:30},
