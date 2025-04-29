@@ -229,9 +229,10 @@ class ViewContainerTab:
         self.updated = datetime.now()
         self.elapsed = timedelta()
 
-        # hostname <-- not everything will be xxx.localhost
-        # port <--  NET 'control port'
-        # mac address <-- authentication
+        # hostname <-- not everything will be x.localhost:yyyy
+        # port <--  not everything will be x.localhost:yyyy
+        # mac address <-- idea: hash the mac for authentication
+        # scanner <-- component doing scanning for module
 
         self.module = module
         self.tab = tab
