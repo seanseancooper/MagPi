@@ -1,12 +1,9 @@
 from flask import Blueprint, redirect, render_template, jsonify
 import logging
 
-from src.wifi.WifiScanner import WifiScanner
 from src.wifi.Scanner import Scanner
 
-# scanner = WifiScanner()
 scanner = Scanner()
-
 scanner.configure('wifi.json')
 
 wifi_bp = Blueprint(
@@ -31,7 +28,7 @@ def wifi_scan():
 
 @wifi_bp.route('/scan/<bssid>', methods=['GET'], subdomain='wifi')
 def wifi_scan_bssid(bssid):
-    worker = scanner.get_worker(bssid)
+    worker = scanner.module_tracker.get_worker(bssid)
     if worker:
         return jsonify(worker.get())
     return "", 404
@@ -55,7 +52,7 @@ def wifi_ghosts():
 
 @wifi_bp.route('/add/<bssid>', methods=['POST'], subdomain='wifi')
 def add(bssid):
-    if scanner.get_worker(bssid).add(bssid):
+    if scanner.module_tracker.get_worker(bssid).add(bssid):
         speech_logger.info(f'added')
         return "OK", 200
     return "", 404
@@ -63,12 +60,12 @@ def add(bssid):
 
 @wifi_bp.route('/mute/<bssid>', methods=['POST'], subdomain='wifi')
 def mute(bssid):
-    return str(scanner.get_worker(bssid).mute()), 200
+    return str(scanner.module_tracker.get_worker(bssid).mute()), 200
 
 
 @wifi_bp.route('/remove/<bssid>', methods=['POST'], subdomain='wifi')
 def remove(bssid):
-    if scanner.get_worker(bssid).remove(bssid):
+    if scanner.module_tracker.get_worker(bssid).remove(bssid):
         speech_logger.info(f'removed')
         return "OK", 200
     return "", 404
