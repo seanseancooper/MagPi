@@ -189,9 +189,9 @@ class Scanner(threading.Thread):
 
     def report(self, flag=None):
 
-        if self.polling_count % 10 == 0:
-            speech_logger.info(
-                f'{len(self.parsed_cells)} scanned, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
+        # if self.polling_count % 10 == 0:
+        #     speech_logger.info(
+        #         f'{len(self.parsed_cells)} scanned, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
 
         if not flag:
             print(f"Scanner [{self.polling_count}] "
@@ -202,6 +202,11 @@ class Scanner(threading.Thread):
                 f"{self.stats['workers']} workers, "
                 f"{self.stats['tracked']} tracked, "
                 f"{self.stats['ghosts']} ghosts")
+
+            if self.polling_count > 0 and self.polling_count % 10 == 0:
+                speech_logger.info(
+                        f'{len(self.parsed_cells)} scanned, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
+
         else:
             print(f"looking for data [{self.polling_count}] {format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))}...")
 
@@ -230,6 +235,7 @@ class Scanner(threading.Thread):
             self.scanned = self.module_retriever.scan()
 
             if len(self.scanned) > 0:
+
                 self.parsed_cells = self.module_retriever.get_parsed_cells(self.scanned)
 
                 self.process_cells()
