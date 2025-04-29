@@ -4,15 +4,13 @@ from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 
 from src.config import readConfig
-from src.lib.instrumentation import timer
 from src.net.lib.net_utils import get_retriever
 from src.lib.utils import get_location, format_time, format_delta
 from src.lib.utils import write_to_scanlist
-from src.lib.Worker import Worker
 
 import logging
 
-from src.wifi.Tracker import Tracker
+from src.view.Tracker import Tracker
 
 logger_root = logging.getLogger('root')
 speech_logger = logging.getLogger('speech_logger')
