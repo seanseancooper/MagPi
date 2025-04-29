@@ -1,20 +1,26 @@
 <!-- build from module 'columns' -->
-<select id="{{ tab.tab }}_filter_field">
+<select id="{{ containerTab.tab }}_filter_field">
     <option></option>
     <option value="is_mute">Muted</option>
     <option value="tracked">Tracked</option>
+    <option value="created">Found</option>
+    <option value="updated">Last</option>
+
+    {% set config =  container.module_configs[module] %}
+
+    <option value="{{ config.CELL_IDENT_FIELD }}">{{ config.CELL_IDENT_FIELD }}</option>
+    <option value="{{ config.CELL_STRENGTH_FIELD }}">{{ config.CELL_STRENGTH_FIELD }}</option>
+
+    <!-- these should iterate over *module* text_attributes -->
     <option value="SSID">SSID</option>
-    <option value="BSSID">BSSID</option>
-    <option value="Signal">Signal</option>
     <option value="Channel">Channel</option>
     <option value="Frequency">Frequency</option>
     <option value="Quality">Quality</option>
     <option value="Encryption">Encryption</option>
     <option value="Vendor">Vendor</option>
-    <option value="created">Found</option>
-    <option value="updated">Last</option>
+
 </select>
-<select id="{{ tab.tab }}_filter_type">
+<select id="{{ containerTab.tab }}_filter_type">
     <option value="=">=</option>
     <option value="<"><</option>
     <option value="<="><=</option>
@@ -23,20 +29,20 @@
     <option value="!=">!=</option>
     <option value="like">like</option>
 </select>
-<input id="{{ tab.tab }}_filter_value" type="text" size="16"  placeholder="filter this.">
-<button id="{{ tab.tab }}_filter_clear" class="clear_button">
+<input id="{{ containerTab.tab }}_filter_value" type="text" size="16"  placeholder="filter this.">
+<button id="{{ containerTab.tab }}_filter_clear" class="clear_button">
     <span id="clear_button_text">CLEAR</span>
 </button>
-<button id="{{ tab.tab }}_all_button" class="all_button button" value="all_button" data-action=""  data-target="{{ tab.module }}">ALL</button>
-<button id="{{ tab.tab }}_none_button" class="none_button button" value="none_button" data-action=""  data-target="{{ tab.module }}">NONE</button>
-<button id="{{ tab.tab }}_write_button" class="write_button button" value="write_button" data-action=""  data-target="{{ tab.module }}">WRITE</button>
-<button id="{{ tab.tab }}_reload_button" class="reload_button button" value="reload_button" data-action=""  data-target="{{ tab.module }}">RELOAD</button>
+<button id="{{ containerTab.tab }}_all_button" class="all_button button" value="all_button" data-action=""  data-target="{{ module }}">ALL</button>
+<button id="{{ containerTab.tab }}_none_button" class="none_button button" value="none_button" data-action=""  data-target="{{ module }}">NONE</button>
+<button id="{{ containerTab.tab }}_write_button" class="write_button button" value="write_button" data-action=""  data-target="{{ module }}">WRITE</button>
+<button id="{{ containerTab.tab }}_reload_button" class="reload_button button" value="reload_button" data-action=""  data-target="{{ module }}">RELOAD</button>
 <script>
 
     // Define variables for input elements
-    var {{ tab.tab }}_fieldEl = document.getElementById("{{ tab.tab }}_filter_field");
-    var {{ tab.tab }}_typeEl = document.getElementById("{{ tab.tab }}_filter_type");
-    var {{ tab.tab }}_valueEl = document.getElementById("{{ tab.tab }}_filter_value");
+    var {{ containerTab.tab }}_fieldEl = document.getElementById("{{ containerTab.tab }}_filter_field");
+    var {{ containerTab.tab }}_typeEl = document.getElementById("{{ containerTab.tab }}_filter_type");
+    var {{ containerTab.tab }}_valueEl = document.getElementById("{{ containerTab.tab }}_filter_value");
 
     // filter
     function customFilter(data){
@@ -45,33 +51,33 @@
 
     // Trigger setFilter function with correct parameters
     function updateFilter(){
-        var {{ tab.tab }}_filterVal = {{ tab.tab }}_fieldEl.options[{{ tab.tab }}_fieldEl.selectedIndex].value;
-        var {{ tab.tab }}_typeVal = {{ tab.tab }}_typeEl.options[{{ tab.tab }}_typeEl.selectedIndex].value;
+        var {{ containerTab.tab }}_filterVal = {{ containerTab.tab }}_fieldEl.options[{{ containerTab.tab }}_fieldEl.selectedIndex].value;
+        var {{ containerTab.tab }}_typeVal = {{ containerTab.tab }}_typeEl.options[{{ containerTab.tab }}_typeEl.selectedIndex].value;
 
         // enable filter
-        var {{ tab.tab }}_filter = {{ tab.tab }}_filterVal == "function" ? customFilter : {{ tab.tab }}_filterVal;
+        var {{ containerTab.tab }}_filter = {{ containerTab.tab }}_filterVal == "function" ? customFilter : {{ containerTab.tab }}_filterVal;
 
-        if({{ tab.tab }}_filterVal == "function" ){
-            {{ tab.tab }}_typeEl.disabled = true;
-            {{ tab.tab }}_valueEl.disabled = true;
+        if({{ containerTab.tab }}_filterVal == "function" ){
+            {{ containerTab.tab }}_typeEl.disabled = true;
+            {{ containerTab.tab }}_valueEl.disabled = true;
         } else {
-            {{ tab.tab }}_typeEl.disabled = false;
-            {{ tab.tab }}_valueEl.disabled = false;
+            {{ containerTab.tab }}_typeEl.disabled = false;
+            {{ containerTab.tab }}_valueEl.disabled = false;
         }
 
-        if({{ tab.tab }}_filterVal){
-            {{ tab.tab }}.setFilter({{ tab.tab }}_filter,{{ tab.tab }}_typeVal, {{ tab.tab }}_valueEl.value);
+        if({{ containerTab.tab }}_filterVal){
+            {{ containerTab.tab }}.setFilter({{ containerTab.tab }}_filter,{{ containerTab.tab }}_typeVal, {{ containerTab.tab }}_valueEl.value);
         }
     }
 
-    {{ tab.tab }}_fieldEl.addEventListener("change", updateFilter);
-    {{ tab.tab }}_typeEl.addEventListener("change", updateFilter);
-    {{ tab.tab }}_valueEl.addEventListener("keyup", updateFilter);
+    {{ containerTab.tab }}_fieldEl.addEventListener("change", updateFilter);
+    {{ containerTab.tab }}_typeEl.addEventListener("change", updateFilter);
+    {{ containerTab.tab }}_valueEl.addEventListener("keyup", updateFilter);
 
-    document.getElementById("{{ tab.tab }}_filter_clear").addEventListener("click", function(){
-        {{ tab.tab }}_fieldEl.value = "";
-        {{ tab.tab }}_typeEl.value = "=";
-        {{ tab.tab }}_valueEl.value = "";
-        {{ tab.tab }}.clearFilter();
+    document.getElementById("{{ containerTab.tab }}_filter_clear").addEventListener("click", function(){
+        {{ containerTab.tab }}_fieldEl.value = "";
+        {{ containerTab.tab }}_typeEl.value = "=";
+        {{ containerTab.tab }}_valueEl.value = "";
+        {{ containerTab.tab }}.clearFilter();
     });
 </script>

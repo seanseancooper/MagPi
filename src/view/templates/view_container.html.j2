@@ -95,15 +95,16 @@
 {% endfor %}
     </div>
 
-{%- for tab in container.module_tabs: -%}
-    {% if tab.timeout > 0 %}
-    <div id="{{ tab.tab }}_container_filters" style="{{ 'display:none;' if loop.index0 > 0 }}" class="container_filters">
-    {% include 'filter.html.js.j2' %}
+{%- for containerTab in container.module_tabs: -%}
+    {% set module = containerTab.module %}
+    {% if containerTab.timeout > 0 %}
+    <div id="{{ containerTab.tab }}_container_filters" style="{{ 'display:none;' if loop.index0 > 0 }}" class="container_filters">
+{% include 'filter.html.js.j2' %}
     </div>
     {% endif %}
 {%- endfor -%}
 
-    {% include 'buttons.js.j2' %}
+{% include 'buttons.js.j2' %}
 
     <script>
         function reload(){
@@ -129,11 +130,12 @@
         };
     </script>
 
-{%- for tab in container.module_tabs: -%}
-    {% if tab.timeout > 0 %}
+{%- for containerTab in container.module_tabs: -%}
+    {% set module = containerTab.module %}
+    {% if containerTab.timeout > 0 %}
         {% include 'autoloader.js.j2' %}
-    <div id="{{ tab.tab }}_bar_container" style="padding-top:2px;padding-bottom:3px;{{ 'display:none;' if loop.index0 > 0 }}" class="bar_container">
-        <div id="{{ tab.tab }}_meter" style=""><script>{{ tab.tab }}_make_deadline_bar();</script></div>
+    <div id="{{ containerTab.tab }}_bar_container" style="padding-top:2px;padding-bottom:3px;{{ 'display:none;' if loop.index0 > 0 }}" class="bar_container">
+        <div id="{{ containerTab.tab }}_meter" style=""><script>{{ containerTab.tab }}_make_deadline_bar();</script></div>
     </div>
     {% endif %}
 {%- endfor -%}
