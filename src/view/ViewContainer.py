@@ -116,7 +116,16 @@ class ViewContainer(threading.Thread):
                     module_retriever = get_retriever(config['MODULE_RETRIEVER'])
                     self.module_retriever = module_retriever()
 
-        else: # use REST
+                    # this returns whatever types are put into data
+                    # for wifi, this is a string
+                    # for others, this should be 'lists of maps'.
+                    self.module_data[mod] = data
+
+                    # this wouldn't fully process the data until the processing of the
+                    # scanner is extracted:
+                    # self.module_data[mod] = self.module_retriever.get_parsed_cells(data)
+
+        else: # use REST: this data is already processed into lists of maps...
 
             try:
                 data = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
