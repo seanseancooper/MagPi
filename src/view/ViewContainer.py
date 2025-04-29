@@ -107,9 +107,6 @@ class ViewContainer(threading.Thread):
             data = self.aggregator.aggregate()
 
             if data:
-                # use MODULE_RETRIEVER to transform data
-                # using the get_parse_cells() method of the retriever.
-                # This transforms data in an expected way; to a list of maps
                 config = self.module_configs[mod]
 
                 if config.get('MODULE_RETRIEVER', None) is not None:
