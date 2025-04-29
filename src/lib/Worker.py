@@ -1,5 +1,8 @@
+import json
 import uuid
 from datetime import datetime, timedelta
+
+from collections import defaultdict
 
 from src.arx.lib.ARXSignalPoint import ARXSignalPoint
 from src.sdr.lib.SDRSignalPoint import SDRSignalPoint
@@ -46,9 +49,33 @@ class Worker:
         self.DEBUG = False
         self.TYPE = None
 
-    def get(self):
-        check = vars(self)
-        return check
+    def get_sgnl(self, sgnl=None):
+        """ update sgnl (a map) with the following fields in the
+        current worker (an object created from a 'cell') note
+        this doesn't RETURN a signal type, it populates one """
+
+        if sgnl is None:
+            sgnl = defaultdict()
+
+        sgnl['id'] = self.id
+        sgnl['type'] = self.TYPE
+        sgnl['ident'] = self.ident
+
+        # this is formatting for luxon.js, but is not clean.
+        sgnl['created'] = format_time(self.created, "%Y-%m-%d %H:%M:%S")
+        sgnl['updated'] = format_time(self.updated, "%Y-%m-%d %H:%M:%S")
+        sgnl['elapsed'] = format_delta(self.elapsed, self.config.get('TIME_FORMAT', "%H:%M:%S"))
+
+        sgnl['is_mute'] = self.is_mute
+        sgnl['tracked'] = self.tracked
+
+        sgnl['signal_cache'] = [x.get() for x in self.scanner.signal_cache[self.ident]]
+        sgnl['text_attributes'] = self.get_text_attributes()
+
+        # put text attributes into worker representation
+        sgnl.update(self.get_text_attributes())
+
+        return sgnl
 
     def get_type(self):
         return self.TYPE
