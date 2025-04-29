@@ -26,39 +26,36 @@
             columns:[
                 {field:"tracked", width:102, formatter: function(cell, formatterParams) {
                     var data = cell.getRow().getData();
-                    const trgt = 'wifi';
+                    const trgt = '{{ module }}';
 
-                    var _color = colorUniqId(data.BSSID, ':');
+                    var _color = colorUniqId(data.{{ scanner.CELL_IDENT_FIELD  }}, ':');
                     var p_signal_color = 'rgba(' + _color + ', 1.0)';
                     var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
 
                     if (data.is_mute == false) {
-                        return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
+                        return "<button id='remove_button_"+ data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='width:24px;' class='trk_btn rem_button' value='"+data.{{ scanner.CELL_IDENT_FIELD  }}+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
                     } else {
-                        return "<button id='remove_button_"+ data.BSSID + "' style='width:24px;' class='trk_btn rem_button' value='"+data.BSSID+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.BSSID + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.BSSID + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
+                        return "<button id='remove_button_"+ data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='width:24px;' class='trk_btn rem_button' value='"+data.{{ scanner.CELL_IDENT_FIELD  }}+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
                     }
                 }},
-                {title:"SSID", field:"SSID", formatter:ssidFormatter, formatterParams:{
+                {title:"{{ scanner.CELL_IDENT_FIELD  }}", field:"{{ scanner.CELL_IDENT_FIELD  }}", width:120},
+
+                // pull 'common name [scanner.CELL_NAME_FIELD] field out of text_attributes.
+                {title:"SSID", field:"text_attributes.SSID", width:140, formatter:ssidFormatter, formatterParams:{
                     field:"Quality",
                     colors:["red", "orange", "yellow", "#008800", "#00FF00"]
-                    },
-                    width:140,
-                },
-                {title:"BSSID", field:"BSSID", width:120},
-                /*
-                {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, formatterParams:{
-                    type:"line"}
-                },
-                */
+                }},
+
+                {title:"db", field:"{{ scanner.CELL_STRENGTH_FIELD  }}", width:30},
                 {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, sorter:"array", sorterParams:{
                     type:"length"
                 }},
 
-                {title:"db", field:"Signal", width:30},         // perhaps the last known strength?? an average??
-                {title:"Ch.", field:"Channel", width:50},
-                {title:"Freq.", field:"Frequency", width:70},
-                {title:"Sec.", field:"Encryption", formatter: "tickCross", width:30},
-                {title:"Vendor", field:"Vendor", width:100},
+                // should 'iterate' text_attributes instead.
+                {title:"Ch.", field:"text_attributes.Channel", width:50},
+                {title:"Freq.", field:"text_attributes.Frequency", width:70},
+                {title:"Sec.", field:"text_attributes.Encryption", formatter: "tickCross", width:30},
+                {title:"Vendor", field:"text_attributes.Vendor", width:100},
                 {title:"Elapsed", field:"elapsed", width:75},
                 {title:"Created", field:"created", width:75, formatter:"datetime", formatterParams:{
                     outputFormat:"HH:mm:ss",
