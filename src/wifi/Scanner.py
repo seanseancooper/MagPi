@@ -205,7 +205,7 @@ class Scanner(threading.Thread):
 
             if self.polling_count > 0 and self.polling_count % 10 == 0:
                 speech_logger.info(
-                        f'{len(self.parsed_cells)} scanned, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
+                        f'{len(self.parsed_cells)} signals, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
 
         else:
             print(f"looking for data [{self.polling_count}] {format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))}...")
