@@ -7,7 +7,7 @@ from src.config import readConfig
 from src.lib.instrumentation import timer
 from src.net.lib.net_utils import get_retriever
 from src.lib.utils import get_location, format_time, format_delta
-from src.lib.utils import write_to_scanlist, print_signals
+from src.lib.utils import write_to_scanlist
 from src.lib.Worker import Worker
 
 import logging
@@ -27,8 +27,8 @@ class Scanner(threading.Thread):
         self.searchmap = {}
         self.stats =  {}
 
-        self.parsed_cells = []                  # parsed cells from retirever...
-        self.parsed_signals = []                # product of scanning
+        self.parsed_cells = [defaultdict()]                  # parsed cells from retirever...
+        self.parsed_signals = [defaultdict()]                # product of scanning
 
         ''' all items represented as a list of dictionaries.  '''
 
@@ -102,7 +102,6 @@ class Scanner(threading.Thread):
         finally:
             return worker
 
-    @timer
     def load_ghosts(self):
         """ find 'ghost' signals (handle tracked signals not detected
         during parsing), and make a signalpoint for them """
@@ -157,51 +156,33 @@ class Scanner(threading.Thread):
         self.parsed_signals.clear()
         for sgnl in self.parsed_cells:
             wrkr = self.get_worker(sgnl[f'{self.CELL_IDENT_FIELD}'])
-            self.wrkr_to_sgnl(wrkr, sgnl)
-            self.parsed_signals.append(sgnl)
+            self.parsed_signals.append(wrkr.get_sgnl())
 
-    def wrkr_to_sgnl(self, worker, sgnl):
-        """ update sgnl (a map) with the following fields in the
-        current worker (an object created from a 'cell')note
-        this doesn't RETURN a signal type, it populates one """
-        sgnl['worker_id'] = worker.id
-        sgnl['type'] = worker.TYPE
-
-        # this is formatting for luxon.js, but is not clean.
-        sgnl['created'] = format_time(worker.created, "%Y-%m-%d %H:%M:%S")
-        sgnl['updated'] = format_time(worker.updated, "%Y-%m-%d %H:%M:%S")
-        sgnl['elapsed'] = format_delta(worker.elapsed, self.config.get('TIME_FORMAT', "%H:%M:%S"))
-
-        sgnl['is_mute'] = worker.is_mute
-        sgnl['tracked'] = worker.tracked
-
-        sgnl['text_attributes'] = worker.get_text_attributes()
-        sgnl['signal_cache'] = [x.get() for x in self.signal_cache[worker.ident]]
+    def update(self, ident, _signals):
+        wrkr = self.get_worker(ident)       # should be current fields of worker
+        _signals.append(wrkr.get_sgnl())
 
     def get_parsed_signals(self):
         return self.parsed_signals or []
 
-    @timer
-    def update(self, ident):
-        wrkr = self.get_worker(ident).get()
-        sgnl = self.get_worker(ident)
-        self.wrkr_to_sgnl(wrkr, sgnl)
-
     def get_tracked_signals(self):
         """ update, transform and return a list of 'rehydrated' tracked signals """
-        return [self.update(ident) for ident in self.tracked_signals]
+        _signals = []
+        [self.update(ident, _signals) for ident in self.tracked_signals]
+        return _signals
 
     def get_ghost_signals(self):
         """ update, transform and return a list of 'rehydrated' ghost signals """
-        return [self.update(ident) for ident in self.ghost_signals]
+        _signals = []
+        [self.update(ident, _signals) for ident in self.ghost_signals]
+        return _signals
 
-    @timer
     def process_signals(self):
         """ workers match their cells, add attributes, and make signalpoint """
         [worker.run() for worker in self.workers]
 
     def stop(self):
-        write_to_scanlist(self.config, self.get_tracked_signals())
+        write_to_scanlist(self.config, self.get_tracked_signals()) # make into signals....
         [worker.stop() for worker in self.workers]
         self.tracked_signals.clear()
         logger_root.info(f"[{__name__}]: Scanner stopped. {self.polling_count} iterations.")
@@ -210,7 +191,7 @@ class Scanner(threading.Thread):
 
         if self.polling_count % 10 == 0:
             speech_logger.info(
-                f'{len(self.scanned)} scanned, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
+                f'{len(self.parsed_cells)} scanned, {len(self.tracked_signals)} tracked, {len(self.ghost_signals)} ghosts.')
 
         if not flag:
             print(f"Scanner [{self.polling_count}] "
@@ -250,6 +231,7 @@ class Scanner(threading.Thread):
 
             if len(self.scanned) > 0:
                 self.parsed_cells = self.module_retriever.get_parsed_cells(self.scanned)
+
                 self.process_cells()
                 self.process_signals()
 
