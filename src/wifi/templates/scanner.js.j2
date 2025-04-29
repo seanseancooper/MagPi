@@ -128,7 +128,7 @@
 
                 {field:"tracked", width:102, formatter: function(cell, formatterParams) {
                     const data = cell.getRow().getData();
-                    const trgt = 'wifi'; // todo: depends on signal type!!!
+                    const trgt = '{{ module }}'; // todo: depends on signal type!!!
 
                     var _color = colorUniqId(data.{{ scanner.CELL_IDENT_FIELD  }}, ':');
                     var p_signal_color = 'rgba(' + _color + ', 1.0)';
@@ -146,7 +146,6 @@
                 }},
 
                 {title:"{{ scanner.CELL_IDENT_FIELD  }}", field:"{{ scanner.CELL_IDENT_FIELD  }}", width:120},
-                {title:"db", field:"{{ scanner.CELL_STRENGTH_FIELD  }}", width:30},
 
                 // pull 'common name [scanner.CELL_NAME_FIELD] field out of text_attributes.
                 {title:"SSID", field:"text_attributes.SSID", width:140, formatter:ssidFormatter, formatterParams:{
