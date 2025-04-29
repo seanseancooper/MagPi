@@ -111,9 +111,10 @@ class ViewContainer(threading.Thread):
                 # using the get_parse_cells() method of the retriever.
                 # This transforms data in an expected way; to a list of maps
                 config = self.module_configs[mod]
-                parser = get_retriever(config['MODULE_RETRIEVER'])
-                self.module_retriever = parser()
-                self.module_data[mod] = self.module_retriever.get_parsed_cells(data)
+
+                if config.get('MODULE_RETRIEVER', None) is not None:
+                    module_retriever = get_retriever(config['MODULE_RETRIEVER'])
+                    self.module_retriever = module_retriever()
 
         else: # use REST
 
