@@ -139,6 +139,7 @@
 {%- endfor -%}
 
 {%- for containerTab in container.module_tabs: -%}
+    {% set module = containerTab.module %}
     {% set module_fragment = containerTab.get_module_fragment() %}
     {% include module_fragment ignore missing %}
 {%- endfor -%}
