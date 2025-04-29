@@ -6,7 +6,7 @@ from src.sdr.lib.SDRSignalPoint import SDRSignalPoint
 from src.trx.lib.TRXSignalPoint import TRXSignalPoint
 from src.wifi.lib.WifiSignalPoint import WifiSignalPoint
 
-from src.lib.utils import format_time, format_delta, get_me
+from src.lib.utils import format_time, format_delta
 from src.wifi.lib.wifi_utils import append_to_outfile, json_logger
 
 import logging
@@ -47,7 +47,8 @@ class Worker:
         self.TYPE = None
 
     def get(self):
-        return get_me(self)
+        check = vars(self)
+        return check
 
     def get_type(self):
         return self.TYPE
