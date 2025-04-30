@@ -9,8 +9,10 @@ from src.cam.lib import FrameObjektEncoder
 logging.basicConfig(level=logging.INFO)
 
 class ImageZMQAsyncConsumer:
-    def __init__(self):
-        self.hub = ImageHub(open_port="tcp://*:5555")
+    """ used to transport FrameObjekts and metadata """
+
+    def __init__(self, host, port):
+        self.hub = ImageHub(open_port=f'tcp://{host}:{port}')
 
     def receive_frame(self):
         while True:
