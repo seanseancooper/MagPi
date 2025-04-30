@@ -109,8 +109,8 @@ class FrameObjektTracker(object):
         o.wall = wall        # put the wall on a temp filesystem and use the tag for the name
 
         get_location(self)
-        o._lat = self.lat
-        o._lon = self.lon
+        o.lat = self.lat
+        o.lon = self.lon
 
         o.frame_rate = frame_stats['capture_frame_rate']
         o.frame_period = frame_stats['capture_frame_period']
