@@ -12,8 +12,8 @@ logger_root = logging.getLogger('root')
 speech_logger = logging.getLogger('speech_logger')
 
 
-class Tracker():
-    """Tracker class """
+class Tracker(object):
+    """ Generic Tracker class """
 
     def __init__(self):
         super().__init__()
