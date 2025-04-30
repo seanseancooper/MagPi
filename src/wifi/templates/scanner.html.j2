@@ -23,7 +23,7 @@
 
         function add(uniqId, trgt){
             var xhttp = new XMLHttpRequest();
-            xhttp.open("POST", "{{ url_for('wifi_bp.add', bssid=uniqId) }}", true);
+            xhttp.open("POST", "{{ url_for('.index') }}add/" + uniqId, true);
             setsHeaders(xhttp);
             xhttp.setRequestHeader('TARGET', trgt);
             xhttp.send();
@@ -48,7 +48,7 @@
         function mute(uniqId, trgt){
             var xhttp = new XMLHttpRequest();
 
-            xhttp.open("POST", "{{ url_for('wifi_bp.mute', bssid=uniqId) }}", true);
+            xhttp.open("POST", "{{ url_for('.index') }}mute/" + uniqId, true);
             setsHeaders(xhttp);
             xhttp.setRequestHeader('TARGET', trgt);
             xhttp.send();
@@ -79,7 +79,7 @@
 
         function remove(uniqId, trgt){
             var xhttp = new XMLHttpRequest();
-            xhttp.open("POST", "{{ url_for('wifi_bp.remove', bssid=uniqId) }}", true);
+            xhttp.open("POST", "{{ url_for('.index') }}remove/" + uniqId, true);
             setsHeaders(xhttp);
             xhttp.setRequestHeader('TARGET', trgt);
             xhttp.send();
