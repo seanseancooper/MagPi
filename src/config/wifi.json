@@ -31,6 +31,9 @@
 			"CELL_IDENT_FIELD": "BSSID"
 		},
 		{
+			"CELL_NAME_FIELD": "SSID"
+		},
+		{
 			"CELL_STRENGTH_FIELD": "Signal"
 		},
 		{

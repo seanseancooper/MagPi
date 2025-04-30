@@ -9,6 +9,7 @@
     {% set config =  container.module_configs[module] %}
 
     <option value="{{ config.CELL_IDENT_FIELD }}">{{ config.CELL_IDENT_FIELD }}</option>
+    <option value="{{ config.CELL_NAME_FIELD }}">{{ config.CELL_NAME_FIELD }}</option>
     <option value="{{ config.CELL_STRENGTH_FIELD }}">{{ config.CELL_STRENGTH_FIELD }}</option>
 
     <!-- these should iterate over *module* text_attributes -->

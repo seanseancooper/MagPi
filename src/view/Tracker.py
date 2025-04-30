@@ -45,6 +45,7 @@ class Tracker():
         self.DEBUG = False
 
         self.CELL_IDENT_FIELD = None
+        self.CELL_NAME_FIELD = None
         self.CELL_STRENGTH_FIELD = None
 
     def configure(self, config_file):
@@ -55,6 +56,7 @@ class Tracker():
         self.signal_cache_max = self.config.get('SIGNAL_CACHE_MAX', self.signal_cache_max)
 
         self.CELL_IDENT_FIELD = self.config['CELL_IDENT_FIELD']
+        self.CELL_NAME_FIELD = self.config['CELL_NAME_FIELD']
         self.CELL_STRENGTH_FIELD = self.config['CELL_STRENGTH_FIELD']
 
         self.sort_order = self.config['CELL_SORT_FIELD']

@@ -41,6 +41,7 @@ class Scanner(threading.Thread):
 
         self.DEBUG = False
         self.CELL_IDENT_FIELD = None
+        self.CELL_NAME_FIELD = None
         self.CELL_STRENGTH_FIELD = None
 
     def configure(self, config_file):
@@ -48,6 +49,7 @@ class Scanner(threading.Thread):
         self.DEBUG = self.config['DEBUG']
         self.tz = timezone(timedelta(hours=self.config['INDEX_TIMEDELTA']), name=self.config['INDEX_TZ'])
         self.CELL_IDENT_FIELD = self.config['CELL_IDENT_FIELD']
+        self.CELL_NAME_FIELD = self.config['CELL_NAME_FIELD']
         self.CELL_STRENGTH_FIELD = self.config['CELL_STRENGTH_FIELD']
 
         MQ_AVAILABLE = True
