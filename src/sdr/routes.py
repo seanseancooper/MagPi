@@ -36,7 +36,7 @@ def sdr_scan_ident(ident):
 
 @sdr_bp.route('/scanner', methods=['GET'], subdomain='sdr')
 def sdr_scanner():
-    """ WIFI scanner UI pre viewcontainer. deprecated. """
+    """ scanner UI pre viewcontainer. deprecated. """
     return render_template("scanner.html.j2", scanner=scanner)
 
 
