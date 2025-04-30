@@ -8,6 +8,6 @@ from . import lib
 from . import map
 from . import net
 from . import sdr
-from . import trx
+
 from . import view
 from . import wifi
