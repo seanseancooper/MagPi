@@ -54,8 +54,8 @@ class FrameObjekt:
         """Convert FrameObjekt to a serializable dictionary w/o processing"""
         return {
             'f_id'       : f.f_id,
-            'frame_shape': f.frame_shape,
-            'created'    : f.created.isoformat(),
+            'frame_shape': f.wall.shape,
+            'created'    : str(f.created.isoformat()),
             'tag'        : f.tag,
             'prev_tag'   : f.prev_tag,
 
