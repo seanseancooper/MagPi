@@ -52,9 +52,13 @@ class Scanner(threading.Thread):
         self.CELL_NAME_FIELD = self.config['CELL_NAME_FIELD']
         self.CELL_STRENGTH_FIELD = self.config['CELL_STRENGTH_FIELD']
 
-        MQ_AVAILABLE = True
+        import requests
+        username = "guest"
+        password = "guest"
 
-        if MQ_AVAILABLE:
+        req = requests.get('http://localhost:15672/api/health/checks/alarms', auth=(username, password))
+
+        if req.status_code == 200:  #MQ_AVAILABLE
             golden_retriever = get_retriever(self.config['MQ_MODULE_RETRIEVER'])
             self.module_retriever = golden_retriever()
         else:
