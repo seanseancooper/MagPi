@@ -20,8 +20,10 @@ class ImageZMQAsyncConsumer:
             metadata = json.loads(metadata_json)
             frameobjekt = FrameObjekt.dict_to_frameobjekt(metadata)
 
-            frame_objekt = FrameObjekt.create(metadata['f_id'])
-            frame_objekt.wall = frame
+            # # Start encoder thread to process frame
+            # from src.cam.lib.FrameObjektEncoder import FrameObjektEncoder
+            # encoder = FrameObjektEncoder(frame_objekt)
+            # encoder.start()
 
             # Start encoder thread to process frame
             encoder = FrameObjektEncoder(frame_objekt)
