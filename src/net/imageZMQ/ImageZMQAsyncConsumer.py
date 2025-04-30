@@ -25,9 +25,7 @@ class ImageZMQAsyncConsumer:
             # encoder = FrameObjektEncoder(frame_objekt)
             # encoder.start()
 
-            # Start encoder thread to process frame
-            encoder = FrameObjektEncoder(frame_objekt)
-            encoder.start()
+            metadata['time_diff'] = (datetime.now() - frameobjekt.created).total_seconds()
 
             created_time = datetime.fromisoformat(metadata['created'])
             time_diff = (datetime.now() - created_time).total_seconds()
