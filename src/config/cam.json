@@ -20,7 +20,6 @@
 		{
 			"IMAGEZMQ_PORT" : "5555"
 		},
-		
 		{
 			"RABBITMQ_HOST" : "localhost"
 		},
