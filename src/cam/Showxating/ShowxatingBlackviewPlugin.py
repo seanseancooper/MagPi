@@ -119,9 +119,11 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self.threshold = self.plugin_config.get('threshold', 10.0)
 
         try:
-            self.rmq = RabbitMQProducer('frame_queue')
-            # self.rmq = mq.create()
-        except AMQPConnectionError:
+            host = '127.0.0.1'
+            port = '5555'
+            self.imq = ImageZMQAsyncProducer(host, port)
+        except Exception as e:
+            print(f'ZMQ not loaded {e}')
             pass
 
     def get(self):
@@ -256,8 +258,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                     self.tracked = self.tracker.track_objects(self.frame_id, frame, cnt, wall, rect, stats)
 
                     if self.tracked:
-                        if self.rmq:
-                            [self.rmq.publish_message(o) for o in self.tracked.values() if o.f_id > 0]
+                        if self.imq:
+                            [self.imq.send_frame(o) for o in self.tracked.values() if o.f_id > 0]
 
                         self.print_tracked(self, frame)
                         self.print_symbology(self, frame, rect)
