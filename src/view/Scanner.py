@@ -59,11 +59,11 @@ class Scanner(threading.Thread):
         # req = requests.get('http://localhost:15672/api/health/checks/alarms', auth=(username, password))
         #
         # if req.status_code == 200:  #MQ_AVAILABLE? what about the queue??!!
-        #     golden_retriever = get_retriever(self.config['MQ_MODULE_RETRIEVER'])
+        #     MQ_AVAILABLE = True
         # else:
-        #     golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
+        #     MQ_AVAILABLE = False
 
-        MQ_AVAILABLE = False
+        MQ_AVAILABLE = True
 
         if MQ_AVAILABLE:
             golden_retriever = get_retriever(self.config['MQ_MODULE_RETRIEVER'])
@@ -101,10 +101,6 @@ class Scanner(threading.Thread):
         logger_root.info(f"[{__name__}]: Scanner stopped. {self.polling_count} iterations.")
 
     def report(self, flag=None):
-
-        # if self.polling_count % 10 == 0:
-        #     speech_logger.info(
-        #         f'{len(self.module_tracker.parsed_cells)} scanned, {len(self.module_tracker.tracked_signals)} tracked, {len(self.module_tracker.ghost_signals)} ghosts.')
 
         if not flag:
             print(f"Scanner [{self.polling_count}] "
