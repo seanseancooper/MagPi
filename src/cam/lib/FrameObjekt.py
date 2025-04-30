@@ -24,6 +24,7 @@ class FrameObjekt:
         self.frame_rate = 0.0
         self.frame_period = 0.0
         self.frame_shape = None                                         # [ndarray: container] shape of current frame
+        self.time_diff = None                                           # amount of time required to pass frame via ImageZMQ
 
         self.max_width = None
         self.max_height = None
