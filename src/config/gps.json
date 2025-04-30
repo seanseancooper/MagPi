@@ -7,7 +7,7 @@
 			"TEST_FILE": "./lib/TEST_FILE.txt"
 		},
 		{
-			"SERVER_NAME": "localhost:5004"
+			"SERVER_NAME": "localhost:5005"
 		},
 		{
 			"GPS_MODULE_RETRIEVER": "src.gps.GPSRetriever.JSGPSRetriever"
@@ -24,8 +24,6 @@
 		{
 			"GPS_CONNECT_TIMEOUT": 10
 		},
-
-
 		{
 			"NODE_START_COMMAND": ["npm", "start"]
 		},
@@ -35,8 +33,6 @@
 		{
 			"NODE_BUILD": false
 		},
-
-
 		{
 			"DATE_FORMAT": "%Y-%m-%d"
 		},
