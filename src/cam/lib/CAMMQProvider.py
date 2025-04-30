@@ -33,8 +33,8 @@ class CAMMQProvider(threading.Thread):
     def send_frameobjekt(self, frameobjekt):
         try:
             message = frameobjekt.get()
-            metadata = message['text_attributes'] # iterate 
-            data = arxs.get_audio_data()
+            metadata = message['text_attributes'] # iterate
+            data = frameobjekt.wall # wall ia numpy array
             frame = metadata, data
 
             print(f'sending zmq')
