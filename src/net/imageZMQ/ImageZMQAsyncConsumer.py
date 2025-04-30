@@ -18,6 +18,7 @@ class ImageZMQAsyncConsumer:
         while True:
             metadata_json, frame = self.hub.recv_image()
             metadata = json.loads(metadata_json)
+            frameobjekt = FrameObjekt.dict_to_frameobjekt(metadata)
 
             frame_objekt = FrameObjekt.create(metadata['f_id'])
             frame_objekt.wall = frame
