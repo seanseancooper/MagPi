@@ -16,10 +16,10 @@
 			"SCANNER": "Tabulator"
 		},
 		{
-			"MODULE_RETRIEVER": "src.sdr.retrievers.?"
+			"MODULE_RETRIEVER": "src.sdr.receivers.SDRReceiver"
 		},
 		{
-			"MQ_MODULE_RETRIEVER": "src.sdr.retrievers.?"
+			"MQ_MODULE_RETRIEVER": "src.sdr.receivers.SDRReceiver"
 		},
 		{
 			"TEMPLATE_AJAX_URL": "http://sdr.localhost:?/scan"
