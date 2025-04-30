@@ -32,7 +32,9 @@ class MAPController(threading.Thread):
 
             def stop():
                 routes.mapAgg.stop()
-                routes.node.stop()
+                routes.gpsRet.stop()
+                routes.map_node.stop()
+                routes.gps_node.stop()
 
             atexit.register(stop)
 
@@ -40,14 +42,32 @@ class MAPController(threading.Thread):
                 RESTServer(self.create_app()).run()
 
             import os
-            os.chdir('src/')
+
+            if routes.map_node.config['NODE_BUILD'] is True:
+                os.chdir('src/')
+                routes.map_node.build()
+                os.chdir('../')
+
             if routes.mapAgg.config['NODE_BUILD'] is True:
-                routes.node.build()
+                os.chdir('js_gps_ret/')
+                routes.gps_node.build()
+                os.chdir('../')
 
             # start elastic instance/cluster docker container.
 
-            # start the map node services on :5173
-            routes.node.run()
+            # run the map node services on :5173
+            os.chdir('src/')
+            routes.map_node.run()
+            os.chdir('../')
+
+            # run the js_gps retrieval services on :5014
+            os.chdir('js_gps_ret/')
+            routes.gps_node.run()
+            os.chdir('../')
+
+            # start() the gps retrieval service on :5005
+            routes.gpsRet.run()
+            # run() the map aggregator service on :5005
             routes.mapAgg.run()
 
         except KeyboardInterrupt:

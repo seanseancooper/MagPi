@@ -1,4 +1,4 @@
-"Because I'm bored and this is hard."
+"Never give up on code."
 
 arx (ARXSignalPoint, ZeroMQ):
     [DONE] ARXSignalPoint RabbitMq & ZeroMQ to ARXAudioEncoder
@@ -50,7 +50,7 @@ ebs:
 
 gps (MapAggregator, REST, class?):
     GPS hardware build.
-    GPS as MAP submodule.
+    [DONE] GPS as MAP submodule.
 
 lib:
     code review: there is junk here and things to add.
@@ -94,7 +94,7 @@ mcp:
     MCP AUTOMATIC DOCKER STARTUP: Ensure the container is available and is a setting in the container startup.
 
 net:
-    Directory structure for ElasticSearch assets.
+    [DONE] Directory structure for ElasticSearch assets.
     ElasticSearch data mapping. Dense vectors, nested data, types
         what about EAVs, object/NoSQL?
     Dashboard URL in template: too where/what?
@@ -109,6 +109,7 @@ PSX:
 
 sdr (SDRSignalPoint, RabbitMQ(vector, text), ZeroMQ(Signal)):
     Receiver modifications: assignable frequency, bandwidth
+    [IP] Scanner modifications: integration
 
     IDEA: A thing that looks at a block of spectrum, finds the peaks in the EM
         and tunes an SDRWorker() receiver to the peak frequency, recording it as a Signal().
@@ -149,8 +150,6 @@ WX:
 
 wifi (WifiSignalPoint, RabbitMQ):
     [IP] Factor Scanner to read ALL SignalPoint types.
-    [DONE] Assign the Scanner instance a SignalPoint type to configure it.
-    [DONE] Continue Worker class
 
     Category        | Feature Examples
     Power           | RSSI (signal strength), SNR (signal-to-noise ratio)
