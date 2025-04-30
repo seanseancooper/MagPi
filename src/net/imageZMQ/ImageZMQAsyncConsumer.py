@@ -27,10 +27,7 @@ class ImageZMQAsyncConsumer:
 
             metadata['time_diff'] = (datetime.now() - frameobjekt.created).total_seconds()
 
-            created_time = datetime.fromisoformat(metadata['created'])
-            time_diff = (datetime.now() - created_time).total_seconds()
-
-            logging.info(f"Received {metadata['f_id']}, time_diff={time_diff:.6f}s")
+            print(f"Received {metadata}")
             self.hub.send_reply(b"OK")
 
 if __name__ == "__main__":
