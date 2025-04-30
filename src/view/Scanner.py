@@ -10,8 +10,6 @@ from src.lib.utils import write_to_scanlist
 
 import logging
 
-from src.view.Tracker import Tracker
-
 logger_root = logging.getLogger('root')
 speech_logger = logging.getLogger('speech_logger')
 
@@ -23,7 +21,7 @@ class Scanner(threading.Thread):
 
         self.config = {}
         self.module_retriever = None
-        self.module_tracker = Tracker()
+        self.module_tracker = None
 
         self.scanned = None
         self.signal_cache = defaultdict(list)   # a mapping of lists of SignalPoint for all signals received.
@@ -54,19 +52,29 @@ class Scanner(threading.Thread):
 
         # this is an intentionally naive check; it fails if rabbit is
         # 'off', exposes passwords and... is not the focus.
-        import requests
-        username = "************"
-        password = "************"
+        # import requests
+        # username = "************"
+        # password = "************"
+        #
+        # req = requests.get('http://localhost:15672/api/health/checks/alarms', auth=(username, password))
+        #
+        # if req.status_code == 200:  #MQ_AVAILABLE? what about the queue??!!
+        #     golden_retriever = get_retriever(self.config['MQ_MODULE_RETRIEVER'])
+        # else:
+        #     golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
 
-        req = requests.get('http://localhost:15672/api/health/checks/alarms', auth=(username, password))
+        MQ_AVAILABLE = False
 
-        if req.status_code == 200:  #MQ_AVAILABLE? what about the queue??!!
+        if MQ_AVAILABLE:
             golden_retriever = get_retriever(self.config['MQ_MODULE_RETRIEVER'])
         else:
             golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
 
         self.module_retriever = golden_retriever()
         self.module_retriever.configure(config_file) # use the module config for the retriever
+
+        module_tracker = get_retriever(self.config['MODULE_TRACKER'])
+        self.module_tracker = module_tracker()
         self.module_tracker.configure(config_file)
 
         self.signal_cache_max = self.config.get('SIGNAL_CACHE_MAX', self.signal_cache_max)

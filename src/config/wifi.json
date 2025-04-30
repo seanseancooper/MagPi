@@ -16,6 +16,9 @@
 			"SCANNER": "Tabulator"
 		},
 		{
+			"MODULE_TRACKER": "src.wifi.lib.WifiTracker"
+		},
+		{
 			"MODULE_RETRIEVER": "src.wifi.retrievers.MacOSAirportWifiRetriever"
 		},
 		{
