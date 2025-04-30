@@ -52,7 +52,6 @@ class Scanner(threading.Thread):
         self.CELL_NAME_FIELD = self.config['CELL_NAME_FIELD']
         self.CELL_STRENGTH_FIELD = self.config['CELL_STRENGTH_FIELD']
 
-
         # this is an intentionally naive check; it fails if rabbit is
         # 'off', exposes passwords and... is not the focus.
         import requests
@@ -65,7 +64,6 @@ class Scanner(threading.Thread):
             golden_retriever = get_retriever(self.config['MQ_MODULE_RETRIEVER'])
         else:
             golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
-
 
         self.module_retriever = golden_retriever()
         self.module_retriever.configure(config_file) # use the module config for the retriever
