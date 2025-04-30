@@ -15,7 +15,7 @@
 			"PLUGIN_NAME" : "blackviewPlugin"
 		},
 		{
-			"IMAGEZMQ_HOST" : "127.0.0.1"
+			"IMAGEZMQ_HOST" : "localhost"
 		},
 		{
 			"IMAGEZMQ_PORT" : "5555"
