@@ -2,8 +2,7 @@ import cv2 as cv
 import numpy as np
 import json
 
-from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
-from pika.exceptions import AMQPConnectionError
+from src.net.imageZMQ.ImageZMQAsyncProducer import ImageZMQAsyncProducer
 
 from src.cam.Showxating.plugin import ShowxatingPlugin
 from src.cam.lib.ImageWriter import ImageWriter
