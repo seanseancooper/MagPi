@@ -15,7 +15,7 @@
 			"PLUGIN_NAME" : "blackviewPlugin"
 		},
 		{
-			"IMAGEZMQ_HOST" : "127.0.0.1:5555"
+			"IMAGEZMQ_HOST" : "127.0.0.1"
 		},
 		{
 			"PLUGIN": {
