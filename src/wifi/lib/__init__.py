@@ -4,4 +4,4 @@ from . import iw_parse
 from . import wifi_utils
 from . import WifiSignalPoint
 from . import WifiWorkerParser
-from . import WifiTracker
+from src.wifi.lib.WifiTracker import WifiTracker
