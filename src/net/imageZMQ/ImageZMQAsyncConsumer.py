@@ -31,5 +31,8 @@ class ImageZMQAsyncConsumer:
             self.hub.send_reply(b"OK")
 
 if __name__ == "__main__":
-    consumer = ImageZMQAsyncConsumer()
+
+    host = '127.0.0.1'
+    port = '5555'
+    consumer = ImageZMQAsyncConsumer(host, port)
     consumer.receive_frame()
