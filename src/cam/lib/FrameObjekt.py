@@ -59,8 +59,8 @@ class FrameObjekt:
             'tag'        : f.tag,
             'prev_tag'   : f.prev_tag,
 
-            'rect'       : f.get_rect,
-            'avg_loc'    : f.get_avg_loc.tolist(),
+            'rect'       : f.get_rect(),
+            'avg_loc'    : f.get_avg_loc().tolist(),
             'lat'        : f.get_lat_lon()[0],
             'lon'        : f.get_lat_lon()[1],
         }
