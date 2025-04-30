@@ -33,10 +33,25 @@ class CapsVid(threading.Thread):
 
 
 if __name__ == "__main__":
-    producer = ImageZMQAsyncProducer()
+
+    class CapsVid(threading.Thread):
+
+        def __init__(self):
+            super().__init__()
+
+        def snap(self):
+            capture = cv.VideoCapture(0)
+            while capture.isOpened():
+                _, frame = capture.retrieve()
+                return frame
+
+    host = '127.0.0.1'
+    port = '5555'
+    producer = ImageZMQAsyncProducer(host, port)
+
     capture = CapsVid()
     frame = capture.snap()
     while True:
-        frame_objekt = FrameObjekt.create(f_id="test_frame")
+        frame_objekt = FrameObjekt.create(f_id=0)
         frame_objekt.wall = frame
         producer.send_frame(frame_objekt)
