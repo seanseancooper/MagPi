@@ -20,6 +20,16 @@
 		{
 			"IMAGEZMQ_PORT" : "5555"
 		},
+		
+		{
+			"RABBITMQ_HOST" : "localhost"
+		},
+		{
+			"RABBITMQ_PORT" : "?"
+		},
+		{
+			"RABBITMQ_QUEUE" : "farameobjekt_queue"
+		},
 		{
 			"PLUGIN": {
 				"debug": false,
