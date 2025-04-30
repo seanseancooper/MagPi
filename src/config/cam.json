@@ -18,6 +18,9 @@
 			"IMAGEZMQ_HOST" : "127.0.0.1"
 		},
 		{
+			"IMAGEZMQ_PORT" : "5555"
+		},
+		{
 			"PLUGIN": {
 				"debug": false,
 				"capture_sleep_time": 0.0,
