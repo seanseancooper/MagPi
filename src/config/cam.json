@@ -85,7 +85,7 @@
 			"MULTIBUTTON_ALL": [true, true, "OFF"]
 		},
 		{
-			"GPS_ENDPOINT": "http://gps.localhost:5004/position"
+			"GPS_ENDPOINT": "http://map.localhost:5005/position"
 		},
 		{
 			"DATE_FORMAT": "%Y-%m-%d %H:%M:%S.%f"

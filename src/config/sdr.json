@@ -58,7 +58,7 @@
 			"VIEW_TIMEOUT": 30
 		},
 		{
-			"GPS_ENDPOINT": "http://gps.localhost:5004/position"
+			"GPS_ENDPOINT": "http://map.localhost:5005/position"
 		},
 		{
 			"SIGNAL_CACHE_MAX": 162

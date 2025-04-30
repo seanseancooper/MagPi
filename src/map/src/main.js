@@ -158,8 +158,8 @@ geolocation.setTracking(true);
 function getLocation(){
     var xhttp = new XMLHttpRequest();
     var block = true;
-    xhttp.open("GET", 'http://gps.localhost:5004/position', block);  // #ToDO: find a way to not hardcode URL
-    setHeaders(xhttp, 'gps.localhost:5004');
+    xhttp.open("GET", 'http://map.localhost:5005/position', block);  // #ToDO: find a way to not hardcode URL
+    setHeaders(xhttp, 'map.localhost:5005');
 
     xhttp.onload = function(){
         const resp = xhttp.response;

@@ -85,7 +85,7 @@
 			"SCAN_TIMEOUT": 1.0
 		},
 		{
-			"GPS_ENDPOINT": "http://gps.localhost:5004/position"
+			"GPS_ENDPOINT": "http://map.localhost:5005/position"
 		},
 		{
 			"TEMPLATE_AJAX_URL": "http://wifi.localhost:5006/scan"
