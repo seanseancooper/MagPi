@@ -1,1 +1,1 @@
-from BlackViewGPSClient import BlackViewGPSClient
+from . import BlackViewGPSClient
