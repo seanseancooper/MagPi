@@ -58,7 +58,7 @@ class Scanner(threading.Thread):
 
         req = requests.get('http://localhost:15672/api/health/checks/alarms', auth=(username, password))
 
-        if req.status_code == 200:  #MQ_AVAILABLE
+        if req.status_code == 200:  #MQ_AVAILABLE? what about the queue??!!
             golden_retriever = get_retriever(self.config['MQ_MODULE_RETRIEVER'])
             self.module_retriever = golden_retriever()
         else:
