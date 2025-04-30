@@ -34,9 +34,15 @@ class SDRReceiver:
     def set_gain(self, gain_value):
         self.sdr.gain = gain_value
 
-
     # needs to be renamed: self.module_retriever.get_parsed_cells()
+    def get_parsed_cells(self):
+        return [self.signalpoint]
+
     # needs to be renamed: self.module_retriever.scan()
+    def scan(self):
+        print(f'scannin....{self.signalpoint}')
+        # return self.get_data()
+
     def get_data(self, fft_size=512, num_rows=500):
         x = self.read_samples(2048)  # get rid of initial empty samples
         x = self.read_samples(fft_size * num_rows)  # get all the samples we need for the spectrogram
