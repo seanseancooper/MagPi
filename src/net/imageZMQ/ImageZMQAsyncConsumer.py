@@ -3,9 +3,6 @@ import logging
 from imagezmq import ImageHub
 from src.cam.lib.FrameObjekt import FrameObjekt
 from datetime import datetime
-
-from src.cam.lib import FrameObjektEncoder
-
 logging.basicConfig(level=logging.INFO)
 
 class ImageZMQAsyncConsumer:
