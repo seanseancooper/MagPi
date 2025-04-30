@@ -67,13 +67,16 @@ def aggregated_by_module_context(mod, context):
 
 
 
+@map_bp.route("/gps", methods=['GET'], subdomain="map")
+def gps():
+    return redirect("/position", code=302)
+
 @map_bp.route("/position", methods=['GET'], subdomain="map")
 def gps_position():
     """  return entire result """
     return gpsRet.gps_result()
 
-
-@map_bp.route('/stats', methods=['GET'], subdomain='gps')
+@map_bp.route('/gps/stats', methods=['GET'], subdomain='map')
 def gps_stats():
     from src.lib.utils import format_time, format_delta
 
@@ -126,7 +129,7 @@ def gps_climb():
     return gpsRet.gps_climb()
 
 
-@map_bp.route("/config", methods=['GET'], subdomain="map")
+@map_bp.route("/gps/config", methods=['GET'], subdomain="map")
 def gps_config():
     return gpsRet.config
 
