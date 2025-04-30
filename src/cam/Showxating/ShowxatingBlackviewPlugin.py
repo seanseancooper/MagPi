@@ -49,7 +49,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self._result_T = None  # medipipe result
 
         self.tracker = FrameObjektTracker()
-        self.rmq = None
+        self.imq = None
 
         self.tracked = {}
 
