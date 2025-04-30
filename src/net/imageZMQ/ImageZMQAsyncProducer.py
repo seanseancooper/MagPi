@@ -10,7 +10,8 @@ logging.basicConfig(level=logging.INFO)
 class ImageZMQAsyncProducer:
     """ used to transport FrameObjekts and metadata """
 
-class CapsVid(threading.Thread):
+    def __init__(self, host, port):
+        self.sender = ImageSender(connect_to=f'tcp://{host}:{port}')
 
     def __init__(self):
         super().__init__()
