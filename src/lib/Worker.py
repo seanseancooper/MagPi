@@ -1,16 +1,9 @@
-import json
 import uuid
 from datetime import datetime, timedelta
 
 from collections import defaultdict
 
-from src.arx.lib.ARXSignalPoint import ARXSignalPoint
-from src.sdr.lib.SDRSignalPoint import SDRSignalPoint
-from src.trx.lib.TRXSignalPoint import TRXSignalPoint
-from src.wifi.lib.WifiSignalPoint import WifiSignalPoint
-
 from src.lib.utils import format_time, format_delta
-from src.wifi.lib.wifi_utils import append_to_outfile, json_logger
 
 import logging
 
@@ -118,11 +111,13 @@ class Worker:
 
         # ARXSignalPoint    (self, worker_id, lon, lat, sgnl)
         if self.TYPE == 'arx':
+            from src.arx.lib.ARXSignalPoint import ARXSignalPoint
             sgnlPt = ARXSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=sgnl)
 
         # WifiSignalPoint   (self, worker_id, lon, lat, sgnl, bssid=None)
         if self.TYPE == 'wifi':
             kwargs["bssid"] =  self.get_text_attribute(self.scanner.CELL_IDENT_FIELD)
+            from src.wifi.lib.WifiSignalPoint import WifiSignalPoint
             sgnlPt = WifiSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=sgnl, **kwargs)
 
         # SDRSignalPoint    (self, worker_id, lon, lat, sgnl, array_data=None, audio_data=None, sr=48000)
@@ -130,12 +125,14 @@ class Worker:
             kwargs["array_data"] =  self.get_text_attribute('array_data'),
             kwargs["audio_data"] =  self.get_text_attribute('audio_data'),
             kwargs["sr"] =  self.get_text_attribute('sr'),
+            from src.sdr.lib.SDRSignalPoint import SDRSignalPoint
             sgnlPt = SDRSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=sgnl, **kwargs)
 
         # TRXSignalPoint    (self, worker_id, lon, lat, sgnl, text_data={}, audio_data=None, signal_type="object", sr=48000)
         if self.TYPE == 'trx':
             kwargs["text_data"] =  self.get_text_attribute('text_data'),
             kwargs["signal_type"] =  self.get_text_attribute('signal_type'),
+            from src.trx.lib.TRXSignalPoint import TRXSignalPoint
             sgnlPt = TRXSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=sgnl, **kwargs)
 
         self.scanner.signal_cache[ident].append(sgnlPt)
@@ -248,7 +245,7 @@ class Worker:
 
                 json_logger.info({wrkr['id']: formatted})
 
-            append_to_outfile(self.get())
+            append_to_outfile(vars(self))
 
     def run(self):
         """ match an ID and populate data """
