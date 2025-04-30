@@ -12,7 +12,7 @@
     <script src="{{ url_for('wifi_bp.static', filename='js/peity-vanilla.js') }}"></script>
 
     <script>
-        const VIEW_TIMEOUT = {{ scanner.config.get('VIEW_TIMEOUT') * 1000 }}
+        const VIEW_TIMEOUT = {{ scanner.config.get('VIEW_TIMEOUT') * 1000 }};
 
         function setsHeaders(xhttp) {
             xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
@@ -23,7 +23,7 @@
 
         function add(uniqId, trgt){
             var xhttp = new XMLHttpRequest();
-            xhttp.open("POST", "{{ url_for('.index')}}add/" + uniqId, true);
+            xhttp.open("POST", "{{ url_for('wifi_bp.add', bssid=uniqId) }}", true);
             setsHeaders(xhttp);
             xhttp.setRequestHeader('TARGET', trgt);
             xhttp.send();
@@ -48,7 +48,7 @@
         function mute(uniqId, trgt){
             var xhttp = new XMLHttpRequest();
 
-            xhttp.open("POST", "{{ url_for('.index')}}mute/" + uniqId, true);
+            xhttp.open("POST", "{{ url_for('wifi_bp.mute', bssid=uniqId) }}", true);
             setsHeaders(xhttp);
             xhttp.setRequestHeader('TARGET', trgt);
             xhttp.send();
@@ -79,7 +79,7 @@
 
         function remove(uniqId, trgt){
             var xhttp = new XMLHttpRequest();
-            xhttp.open("POST", "{{ url_for('.index')}}remove/" + uniqId, true);
+            xhttp.open("POST", "{{ url_for('wifi_bp.remove', bssid=uniqId) }}", true);
             setsHeaders(xhttp);
             xhttp.setRequestHeader('TARGET', trgt);
             xhttp.send();
@@ -119,7 +119,7 @@
 
             var xhttp = new XMLHttpRequest();
 
-            xhttp.open('POST', "{{ url_for('.index')}}write", true);
+            xhttp.open('POST', "{{ url_for('wifi_bp.wifi_write') }}", true);
             setsHeaders(xhttp);
             xhttp.setRequestHeader('TARGET', trgt);
             xhttp.send();
@@ -156,7 +156,7 @@
 
         function replace_data(){
             // use foreach...
-            wifi.replaceData();
+            scanner.replaceData();
             tracked.replaceData();
             ghosts.replaceData();
         }
@@ -215,9 +215,6 @@
     </script>
 </head>
 <body>
-    <div id="bar_container" style="padding-top:2px;padding-bottom:3px;" class="bar_container">
-        <div id="meter" style=""><script>make_deadline_bar();</script></div>
-    </div>
 
     <div id="tabs" style="height:30px">
         <button id="scanner_tab_scanner" class="tab_button" onclick="loadTab(event, 'scanner')">SCANNED</button>
@@ -233,18 +230,16 @@
             <option value="created">Found</option>
             <option value="updated">Last</option>
 
-
             <option value="{{ scanner.CELL_IDENT_FIELD }}">{{ scanner.CELL_IDENT_FIELD }}</option>
             <option value="{{ scanner.CELL_STRENGTH_FIELD }}">{{ scanner.CELL_STRENGTH_FIELD }}</option>
 
-
+            <!-- these should iterate over *module* text_attributes -->
             <option value="SSID">SSID</option>
             <option value="Channel">Channel</option>
             <option value="Frequency">Frequency</option>
             <option value="Quality">Quality</option>
             <option value="Encryption">Encryption</option>
             <option value="Vendor">Vendor</option>
-
 
         </select>
         <select id="filter-type">
@@ -273,14 +268,63 @@
         <button id="load_button" class="reload_button" value="" onClick="reload();">
             <span id="load_button_text">RELOAD</span>
         </button>
-        <span id="scanner_stats" style="" class="scanner_stats">
-            {{ scanner.workers|length }} SIGNALS | {{ scanner.elapsed }} ELAPSED
-        </span>
 
     </div>
+    <div id="bar_container" style="padding-top:2px;padding-bottom:3px;" class="bar_container">
+        <div id="meter" style=""><script>make_deadline_bar();</script></div>
+    </div>
+{% set tab = 'scanner' %}
+{% set module = 'wifi' %}
+{% include 'scanner.js.j2' %}
+{% include 'tracked.js.j2' %}
+{% include 'ghosts.js.j2' %}
+<script>
+    scanner_elements = [];
 
-    {% set tab = 'scanner' %}
-    {% include 'scanner.js.j2' %}
+    scanner_elements.push(document.getElementById('scanner'));
+    scanner_elements.push(document.getElementById('tracked'));
+    scanner_elements.push(document.getElementById('ghosts'));
 
+    scanner_elements.push(document.getElementById("all_button"));
+    scanner_elements.push(document.getElementById("none_button"));
+    scanner_elements.push(document.getElementById("write_button"));
+    scanner_elements.push(document.getElementById("reload_button"));
+
+    scanner_elements.forEach(function(element) {
+
+        element.addEventListener('click', function(event) {
+
+            if (event.target.classList.contains('trk_btn')) {
+                if (event.target.classList.contains('add_button')) {
+                    add(event.target.value, event.target.attributes['data-target'].value);
+                };
+                if (event.target.classList.contains('rem_button')) {
+                    remove(event.target.value, event.target.attributes['data-target'].value)
+                };
+            };
+
+            if (event.target.classList.contains('mute_btn')) {
+                mute(event.target.value, event.target.attributes['data-target'].value);
+            };
+
+            if (event.target.classList.contains('all_button')) {
+                alert('select all');
+            };
+
+            if (event.target.classList.contains('none_button')) {
+                alert('select none');
+            };
+
+            if (event.target.classList.contains('write_button')) {
+                write_tracked(this, event.target.attributes['data-target'].value); // 'wifi' the http header
+            };
+
+            if (event.target.classList.contains('reload_button')) {
+                reload();
+            };
+
+        });
+    });
+</script>
 </body>
 </html>
