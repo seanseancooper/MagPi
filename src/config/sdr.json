@@ -16,19 +16,28 @@
 			"SCANNER": "Tabulator"
 		},
 		{
-			"TEMPLATE_AJAX_URL": "http://sdr.localhost:5006/scan"
+			"MODULE_RETRIEVER": "src.sdr.retrievers.?"
+		},
+		{
+			"MQ_MODULE_RETRIEVER": "src.sdr.retrievers.?"
+		},
+		{
+			"TEMPLATE_AJAX_URL": "http://sdr.localhost:?/scan"
 		},
 		{
 			"SIGNALPOINT_TYPE": "src.sdr.lib.SDRSignalPoint"
 		},
 		{
-			"CELL_IDENT_FIELD": "?"
+			"CELL_IDENT_FIELD": "CELL_IDENT_FIELD"
 		},
 		{
-			"CELL_STRENGTH_FIELD": "?"
+			"CELL_NAME_FIELD": "CELL_NAME_FIELD"
 		},
 		{
-			"CELL_SORT_FIELD": "?"
+			"CELL_STRENGTH_FIELD": "CELL_STRENGTH_FIELD"
+		},
+		{
+			"CELL_SORT_FIELD": "CELL_SORT_FIELD"
 		},
 		{
 			"PRINT_CELLS": false
