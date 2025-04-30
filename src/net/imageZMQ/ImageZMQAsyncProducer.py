@@ -13,15 +13,10 @@ class ImageZMQAsyncProducer:
     def __init__(self, host, port):
         self.sender = ImageSender(connect_to=f'tcp://{host}:{port}')
 
-    def __init__(self):
-        super().__init__()
-
-    def snap(self):
-        capture = cv.VideoCapture(0)
-        while capture.isOpened():
-            _, frame = capture.retrieve()
-            return frame
-
+    def send_frame(self, frameobjekt: FrameObjekt):
+        metadata = frameobjekt.frameobjekt_to_dict(frameobjekt)
+        logging.debug(f"Sending: {metadata['f_id']}")
+        self.sender.send_image(json.dumps(metadata), frameobjekt.wall)
 
 if __name__ == "__main__":
 
