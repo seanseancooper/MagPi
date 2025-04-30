@@ -12,20 +12,22 @@
             ajaxConfig:"GET",                                               // ajax config options go here
             headerVisible:true,                                             // show header
             dataLoaderLoading:dataLoaderLoading,                            // change "Loading" message to "&nbsp;"
-            index:"BSSID",                                                  // use BSSID as index
+            index:"{{ scanner.CELL_IDENT_FIELD  }}",                                                  // use BSSID as index
+            rowFormatter:function(row){
+                row.getElement().style = "height:24px";
+            },
 
             dependencies:{
                 datetime: luxon,
             },
 
-            rowFormatter:function(row){
-                row.getElement().style = "height:24px";
-                if(row.getData().tracked == true){
-                    row.getElement().style.backgroundColor = "#777777";
-                }
+            persistence:{
+                sort: true,                                         //persist column sorting
+                filter: true,                                       //persist filters
             },
 
             columns:[
+
                 {field:"tracked", width:102, formatter: function(cell, formatterParams) {
                     var data = cell.getRow().getData();
                     const trgt = '{{ module }}';
@@ -58,6 +60,7 @@
                 {title:"Freq.", field:"text_attributes.Frequency", width:70},
                 {title:"Sec.", field:"text_attributes.Encryption", formatter: "tickCross", width:30},
                 {title:"Vendor", field:"text_attributes.Vendor", width:100},
+
                 {title:"Elapsed", field:"elapsed", width:75},
                 {title:"Created", field:"created", width:75, formatter:"datetime", formatterParams:{
                     outputFormat:"HH:mm:ss",

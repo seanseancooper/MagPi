@@ -90,10 +90,14 @@
         var scanner = new Tabulator("#scanner", {
             ajaxURL:"{{ scanner.config.TEMPLATE_AJAX_URL  }}",      // request URI
             ajaxConfig:"GET",                                       // ajax config options go here
+            headerVisible:true,
             dataLoaderLoading:dataLoaderLoading,                    // change "Loading" message to "&nbsp;"
             index:"{{ scanner.CELL_IDENT_FIELD  }}",                // use CELL_IDENT_FIELD as index [dynamic]
             rowFormatter:function(row){
                 row.getElement().style = "height:24px";
+                if(row.getData().tracked == true){
+                    // row.getElement().style.backgroundColor = "#777777";
+                }
             },
 
             dependencies:{
@@ -104,9 +108,6 @@
                 sort: true,                                         //persist column sorting
                 filter: true,                                       //persist filters
             },
-
-            placeholder:"..." ,
-
 
             /*
             const data = cell.getRow().getData()['text_attributes'];
