@@ -1,5 +1,6 @@
 import pika
 import logging
+from src.config import readConfig
 
 logger_root = logging.getLogger('root')
 net_logger = logging.getLogger('net_logger')
@@ -52,7 +53,10 @@ class RabbitMQAsyncConsumer:
     def run(self):
         """Start the asynchronous consumer."""
         net_logger.info("Starting consumer...")
-        parameters = pika.ConnectionParameters(host='localhost')
+
+        config = {}
+        readConfig('net.json', config)
+        parameters = pika.ConnectionParameters(host=config['RMQ_HOST'])
 
         try:
             self.connection = pika.SelectConnection(

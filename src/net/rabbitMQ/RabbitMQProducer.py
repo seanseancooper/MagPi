@@ -1,5 +1,6 @@
 import pika
 import logging
+from src.config import readConfig
 
 logger_root = logging.getLogger('root')
 net_logger = logging.getLogger('net_logger')
@@ -8,7 +9,11 @@ speech_logger = logging.getLogger('speech_logger')
 class RabbitMQProducer:
 
     def __init__(self, queue):
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+
+        self.config = {}
+        readConfig('net.json', self.config)
+
+        self.connection = pika.BlockingConnection(pika.ConnectionParameters(self.config['RMQ_HOST']))
         self.channel = self.connection.channel()
         self.queue = queue
         self.channel.queue_declare(queue=self.queue, durable=True)

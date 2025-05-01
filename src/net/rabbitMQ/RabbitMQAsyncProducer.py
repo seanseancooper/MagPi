@@ -1,5 +1,6 @@
 import pika
 import logging
+from src.config import readConfig
 
 logger_root = logging.getLogger('root')
 net_logger = logging.getLogger('net_logger')
@@ -58,7 +59,10 @@ class RabbitMQAsyncProducer:
             """Start the asynchronous producer."""
             net_logger.info("Starting producer...")
 
-            parameters = pika.ConnectionParameters(host='localhost')
+            config = {}
+            readConfig('net.json', config)
+            parameters = pika.ConnectionParameters(host=config['RMQ_HOST'])
+
             self.connection = pika.SelectConnection(
                 parameters=parameters,
                 on_open_callback=self.on_connection_open,
