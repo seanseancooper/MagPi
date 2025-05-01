@@ -3,6 +3,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 
+from src.net.lib.net_utils import check_rmq_available
 from src.config import readConfig
 from src.net.lib.net_utils import get_retriever
 from src.lib.utils import get_location, format_time, format_delta
@@ -50,28 +51,15 @@ class Scanner(threading.Thread):
         self.CELL_NAME_FIELD = self.config['CELL_NAME_FIELD']
         self.CELL_STRENGTH_FIELD = self.config['CELL_STRENGTH_FIELD']
 
-        # this is an intentionally naive check; it fails if rabbit is
-        # 'off', exposes passwords and... is not the focus.
-        # import requests
-        # username = "************"
-        # password = "************"
-        #
-        # req = requests.get('http://localhost:15672/api/health/checks/alarms', auth=(username, password))
-        #
-        # if req.status_code == 200:  #MQ_AVAILABLE? what about the queue??!!
-        #     MQ_AVAILABLE = True
-        # else:
-        #     MQ_AVAILABLE = False
+        _, RMQ_OK = check_rmq_available(self.config['MODULE'].lower())
 
-        MQ_AVAILABLE = True
-
-        if MQ_AVAILABLE:
+        if RMQ_OK:
             golden_retriever = get_retriever(self.config['MQ_MODULE_RETRIEVER'])
         else:
             golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
 
         self.module_retriever = golden_retriever()
-        self.module_retriever.configure(config_file) # use the module config for the retriever
+        self.module_retriever.configure(config_file)
 
         module_tracker = get_retriever(self.config['MODULE_TRACKER'])
         self.module_tracker = module_tracker()
