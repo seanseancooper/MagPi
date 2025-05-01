@@ -15,7 +15,11 @@ class CAMMQProvider(threading.Thread):
         super().__init__()
         self.config = {}
         self.rmq = None
-        self.imq = ImageZMQAsyncProducer()  # FRAMEOBJEKT_FRAME_QUEUE
+        # self.rmq_host = None
+        # self.rmq_port = None
+        self.imq = None
+        self.imq_host = None
+        self.imq_port = None
         self.DEBUG = False
 
     def configure(self, config_file):
