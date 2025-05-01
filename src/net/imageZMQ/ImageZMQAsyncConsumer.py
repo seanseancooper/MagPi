@@ -9,7 +9,7 @@ class ImageZMQAsyncConsumer:
     """ used to transport FrameObjekts and metadata """
 
     def __init__(self, host, port):
-        self.hub = ImageHub(open_port=f'tcp://{host}:{port}')
+        self.hub = ImageHub(open_port=f'tcp://*:{port}')
 
     def receive_frame(self):
         while True:
