@@ -26,8 +26,8 @@ class CAMMQProvider(threading.Thread):
         if check_rmq_available(self.config['MODULE']):
             self.rmq = RabbitMQProducer(self.config['FRAMEOBJEKT_QUEUE'])
 
-        self.imq_host = self.config.get('ZMQ_HOST')
-        self.imq_port = self.config.get('ZMQ_HOST')
+        self.imq_host = self.config.get('IMQ_HOST')
+        self.imq_port = self.config.get('IMQ_HOST')
         self.imq = ImageZMQAsyncProducer(self.imq_host, self.imq_port)
 
     def send_frame(self, frame):
