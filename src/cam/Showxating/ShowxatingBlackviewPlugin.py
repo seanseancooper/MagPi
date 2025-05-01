@@ -2,14 +2,17 @@ import cv2 as cv
 import numpy as np
 import json
 
-from src.net.imageZMQ.ImageZMQAsyncProducer import ImageZMQAsyncProducer
+# from src.net.imageZMQ.ImageZMQAsyncProducer import ImageZMQAsyncProducer
 
+from src.cam.lib.CAMMQProvider import CAMMQProvider
 from src.cam.Showxating.plugin import ShowxatingPlugin
 from src.cam.lib.ImageWriter import ImageWriter
 from src.cam.lib.FrameObjektTracker import FrameObjektTracker
 from src.cam.lib.utils import draw_contours, wall_images, sortedContours
 from src.ebs.lib.TokenBucket import TokenBucket
 from src.lib.utils import format_time, format_delta
+from src.net.lib.net_utils import check_imq_available
+
 
 import logging
 
@@ -49,7 +52,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self._result_T = None  # medipipe result
 
         self.tracker = FrameObjektTracker()
-        self.imq = None
+        self.mq_provider = None
 
         self.tracked = {}
 
@@ -119,9 +122,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self.threshold = self.plugin_config.get('threshold', 10.0)
 
         if check_imq_available(self.plugin_config['MODULE']):
-            provider = CAMMQProvider()
-            provider.configure('cam.json')
-            self.imq = provider.imq
+            self.mq_provider = CAMMQProvider()
+            self.mq_provider.configure('cam.json')
 
 
     def get(self):
@@ -256,8 +258,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                     self.tracked = self.tracker.track_objects(self.frame_id, frame, cnt, wall, rect, stats)
 
                     if self.tracked:
-                        if self.imq:
-                            [self.imq.send_frame(o) for o in self.tracked.values() if o.f_id > 0]
+                        if self.mq_provider:
+                            [self.mq_provider.send_frameobjekt(o) for o in self.tracked.values() if o.f_id > 0]
 
                         self.print_tracked(self, frame)
                         self.print_symbology(self, frame, rect)

@@ -2,6 +2,7 @@ import threading
 
 from src.config import readConfig
 from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
+from src.net.lib.net_utils import check_rmq_available
 from src.net.imageZMQ.ImageZMQAsyncProducer import ImageZMQAsyncProducer
 
 import logging
@@ -24,14 +25,13 @@ class CAMMQProvider(threading.Thread):
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
-        self.rmq = RabbitMQProducer(self.config['FRAMEOBJEKT_MESSAGE_QUEUE'])
         self.DEBUG = self.config.get('DEBUG')
 
         if check_rmq_available(self.config['MODULE']):
             self.rmq = RabbitMQProducer(self.config['FRAMEOBJEKT_QUEUE'])
 
         self.imq_host = self.config.get('IMQ_HOST')
-        self.imq_port = self.config.get('IMQ_HOST')
+        self.imq_port = self.config.get('IMQ_PORT')
         self.imq = ImageZMQAsyncProducer(self.imq_host, self.imq_port)
 
     def send_frame(self, frame):
@@ -43,8 +43,8 @@ class CAMMQProvider(threading.Thread):
     def send_frameobjekt(self, frameobjekt):
         try:
             message = frameobjekt.get()
-            metadata = message['text_attributes'] # iterate
-            data = frameobjekt.wall # wall ia numpy array
+            metadata = message['text_attributes']   # iterate over fields or use text_attributes
+            data = frameobjekt.wall                 # wall is numpy array
             frame = metadata, data
 
             print(f'sending zmq')
