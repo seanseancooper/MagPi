@@ -83,10 +83,10 @@ def check_imq_available(module):
     config = {}
     readConfig('net.json', config)
 
-    imq_username = config['imq_USERNAME']
-    imq_password = config['imq_PASSWORD']
-    imq_host = config['imq_HOST']
-    imq_port = config['imq_PORT']
+    imq_username = config['IMQ_USERNAME']
+    imq_password = config['IMQ_PASSWORD']
+    imq_host = config['IMQ_HOST']
+    imq_port = config['IMQ_PORT']
 
     IMQ_AVAILABLE = True
 
