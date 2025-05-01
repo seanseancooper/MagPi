@@ -76,7 +76,7 @@ def check_zmq_available(module):
         ZMQ_AVAILABLE = False
         print(f'Error: NET::ZMQ is not available: {e}')
 
-    return module, ZMQ_AVAILABLE
+    return ZMQ_AVAILABLE
 
 def check_imq_available(module):
 
