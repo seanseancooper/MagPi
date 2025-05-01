@@ -1,6 +1,9 @@
 {
 	"WIFI": [
 		{
+			"MODULE": "WIFI"
+		},
+		{
 			"DEBUG": false
 		},
 		{
