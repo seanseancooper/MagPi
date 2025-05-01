@@ -32,6 +32,18 @@
 		},
 
 
+		{
+			"RMQ_USERNAME": "guest"
+		},
+		{
+			"RMQ_PASSWORD": "guest"
+		},
+		{
+			"RMQ_HOST": "localhost"
+		},
+		{
+			"RMQ_PORT": 15672
+		},
 
 		{
 			"MQ_TRX_RETRIEVER": "src.trx.retrievers.TRXUSBRetriever"
