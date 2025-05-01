@@ -54,10 +54,10 @@ def check_zmq_available(module):
     config = {}
     readConfig('net.json', config)
 
-    zmq_username = config['zmq_USERNAME']
-    zmq_password = config['zmq_PASSWORD']
-    zmq_host = config['zmq_HOST']
-    zmq_port = config['zmq_PORT']
+    zmq_username = config['ZMQ_USERNAME']
+    zmq_password = config['ZMQ_PASSWORD']
+    zmq_host = config['ZMQ_HOST']
+    zmq_port = config['ZMQ_PORT']
 
     ZMQ_AVAILABLE = True
 
