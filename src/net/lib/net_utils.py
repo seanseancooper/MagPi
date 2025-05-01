@@ -105,4 +105,4 @@ def check_imq_available(module):
         IMQ_AVAILABLE = False
         print(f'Error: NET::IMQ is not available: {e}')
 
-    return module, IMQ_AVAILABLE
+    return IMQ_AVAILABLE
