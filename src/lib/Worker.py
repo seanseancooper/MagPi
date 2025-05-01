@@ -22,7 +22,7 @@ class Worker:
         self.config = {}
         self.scanner = None
         self.id = None                  # filled if match(), 'marks' SignalPoint type.
-        self.ident = ident              # used in object lookups and coloring UI, self.scanner.CELL_IDENT_FIELD
+        self.ident = ident              # used in object lookups and coloring UI, value of 'self.scanner.CELL_IDENT_FIELD'
 
         self.created = datetime.now()   # when signal was found
         self.updated = datetime.now()   # when signal was last reported
@@ -230,22 +230,36 @@ class Worker:
         return True
 
     def stop(self):
+
         if self.tracked:
 
-            def append_to_outfile(wrkr):
+            def append_to_outfile(sgnl):
                 """Append found cells to a rolling JSON list"""
+
                 formatted = {
-                    f"{self.scanner.CELL_IDENT_FIELD}"  : wrkr[f'{self.scanner.CELL_IDENT_FIELD}'],
-                    "created"                           : wrkr['created'],
-                    "updated"                           : wrkr['updated'],
-                    "elapsed"                           : wrkr['elapsed'],
-                    "is_mute"                           : wrkr['is_mute'],
-                    "tracked"                           : wrkr['tracked'],
+                    "id"                : sgnl['id'],
+                    "type"              : sgnl['type'],
+                    "ident"             : sgnl['ident'],
+                    f"{self.scanner.CELL_IDENT_FIELD}"  : sgnl[self.scanner.CELL_IDENT_FIELD],
+                    f"{self.scanner.CELL_NAME_FIELD}"   : sgnl[self.scanner.CELL_NAME_FIELD],
+
+                    "created"           : sgnl['created'],
+                    "updated"           : sgnl['updated'],
+                    "elapsed"           : sgnl['elapsed'],
+
+                    "is_mute"           : sgnl['is_mute'],
+                    "tracked"           : sgnl['tracked'],
+                    "signal_cache"      : sgnl['signal_cache'],
+                    "text_attributes"   : sgnl['text_attributes'],
+
                 }
 
-                json_logger.info({wrkr['id']: formatted})
+                json_logger.info({sgnl['BSSID']: formatted})
 
-            append_to_outfile(vars(self))
+            append_to_outfile(self.get_sgnl())
+
+
+
 
     def run(self):
         """ match an ID and populate data """
