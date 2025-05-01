@@ -118,13 +118,11 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self.krnl = self.plugin_config.get('krnl', 10.0)
         self.threshold = self.plugin_config.get('threshold', 10.0)
 
-        try:
-            host = '127.0.0.1'
-            port = '5555'
-            self.imq = ImageZMQAsyncProducer(host, port)
-        except Exception as e:
-            print(f'ZMQ not loaded {e}')
-            pass
+        if check_imq_available(self.plugin_config['MODULE']):
+            provider = CAMMQProvider()
+            provider.configure('cam.json')
+            self.imq = provider.imq
+
 
     def get(self):
         return {
