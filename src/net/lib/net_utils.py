@@ -1,4 +1,5 @@
 import logging
+from src.config import readConfig
 
 logger_root = logging.getLogger('root_logger')
 
@@ -15,10 +16,6 @@ def get_retriever(name):
         exit(1)
 
 def check_rmq_available(module):
-    # this is an intentionally naive check; it fails if rabbit is
-    # 'off', exposes passwords and... is not the focus.
-
-    from src.config import readConfig
 
     config = {}
     readConfig('net.json', config)
@@ -42,12 +39,70 @@ def check_rmq_available(module):
                 queue = queues[i]
                 if queue['name'] == module_queue and queue['state'] != "running":
                     RMQ_AVAILABLE = False
-                    print(f'{module_queue} not available: queue not running.')
+                    print(f'NET::RMQ {module_queue} not available: queue not running.')
         else:
             RMQ_AVAILABLE = False
-            print(f'{module_queue} not available: healthcheck failed.')
+            print(f'NET::RMQ {module_queue} not available: healthcheck failed.')
     except Exception as e:
         RMQ_AVAILABLE = False
-        print(f'Error: {module_queue} is not available: {e}')
+        print(f'Error: NET::RMQ {module_queue} is not available: {e}')
 
     return module, RMQ_AVAILABLE
+
+def check_zmq_available(module):
+
+    config = {}
+    readConfig('net.json', config)
+
+    zmq_username = config['zmq_USERNAME']
+    zmq_password = config['zmq_PASSWORD']
+    zmq_host = config['zmq_HOST']
+    zmq_port = config['zmq_PORT']
+
+    ZMQ_AVAILABLE = True
+
+    try:
+        import requests
+        # look for uRL
+        req = requests.get(f'http://{zmq_host}:{zmq_port}', auth=(zmq_username, zmq_password))
+
+        if req.ok:  # check for auth fail too!!
+            # process response
+            pass
+        else:
+            ZMQ_AVAILABLE = False
+            print(f'NET::ZMQ not available: healthcheck failed.')
+    except Exception as e:
+        ZMQ_AVAILABLE = False
+        print(f'Error: NET::ZMQ is not available: {e}')
+
+    return module, ZMQ_AVAILABLE
+
+def check_imq_available(module):
+
+    config = {}
+    readConfig('net.json', config)
+
+    imq_username = config['imq_USERNAME']
+    imq_password = config['imq_PASSWORD']
+    imq_host = config['imq_HOST']
+    imq_port = config['imq_PORT']
+
+    IMQ_AVAILABLE = True
+
+    try:
+        import requests
+        # look for uRL
+        req = requests.get(f'http://{imq_host}:{imq_port}', auth=(imq_username, imq_password))
+
+        if req.ok:  # check for auth fail too!!
+            # process response
+            pass
+        else:
+            IMQ_AVAILABLE = False
+            print(f'NET::IMQ not available: healthcheck failed.')
+    except Exception as e:
+        IMQ_AVAILABLE = False
+        print(f'Error: NET::IMQ is not available: {e}')
+
+    return module, IMQ_AVAILABLE
