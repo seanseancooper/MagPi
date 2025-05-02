@@ -4,6 +4,9 @@
 			"DEBUG": false
 		},
 		{
+			"MODULE": "net"
+		},
+		{
 			"SERVER_NAME": "localhost:5006"
 		},
 		{
