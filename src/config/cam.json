@@ -4,7 +4,7 @@
 			"DEBUG" : false
 		},
 		{
-			"MODULE" : "CAM"
+			"MODULE" : "cam"
 		},
 		{
 			"SERVER_NAME": "localhost:5002"
