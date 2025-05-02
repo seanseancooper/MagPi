@@ -1,24 +1,23 @@
-import threading
-import cv2 as cv
 import json
 import logging
 from imagezmq import ImageSender
 from src.cam.lib.FrameObjekt import FrameObjekt
 
-logging.basicConfig(level=logging.INFO)
+logger_root = logging.getLogger('logger_root')
 
 class ImageZMQAsyncProducer:
-    """ used to transport FrameObjekts and metadata """
+    """ Transport FrameObjekt in the CAM module """
 
     def __init__(self, host, port):
         self.sender = ImageSender(connect_to=f'tcp://{host}:{port}')
 
     def send_frame(self, frameobjekt: FrameObjekt):
-        metadata = frameobjekt.frameobjekt_to_dict(frameobjekt)
-        logging.debug(f"Sending: {metadata['f_id']}")
-        self.sender.send_image(json.dumps(metadata), frameobjekt.wall)
+        metadata, f = frameobjekt
+        logger_root.info(f"Sending: {metadata['f_id']}")
+        self.sender.send_image(json.dumps(metadata), f)
 
 if __name__ == "__main__":
+    import threading
 
     class CapsVid(threading.Thread):
 
@@ -26,14 +25,15 @@ if __name__ == "__main__":
             super().__init__()
 
         def snap(self):
+            import cv2 as cv
             capture = cv.VideoCapture(0)
             while capture.isOpened():
                 _, frame = capture.retrieve()
                 return frame
 
-    host = '127.0.0.1'
-    port = '5555'
-    producer = ImageZMQAsyncProducer(host, port)
+    t_host = '127.0.0.1'
+    t_port = '5555'
+    producer = ImageZMQAsyncProducer(t_host, t_port)
 
     capture = CapsVid()
     frame = capture.snap()
