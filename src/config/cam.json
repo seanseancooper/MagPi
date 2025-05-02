@@ -31,7 +31,7 @@
 			"RABBITMQ_PORT" : "?"
 		},
 		{
-			"RABBITMQ_QUEUE" : "farameobjekt_queue"
+			"RABBITMQ_QUEUE" : "cam_queue"
 		},
 		{
 			"PLUGIN": {
