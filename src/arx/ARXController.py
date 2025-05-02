@@ -1,10 +1,10 @@
-import asyncio
 import threading
 from flask import Flask
 from flask_cors import CORS
 
 import routes
 from src.lib.rest_server import RESTServer
+from src.arx.lib.ARXMQProvider import ARXMQProvider
 
 
 class ARXController(threading.Thread):
@@ -33,78 +33,18 @@ class ARXController(threading.Thread):
         try:
             import atexit
 
+            try:
+                provider = ARXMQProvider()
+                provider.configure('arx.json')
+            except Exception as e:
+                print(f"ARXController 'producer' failed : {e}")
+
             def stop():
-
-                from src.arx.lib.ARXSignalPoint import ARXSignalPoint
-                arxs = ARXSignalPoint(routes.arxRec.get_worker_id(),
-                                      routes.arxRec.lon,
-                                      routes.arxRec.lat,
-                                      routes.arxRec.signal_cache[:-1]) #remove signal_cache
-
-                out = routes.arxRec.stop()  # required.
-
-                def get_audio_data(f):
-                    import soundfile as sf
-                    return sf.read(f)
-
-                data, sr = get_audio_data(out)
-
-                arxs.set_audio_data(data)
-                arxs.set_sampling_rate(sr)
-
-                # arxs.set_text_attribute('source', '')
-                arxs.set_text_attribute('signal_type', arxs.get_signal_type())
-                # arxs.set_text_attribute('name', '')
-                arxs.set_text_attribute('d_type', str(type(data)))
-                arxs.set_text_attribute('fs_path', out)
-                arxs.set_text_attribute('channels', data.shape[1])
-                arxs.set_text_attribute('shape', data.shape)
-                arxs.set_text_attribute('sr', sr)
-
-                # print(f'arxs:\n{arxs.get()}')
-
-                # test consumer
-                # import asyncio
-                # from src.arx.lib.ARXMQConsumer import ARXMQConsumer
-                # consumer = ARXMQConsumer()
-                # consumer.configure('arx.json')
-                # loop = asyncio.get_event_loop()
-                # loop.run_until_complete(consumer.consume())
-                # consumer.consume()
-
-                # try:
-                #     consumer = ARXMQConsumer()
-                #     consumer.configure('arx.json')
-                #     # loop = asyncio.get_event_loop()
-                #     # loop.run_until_complete(consumer.consume())
-                #     consumer.consume()
-                # except Exception as e:
-                #     print(f'controller consumer failed : {e}')
-                #     pass
-
-                from src.arx.lib.ARXMQProvider import ARXMQProvider
+                arxs = routes.arxRec.stop()  # required.
                 try:
-                    provider = ARXMQProvider()
-                    provider.configure('arx.json')
-                    # loop = asyncio.get_event_loop()
-                    # loop.run_until_complete(provider.send_sgnlpt(arxs)) #  RuntimeWarning: coroutine 'ZeroMQAsyncProducer.send_data' was never awaited
                     provider.send_sgnlpt(arxs)
-                    pass
                 except Exception as e:
                     print(f"ARXController 'producer' failed : {e}")
-                    pass
-
-                # test ZMQ consumer
-                # frame = consumer.get_frame()              # potentially array, a Signal() or LIST of type
-                # print(f'metadata: {frame}')
-                # metadata = consumer.get_metadata()        # potentially array, a Signal() or LIST of type
-                # print(f'metadata :{metadata}')
-                # audio_data = consumer.get_data()          # potentially array, a Signal() or LIST of type
-                # print(f'audio_data :{audio_data}')
-
-                # test RabbitMQ consumer
-                # message = consumer.get_message()          # potentially array, a Signal() or LIST of type
-                # print(f'message: {message}')
 
             atexit.register(stop)
 
