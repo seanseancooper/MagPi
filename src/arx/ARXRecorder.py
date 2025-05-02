@@ -8,7 +8,8 @@ import numpy as np
 import sounddevice as sd
 import soundfile as sf
 
-from src.lib.utils import get_location
+from src.arx.lib.ARXSignalPoint import ARXSignalPoint
+from src.lib.utils import get_location, format_time
 from src.config import readConfig
 
 import logging
@@ -46,12 +47,13 @@ class ARXRecorder(threading.Thread):
         self.elapsed = timedelta()  # elapsed time since creation
 
         self._worker_id = 'ARXRecorder'
+        self._signal_type = None                    # Emission type (radar, voice, data)
 
         self._stream = None
         self.thread = None
         self.recording = self.previously_recording = False
-        self.audioq = queue.Queue()  # Unbounded queue for audio frames
-        self.metering_q = queue.Queue(maxsize=1)  # Small queue for metering
+        self.audioq = queue.Queue()                 # Unbounded queue for audio frames
+        self.metering_q = queue.Queue(maxsize=1)    # Small queue for metering
         self.peak = 0.0
         self.meter = {'max': 1.0, 'peak_percentage': 0}
         self.signal_cache = []  # Cache of peaks (unbounded)
@@ -68,6 +70,7 @@ class ARXRecorder(threading.Thread):
 
         readConfig(config_file, self.config)
         get_location(self)
+        self._signal_type = ARXSignalPoint.get_signal_type(self)
 
     def create_stream(self):
         """
@@ -182,7 +185,25 @@ class ARXRecorder(threading.Thread):
         """
         self.recording = False
         self.wait_for_thread()
-        return self._OUTFILE
+
+        arxs = ARXSignalPoint(self.get_worker_id(),
+                              self.lon,
+                              self.lat,
+                              self.signal_cache[:-1])  # remove signal_cache
+
+        data, sr   = sf.read(self._OUTFILE)
+
+        arxs.set_audio_data(data)
+        arxs.set_sampling_rate(sr)
+
+        arxs.set_text_attribute('signal_type', self._signal_type)
+        arxs.set_text_attribute('sent', format_time(datetime.now(), "%Y-%m-%d %H:%M:%S.%f"))
+        arxs.set_text_attribute('fs_path', self._OUTFILE)
+        arxs.set_text_attribute('channels', data.shape[1])
+        arxs.set_text_attribute('sr', sr)
+        arxs.set_text_attribute('frame_shape', str(data.shape))
+
+        return arxs
 
     def run(self):
         """
