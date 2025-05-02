@@ -1,36 +1,50 @@
+from datetime import datetime
+
 import zmq
 import numpy as np
 import json
 import logging
 
 class ZeroMQAsyncConsumer:
-    """ZeroMQ Consumer. """
+    """
+    Consume ARXSignalPoint audio data for offline processing.
+    ZeroMQ Consumer: consume a 'message' composed of:
+            metadata: a mapping of 'text_attributes' sent [utf-8].
+            data: byte array of data sent
+    """
     def __init__(self):
         context = zmq.Context()
-        self.socket = context.socket(zmq.PULL)
+
+        self.socket = context.socket(zmq.PULL)  # this is hardcoded
         self.socket.bind("tcp://127.0.0.1:5555")
-        self._message = None    # entire message
-        self._metadata = None   # 'text_attributes'
-        self._data = None
+
+        self.message = None     # entire message
+        self.metadata = None    # encapsulates 'text_attributes'
+        self.data = None        # data as utf-8 decoded bytes.
 
     async def receive_data(self):
         while True:
-            self._message = self.socket.recv()
-            metadata_part, data_part = self._message.split(b'||', 1)
+            self.message = self.socket.recv()
+            metadata_part, audiodata_part = self.message.split(b'||', 1)
+            self.metadata = json.loads(metadata_part.decode('utf-8'))
 
-            self._metadata = json.loads(metadata_part.decode('utf-8'))
-            self._data = np.frombuffer(data_part, dtype=np.float64).reshape(self._metadata['shape'])  # was np.uint8
+            shape = self.metadata['frame_shape']
 
-            logging.info(f"Received data")
+            self.data = np.frombuffer(audiodata_part, dtype=np.float64).reshape(shape)
+            self.metadata['time_diff'] = (datetime.now() - datetime.strptime(self.metadata['sent'], "%Y-%m-%d %H:%M:%S.%f")).total_seconds()
+
+            # do something with ARX data & text_attributes
+            print(f'Received metadata :{self.metadata}')
+            # print(f'Received audio_data :{self.data}')
 
     def get_message(self):
-        return self._message
+        return self.message
 
     def get_metadata(self):
-        return self._metadata
+        return self.metadata
 
     def get_data(self):
-        return self._data
+        return self.data
 
 if __name__ == "__main__":
     consumer = ZeroMQAsyncConsumer()
