@@ -4,7 +4,6 @@ from src.config import readConfig
 
 logger_root = logging.getLogger('root')
 net_logger = logging.getLogger('net_logger')
-speech_logger = logging.getLogger('speech_logger')
 
 class RabbitMQProducer:
 
@@ -31,4 +30,4 @@ class RabbitMQProducer:
             )
             net_logger.info(f"Sent message successfully")
         except Exception as e:
-            net_logger.error(f"Failed to send message: {e}")
+            print(f"Failed to send message: {e}")
