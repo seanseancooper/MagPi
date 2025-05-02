@@ -2,15 +2,12 @@ import numpy as np
 
 from src.lib.utils import format_time
 from src.lib.SignalPoint import SignalPoint
-from src.arx.lib.ARXEncoder import ARXEncoder
 
 
 class ARXSignalPoint(SignalPoint):
     """
     Class to encapsulate ARXRecorder recordings. This class holds a single audio data
     recording as a Signal() with a default sampling rate of 48Khz.
-
-    The class computes frequency features using ARXEncoder.
     """
     def __init__(self, worker_id, lon, lat, sgnl):
         super().__init__(lon, lat, sgnl)
@@ -69,68 +66,23 @@ class ARXSignalPoint(SignalPoint):
     def get_audio_data(self):
         return self._audio_data
 
+    def get_frequency_features(self):
+        return self._audio_frequency_features
+
     def set_audio_data(self, audio_data):
-
-        def process_features(_data):
-            yield self.compute_audio_frequency_features()
-
-        if isinstance(audio_data, np.ndarray):
-            process_features(audio_data)
-
-        if isinstance(audio_data, list):
-            self._audio_frequency_features = []
-            [self._audio_frequency_features.append(process_features(_data)) for _data in audio_data]
 
         self._audio_data = audio_data
 
-    @staticmethod
-    def arxs_to_dict(arxs):
-        """ calculates on arxs """
-        return  {
-            "worker_id"                 : arxs._worker_id,
-            "lon"                       : arxs._lon,
-            "lat"                       : arxs._lat,
-            "sgnl"                      : arxs._sgnl,
-            "audio_data"                : arxs.get_audio_data(),
-            "sr"                        : arxs.get_sampling_rate(),
-            "signal_type"               : arxs.get_signal_type(),
-            "frequency_features"        : arxs.compute_audio_frequency_features(),
-            "text_attributes"           : arxs.get_text_attributes(),
-        }
-
     def get(self):
-        """ return arxs *as is* """
+        """ return arxs *as is*. It may or may not have computed
+        frequency_features dependent on having audio_data """
         return {
-            "created"           : format_time(self._created, "%Y-%m-%d %H:%M:%S.%f"),
-            "id"                : str(self._id),
-            "worker_id"         : self._worker_id,
-            "signal_type"       : self._signal_type,
-            "lon"               : self._lon,
-            "lat"               : self._lat,
-            "audio_data"        : self._audio_data if self._audio_data is not None else None,
-            "sr"                : self._sr,
-            "frequency_features": self._audio_frequency_features,
-            "text_attributes"   : self._text_attributes
+            "created"           : format_time(self.get_created(), "%Y-%m-%d %H:%M:%S.%f"),
+            "id"                : str(self.get_id()),
+            "worker_id"         : self.get_worker_id(),
+            "signal_type"       : self.get_signal_type(),
+            "lon"               : self.get_lon_lat()[0],
+            "lat"               : self.get_lon_lat()[1],
+            "sr"                : self.get_sampling_rate(),
+            "text_attributes"   : self.get_text_attributes(),
         }
-
-    @staticmethod
-    def dict_to_arxs(d):
-        arxs  = ARXSignalPoint(d['worker_id'],
-                                 d['lon'],
-                                 d['lat'],
-                                 d['sgnl'])
-
-        arxs._worker_id = d.worker_id
-        arxs._signal_type = d['signal_type']
-        arxs._sampling_rate = d['sr']
-        arxs._audio_frequency_features = d['audio_frequency_features']  # a mapping of features, or LIST of mappings
-        arxs._text_attributes = {k: v for k, v in d['_text_attributes'].items()},
-
-        return arxs
-
-    def compute_audio_frequency_features(self):
-        # Compute frequency features for the audio data
-        print(f'compute_audio_frequency_features:{self._audio_data}')
-        enc = ARXEncoder(self._audio_data, self._sr) # <-- now needs to  process multiple
-        self._audio_frequency_features = enc.compute_audio_frequency_features()
-        return self._audio_frequency_features
