@@ -73,7 +73,6 @@
 		{
 			"RMQ_PORT": 15672
 		},
-
 		{
 			"MQ_TRX_RETRIEVER": "src.trx.retrievers.TRXUSBRetriever"
 		},
