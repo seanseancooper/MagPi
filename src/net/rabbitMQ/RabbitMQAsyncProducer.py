@@ -4,7 +4,6 @@ from src.config import readConfig
 
 logger_root = logging.getLogger('root')
 net_logger = logging.getLogger('net_logger')
-speech_logger = logging.getLogger('speech_logger')
 
 
 class RabbitMQAsyncProducer:
