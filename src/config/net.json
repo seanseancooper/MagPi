@@ -16,8 +16,6 @@
 			"STATIC_FOLDER": "static"
 		},
 
-
-
 		{
 			"ELASTIC_HOST": "https://localhost:9200"
 		},
