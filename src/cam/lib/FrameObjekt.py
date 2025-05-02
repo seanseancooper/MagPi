@@ -36,6 +36,8 @@ class FrameObjekt:
         self.mse_pass = None
         self.cosim_pass = None
 
+        self._text_attributes = {}                                      # dict: intermittent text from hardware, see aggregate(k, v)
+
         # features not passed to post processing, used internally.
         self.contours = None                                            # [tuple of ndarray(n, 1, 2): object tracking] ALL contours in this frame
 
@@ -48,6 +50,9 @@ class FrameObjekt:
         # internal boolean values
         self.close = None                                               # [boolean: reporting] is this mean location with the bounds of the contour?
         self.inside = None
+
+    def get_text_attributes(self):
+        return self._text_attributes
 
     @staticmethod
     def frameobjekt_to_dict(f):
@@ -75,8 +80,8 @@ class FrameObjekt:
         frame_obj.tag = d['tag']
         frame_obj.prev_tag = d['prev_tag']
 
-        frame_obj._rect = tuple(d['rect']) if d['rect'] else None
-        frame_obj._avg_loc = np.array(d['avg_loc'])
+        frame_obj._rect = d['_rect'] if d['_rect'] else None
+        frame_obj._avg_loc = np.array(d['_avg_loc'])
         frame_obj.lat = d['lat']
         frame_obj.lon = d['lon']
 
@@ -101,7 +106,14 @@ class FrameObjekt:
         return [self.lat, self.lon]
 
     def get(self):
-        # metadata and post-processed features.
+
+        # add all fields and their values at instantiation as 'text_attributes'.
+        text_attributes = {}
+        def aggregate(k, v):
+            text_attributes[k] = v
+
+        [aggregate(k, str(v)) for k, v in vars(self).items()]
+
         return {
                 'f_id'              : self.f_id,
                 'created'           : str(self.created.isoformat()),
@@ -121,4 +133,5 @@ class FrameObjekt:
                 'wall_pass'         : self.wall_pass,
                 'mse_pass'          : self.mse_pass,
                 'cosim_pass'        : self.cosim_pass,
+                'text_attributes'   : text_attributes
         }
