@@ -49,7 +49,7 @@ def check_rmq_available(module):
 
     return module, RMQ_AVAILABLE
 
-def check_zmq_available(module):
+def check_zmq_available():
 
     config = {}
     readConfig('net.json', config)
@@ -63,22 +63,22 @@ def check_zmq_available(module):
 
     try:
         import requests
-        # look for uRL
-        req = requests.get(f'http://{zmq_host}:{zmq_port}', auth=(zmq_username, zmq_password))
-
-        if req.ok:  # check for auth fail too!!
-            # process response
-            pass
-        else:
-            ZMQ_AVAILABLE = False
-            print(f'NET::ZMQ not available: healthcheck failed.')
+        # # look for uRL
+        # req = requests.get(f'http://{zmq_host}:{zmq_port}', auth=(zmq_username, zmq_password))
+        #
+        # if req.ok:  # check for auth fail too!!
+        #     # process response
+        #     pass
+        # else:
+        #     ZMQ_AVAILABLE = False
+        #     print(f'NET::ZMQ not available: healthcheck failed.')
     except Exception as e:
         ZMQ_AVAILABLE = False
         print(f'Error: NET::ZMQ is not available: {e}')
 
     return ZMQ_AVAILABLE
 
-def check_imq_available(module):
+def check_imq_available():
 
     config = {}
     readConfig('net.json', config)
@@ -92,15 +92,15 @@ def check_imq_available(module):
 
     try:
         import requests
-        # look for uRL
-        req = requests.get(f'http://{imq_host}:{imq_port}', auth=(imq_username, imq_password))
-
-        if req.ok:  # check for auth fail too!!
-            # process response
-            pass
-        else:
-            IMQ_AVAILABLE = False
-            print(f'NET::IMQ not available: healthcheck failed.')
+        # # look for uRL
+        # req = requests.get(f'http://{imq_host}:{imq_port}', auth=(imq_username, imq_password))
+        #
+        # if req.ok:  # check for auth fail too!!
+        #     # process response
+        #     pass
+        # else:
+        #     IMQ_AVAILABLE = False
+        #     print(f'NET::IMQ not available: healthcheck failed.')
     except Exception as e:
         IMQ_AVAILABLE = False
         print(f'Error: NET::IMQ is not available: {e}')
