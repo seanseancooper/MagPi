@@ -33,24 +33,12 @@
 		},
 
 		{
-			"IMQ_USERNAME": "guest"
-		},
-		{
-			"IMQ_PASSWORD": "guest"
-		},
-		{
 			"IMQ_HOST": "localhost"
 		},
 		{
 			"IMQ_PORT": 5555
 		},
 
-		{
-			"ZMQ_USERNAME": "guest"
-		},
-		{
-			"ZMQ_PASSWORD": "guest"
-		},
 		{
 			"ZMQ_HOST": "localhost"
 		},
