@@ -46,11 +46,11 @@ class ARXMQProvider(threading.Thread):
             frame = metadata, data
 
             if self.zmq:
-                print(f'sending zmq')
+                # print(f'sending zmq')
                 self.send_frame(frame)
 
             if self.rmq:
-                print(f'sending rmq')
+                # print(f'sending rmq')
                 self.send_message(json.dumps(text_attributes).encode('utf-8'))
 
         except Exception as e:
