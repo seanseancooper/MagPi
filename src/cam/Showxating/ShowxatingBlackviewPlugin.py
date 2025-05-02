@@ -121,7 +121,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self.krnl = self.plugin_config.get('krnl', 10.0)
         self.threshold = self.plugin_config.get('threshold', 10.0)
 
-        if check_imq_available('cam'):
+        if check_imq_available():
             self.mq_provider = CAMMQProvider()
             self.mq_provider.configure('cam.json')
 
