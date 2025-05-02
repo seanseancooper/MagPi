@@ -34,6 +34,32 @@
 			"ELASTIC_DASHBOARD_URL": "https://localhost:5601/app/dashboards#/view/9356de6a-e03a-4482-ae21-46ffe2de6d79?embed=true&_g=(refreshInterval%3A(pause%3A!t%2Cvalue%3A60000)%2Ctime%3A(from%3Anow-1h%2Cto%3Anow))&show-query-input=true&show-time-filter=true"
 		},
 
+		{
+			"IMQ_USERNAME": "guest"
+		},
+		{
+			"IMQ_PASSWORD": "guest"
+		},
+		{
+			"IMQ_HOST": "localhost"
+		},
+		{
+			"IMQ_PORT": 5555
+		},
+
+		{
+			"ZMQ_USERNAME": "guest"
+		},
+		{
+			"ZMQ_PASSWORD": "guest"
+		},
+		{
+			"ZMQ_HOST": "localhost"
+		},
+		{
+			"ZMQ_PORT": 5555
+		},
+
 
 		{
 			"RMQ_USERNAME": "guest"
