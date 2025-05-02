@@ -16,8 +16,6 @@ class CAMMQProvider(threading.Thread):
         super().__init__()
         self.config = {}
         self.rmq = None
-        # self.rmq_host = None
-        # self.rmq_port = None
         self.imq = None
         self.imq_host = None
         self.imq_port = None
@@ -27,33 +25,33 @@ class CAMMQProvider(threading.Thread):
         readConfig(config_file, self.config)
         self.DEBUG = self.config.get('DEBUG')
 
-        if check_rmq_available(self.config['MODULE']):
-            self.rmq = RabbitMQProducer(self.config['FRAMEOBJEKT_QUEUE'])
+        _, RMQ_AVAIL = check_rmq_available(self.config['MODULE'])
+
+        if RMQ_AVAIL:
+            self.rmq = RabbitMQProducer(self.config['RABBITMQ_QUEUE'])
 
         self.imq_host = self.config.get('IMQ_HOST')
         self.imq_port = self.config.get('IMQ_PORT')
         self.imq = ImageZMQAsyncProducer(self.imq_host, self.imq_port)
 
-    def send_frame(self, frame):
+    def send_frame(self, frame):        # metadata & image arrays via ImageZMQ
         self.imq.send_frame(frame)
 
-    def send_message(self, message):
-        self.rmq.publish_message(message)
+    def send_message(self, message):    # 'fields' via RabbitMQ
+        if self.rmq:
+            self.rmq.publish_message(message)
 
     def send_frameobjekt(self, frameobjekt):
+        """ decompose a FrameObjekt into message, metadata and data """
         try:
-            message = frameobjekt.get()
-            metadata = message['text_attributes']   # iterate over fields or use text_attributes
-            data = frameobjekt.wall                 # wall is numpy array
+            message = frameobjekt.get()             # fields & values
+
+            metadata = message['text_attributes']   # text_attributes
+            data = frameobjekt.wall                 # wall
             frame = metadata, data
 
-            print(f'sending zmq')
-            self.send_frame(frame)
-
-            print(f'sending rmq')
-            self.send_message(message)
+            self.send_frame(frame)      # metadata, arrays
+            self.send_message(message)  # fields & values
 
         except Exception as e:
-            print(f'{e}')
-
-        print(f'arxs sent!')
+            print(f'Exception: {e}')
