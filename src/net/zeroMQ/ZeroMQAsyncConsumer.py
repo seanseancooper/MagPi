@@ -4,6 +4,7 @@ import zmq
 import numpy as np
 import json
 import logging
+net_logger = logging.getLogger('net_logger')
 
 class ZeroMQAsyncConsumer:
     """
@@ -34,7 +35,7 @@ class ZeroMQAsyncConsumer:
             self.metadata['time_diff'] = (datetime.now() - datetime.strptime(self.metadata['sent'], "%Y-%m-%d %H:%M:%S.%f")).total_seconds()
 
             # do something with ARX data & text_attributes
-            print(f'Received metadata :{self.metadata}')
+            net_logger.debug(f'Received metadata :{self.metadata}')
             # print(f'Received audio_data :{self.data}')
 
     def get_message(self):

@@ -2,6 +2,8 @@ import zmq
 import json
 import logging
 
+net_logger = logging.getLogger('net_logger')
+
 class ZeroMQAsyncProducer:
     """
     Publish ARXSignalPoint audio data to offline processing.
@@ -17,7 +19,7 @@ class ZeroMQAsyncProducer:
 
     async def send_data(self, metadata, audiodata):
         message = json.dumps(metadata).encode('utf-8') + b'||' + audiodata.tobytes()
-        logging.info(f"Sending data. {metadata['id']}")
+        net_logger.debug(f"Sending data. {metadata['id']}")
         self.socket.send(message)
 
 if __name__ == "__main__":
