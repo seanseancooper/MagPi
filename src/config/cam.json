@@ -19,7 +19,7 @@
 			"PLUGIN_NAME" : "blackviewPlugin"
 		},
 		{
-			"IMQ_HOST" : "localhost"
+			"IMQ_HOST" : "127.0.0.1"
 		},
 		{
 			"IMQ_PORT" : "5555"
