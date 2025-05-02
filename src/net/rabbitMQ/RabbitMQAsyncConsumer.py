@@ -4,7 +4,6 @@ from src.config import readConfig
 
 logger_root = logging.getLogger('root')
 net_logger = logging.getLogger('net_logger')
-speech_logger = logging.getLogger('speech_logger')
 
 
 class RabbitMQAsyncConsumer:
@@ -43,7 +42,7 @@ class RabbitMQAsyncConsumer:
         try:
             if body:
                 self.data = str(body.decode())
-                # net_logger.debug(self.data)
+                print(self.data)
                 self.channel.basic_ack(delivery_tag=method.delivery_tag)
                 return self.data
 
@@ -71,5 +70,5 @@ class RabbitMQAsyncConsumer:
             self.connection.close()
 
 if __name__ == "__main__":
-    consumer = RabbitMQAsyncConsumer('wifi_queue')
+    consumer = RabbitMQAsyncConsumer('arx_queue')
     consumer.run()
