@@ -201,7 +201,7 @@ class ARXRecorder(threading.Thread):
         arxs.set_text_attribute('fs_path', self._OUTFILE)
         arxs.set_text_attribute('channels', data.shape[1])
         arxs.set_text_attribute('sr', sr)
-        arxs.set_text_attribute('frame_shape', str(data.shape))
+        arxs.set_text_attribute('frame_shape', data.shape)
 
         return arxs
 
