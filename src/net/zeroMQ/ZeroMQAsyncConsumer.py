@@ -29,7 +29,8 @@ class ZeroMQAsyncConsumer:
             metadata_part, audiodata_part = self.message.split(b'||', 1)
             self.metadata = json.loads(metadata_part.decode('utf-8'))
 
-            shape = self.metadata['frame_shape']
+            frame_shape = self.metadata['frame_shape']
+            shape = tuple(int(_) for _ in frame_shape)
 
             self.data = np.frombuffer(audiodata_part, dtype=np.float64).reshape(shape)
             self.metadata['time_diff'] = (datetime.now() - datetime.strptime(self.metadata['sent'], "%Y-%m-%d %H:%M:%S.%f")).total_seconds()
