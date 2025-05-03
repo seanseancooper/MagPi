@@ -18,7 +18,8 @@ class ImageZMQAsyncConsumer:
 
             """ rehydrate FrameObjekt from metadata & data """
             metadata = json.loads(metadata_json)
-            metadata['time_diff'] = (datetime.now() - metadata['created']).total_seconds()
+            metadata['time_diff'] = (datetime.now() - datetime.strptime(metadata['created'],
+                                                                             "%Y-%m-%d %H:%M:%S.%f")).total_seconds()
             frameobjekt = FrameObjekt.dict_to_frameobjekt(metadata)
             frameobjekt.wall = f
 
