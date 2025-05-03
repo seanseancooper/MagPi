@@ -33,7 +33,7 @@ class ImageZMQAsyncConsumer:
 
 if __name__ == "__main__":
 
-    t_host = 'localhost'
+    t_host = '*'
     t_port = '5555'
     consumer = ImageZMQAsyncConsumer(t_host, t_port)
     consumer.receive_frame()
