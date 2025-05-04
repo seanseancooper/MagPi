@@ -53,12 +53,6 @@ def check_zmq_available():
 
     config = {}
     readConfig('net.json', config)
-
-    zmq_username = config['ZMQ_USERNAME']
-    zmq_password = config['ZMQ_PASSWORD']
-    zmq_host = config['ZMQ_HOST']
-    zmq_port = config['ZMQ_PORT']
-
     ZMQ_AVAILABLE = True
 
     try:
@@ -82,11 +76,6 @@ def check_imq_available():
 
     config = {}
     readConfig('net.json', config)
-
-    imq_username = config['IMQ_USERNAME']
-    imq_password = config['IMQ_PASSWORD']
-    imq_host = config['IMQ_HOST']
-    imq_port = config['IMQ_PORT']
 
     IMQ_AVAILABLE = True
 
