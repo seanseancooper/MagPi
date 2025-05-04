@@ -50,6 +50,11 @@ def wifi_ghosts():
     return jsonify(scanner.get_ghost_signals())
 
 
+@wifi_bp.route('/workers', methods=['GET', 'POST'], subdomain='wifi')
+def wifi_workers():
+    return jsonify(scanner.get_workers())
+
+
 @wifi_bp.route('/add/<bssid>', methods=['POST'], subdomain='wifi')
 def add(bssid):
     if scanner.module_tracker.get_worker(bssid).add(bssid):

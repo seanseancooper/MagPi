@@ -70,6 +70,9 @@ class Scanner(threading.Thread):
     def get_parsed_signals(self):
         return self.module_tracker.parsed_signals or []
 
+    def get_workers(self):
+        return [worker.get_sgnl() for worker in self.module_tracker.workers]
+
     def get_tracked_signals(self):
         """ update, transform and return a list of 'rehydrated' tracked signals """
         _signals = []
