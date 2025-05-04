@@ -115,7 +115,7 @@ DOCKER STARTUP ensure the container is available and is a setting in the contain
     SDRSignalPoint(self, worker_id, lon, lat, sgnl, array_data=None, audio_data=None, sr=48000)
     DATA: RabbitMQ for object data, ZeroMQ arrays
 >- ****IDEA:**:** A thing that looks at a block of spectrum, finds the peaks in the EM
-and tunes an SDRWorker() receiver to the peak frequency, recording it as a Signal().
+and tunes an SDRWorker() receiver to the peak frequency, recording it as a SSET SignalFrame().
 >>- Receiver modifications: assignable frequency, bandwidth
 >>- [IP] Scanner modifications: integration
 >>- SignalPoint processing zeroMQ
