@@ -2,7 +2,7 @@ import threading
 from datetime import datetime, timedelta
 from src.config import readConfig
 from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
-from src.net.lib.net_utils import get_retriever
+from src.net.lib.net_utils import get_retriever, check_rmq_available
 
 import logging
 
@@ -31,11 +31,15 @@ class RabbitMQWifiScanner(threading.Thread):
     def configure(self, config_file):
         readConfig('net.json', self.config)
 
-        golden_retriever = get_retriever(self.config['MQ_WIFI_RETRIEVER'])
-        self.mq_wifi_retriever = golden_retriever()
-        self.mq_wifi_retriever.configure(config_file)
+        _ , RMQ_AVAIL = check_rmq_available(self.config['MODULE'])
 
-        self.producer = RabbitMQProducer(self.config['MQ_WIFI_QUEUE'])
+        if RMQ_AVAIL:
+            golden_retriever = get_retriever(self.config['MQ_WIFI_RETRIEVER'])
+            self.mq_wifi_retriever = golden_retriever()
+            self.mq_wifi_retriever.configure(config_file)
+            self.producer = RabbitMQProducer(self.config['MQ_WIFI_QUEUE'])
+        else:
+            exit(0)
 
     def parse_signals(self, readlines):
         self.parsed_signals = self.mq_wifi_retriever.get_parsed_cells(readlines)

@@ -1,6 +1,7 @@
 import threading
 
 from src.config import readConfig
+from src.net.lib.net_utils import check_rmq_available
 from src.net.rabbitMQ.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
 
 import logging
@@ -20,10 +21,13 @@ class MQAggregator(threading.Thread):
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
-
-        self.consumer = RabbitMQAsyncConsumer(self.config['AGGREGATOR_DATA_QUEUE'])
         self.DEBUG = self.config.get('DEBUG')
-        self.start_consumer()
+
+        _ , RMQ_AVAIL = check_rmq_available(self.config['MODULE'])
+
+        if RMQ_AVAIL:
+            self.consumer = RabbitMQAsyncConsumer(self.config['AGGREGATOR_DATA_QUEUE'])
+            self.start_consumer()
 
     def start_consumer(self):
         t = threading.Thread(target=self.consumer.run, daemon=True)
@@ -32,7 +36,10 @@ class MQAggregator(threading.Thread):
     def aggregate(self):
         """ aggregated data from MQ """
         try:
-            return self.consumer.data or []
+            if self.consumer:
+                return self.consumer.data
+            else:
+                return []
         except Exception as e:
             view_logger.error(f"[{__name__}]: Exception: {e}")
 
