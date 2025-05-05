@@ -103,7 +103,7 @@ class Scanner(threading.Thread):
                 f"{self.stats['tracked']} tracked, "
                 f"{self.stats['ghosts']} ghosts")
 
-            if self.polling_count > 0 and self.polling_count % 10 == 0:
+            if self.polling_count > 0 and self.polling_count % 10 == 0 and self.config['SPEECH_ENABLED']:
                 speech_logger.info(
                         f'{len(self.module_tracker.parsed_cells)} signals, {len(self.module_tracker.tracked_signals)} tracked, {len(self.module_tracker.ghost_signals)} ghosts.')
 
@@ -146,7 +146,8 @@ class Scanner(threading.Thread):
 
             else:
                 self.report(True)
-                speech_logger.info(f'looking for data {self.polling_count} ...')
+                if self.config['SPEECH_ENABLED']:
+                    speech_logger.info(f'looking for data {self.polling_count} ...')
                 time.sleep(self.config.get('SCAN_TIMEOUT') * 5)
 
             # throttle MQ requests vs. further delay an I/O bound process that blocks....

@@ -58,7 +58,8 @@ def wifi_workers():
 @wifi_bp.route('/add/<bssid>', methods=['POST'], subdomain='wifi')
 def add(bssid):
     if scanner.module_tracker.get_worker(bssid).add(bssid):
-        speech_logger.info(f'added')
+        if scanner.config['SPEECH_ENABLED']:
+            speech_logger.info(f'added')
         return "OK", 200
     return "", 404
 
@@ -71,7 +72,8 @@ def mute(bssid):
 @wifi_bp.route('/remove/<bssid>', methods=['POST'], subdomain='wifi')
 def remove(bssid):
     if scanner.module_tracker.get_worker(bssid).remove(bssid):
-        speech_logger.info(f'removed')
+        if scanner.config['SPEECH_ENABLED']:
+            speech_logger.info(f'removed')
         return "OK", 200
     return "", 404
 
@@ -96,7 +98,8 @@ def wifi_stop():
 def wifi_write():
     from src.lib.utils import write_to_scanlist
     if write_to_scanlist(scanner.config, scanner.get_tracked_signals()):
-        speech_logger.info(f'logged {len(scanner.get_tracked_signals())} items')
+        if scanner.config['SPEECH_ENABLED']:
+            speech_logger.info(f'logged {len(scanner.get_tracked_signals())} items')
         return "OK", 200
     return "", 500
 

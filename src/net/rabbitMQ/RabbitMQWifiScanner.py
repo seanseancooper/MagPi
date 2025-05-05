@@ -43,7 +43,8 @@ class RabbitMQWifiScanner(threading.Thread):
     def run(self):
 
         self.created = datetime.now()
-        speech_logger.info('MQ WiFi scanner started')
+        if self.config['SPEECH_ENABLED']:
+           speech_logger.info('MQ WiFi scanner started')
 
         while True:
             scanned = self.mq_wifi_retriever.scan()

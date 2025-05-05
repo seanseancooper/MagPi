@@ -197,8 +197,8 @@ class ViewContainer(threading.Thread):
 
         if self.iteration % 100 == 0:
             print(f"ViewContainer [{self.iteration}] {format_delta(self.elapsed, '%H:%M:%S')} elapsed")
-            # yell about offline modules
-            # [speech_logger.info(f'{mod} offline.') for mod in self.dead_modules]
+            if  self.plugin_config['SPEECH_ENABLED']:
+                [speech_logger.info(f'{mod} offline.') for mod in self.dead_modules]
 
         [print(module_info(mod), end='') for mod in self.modules if mod != 'view']
         print('')
@@ -206,7 +206,8 @@ class ViewContainer(threading.Thread):
     def run(self):
 
         self.register_modules()
-        # speech_logger.info('aggregator started')
+        if  self.config['SPEECH_ENABLED']:
+            speech_logger.info('aggregator started')
 
         while True:
             self.iteration += 1

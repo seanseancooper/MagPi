@@ -43,7 +43,8 @@ class RabbitMQTRXScanner(threading.Thread):
     def run(self):
 
         self.created = datetime.now()
-        speech_logger.info('MQ TRX scanner started')
+        if self.config['SPEECH_ENABLED']:
+            speech_logger.info('MQ TRX scanner started')
 
         while True:
             scanned = self.retriever.scan()

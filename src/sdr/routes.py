@@ -53,7 +53,8 @@ def sdr_ghosts():
 @sdr_bp.route('/add/<ident>', methods=['POST'], subdomain='sdr')
 def add(ident):
     if scanner.module_tracker.get_worker(ident).add(ident):
-        speech_logger.info(f'added')
+        if scanner.config['SPEECH_ENABLED']:
+            speech_logger.info(f'added')
         return "OK", 200
     return "", 404
 
@@ -66,7 +67,8 @@ def mute(ident):
 @sdr_bp.route('/remove/<ident>', methods=['POST'], subdomain='sdr')
 def remove(ident):
     if scanner.module_tracker.get_worker(ident).remove(ident):
-        speech_logger.info(f'removed')
+        if scanner.config['SPEECH_ENABLED']:
+            speech_logger.info(f'removed')
         return "OK", 200
     return "", 404
 
@@ -91,7 +93,8 @@ def sdr_stop():
 def sdr_write():
     from src.lib.utils import write_to_scanlist
     if write_to_scanlist(scanner.config, scanner.get_tracked_signals()):
-        speech_logger.info(f'logged {len(scanner.get_tracked_signals())} items')
+        if scanner.config['SPEECH_ENABLED']:
+            speech_logger.info(f'logged {len(scanner.get_tracked_signals())} items')
         return "OK", 200
     return "", 500
 
