@@ -247,7 +247,7 @@ class ViewContainerTab:
 
     def get_module_fragment(self):
 
-        _path = f'{os.path.abspath(".").replace("/view","")}/{self.module}/templates'
+        _path = f'{os.path.abspath("..").replace("/view", "")}/{self.module}/templates'
         templateLoader = jinja2.FileSystemLoader(searchpath=_path)
         templateEnv = jinja2.Environment(loader=templateLoader)
         TEMPLATE_FILE = f'{self.tab}.js.j2'

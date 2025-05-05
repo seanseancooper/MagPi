@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, request, render_template
 import requests
 
-from src.view.ViewContainer import ViewContainer
+from src.view.lib.ViewContainer import ViewContainer
 
 
 viewContainer = ViewContainer()
