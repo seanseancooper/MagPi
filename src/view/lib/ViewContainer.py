@@ -116,11 +116,11 @@ class ViewContainer(threading.Thread):
                     # this returns whatever types are put into data
                     # for wifi, this is a string
                     # for others, this should be 'lists of maps'.
-                    self.module_data[mod] = data
+                    # self.module_data[mod] = data
 
                     # this wouldn't fully process the data until the processing of the
                     # scanner is extracted:
-                    # self.module_data[mod] = self.module_retriever.get_parsed_cells(data)
+                    self.module_data[mod] = self.module_retriever.get_parsed_cells(data)
 
         else: # use REST: this data is already processed into lists of maps...
 
@@ -197,7 +197,7 @@ class ViewContainer(threading.Thread):
 
         if self.iteration % 100 == 0:
             print(f"ViewContainer [{self.iteration}] {format_delta(self.elapsed, '%H:%M:%S')} elapsed")
-            if  self.plugin_config['SPEECH_ENABLED']:
+            if  self.config['SPEECH_ENABLED']:
                 [speech_logger.info(f'{mod} offline.') for mod in self.dead_modules]
 
         [print(module_info(mod), end='') for mod in self.modules if mod != 'view']
