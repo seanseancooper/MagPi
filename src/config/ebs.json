@@ -1,5 +1,6 @@
 {
-	"EBS": [{
+	"EBS": [
+		{
 			"RESTART_COMMAND": ["systemd/systemctl", "--user", "restart", "ebs"]
 		},
 		{

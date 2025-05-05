@@ -101,7 +101,8 @@ def get_location(locator):
         locator.lat = position.get('LATITUDE', position.get('lat'))
         locator.lon = position.get('LONGITUDE', position.get('lon'))
     except Exception as e:
-        speech_logger.warning(f"GPS Error")
+        if locator.config['SPEECH_ENABLED']:
+            speech_logger.warning(f"GPS Error")
         gps_logger.warning(f"GPS Retrieval Error: {e}")
 
 

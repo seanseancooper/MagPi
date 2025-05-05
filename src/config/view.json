@@ -4,6 +4,12 @@
 			"DEBUG": false
 		},
 		{
+			"MODULE": "view"
+		},
+		{
+			"SPEECH_ENABLED": false
+		},
+		{
 			"SERVER_NAME": "localhost:5110"
 		},
 		{

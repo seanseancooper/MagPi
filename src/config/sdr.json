@@ -4,6 +4,12 @@
 			"DEBUG": false
 		},
 		{
+			"MODULE": "sdr"
+		},
+		{
+			"SPEECH_ENABLED": false
+		},
+		{
 			"SERVER_NAME": "localhost:?"
 		},
 		{

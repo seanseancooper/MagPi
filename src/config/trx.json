@@ -4,6 +4,12 @@
 			"DEBUG": false
 		},
 		{
+			"MODULE": "trx"
+		},
+		{
+			"SPEECH_ENABLED": true
+		},
+		{
 			"TEST_FILE": "/Users/scooper/PycharmProjects/MagPi/dev/trx/TEST_FILE.csv"
 		},
 		{

@@ -7,6 +7,9 @@
 			"MODULE": "net"
 		},
 		{
+			"SPEECH_ENABLED": false
+		},
+		{
 			"SERVER_NAME": "localhost:5006"
 		},
 		{
