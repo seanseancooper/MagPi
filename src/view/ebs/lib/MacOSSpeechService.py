@@ -1,7 +1,7 @@
 import shutil
 import subprocess
 
-from src.ebs.lib.SpeechService import SpeechService
+from src.view.ebs.lib.SpeechService import SpeechService
 
 
 class MacOSSpeechService(SpeechService):

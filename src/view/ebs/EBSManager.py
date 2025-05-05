@@ -3,7 +3,7 @@ import logging
 import time
 
 from src.config import readConfig
-from src.ebs.lib.MacOSSpeechService import MacOSSpeechService
+from src.view.ebs.lib.MacOSSpeechService import MacOSSpeechService
 
 logger_root = logging.getLogger('root')
 ebs_logger = logging.getLogger('ebs_logger')

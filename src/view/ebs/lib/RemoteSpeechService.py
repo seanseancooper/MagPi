@@ -1,4 +1,4 @@
-from src.ebs.lib.SpeechService import SpeechService
+from src.view.ebs.lib.SpeechService import SpeechService
 from google.cloud import texttospeech
 
 class RemoteSpeechService(SpeechService):

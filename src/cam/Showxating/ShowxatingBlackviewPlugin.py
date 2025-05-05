@@ -9,7 +9,7 @@ from src.cam.Showxating.plugin import ShowxatingPlugin
 from src.cam.Showxating.ImageWriter import ImageWriter
 from src.cam.lib.FrameObjektTracker import FrameObjektTracker
 from src.cam.lib.utils import draw_contours, wall_images, sortedContours
-from src.ebs.lib.TokenBucket import TokenBucket
+from src.view.ebs.lib import TokenBucket
 from src.lib.utils import format_time, format_delta
 from src.net.lib.net_utils import check_imq_available
 

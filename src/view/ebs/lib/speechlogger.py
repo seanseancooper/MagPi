@@ -7,7 +7,6 @@ this is based on pythonjsonlogger
 import logging
 import json
 import re
-import threading
 from datetime import date, datetime, time, timezone
 import traceback
 import importlib
@@ -213,7 +212,7 @@ class SpeechFormatter(logging.Formatter):
         # ebsMgr.configure('ebs.json')
 
         # QUEUED MESSAGES
-        from src.ebs.routes import ebsMgr
+        from src.view.ebs.routes import ebsMgr
         ebsMgr.enunciate(log_record['message'])
 
         return log_record

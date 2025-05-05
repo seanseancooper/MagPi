@@ -3,7 +3,7 @@ import threading
 import time
 import logging
 from src.config import readConfig
-from src.ebs.lib.Enunciator import Enunciator
+from src.view.ebs.lib.Enunciator import Enunciator
 
 ebs_logger = logging.getLogger('ebs_logger')
 
