@@ -1,8 +1,5 @@
-from . import arx
-from . import cam
-# from . import lib
-from . import map
-from . import net
-from . import sdr
-from . import view
-from . import wifi
+# these modules have runtime class retrieval
+from . import cam       #
+from . import sdr       # has runtime retrieval for SDRReceiver
+from . import trx       # has runtime retrieval TRXSerialRetriever, TRXUSBRetriever
+from . import wifi      # has runtime retrieval
