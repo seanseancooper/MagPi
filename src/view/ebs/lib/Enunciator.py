@@ -63,7 +63,7 @@ class Enunciator(threading.Thread):
                     # enqueue message to SpeechService.
                     message = self.message_queue.get()
                     self.speechservice.enqueue(message)
-                    ebs_logger.debug(f'actuator: {message}')
+                    # ebs_logger.debug(f'actuator: {message}')
                 except Exception as e:
                     logger_root.error(f'Exception: {e}')
             else:
@@ -76,7 +76,7 @@ class Enunciator(threading.Thread):
                 try:
                     # push message to onto local fifo
                     self.message_queue.put(message)
-                    ebs_logger.debug(f'broadcast: {message}')
+                    # ebs_logger.debug(f'broadcast: {message}')
                 except Exception as e:
                     logger_root.error(f'Exception:  {e}')
             else:
