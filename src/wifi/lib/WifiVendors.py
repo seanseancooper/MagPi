@@ -10,6 +10,10 @@ vendors = {}
 vendorsMacs_XML = ET.parse(os.path.join(CONFIG_PATH, config['VENDORMACS_FILE']))
 
 
+def update_vendormacs():
+    # Todo: add code to update vendorMacs.xml file via http if it's available.
+    print("update_vendormacs not implemented.")
+
 def matching_line(lines, keyword):
     """ Returns the first matching line in a list of lines.
     @see match()
