@@ -2,7 +2,8 @@ import json
 import glob
 import uuid
 from src.lib.utils import format_time
-from src.wifi.lib.wifi_utils import vendorsMacs_XML, proc_vendors, generate_signal
+from src.wifi.lib.wifi_utils import generate_signal
+from src.wifi.lib.WifiVendors import vendorsMacs_XML, proc_vendors
 from datetime import datetime, timedelta
 from src.config import readConfig
 from src.lib.utils import get_location
