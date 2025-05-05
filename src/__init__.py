@@ -1,6 +1,6 @@
 from . import arx
 from . import cam
-from . import can
+from .net import can
 from . import config
 from .map import gps
 from . import lib
