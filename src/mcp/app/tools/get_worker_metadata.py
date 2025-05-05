@@ -1,4 +1,4 @@
-from app.server import mcp
+from src.mcp.app.server import mcp
 
 from src.mcp.xrx.XRXSignalGenerator import XRXSignalGenerator
 
