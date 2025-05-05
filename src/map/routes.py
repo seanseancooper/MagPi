@@ -1,6 +1,6 @@
 from flask import Blueprint, redirect, render_template, jsonify
 
-from src.map.MAPAggregator import MAPAggregator
+from src.map.lib.MAPAggregator import MAPAggregator
 mapAgg = MAPAggregator()
 # TODO: the config hasn't been read yet, how can these be configurable?
 non_config_files = ['arx.json', 'cam.json', 'ebs.json', 'gps.json', 'view.json']
