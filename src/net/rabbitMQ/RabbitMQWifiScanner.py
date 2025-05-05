@@ -14,7 +14,7 @@ speech_logger = logging.getLogger('speech_logger')
 
 class RabbitMQWifiScanner(threading.Thread):
 
-    """ Wifi Scanner class; poll the wifi, match BSSID and report as parsed_signals. """
+    """ RabbitMQWifiScanner: use a wifi retriever to scan wifi, publish XML as lines to RabbitMQ. """
     def __init__(self):
         super().__init__()
 
