@@ -2,4 +2,4 @@
 from . import cam       #
 from . import sdr       # has runtime retrieval for SDRReceiver
 from . import trx       # has runtime retrieval TRXSerialRetriever, TRXUSBRetriever
-from . import wifi      # has runtime retrieval
+from . import wifi      # has runtime retrieval LinuxIWListWifiRetriever, MacOSAirportWifiRetriever, WifiTracker
