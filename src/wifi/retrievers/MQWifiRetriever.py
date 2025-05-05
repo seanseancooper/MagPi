@@ -1,0 +1,58 @@
+import threading
+
+from src.net.rabbitMQ.RabbitMQWifiScanner import RabbitMQWifiScanner
+from src.config import readConfig
+from src.net.rabbitMQ.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
+
+import logging
+
+logger_root = logging.getLogger('root')
+wifi_logger = logging.getLogger('wifi_logger')
+
+
+class MQWifiRetriever(threading.Thread):
+    """ MQ Wifi Retriever class """
+    def __init__(self):
+        super().__init__()
+
+        self.config = {}
+        self.interface = None
+
+        self.consumer = None
+        self.scanner = None                     # want to use retriever methods
+
+        self.stats = {}                         # new, not yet used
+        self.parsed_cells = []                  # a list of 'cells' representing signals as dictionaries.
+
+        self.DEBUG = False
+
+    def configure(self, config_file):
+        readConfig(config_file, self.config)
+
+        self.DEBUG = self.config.get('DEBUG')
+
+        self.start_scanner()
+        self.consumer = RabbitMQAsyncConsumer(self.config['WIFI_QUEUE'])
+        self.start_consumer()
+
+    # @staticmethod
+    def start_scanner(self):
+        self.scanner = RabbitMQWifiScanner()
+        self.scanner.configure('wifi.json')
+        t = threading.Thread(target=self.scanner.run, daemon=True)
+        t.start()
+
+    def start_consumer(self):
+        t = threading.Thread(target=self.consumer.run, daemon=True)
+        t.start()
+
+    def scan(self):
+        """ get scan data from MQ """
+        try:
+            return self.consumer.data or []
+        except Exception as e:
+            wifi_logger.error(f"[{__name__}]: Exception: {e}")
+
+    def get_parsed_cells(self, airport_data):
+        return self.scanner.mq_wifi_retriever.get_parsed_cells(airport_data)
+
