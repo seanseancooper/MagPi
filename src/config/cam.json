@@ -49,6 +49,7 @@
 				"FORE_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPiDev/cam/training_data/test_movies/cam.mp4",
 				"AFT_VIDEO_URL" : "/Users/scooper/PycharmProjects/MagPiDev/cam/training_data/test_movies/cam.mp4",
 				"FORWARD_TEST_URL" : "",
+				"SPEECH_ENABLED": false,
 
 				"plugin_process_frames": true,
 				"krnl": 17,
