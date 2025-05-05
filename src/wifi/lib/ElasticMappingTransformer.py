@@ -6,7 +6,7 @@ from src.config import readConfig
 
 class ElasticMappingTransformer:
 
-    def __init__(self, mapTxfmr):
+    def __init__(self, mappingParser):
 
         self.client = None
         self.worker_index_mapping = None
@@ -15,7 +15,7 @@ class ElasticMappingTransformer:
         self.tz = None
         self._seen = []
         self.config = {}
-        self.mapTxfmr = mapTxfmr
+        self.mappingParser = mappingParser
 
     def configure(self, config_file):
 
@@ -56,7 +56,7 @@ class ElasticMappingTransformer:
 
     def process_worker(self, item):
 
-        parser = self.mapTxfmr(item)
+        parser = self.mappingParser(item)
         worker_data = parser.get_worker_data()
 
         # this entire choice should be higher, earlier and remove signal_data and deps from this method
@@ -108,7 +108,7 @@ class ElasticMappingTransformer:
 
     def process_signals(self, item):
 
-        parser = self.mapTxfmr(item)
+        parser = self.mappingParser(item)
         worker_data = parser.get_worker_data()
         self.signals_data = parser.get_signal_data()
 
@@ -132,7 +132,7 @@ class ElasticMappingTransformer:
 
             [self.process_signals(item) for item in data]
 
-            parsers = [self.mapTxfmr(item) for item in data]
+            parsers = [self.mappingParser(item) for item in data]
             parsed_workers = [parsed.get_worker_data() for parsed in parsers]
 
             def worker_sorter(parsed_worker):
@@ -156,10 +156,10 @@ class ElasticMappingTransformer:
         pass
 
 if __name__ == '__main__':
-    from src.wifi.lib.WifiWorkerParser import WifiWorkerParser
-    mapTxfmr = WifiWorkerParser
+    from src.wifi.lib.WifiMappingParser import WifiMappingParser
+    mappingParser = WifiMappingParser
 
-    e = ElasticMappingTransformer(mapTxfmr)  # <-- pass it a transformer ()
+    e = ElasticMappingTransformer(mappingParser)  # <-- pass it a transformer ()
     e.configure('wifi.json')
     # push 'training data' into elastic.
     with open('/Users/scooper/PycharmProjects/MagPiDev/wifi/training_data/scanlists_out.json', 'r') as f:

@@ -32,7 +32,7 @@
 #     def get_test_data(self):
 #         return self.signal_test
 
-class WifiWorkerParser:
+class WifiMappingParser:
 
     def __init__(self, data):
         self.data = data
