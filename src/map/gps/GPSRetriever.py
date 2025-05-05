@@ -48,7 +48,7 @@ class GPSRetriever(threading.Thread):
         return self
 
     def update(self):
-        gps_logger.debug(f'{self.result}')
+        # gps_logger.debug(f'{self.result}')
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
         self.polling_count += 1
@@ -79,7 +79,7 @@ class GPSRetriever(threading.Thread):
                     for result in client.dict_stream():
                         if not result:
                             break
-                        gps_logger.debug(f'{result}')
+                        # gps_logger.debug(f'{result}')
 
                         self.result = {"lat": result['GPS']['LATITUDE'],
                                        "lon": result['GPS']['LONGITUDE'],
