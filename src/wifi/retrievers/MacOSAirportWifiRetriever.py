@@ -6,8 +6,6 @@ import xml.etree.ElementTree as ET
 import xml.parsers.expat
 from xml.parsers.expat import ExpatError
 
-from src.wifi.lib.iw_parse import matching_line
-
 from src.config import readConfig
 import logging
 
@@ -67,6 +65,31 @@ class MacOSAirportWifiRetriever(threading.Thread):
         @return string
             The quality of the network.
         """
+
+        def matching_line(lines, keyword):
+            """ Returns the first matching line in a list of lines.
+            @see match()
+            """
+            for line in lines:
+                matching = match(line, keyword)
+                if matching != None:
+                    return matching
+            return None
+
+        def match(line, keyword):
+            """ If the first part of line (modulo blanks) matches keyword,
+            returns the end of that line. Otherwise checks if keyword is
+            anywhere in the line and returns that section, else returns None"""
+
+            line = line.lstrip()
+            length = len(keyword)
+            if line[:length] == keyword:
+                return line[length:]
+            else:
+                if keyword in line:
+                    return line[line.index(keyword):]
+                else:
+                    return None
 
         signal = matching_line(cell, "Signal level=")
         if signal is None:
