@@ -143,8 +143,9 @@ TRXSignalPoint(self, worker_id, lon, lat, sgnl, text_data={}, audio_data=None, s
 >````
 
 ## view 
-### ViewController [RabbitMQ/REST]
->- [DONE] Reads WIFI data over MQ & REST
+### [RabbitMQ/REST]
+>- [] pull aggregation out of ViewController; put it in /aggregator/ViewAggregator.py
+>- [] make generic aggregation ViewAggregator; put it in /aggregator
 >- [DONE] Scanner, Tracker reads data over MQ & REST
 >- [IP] Factor Scanner to read ALL SignalPoint types.
 >- [? ] Integrate Kibana: blocker is elastic https
