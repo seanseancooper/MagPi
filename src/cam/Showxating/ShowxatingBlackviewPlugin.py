@@ -6,7 +6,7 @@ import json
 
 from src.cam.mq.CAMMQProvider import CAMMQProvider
 from src.cam.Showxating.plugin import ShowxatingPlugin
-from src.cam.lib.ImageWriter import ImageWriter
+from src.cam.Showxating.ImageWriter import ImageWriter
 from src.cam.lib.FrameObjektTracker import FrameObjektTracker
 from src.cam.lib.utils import draw_contours, wall_images, sortedContours
 from src.ebs.lib.TokenBucket import TokenBucket
