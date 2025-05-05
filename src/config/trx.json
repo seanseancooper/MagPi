@@ -10,7 +10,7 @@
 			"SPEECH_ENABLED": true
 		},
 		{
-			"TEST_FILE": "/Users/scooper/PycharmProjects/MagPi/dev/trx/TEST_FILE.csv"
+			"TEST_FILE": "/Users/scooper/PycharmProjects/MagPiDev/trx/TEST_FILE.csv"
 		},
 		{
 			"TEST_FILE_TIME_MAX": 300
