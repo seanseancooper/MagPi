@@ -23,3 +23,8 @@ def readConfig(config_file, config):
             for category, settings in data.items():
                 for setting in settings:
                     config[list(setting.keys()).pop(0)] = list(setting.values()).pop(0)
+
+
+def update_vendormacs():
+    # Todo: add code to update vendorMacs.xml file via http if it's available.
+    print("update_vendormacs not implemented.")
