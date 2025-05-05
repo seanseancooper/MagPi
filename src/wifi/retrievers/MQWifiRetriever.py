@@ -1,5 +1,6 @@
 import threading
 
+from src.net.lib.net_utils import check_rmq_available
 from src.net.rabbitMQ.RabbitMQWifiScanner import RabbitMQWifiScanner
 from src.config import readConfig
 from src.net.rabbitMQ.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
@@ -30,10 +31,15 @@ class MQWifiRetriever(threading.Thread):
         readConfig(config_file, self.config)
 
         self.DEBUG = self.config.get('DEBUG')
+        _ , RMQ_AVAIL = check_rmq_available(self.config['MODULE'])
+
+        if RMQ_AVAIL:
+            self.consumer = RabbitMQAsyncConsumer(self.config['WIFI_QUEUE'])
+            self.start_consumer()
+        else:
+            exit(0)
 
         self.start_scanner()
-        self.consumer = RabbitMQAsyncConsumer(self.config['WIFI_QUEUE'])
-        self.start_consumer()
 
     # @staticmethod
     def start_scanner(self):
