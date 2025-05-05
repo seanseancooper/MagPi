@@ -4,7 +4,7 @@ import json
 
 # from src.net.imageZMQ.ImageZMQAsyncProducer import ImageZMQAsyncProducer
 
-from src.cam.lib.CAMMQProvider import CAMMQProvider
+from src.cam.mq.CAMMQProvider import CAMMQProvider
 from src.cam.Showxating.plugin import ShowxatingPlugin
 from src.cam.lib.ImageWriter import ImageWriter
 from src.cam.lib.FrameObjektTracker import FrameObjektTracker
