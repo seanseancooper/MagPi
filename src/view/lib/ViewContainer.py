@@ -102,34 +102,12 @@ class ViewContainer(threading.Thread):
     def aggregate(self, mod):
         """ collect data and stats into aggregation """
 
-        if self.aggregator:  # Use MQ 'DATA_QUEUE'
-
-            data = self.aggregator.aggregate()
-
-            if data:
-                config = self.module_configs[mod]
-
-                if config.get('MODULE_RETRIEVER', None) is not None:
-                    module_retriever = get_retriever(config['MODULE_RETRIEVER'])
-                    self.module_retriever = module_retriever()
-
-                    # this returns whatever types are put into data
-                    # for wifi, this is a string
-                    # for others, this should be 'lists of maps'.
-                    # self.module_data[mod] = data
-
-                    # this wouldn't fully process the data until the processing of the
-                    # scanner is extracted:
-                    self.module_data[mod] = self.module_retriever.get_parsed_cells(data)
-
-        else: # use REST: this data is already processed into lists of maps...
-
-            try:
-                data = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
-                if data.ok:
-                    self.module_data[mod] = data.json()
-            except Exception as e:
-                view_logger.warning(f'Data Aggregator Warning [{mod}]! {e}')
+        try:
+            data = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
+            if data.ok:
+                self.module_data[mod] = data.json()
+        except Exception as e:
+            view_logger.warning(f'Data Aggregator Warning [{mod}]! {e}')
 
         try:
             stats = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'] + '/stats')
