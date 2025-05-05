@@ -13,18 +13,13 @@
 >  - text_attribute parsing
 >  - audio transcription: speech to text.
 >  - vocal 'stress' analysis.
-### ARXEncoder
-````
-Category            | Feature Examples
-Frequency-based     | Center frequency, bandwidth, frequency drift
-Geolocation         | Direction of arrival (DoA), location estimates, altitude
-Behavior-based      | Emission pattern, silence periods, handoff behavior
-````
-
-
-## BLU [NOT STARTED]
->- Likely to use SDR for this and not have a module.
->- **IDEA:** features unique to 'Bluetooth' signals (special identifiers)
+>### ARXEncoder
+>````
+>Category            | Feature Examples
+>Frequency-based     | Center frequency, bandwidth, frequency drift
+>Geolocation         | Direction of arrival (DoA), location estimates, altitude
+>Behavior-based      | Emission pattern, silence periods, handoff behavior
+>````
 
 ## cam
     FrameObjekt()
@@ -41,9 +36,6 @@ Behavior-based      | Emission pattern, silence periods, handoff behavior
 >- perhaps a magnifiged ROI/license plate reader?
 >- Camera switching?
 
-## CAN:
->- NOT STARTED
-
 ## config:
 
 >- **IDEA:**: Configuration layering, global vs. module vs. class:
@@ -52,18 +44,12 @@ Behavior-based      | Emission pattern, silence periods, handoff behavior
 >- global configuration: look for a configuration file in 'config' directory, named 'module.json': this overides module config)
 >- potential benefits vs. complexity added
 
-## ebs:
->- configure text logging
->- **IDEA:**: Speech Service client using MCP?
-
-## gps: now a MAP submodule
-
 ## lib:
 >- [?] code review.
 >- [?] dependecies and __init__ usage.
 
 ## map 
-MapAggregator: read configs, test REST endpoints and pull data
+> MapAggregator: read configs, test REST endpoints and pull data
 >- [NO] Elastic Integration:
 >- [NO] Elastic pull()
 >- [DONE] GPS subcomponent
@@ -73,11 +59,13 @@ MapAggregator: read configs, test REST endpoints and pull data
 >- [XX] Hyperspectral imaging: BLOCKED DUE TO ENVIRONMENT
 >- Trilaterator: **DATA is the problem** points need ~300m separation to resolve.
 >  - Can this be fixed by scaling the data?
+>## gps:
+>## WX [NOT STARTED]:
 
 ## mcp:
-DOCKER STARTUP ensure the container is available and is a setting in the container startup.
-
-[??] keyword-spotter integration
+>>DOCKER STARTUP ensure the container is available and is a setting in the container startup.
+>
+>[??] keyword-spotter integration
 >### Pattern Learning
 > Use statistical or ML models to find structure:
 >>- Clustering: Find recurring emission types or behaviors (DBSCAN, k-means)
@@ -107,49 +95,52 @@ DOCKER STARTUP ensure the container is available and is a setting in the contain
 > >- direct manipulation of internal mappings?
 > >- augmented data (extra rows in tables, overlay symbology in maps
 >- - AR in CAM module?
-
-## PSX [NOT STARTED]
-**IDEA:** Pyshark. Visualizations? Stats? GPT?
+>## CAN:
+>- NOT STARTED
+>## PSX [NOT STARTED]
+>**IDEA:** Pyshark. Visualizations? Stats? GPT?
 
 ## sdr
-    SDRSignalPoint(self, worker_id, lon, lat, sgnl, array_data=None, audio_data=None, sr=48000)
-    DATA: RabbitMQ for object data, ZeroMQ arrays
->- ****IDEA:**:** A thing that looks at a block of spectrum, finds the peaks in the EM
+> SDRSignalPoint(self, worker_id, lon, lat, sgnl, array_data=None, audio_data=None, sr=48000)
+> - DATA: RabbitMQ for object data, ZeroMQ arrays
+>- **IDEA:** A thing that looks at a block of spectrum, finds the peaks in the EM
 and tunes an SDRWorker() receiver to the peak frequency, recording it as a SSET SignalFrame().
 >>- Receiver modifications: assignable frequency, bandwidth
 >>- [IP] Scanner modifications: integration
 >>- SignalPoint processing zeroMQ
 >>- ARXAudioEncoder via MQ! not a local method. offline processing...
 >>- Elasticsearch mappings
-
-### SDRSignalAnalyzer
-```
-Category            | Feature Examples
-
-Time-based          | Pulse repetition interval (PRI), burst duration, timing jitter
-Frequency-based     | Center frequency, bandwidth, frequency drift
-Modulation          | Modulation type (AM/FM/PSK), symbol rate, coding scheme
-Power               | RSSI (signal strength), SNR (signal-to-noise ratio)
-Geolocation         | Direction of arrival (DoA), location estimates, altitude
-Behavior-based      | Emission pattern, silence periods, handoff behavior
-```
+>### SDRSignalAnalyzer
+>```
+>Category            | Feature Examples
+>
+>Time-based          | Pulse repetition interval (PRI), burst duration, timing jitter
+>Frequency-based     | Center frequency, bandwidth, frequency drift
+>Modulation          | Modulation type (AM/FM/PSK), symbol rate, coding scheme
+>Power               | RSSI (signal strength), SNR (signal-to-noise ratio)
+>Geolocation         | Direction of arrival (DoA), location estimates, altitude
+>Behavior-based      | Emission pattern, silence periods, handoff behavior
+>```
 >These features are often extracted using tools like Fourier Transforms, wavelet analysis, or cyclostationary analysis.
+>## BLU [NOT STARTED]
+>>- Likely to use SDR for this and not have a module.
+>>- **IDEA:** features unique to 'Bluetooth' signals (special identifiers)
+
 
 ## trx
-    TRXSignalPoint(self, worker_id, lon, lat, sgnl, text_data={}, audio_data=None, signal_type="object", sr=48000)
+TRXSignalPoint(self, worker_id, lon, lat, sgnl, text_data={}, audio_data=None, signal_type="object", sr=48000)
     DATA: RabbitMQ for object data, ZeroMQ for arrays
 >- TRXUSBRetriever docker solution
 >- TRXSerialRetriever may be kaput on Mac? Verify this.
 >- TRXSignalPoint mappings
 >- text_attribute/audio transcription.
-
-### TRXEncoder
-````
-    Category        | Feature Examples
-    
-    Geolocation     | Direction of arrival (DoA), location estimates, altitude
-    Behavior-based  | Emission pattern, silence periods, handoff behavior
-   ````
+>### TRXEncoder
+>````
+>    Category        | Feature Examples
+>    
+>    Geolocation     | Direction of arrival (DoA), location estimates, altitude
+>    Behavior-based  | Emission pattern, silence periods, handoff behavior
+>````
 
 ## view 
 ### ViewController [RabbitMQ/REST]
@@ -159,9 +150,10 @@ Behavior-based      | Emission pattern, silence periods, handoff behavior
 >- [? ] Integrate Kibana: blocker is elastic https
 >- [? ] Integrate SDR: Bokeh, jupyterlite w/ matplotlib inline + custom javascript vertical waterfall served via node.
 >- [? ] rename?
+>>## ebs:
+>>- configure text logging
+>>- **IDEA:**: Speech Service client using MCP?
 
-## WX [NOT STARTED]:
->- Likely Subcomponent of MAP
 
 ## wifi
     WifiSignalPoint(self, worker_id, lon, lat, sgnl, bssid=None) 
