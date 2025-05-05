@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, jsonify
 
-from src.arx.ARXRecorder import ARXRecorder
+from src.arx.lib.ARXRecorder import ARXRecorder
 
 arxRec = ARXRecorder()
 arxRec.configure('arx.json')
