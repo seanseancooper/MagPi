@@ -1,5 +1,3 @@
-# "Never give up on code."
-
 ## arx
     ARXSignalPoint(self, worker_id, lon, lat, sgnl)
     DATA: ZeroMQ 'frame' composed of metatdata and data
@@ -48,8 +46,8 @@
 >- [?] code review.
 >- [?] dependecies and __init__ usage.
 
-## map 
-> MapAggregator: read configs, test REST endpoints and pull data
+## map [REST]
+> MapAggregator: use generic aggregator.
 >- [NO] Elastic Integration:
 >- [NO] Elastic pull()
 >- [DONE] GPS subcomponent
@@ -144,8 +142,8 @@ TRXSignalPoint(self, worker_id, lon, lat, sgnl, text_data={}, audio_data=None, s
 
 ## view 
 ### [RabbitMQ/REST]
->- [] pull aggregation out of ViewController; put it in /aggregator/ViewAggregator.py
->- [] make generic aggregation ViewAggregator; put it in /aggregator
+>- [  ] pull aggregation out of ViewController; put it in /aggregator/ViewAggregator.py
+>- [  ] make generic aggregation ViewAggregator; make MQAggregator use the generic one ggregator
 >- [DONE] Scanner, Tracker reads data over MQ & REST
 >- [IP] Factor Scanner to read ALL SignalPoint types.
 >- [? ] Integrate Kibana: blocker is elastic https
