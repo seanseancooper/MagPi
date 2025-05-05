@@ -56,7 +56,7 @@ class LinuxIWListWifiRetriever(threading.Thread):
             "Noise"     : get_noise_level,
             "BitRates"  : get_bit_rates,
             "Mode"      : get_mode,
-            "Last"      : get_timing,
+            # "Last"      : get_timing,
             "Vendor"    : get_vendor,
         }
 
