@@ -1,8 +1,8 @@
 import threading
 from flask import Flask
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 import routes as view
-from src.lib.rest_server import RESTServer as RESTServer
+from src.net.FlaskRESTServer import RESTServer as RESTServer
 
 
 class ViewController(threading.Thread):

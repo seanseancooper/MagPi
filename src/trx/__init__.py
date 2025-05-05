@@ -1,5 +1,5 @@
 from src.trx.TRXController import TRXController
-from src.lib.rest_server import RESTServer
+from src.net.FlaskRESTServer import RESTServer
 
 if __name__ == '__main__':
     t = TRXController()

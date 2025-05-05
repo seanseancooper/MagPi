@@ -10,7 +10,7 @@ from src.map.gps.GPSRetriever import GPSRetriever
 gpsRet = GPSRetriever()
 gpsRet.configure('gps.json')
 
-from src.lib.NodeRunner import NodeRunner
+from src.net.NodeRunner import NodeRunner
 # node map service on :5173
 map_node = NodeRunner()
 map_node.configure('map.json')
