@@ -4,6 +4,9 @@
 			"DEBUG": false
 		},
 		{
+			"MODULE": "map"
+		},
+		{
 			"SPEECH_ENABLED": false
 		},
 		{
