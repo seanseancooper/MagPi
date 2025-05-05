@@ -1,9 +1,6 @@
 from datetime import datetime, timedelta
 import random
 import uuid
-
-from src.wifi.lib.iw_parse import matching_line
-
 import logging
 
 json_logger = logging.getLogger('json_logger')
