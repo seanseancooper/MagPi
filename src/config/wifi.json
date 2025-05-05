@@ -25,7 +25,7 @@
 			"MODULE_TRACKER": "src.wifi.lib.WifiTracker"
 		},
 		{
-			"MODULE_RETRIEVER": "src.wifi.retrievers.MacOSAirportWifiRetriever"
+			"MODULE_RETRIEVER": "src.wifi.retrievers.MQWifiRetriever"
 		},
 		{
 			"MQ_MODULE_RETRIEVER": "src.wifi.retrievers.MQWifiRetriever"
