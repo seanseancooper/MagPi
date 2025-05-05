@@ -2,14 +2,12 @@ import cv2 as cv
 import numpy as np
 import json
 
-# from src.net.imageZMQ.ImageZMQAsyncProducer import ImageZMQAsyncProducer
-
 from src.cam.mq.CAMMQProvider import CAMMQProvider
 from src.cam.Showxating.plugin import ShowxatingPlugin
 from src.cam.Showxating.ImageWriter import ImageWriter
 from src.cam.lib.FrameObjektTracker import FrameObjektTracker
 from src.cam.lib.utils import draw_contours, wall_images, sortedContours
-from src.view.ebs.lib import TokenBucket
+from src.view.ebs.lib.TokenBucket import TokenBucket
 from src.lib.utils import format_time, format_delta
 from src.net.lib.net_utils import check_imq_available
 
@@ -115,7 +113,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
     def get_config(self):
         super().get_config()
         self.tracker.configure()
-        self.throttle = TokenBucket(self.plugin_config['tokenbucket'].get('tokens', 1),
+        self.throttle = TokenBucket(self.plugin_config['tokenbucket'].get('tokens', 1),         # move this out to Controller
                                     self.plugin_config['tokenbucket'].get('interval', 60)
                                     )
         self.krnl = self.plugin_config.get('krnl', 10.0)
