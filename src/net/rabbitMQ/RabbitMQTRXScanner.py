@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from src.config import readConfig
 from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
 from src.net.lib.net_utils import get_retriever
-from src.trx.TRXWorker import TRXWorker
 
 import logging
 
@@ -14,7 +13,7 @@ speech_logger = logging.getLogger('speech_logger')
 
 
 class RabbitMQTRXScanner(threading.Thread):
-    """ MQTRXProducer class; poll the serial/USB for signals. """
+    """ RabbitMQTRXScanner: use a TRXRetriever to scan my TRX-1, publish mappings to RabbitMQ. """
     def __init__(self):
         super().__init__()
 
@@ -24,36 +23,22 @@ class RabbitMQTRXScanner(threading.Thread):
 
         self.created = datetime.now()
         self.updated = datetime.now()
-        self.elapsed = timedelta()              # elapsed time since created
+        self.elapsed = timedelta()                  # elapsed time since created
+
         self.workers = []
         self.tracked_signals = {}
 
-        self.retriever = None
+        self.retriever = None                       # mq_trx_retriever
         self.producer = None
 
     def configure(self, config_file):
-        readConfig(config_file, self.config)
+        readConfig(config_file, self.config)        # config from module, not net
 
         golden_retriever = get_retriever(self.config['MQ_TRX_RETRIEVER'])
         self.retriever = golden_retriever()
         self.retriever.configure(config_file)
 
-        for freq in self.tracked_signals.keys():
-            worker = TRXWorker(freq)
-            self.config_worker(worker)
-            self.workers.append(worker)
-
         self.producer = RabbitMQProducer(self.config['MQ_TRX_QUEUE'])
-
-    def config_worker(self, worker):
-        worker.retriever = self
-        worker.config = self.config
-        worker.created = datetime.now()
-        worker.DEBUG = self.config.get('DEBUG', False)
-        worker.cache_max = max(
-            int(self.config.get('SIGNAL_CACHE_LOG_MAX', -5)),
-            -self.config.get('SIGNAL_CACHE_MAX', 150)
-        )
 
     def run(self):
 
