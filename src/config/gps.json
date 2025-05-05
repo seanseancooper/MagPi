@@ -13,7 +13,7 @@
 			"SERVER_NAME": "localhost:5005"
 		},
 		{
-			"GPS_MODULE_RETRIEVER": "src.gps.GPSRetriever.JSGPSRetriever"
+			"GPS_MODULE_RETRIEVER": "src.map.gps.GPSRetriever.JSGPSRetriever"
 		},
 		{
 			"GPS_RETRIEVER_TIMEOUT": 1
