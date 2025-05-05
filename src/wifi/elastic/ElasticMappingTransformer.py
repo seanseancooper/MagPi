@@ -156,7 +156,7 @@ class ElasticMappingTransformer:
         pass
 
 if __name__ == '__main__':
-    from src.wifi.lib.WifiMappingParser import WifiMappingParser
+    from src.wifi.elastic.WifiMappingParser import WifiMappingParser
     mappingParser = WifiMappingParser
 
     e = ElasticMappingTransformer(mappingParser)  # <-- pass it a transformer ()
