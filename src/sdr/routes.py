@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, render_template, jsonify
 import logging
 
-from src.view.lib.Scanner import Scanner
+from src.lib.Scanner import Scanner
 
 scanner = Scanner()
 scanner.configure('sdr.json')
