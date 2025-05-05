@@ -6,7 +6,7 @@ mapAgg = MAPAggregator()
 non_config_files = ['arx.json', 'cam.json', 'ebs.json', 'gps.json', 'view.json']
 mapAgg.configure('map.json', non_config_files=non_config_files)
 
-from src.gps.GPSRetriever import GPSRetriever
+from src.map.gps.GPSRetriever import GPSRetriever
 gpsRet = GPSRetriever()
 gpsRet.configure('gps.json')
 

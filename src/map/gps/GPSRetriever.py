@@ -10,7 +10,7 @@ import time
 from gpsdclient import GPSDClient
 
 from src.config import readConfig
-from src.gps.lib.BlackViewGPSClient import BlackViewGPSClient
+from src.map.gps.lib.BlackViewGPSClient import BlackViewGPSClient
 from src.lib.utils import format_time
 from src.net.lib.net_utils import get_retriever
 

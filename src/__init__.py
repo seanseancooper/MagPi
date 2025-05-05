@@ -2,8 +2,7 @@ from . import arx
 from . import cam
 from . import can
 from . import config
-from . import ebs
-from . import gps
+from .map import gps
 from . import lib
 from . import map
 from . import net
