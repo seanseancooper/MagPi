@@ -10,7 +10,7 @@ import usb.backend.libusb1
 
 from src.config import readConfig
 from src.lib.utils import get_location
-from src.trx.TRXWorker import TRXWorker
+from src.trx.lib.TRXWorker import TRXWorker
 from src.trx.lib.TRXSignalPoint import TRXSignalPoint
 
 def find_device(vendor_id, product_id):
