@@ -230,7 +230,7 @@ class MacOSAirportWifiRetriever(threading.Thread):
                     pass
 
                 try:
-                    from src.wifi.lib.wifi_utils import vendors
+                    from src.wifi.lib.vendors import vendors
                     VENDOR = vendors[BSSID[0:8]]
                 except KeyError:
                     VENDOR = f"UNKNOWN"

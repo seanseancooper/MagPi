@@ -1,59 +1,13 @@
 from datetime import datetime, timedelta
-import os
 import random
 import uuid
-import xml.etree.ElementTree as ET
 
-from src.config import CONFIG_PATH, readConfig
 from src.wifi.lib.iw_parse import matching_line
 
 import logging
 
 json_logger = logging.getLogger('json_logger')
 
-config = {}
-readConfig('wifi.json', config)
-
-vendors = {}
-vendorsMacs_XML = ET.parse(os.path.join(CONFIG_PATH, config['VENDORMACS_FILE']))
-
-
-def proc_vendors(vendor, vendors):
-    vendors[vendor.attrib["mac_prefix"]] = vendor.attrib["vendor_name"]
-
-
-def get_vendor(cell):
-    wifi_logger = logging.getLogger('wifi_logger')
-    if cell:
-        vendor_mac = matching_line(cell, "Address: ")[0:8]
-        if vendor_mac is None:
-            return "no mac!"
-        else:
-            try:
-                return vendors[vendor_mac]
-            except KeyError:
-                return f"UNKNOWN"
-    else:
-        wifi_logger.error(f"[{__name__}]:get_vendor got no cell!!")
-        return "no cell!"
-
-
-[proc_vendors(vendor, vendors) for vendor in vendorsMacs_XML.getroot()]
-
-
-def get_timing(cell):
-    """ Gets the mode of a network / cell.
-    @param string cell
-        A network / cell from iwlist scan.
-
-    @return string
-        Last updated timestamp
-    """
-
-    time = matching_line(cell, "Extra: Last beacon:")
-    if time is None:
-        return ""
-    return time
 
 
 def generate_signal(worker_id):

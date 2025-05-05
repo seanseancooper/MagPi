@@ -1,11 +1,10 @@
 import subprocess
 import threading
 
-from src.wifi.lib.wifi_utils import get_vendor, get_timing
-
 from src.wifi.lib.iw_parse import get_parsed_cells, get_name, get_quality, get_channel, get_frequency, \
     get_encryption, get_address, get_signal_level, get_noise_level, get_bit_rates, get_mode
 
+from src.wifi.lib.vendors import get_vendor
 from src.config import readConfig
 import logging
 
