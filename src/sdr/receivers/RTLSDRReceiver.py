@@ -1,7 +1,7 @@
 from rtlsdr import RtlSdr
 from src.sdr.lib.SDRSignalPoint import SDRSignalPoint
 
-class SDRReceiver:
+class RTLSDRReceiver:
 
     def __init__(self, sr=2.048e6, center_freq=100e6, freq_correction=60, gain='auto'):
         """Initialize the SDR hardware with provided parameters.
@@ -19,6 +19,9 @@ class SDRReceiver:
         self.data = None
         self.signalpoint = None
 
+    def configure(self, config_file):
+        pass
+
     def get_sample_rate(self):
         return self.sdr.sample_rate
 
@@ -34,21 +37,21 @@ class SDRReceiver:
     def set_gain(self, gain_value):
         self.sdr.gain = gain_value
 
-    # needs to be renamed: self.module_retriever.get_parsed_cells()
     def get_parsed_cells(self):
+        # needs be a list of signalpoint as a cell
         return [self.signalpoint]
 
-    # needs to be renamed: self.module_retriever.scan()
     def scan(self):
+        self.get_data()
         print(f'scannin....{self.signalpoint}')
-        # return self.get_data()
+        return [self.signalpoint]
 
     def get_data(self, fft_size=512, num_rows=500):
-        x = self.read_samples(2048)  # get rid of initial empty samples
-        x = self.read_samples(fft_size * num_rows)  # get all the samples we need for the spectrogram
+        x = self.read_samples(2048)                             # get rid of initial empty samples
+        x = self.read_samples(num_samples=fft_size * num_rows)  # get all the samples we need for the spectrogram
+        sr = self.sdr.sample_rate
         self.sdr.close()
 
-        # test SDRSignalPoint
         self.signalpoint = SDRSignalPoint(
                 'worker_id',
                 0.0,  # lat
@@ -56,7 +59,7 @@ class SDRReceiver:
                 0.0,  # sgnl
                 array_data=x,
                 audio_data=None,
-                sr=self.sdr.sample_rate)
+                sr=sr)
 
         print(self.signalpoint.get_audio_frequency_features())
 
@@ -72,7 +75,7 @@ class SDRReceiver:
         print(self.sdr.valid_gains_db)
 
 if __name__ == '__main__':
-    sdr_analyzer = SDRReceiver()
+    sdr_analyzer = RTLSDRReceiver()
     sdr_analyzer.set_gain(49.6)
 
     fft_size=512
