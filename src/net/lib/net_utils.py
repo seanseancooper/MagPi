@@ -2,6 +2,7 @@ import logging
 from src.config import readConfig
 
 logger_root = logging.getLogger('root_logger')
+net_logger = logging.getLogger('net_logger')
 
 def get_retriever(name):
     logger_root.debug(f'attempting to load retriever {name}')
@@ -39,13 +40,13 @@ def check_rmq_available(module):
                 queue = queues[i]
                 if queue['name'] == module_queue and queue['state'] != "running":
                     RMQ_AVAILABLE = False
-                    print(f'NET::RMQ {module_queue} not available: queue not running.')
+                    net_logger.debug(f'NET::RMQ {module_queue} not available: queue not running.')
         else:
             RMQ_AVAILABLE = False
-            print(f'NET::RMQ {module_queue} not available: healthcheck failed.')
+            net_logger.debug(f'NET::RMQ {module_queue} not available: healthcheck failed.')
     except Exception as e:
         RMQ_AVAILABLE = False
-        print(f'Error: NET::RMQ {module_queue} is not available: {e}')
+        net_logger.debug(f'Error: NET::RMQ {module_queue} is not available: {e}')
 
     return module, RMQ_AVAILABLE
 
@@ -65,10 +66,10 @@ def check_zmq_available():
         #     pass
         # else:
         #     ZMQ_AVAILABLE = False
-        #     print(f'NET::ZMQ not available: healthcheck failed.')
+        #     net_logger.debug(f'NET::ZMQ not available: healthcheck failed.')
     except Exception as e:
         ZMQ_AVAILABLE = False
-        print(f'Error: NET::ZMQ is not available: {e}')
+        net_logger.info(f'Error: NET::ZMQ is not available: {e}')
 
     return ZMQ_AVAILABLE
 
@@ -89,9 +90,9 @@ def check_imq_available():
         #     pass
         # else:
         #     IMQ_AVAILABLE = False
-        #     print(f'NET::IMQ not available: healthcheck failed.')
+        #     net_logger.debug(f'NET::IMQ not available: healthcheck failed.')
     except Exception as e:
         IMQ_AVAILABLE = False
-        print(f'Error: NET::IMQ is not available: {e}')
+        net_logger.debug(f'Error: NET::IMQ is not available: {e}')
 
     return IMQ_AVAILABLE
