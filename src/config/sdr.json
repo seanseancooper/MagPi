@@ -22,6 +22,9 @@
 			"SCANNER": "Tabulator"
 		},
 		{
+			"MODULE_TRACKER": "src.lib.Tracker"
+		},
+		{
 			"MODULE_RETRIEVER": "src.sdr.receivers.SDRReceiver"
 		},
 		{
