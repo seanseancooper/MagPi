@@ -1,0 +1,76 @@
+<div id="workers" class="module_tab" style="position:relative;display:none;">
+{% if container %}
+    {% set scanner = {} %}
+    {% set config = scanner.__setitem__("config", {}) %}
+    {% set CELL_IDENT_FIELD = scanner.__setitem__("CELL_IDENT_FIELD", "BSSID") %}
+    {% set CELL_NAME_FIELD = scanner.__setitem__("CELL_NAME_FIELD", "SSID") %}
+    {% set CELL_STRENGTH_FIELD = scanner.__setitem__("CELL_STRENGTH_FIELD", "Signal") %}
+    {% set TEMPLATE_AJAX_URL = scanner.config.__setitem__("TEMPLATE_AJAX_URL", "http://wifi.localhost:5006/scan") %}
+{% endif %}
+    <script>
+        var workers = new Tabulator("#workers", {
+            ajaxURL:"http://wifi.localhost:5006/workers",                   // request URI
+            ajaxConfig:"GET",                                               // ajax config options go here
+            headerVisible:true,                                             // show header
+            dataLoaderLoading:dataLoaderLoading,                            // change "Loading" message to "&nbsp;"
+            index:"{{ scanner.CELL_IDENT_FIELD  }}",                                                  // use BSSID as index
+            rowFormatter:function(row){
+                row.getElement().style = "height:24px";
+            },
+
+            dependencies:{
+                datetime: luxon,
+            },
+
+            persistence:{
+                sort: true,                                         //persist column sorting
+                filter: true,                                       //persist filters
+            },
+
+            columns:[
+
+                {field:"workers", width:102, formatter: function(cell, formatterParams) {
+                    var data = cell.getRow().getData();
+                    const trgt = '{{ module }}';
+
+                    var _color = colorUniqId(data.{{ scanner.CELL_IDENT_FIELD  }}, ':');
+                    var p_signal_color = 'rgba(' + _color + ', 1.0)';
+                    var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
+
+                    if (data.is_mute == false) {
+                        return "<button id='remove_button_"+ data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='width:24px;' class='trk_btn rem_button' value='"+data.{{ scanner.CELL_IDENT_FIELD  }}+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
+                    } else {
+                        return "<button id='remove_button_"+ data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='width:24px;' class='trk_btn rem_button' value='"+data.{{ scanner.CELL_IDENT_FIELD  }}+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
+                    }
+                }},
+                {title:"{{ scanner.CELL_IDENT_FIELD  }}", field:"{{ scanner.CELL_IDENT_FIELD  }}", width:120},
+
+                {title:"{{ scanner.CELL_NAME_FIELD }}", field:"text_attributes.{{ scanner.CELL_NAME_FIELD }}", width:140, formatter:ssidFormatter, formatterParams:{
+                    field:"Quality",
+                    colors:["red", "orange", "yellow", "#008800", "#00FF00"]
+                }},
+
+                {title:"db", field:"{{ scanner.CELL_STRENGTH_FIELD  }}", width:30},
+                {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, sorter:"array", sorterParams:{
+                    type:"length"
+                }},
+
+                // should 'iterate' text_attributes instead.
+                {title:"Ch.", field:"text_attributes.Channel", width:50},
+                {title:"Freq.", field:"text_attributes.Frequency", width:70},
+                {title:"Sec.", field:"text_attributes.Encryption", formatter: "tickCross", width:30},
+                {title:"Vendor", field:"text_attributes.Vendor", width:100},
+
+                {title:"Elapsed", field:"elapsed", width:75},
+                {title:"Created", field:"created", width:75, formatter:"datetime", formatterParams:{
+                    outputFormat:"HH:mm:ss",
+                    invalidPlaceholder:"--:--:--",
+                }},
+                {title:"Updated", field:"updated", width:75, formatter:"datetime", formatterParams:{
+                    outputFormat:"HH:mm:ss",
+                    invalidPlaceholder:"--:--:--",
+                }},
+            ],
+        });
+    </script>
+</div>
