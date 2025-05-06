@@ -43,9 +43,11 @@ class SDRSignalPoint(SignalPoint):
         self._text_attributes = {}
 
         if audio_data is not None and sr is not None:
+            self._signal_type = 'audio'
             self._audio_frequency_features = self.compute_audio_frequency_features(audio_data, sr)
 
         if array_data is not None:
+            self._signal_type = 'array'
             self._array_frequency_features = self.compute_array_frequency_features(array_data)
 
     def get(self):
