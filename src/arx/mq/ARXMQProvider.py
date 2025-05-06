@@ -95,12 +95,12 @@ class ARXMQConsumer(threading.Thread):
         try:
             # asyncio.run(self.zmq.receive_data())
             self.zmq.receive_data()
-        except Exception as e:
+        except Exception as e: # don't trap here
             print(f'NET::ZMQ Error {e}')
 
     def consume_rmq(self):
         try:
             t = threading.Thread(target=self.rmq.run)
             t.start()
-        except Exception as e:
+        except Exception as e: # don't trap here
             print(f'NET::RMQ Error {e}')
