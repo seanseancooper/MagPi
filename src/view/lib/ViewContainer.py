@@ -9,7 +9,7 @@ import requests
 from src.config import readConfig, CONFIG_PATH
 
 from src.lib.utils import format_time, format_delta
-from src.net.lib.net_utils import get_retriever
+from src.net.lib.net_utils import get_retriever, check_rmq_available
 import jinja2
 
 from src.view.aggregator.MQAggregator import MQAggregator
@@ -35,7 +35,7 @@ class ViewContainer(threading.Thread):
         self.dead_modules = []
 
         self.aggregator  = None
-        self.module_retriever = None
+        self.mq_retrievers = defaultdict(dict)
         self.module_stats = defaultdict(dict)
         self.module_configs = defaultdict(dict)
         self.module_data = defaultdict(dict)
@@ -84,6 +84,18 @@ class ViewContainer(threading.Thread):
         except Exception as e:
             view_logger.error(f'MQ did load: {e}')
 
+    def load_mq_retriever(self, m):
+        """ load the retriever once """
+        _, RMQ_OK = check_rmq_available(m)
+        mq_retriever = self.module_configs[m].get('MODULE_RETRIEVER', None)
+
+        if mq_retriever and self.mq_retrievers[m] == {} and RMQ_OK:
+            retriever = get_retriever(mq_retriever)
+            retriver = retriever()
+            retriver.configure(f'{m}.json')
+            self.mq_retrievers[m] = retriver
+            print(self.mq_retrievers[m])
+
     def register_modules(self):
         """ discover 'live' module REST contexts """
         self.live_modules.clear()
@@ -94,20 +106,31 @@ class ViewContainer(threading.Thread):
                 test = requests.get('http://' + m + '.' + self.module_configs[m]['SERVER_NAME'])
                 if test.ok:
                     self.live_modules.append(m)
+                    self.load_mq_retriever(m)
             except Exception:
                 self.dead_modules.append(m)
 
         [test(mod) for mod in self.modules]
 
-    def aggregate(self, mod):
-        """ collect data and stats into aggregation """
-
+    def use_REST(self, mod):
         try:
             data = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
             if data.ok:
                 self.module_data[mod] = data.json()
         except Exception as e:
-            view_logger.warning(f'Data Aggregator Warning [{mod}]! {e}')
+            view_logger.warning(f'Data Aggregator REST Exception [{mod}]! {e}')
+
+    def aggregate(self, mod):
+        """ collect data and stats into aggregation """
+
+        try:
+            if self.mq_retrievers[mod]:
+                self.module_data[mod] = self.mq_retrievers[mod].scan()
+            else:
+                self.use_REST(mod)
+
+        except KeyError:
+            self.use_REST(mod)
 
         try:
             stats = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'] + '/stats')
