@@ -14,13 +14,6 @@ import sys
 from rtlsdr import RtlSdr
 
 # A simple waterfall, spectrum plotter
-#
-# Controls:
-#
-# * Scroll mouse-wheel up or down, or press the left or right arrow keys, to
-#   change the center frequency (hold shift for finer control).
-# * Press "+" and "-" to control gain, and space to enable AGC.
-# * Type a frequency (in MHz) and press enter to directly change the center frequency
 
 NFFT = 1024*4
 NUM_SAMPLES_PER_SCAN = NFFT*16
@@ -36,84 +29,34 @@ FREQ_INC_FINE = 0.1e6
 GAIN_INC = 5
 
 class Waterfall(object):
-    keyboard_buffer = []
-    shift_key_down = False
-    image_buffer = -100*np.ones((NUM_BUFFERED_SWEEPS,\
-                                 NUM_SCANS_PER_SWEEP*NFFT))
+    image_buffer = -100*np.ones((NUM_BUFFERED_SWEEPS, NUM_SCANS_PER_SWEEP*NFFT))
 
     def __init__(self, sdr=None, fig=None):
+        self.image = None
+        self.ax = None
         self.fig = fig if fig else pyl.figure()
         self.sdr = sdr if sdr else RtlSdr()
-
         self.init_plot()
 
     def init_plot(self):
+        print(f'called init_plot')
         self.ax = self.fig.add_subplot(1,1,1)
         self.image = self.ax.imshow(self.image_buffer, aspect='auto',\
                                     interpolation='nearest', vmin=-50, vmax=10)
         self.ax.set_xlabel('Current frequency (MHz)')
         self.ax.get_yaxis().set_visible(False)
 
-        self.fig.canvas.mpl_connect('scroll_event', self.on_scroll)
-        self.fig.canvas.mpl_connect('key_press_event', self.on_key_press)
-        self.fig.canvas.mpl_connect('key_release_event', self.on_key_release)
-
     def update_plot_labels(self):
+        print(f'called update_plot_labels')
         fc = self.sdr.fc
         rs = self.sdr.rs
         freq_range = (fc - rs/2)/1e6, (fc + rs*(NUM_SCANS_PER_SWEEP - 0.5))/1e6
 
         self.image.set_extent(freq_range + (0, 1))
-        self.fig.canvas.draw_idle()
-
-    def on_scroll(self, event):
-        if event.button == 'up':
-            self.sdr.fc += FREQ_INC_FINE if self.shift_key_down else FREQ_INC_COARSE
-            self.update_plot_labels()
-        elif event.button == 'down':
-            self.sdr.fc -= FREQ_INC_FINE if self.shift_key_down else FREQ_INC_COARSE
-            self.update_plot_labels()
-
-    def on_key_press(self, event):
-        if event.key == '+':
-            self.sdr.gain += GAIN_INC
-        elif event.key == '-':
-            self.sdr.gain -= GAIN_INC
-        elif event.key == ' ':
-            self.sdr.gain = 'auto'
-        elif event.key == 'shift':
-            self.shift_key_down = True
-        elif event.key == 'right':
-            self.sdr.fc += FREQ_INC_FINE if self.shift_key_down else FREQ_INC_COARSE
-            self.update_plot_labels()
-        elif event.key == 'left':
-            self.sdr.fc -= FREQ_INC_FINE if self.shift_key_down else FREQ_INC_COARSE
-            self.update_plot_labels()
-        elif event.key == 'enter':
-            # see if valid frequency was entered, then change center frequency
-            try:
-                # join individual key presses into a string
-                input = ''.join(self.keyboard_buffer)
-
-                # if we're doing multiple adjacent scans, we need to figure out
-                # the appropriate center freq for the leftmost scan
-                center_freq = float(input)*1e6 + (self.sdr.rs/2)*(1 - NUM_SCANS_PER_SWEEP)
-                self.sdr.fc = center_freq
-
-                self.update_plot_labels()
-            except ValueError:
-                pass
-
-            self.keyboard_buffer = []
-        else:
-            self.keyboard_buffer.append(event.key)
-
-    def on_key_release(self, event):
-        if event.key == 'shift':
-            self.shift_key_down = False
 
     def update(self, *args):
         # save center freq. since we're gonna be changing it
+        print(f'called update')
         start_fc = self.sdr.fc
 
         # prepare space in buffer
@@ -125,6 +68,7 @@ class Waterfall(object):
 
             # estimate PSD for one scan
             samples = self.sdr.read_samples(NUM_SAMPLES_PER_SCAN)
+            print(samples.shape)
             psd_scan, f = psd(samples, NFFT=NFFT)
 
             self.image_buffer[0, start_ind: start_ind+NFFT] = 10*np.log10(psd_scan)
@@ -138,23 +82,20 @@ class Waterfall(object):
         return self.image,
 
     def start(self):
+        print(f'called start')
         self.update_plot_labels()
         if sys.platform == 'darwin':
-            # Disable blitting. The matplotlib.animation's restore_region()
-            # method is only implemented for the Agg-based backends,
-            # which the macosx backend is not.
             blit = False
         else:
             blit = True
-        ani = animation.FuncAnimation(self.fig, self.update, interval=50,
-                blit=blit)
+
+        ani = animation.FuncAnimation(self.fig, self.update, interval=50, blit=blit)
 
         pyl.show()
-
         return
 
-
 def main():
+    print(f'called main')
     sdr = RtlSdr()
     wf = Waterfall(sdr)
 
@@ -164,8 +105,6 @@ def main():
     sdr.gain = 10
 
     wf.start()
-
-    # cleanup
     sdr.close()
 
 
