@@ -1,1 +1,1 @@
-from src.sdr.receivers.RTLSDRReceiver import SDRReceiver   # runtime retrieval
+from src.sdr.receivers.RTLSDRReceiver import RTLSDRReceiver   # runtime retrieval
