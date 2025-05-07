@@ -159,6 +159,7 @@
             scanner.replaceData();
             tracked.replaceData();
             ghosts.replaceData();
+            workers.replaceData();
         }
 
         const dataLoaderLoading = "&nbsp;";
@@ -217,9 +218,10 @@
 <body>
 
     <div id="tabs" style="height:30px">
-        <button id="scanner_tab_scanner" class="tab_button" onclick="loadTab(event, 'scanner')">SCANNED</button>
-        <button id="scanner_tab_tracked" class="tab_button" onclick="loadTab(event, 'tracked')">TRACKED</button>
-        <button id="scanner_tab_ghosts" class="tab_button" onclick="loadTab(event, 'ghosts')">GHOSTS</button>
+        <button id="scanner_tab_scanner" class="tab_button" onclick="loadTab(event, 'scanner')">scanned</button>
+        <button id="scanner_tab_tracked" class="tab_button" onclick="loadTab(event, 'tracked')">tracked</button>
+        <button id="scanner_tab_ghosts" class="tab_button" onclick="loadTab(event, 'ghosts')">ghosts</button>
+        <button id="scanner_tab_workers" class="tab_button" onclick="loadTab(event, 'workers')">workers</button>
     </div>
 
     <div id="scanner_filters" style="" class="scanner_filters">
@@ -278,12 +280,14 @@
 {% include 'scanner.js.j2' %}
 {% include 'tracked.js.j2' %}
 {% include 'ghosts.js.j2' %}
+{% include 'workers.js.j2' %}
 <script>
     scanner_elements = [];
 
     scanner_elements.push(document.getElementById('scanner'));
     scanner_elements.push(document.getElementById('tracked'));
     scanner_elements.push(document.getElementById('ghosts'));
+    scanner_elements.push(document.getElementById('workers'));
 
     scanner_elements.push(document.getElementById("all_button"));
     scanner_elements.push(document.getElementById("none_button"));
