@@ -1,5 +1,9 @@
 import logging
 from src.config import readConfig
+import requests
+
+from src.net.zeroMQ.ZeroMQAsyncConsumer import ZeroMQAsyncConsumer
+from src.net.zeroMQ.ZeroMQAsyncProducer import ZeroMQAsyncProducer
 
 logger_root = logging.getLogger('root_logger')
 net_logger = logging.getLogger('net_logger')
@@ -30,7 +34,6 @@ def check_rmq_available(module):
     module_queue = f'{module}_queue'
 
     try:
-        import requests
         req = requests.get(f'http://{rmq_host}:{rmq_port}/api/queues', auth=(rmq_username, rmq_password))
 
         if req.ok:  # check for auth fail too!!
@@ -57,16 +60,20 @@ def check_zmq_available():
     ZMQ_AVAILABLE = True
 
     try:
-        import requests
-        # # look for uRL
-        # req = requests.get(f'http://{zmq_host}:{zmq_port}', auth=(zmq_username, zmq_password))
-        #
-        # if req.ok:  # check for auth fail too!!
-        #     # process response
-        #     pass
-        # else:
-        #     ZMQ_AVAILABLE = False
-        #     net_logger.debug(f'NET::ZMQ not available: healthcheck failed.')
+        # start a ZMQ consumer/producer and test zmq
+        consumer = ZeroMQAsyncConsumer()
+        producer = ZeroMQAsyncProducer()
+
+        import asyncio
+        asyncio.run(consumer.receive_data())
+        producer.send_data(metadata={"test": 1}, audiodata=None)
+
+        while consumer.receive_data():
+            if not consumer.metadata['test']:
+                ZMQ_AVAILABLE = False
+                net_logger.debug(f'NET::ZMQ not available: healthcheck failed.')
+            return ZMQ_AVAILABLE
+
     except Exception as e:
         ZMQ_AVAILABLE = False
         net_logger.info(f'Error: NET::ZMQ is not available: {e}')
@@ -74,25 +81,10 @@ def check_zmq_available():
     return ZMQ_AVAILABLE
 
 def check_imq_available():
-
-    config = {}
-    readConfig('net.json', config)
-
-    IMQ_AVAILABLE = True
+    """ IMQ uses ZMQ internally """
 
     try:
-        import requests
-        # # look for uRL
-        # req = requests.get(f'http://{imq_host}:{imq_port}', auth=(imq_username, imq_password))
-        #
-        # if req.ok:  # check for auth fail too!!
-        #     # process response
-        #     pass
-        # else:
-        #     IMQ_AVAILABLE = False
-        #     net_logger.debug(f'NET::IMQ not available: healthcheck failed.')
+        return check_zmq_available()
     except Exception as e:
-        IMQ_AVAILABLE = False
         net_logger.debug(f'Error: NET::IMQ is not available: {e}')
 
-    return IMQ_AVAILABLE
