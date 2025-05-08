@@ -4,11 +4,12 @@ import threading
 from collections import defaultdict
 import time
 from datetime import datetime, timedelta
+
 import requests
 
 from src.config import readConfig, CONFIG_PATH
 
-from src.lib.utils import format_time, format_delta
+from src.lib.utils import format_delta
 from src.net.lib.net_utils import get_retriever, check_rmq_available
 import jinja2
 
@@ -91,9 +92,9 @@ class ViewContainer(threading.Thread):
 
         if mq_retriever and self.mq_retrievers[m] == {} and RMQ_OK:
             retriever = get_retriever(mq_retriever)
-            retriver = retriever()
-            retriver.configure(f'{m}.json')
-            self.mq_retrievers[m] = retriver
+            retriever = retriever()
+            retriever.configure(f'{m}.json')
+            self.mq_retrievers[m] = retriever
             print(self.mq_retrievers[m])
 
     def register_modules(self):
@@ -112,32 +113,26 @@ class ViewContainer(threading.Thread):
 
         [test(mod) for mod in self.modules]
 
-    def use_REST(self, mod):
-        try:
-            data = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
-            if data.ok:
-                self.module_data[mod] = data.json()
-        except Exception as e:
-            view_logger.warning(f'Data Aggregator REST Exception [{mod}]! {e}')
 
     def aggregate(self, mod):
         """ collect data and stats into aggregation """
 
-        try:
-            if self.mq_retrievers[mod]:
-                self.module_data[mod] = self.mq_retrievers[mod].scan()
+        if self.mq_retrievers[mod]:
+            self.module_data[mod] = self.mq_retrievers[mod].scan()
+        else:
+            data = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
+            if data.ok:
+                self.module_data[mod] = data.json()
             else:
-                self.use_REST(mod)
+                view_logger.warning(f'Data Aggregator REST Exception [{mod}]')
 
-        except KeyError:
-            self.use_REST(mod)
+        # stats only available via REST?
+        stats = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'] + '/stats')
 
-        try:
-            stats = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'] + '/stats')
-            if stats.ok:
-                self.module_stats[mod] = stats.json()  # current module stats
-        except Exception as e:
-            view_logger.warning(f'Statistics Aggregator Warning [{mod}]! {e}')
+        if stats.ok:
+            self.module_stats[mod] = stats.json() # current module stats
+        else:
+            view_logger.warning(f'Statistics Aggregator Warning [{mod}] not loaded.')
 
     def get_module_stats(self, mod):
         """ return all stats """
