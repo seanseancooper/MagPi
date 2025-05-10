@@ -25,7 +25,6 @@ class ARXSignalPoint(SignalPoint):
             "source"            : None,                     # who: source component, plugin or process
             "signal_type"       : None,                     # who: ???
             "name"              : None,                     # what: a human readable identifier
-            "d_type"            : str(type(self._audio_data)),   # what: 32bit, 64bit, complex, list?
             "id"                : str(self._id),            # when: derived from creator SignalPoint type.
             "fs_path"           : None,                     # where: could be on filesystem
             "channels"          : None,                     # how: documentation of created value.
