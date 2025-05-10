@@ -1,3 +1,4 @@
+import threading
 from datetime import datetime
 
 import zmq
@@ -30,9 +31,10 @@ class ZeroMQAsyncConsumer:
             self.metadata = json.loads(metadata_part.decode('utf-8'))
 
             frame_shape = self.metadata['frame_shape']
+            dtype = self.metadata['dtype']
             shape = tuple(int(_) for _ in frame_shape)
 
-            self.data = np.frombuffer(audiodata_part, dtype=np.float64).reshape(shape)
+            self.data = np.frombuffer(audiodata_part, dtype=dtype).reshape(shape)
             self.metadata['time_diff'] = (datetime.now() - datetime.strptime(self.metadata['sent'], "%Y-%m-%d %H:%M:%S.%f")).total_seconds()
 
             # do something with ARX data & text_attributes
