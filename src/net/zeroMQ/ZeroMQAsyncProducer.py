@@ -22,23 +22,48 @@ class ZeroMQAsyncProducer:
         net_logger.debug(f"Sending data. {metadata['id']}")
         self.socket.send(message)
 
+
+    def test(self):
+
+        from datetime import datetime
+        import numpy as np
+
+        from src.arx.lib.ARXSignalPoint import ARXSignalPoint
+        from src.lib.utils import format_time
+
+        arxs = ARXSignalPoint('00000-00000-000000',
+                              0.0,
+                              0.0,
+                              0.0)
+
+        data = np.zeros((1024, 2), dtype=np.float64)
+
+        arxs.set_audio_data(data)
+        arxs.set_sampling_rate(48000)
+
+        arxs.set_text_attribute('signal_type', 'test')
+        arxs.set_text_attribute('sent', format_time(datetime.now(), "%Y-%m-%d %H:%M:%S.%f"))
+        arxs.set_text_attribute('fs_path', 'test')
+        arxs.set_text_attribute('channels', data.shape[1])
+        arxs.set_text_attribute('sr', 48000)
+        arxs.set_text_attribute('frame_shape', data.shape)
+        arxs.set_text_attribute('dtype', str(data.dtype))
+
+        return arxs
+        # while True:
+        #     metadata = arxs.get_text_attributes()
+        #     data = arxs.get_audio_data()
+        #
+        #     asyncio.run(producer.send_data(metadata, data))
+
+
 if __name__ == "__main__":
     import asyncio
-    from src.cam.lib.FrameObjekt import FrameObjekt
-
-    def snap():
-        import cv2 as cv
-        c = cv.VideoCapture(0)
-        while c.isOpened():
-            _, f = c.retrieve()
-            return f
-
     producer = ZeroMQAsyncProducer()
-    f = snap()
+    arxs = producer.test()
+
     while True:
+        metadata = arxs.get_text_attributes()
+        data = arxs.get_audio_data()
 
-        frame_objekt = FrameObjekt.create(f_id="0")
-        frame_objekt.wall = f
-        frame_objekt._text_attributes = {'text_attributes': {'frame_shape': f.shape, 'dtype': f.dtype}}
-
-        asyncio.run(producer.send_data(frame_objekt.get_text_attributes(),frame_objekt.wall))
+        asyncio.run(producer.send_data(metadata, data))
