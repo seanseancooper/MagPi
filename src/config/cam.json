@@ -28,15 +28,6 @@
 			"IMQ_PORT" : "5555"
 		},
 		{
-			"RABBITMQ_HOST" : "localhost"
-		},
-		{
-			"RABBITMQ_PORT" : "?"
-		},
-		{
-			"RABBITMQ_QUEUE" : "cam_queue"
-		},
-		{
 			"PLUGIN": {
 				"debug": false,
 				"capture_sleep_time": 0.0,
