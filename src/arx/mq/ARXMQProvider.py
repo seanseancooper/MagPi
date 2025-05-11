@@ -29,13 +29,12 @@ class ARXMQProvider(threading.Thread):
     def send_sgnlpt(self, arxs):
         try:
             text_attributes = arxs.get()
+
             metadata = text_attributes['text_attributes']
             data = arxs.get_audio_data()
             frame = metadata, data
 
-            if self.zmq:
-                # print(f'sending zmq')
-                self.send_frame(frame)
+            self.send_frame(frame)
 
         except Exception as e:
             print(f'{e}')
