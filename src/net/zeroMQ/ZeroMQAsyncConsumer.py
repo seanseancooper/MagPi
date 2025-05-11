@@ -39,7 +39,7 @@ class ZeroMQAsyncConsumer:
 
             # do something with ARX data & text_attributes
             net_logger.debug(f'Received metadata :{self.metadata}')
-            # print(f'Received audio_data :{self.data}')
+            print(f'Received audio_data :{self.metadata["id"]}')
 
     def get_message(self):
         return self.message

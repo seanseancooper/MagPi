@@ -19,7 +19,7 @@ class ZeroMQAsyncProducer:
 
     async def send_data(self, metadata, audiodata):
         message = json.dumps(metadata).encode('utf-8') + b'||' + audiodata.tobytes()
-        net_logger.debug(f"Sending data. {metadata['id']}")
+        print(f"Sending data. {metadata['id']}")
         self.socket.send(message)
 
 
@@ -50,11 +50,6 @@ class ZeroMQAsyncProducer:
         arxs.set_text_attribute('dtype', str(data.dtype))
 
         return arxs
-        # while True:
-        #     metadata = arxs.get_text_attributes()
-        #     data = arxs.get_audio_data()
-        #
-        #     asyncio.run(producer.send_data(metadata, data))
 
 
 if __name__ == "__main__":
