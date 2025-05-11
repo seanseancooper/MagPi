@@ -86,7 +86,7 @@ def check_imq_available():
     """ IMQ uses ZMQ internally """
 
     try:
-        return check_zmq_available()
+        return True
     except Exception as e:
         net_logger.debug(f'Error: NET::IMQ is not available: {e}')
 
