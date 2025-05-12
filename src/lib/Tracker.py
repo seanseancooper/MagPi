@@ -13,7 +13,15 @@ speech_logger = logging.getLogger('speech_logger')
 
 
 class Tracker(object):
-    """ Generic Tracker class """
+    """ Generic Tracker has 3 related jobs
+     Deconstructs cells: parse the information in received data [cell] into counterpart 'Worker' attributes that
+     never change. This Worker is associated by it's ident and identified by worker_id.
+
+     Assigns Workers: Instance a Worker to track the cell over its lifetime and create signalpoints for the type.
+
+     Tracks lif of cells: keeps up with stats on when cell last seen, tracked, etc using mappings internal to Scanner
+     that instanced this Tracker.
+     """
 
     def __init__(self):
         super().__init__()
