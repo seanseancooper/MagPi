@@ -12,7 +12,7 @@ wifi_logger = logging.getLogger('wifi_logger')
 speech_logger = logging.getLogger('speech_logger')
 
 
-class MQWifiRetriever(threading.Thread):
+class RabbitMQWifiRetriever(threading.Thread):
     """ MQ Wifi Retriever class """
     def __init__(self):
         super().__init__()
