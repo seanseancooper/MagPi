@@ -3,7 +3,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 
-from src.net.lib.net_utils import check_rmq_available
+from src.net.lib.net_utils import check_zmq_available
 from src.config import readConfig
 from src.net.lib.net_utils import get_retriever
 from src.lib.utils import get_location, format_time, format_delta
