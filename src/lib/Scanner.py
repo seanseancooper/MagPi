@@ -53,7 +53,7 @@ class Scanner(threading.Thread):
 
         _, ZMQ_OK = check_zmq_available()  # self.config['MODULE'].lower()
 
-        if RMQ_OK:
+        if ZMQ_OK:
             golden_retriever = get_retriever(self.config['MQ_MODULE_RETRIEVER']) # this should have been a list.
         else:
             golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
