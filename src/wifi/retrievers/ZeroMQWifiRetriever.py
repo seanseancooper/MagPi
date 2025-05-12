@@ -108,3 +108,5 @@ class ZeroMQWifiScanner(threading.Thread):
                 import numpy as np
                 metadata = {"id": 0}
                 data = np.array(scanned)
+
+                asyncio.run(self.producer.send_data(metadata, data))
