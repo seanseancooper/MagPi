@@ -22,7 +22,7 @@
 			"SCANNER": "Tabulator"
 		},
 		{
-			"MODULE_TRACKER": "src.wifi.lib.WifiTracker"
+			"MODULE_TRACKER": "src.lib.Tracker"
 		},
 		{
 			"MODULE_RETRIEVER": "src.wifi.retrievers.MacOSAirportWifiRetriever"
