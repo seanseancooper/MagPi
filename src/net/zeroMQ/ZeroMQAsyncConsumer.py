@@ -34,7 +34,7 @@ class ZeroMQAsyncConsumer:
             dtype = self.metadata['dtype']
             shape = tuple(int(_) for _ in frame_shape)
 
-            self.data = np.frombuffer(audiodata_part, dtype=dtype).reshape(shape)
+            self.data = np.frombuffer(data_part, dtype=dtype).reshape(shape)
             self.metadata['time_diff'] = (datetime.now() - datetime.strptime(self.metadata['sent'], "%Y-%m-%d %H:%M:%S.%f")).total_seconds()
 
             # do something with data & text_attributes
