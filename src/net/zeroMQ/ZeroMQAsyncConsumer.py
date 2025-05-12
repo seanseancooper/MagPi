@@ -37,7 +37,7 @@ class ZeroMQAsyncConsumer:
             self.data = np.frombuffer(audiodata_part, dtype=dtype).reshape(shape)
             self.metadata['time_diff'] = (datetime.now() - datetime.strptime(self.metadata['sent'], "%Y-%m-%d %H:%M:%S.%f")).total_seconds()
 
-            # do something with ARX data & text_attributes
+            # do something with data & text_attributes
             net_logger.debug(f'Received metadata :{self.metadata}')
             print(f'Received audio_data :{self.metadata["id"]}')
 
