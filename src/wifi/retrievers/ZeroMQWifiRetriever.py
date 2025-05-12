@@ -50,8 +50,8 @@ class ZeroMQWifiRetriever(threading.Thread):
         t.start()
 
     def start_consumer(self):
-        t = threading.Thread(target=self.consumer.run, daemon=True)
-        t.start()
+        import asyncio
+        asyncio.run(self.consumer.receive_data())
 
     def scan(self):
         """ get scan data from MQ """
