@@ -80,7 +80,7 @@ class ZeroMQWifiScanner(threading.Thread):
         self.producer = None
 
     def configure(self, config_file):
-        readConfig('net.json', self.config)     # was passed 'wifi'!
+        readConfig(config_file, self.config)
 
         _ , ZMQ_AVAIL = check_zmq_available()   # self.config['MODULE']
 
