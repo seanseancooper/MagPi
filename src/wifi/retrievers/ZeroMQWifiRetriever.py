@@ -104,6 +104,7 @@ class ZeroMQWifiScanner(threading.Thread):
         while True:
             scanned = self.mq_wifi_retriever.scan()
             if len(scanned) > 0:
+
                 import asyncio
                 import numpy as np
                 metadata = {"id": 0}
