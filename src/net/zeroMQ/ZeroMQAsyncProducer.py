@@ -17,8 +17,8 @@ class ZeroMQAsyncProducer:
         self.socket = context.socket(zmq.PUSH)   #???!!!!!!
         self.socket.connect("tcp://127.0.0.1:5555")
 
-    async def send_data(self, metadata, audiodata):
-        message = json.dumps(metadata).encode('utf-8') + b'||' + audiodata.tobytes()
+    async def send_data(self, metadata, data):
+        message = json.dumps(metadata).encode('utf-8') + b'||' + data.tobytes()
         print(f"Sending data. {metadata['id']}")
         self.socket.send(message)
 
