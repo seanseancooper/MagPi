@@ -27,7 +27,7 @@ class ZeroMQAsyncConsumer:
     async def receive_data(self):
         while True:
             self.message = self.socket.recv()
-            metadata_part, audiodata_part = self.message.split(b'||', 1)
+            metadata_part, data_part = self.message.split(b'||', 1)
             self.metadata = json.loads(metadata_part.decode('utf-8'))
 
             frame_shape = self.metadata['frame_shape']
