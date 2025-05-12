@@ -46,7 +46,7 @@ class MacOSAirportWifiRetriever(threading.Thread):
         except Exception as e:
             wifi_logger.error(f"[{__name__}]: Exception: {e}")
 
-    def configure(self, config_file):
+    def configure(self, config_file): # this should only ever read 'wifi'
         readConfig(config_file, self.config)
 
         self.SIGNAL_DEBUG = self.config.get('XML_SIGNAL_DEBUG')

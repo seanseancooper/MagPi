@@ -28,7 +28,7 @@ class MQWifiRetriever(threading.Thread):
         self.DEBUG = False
 
     def configure(self, config_file):
-        readConfig(config_file, self.config)
+        readConfig(config_file, self.config)  # module config 'wifi.json'
 
         self.DEBUG = self.config.get('DEBUG')
         _ , RMQ_AVAIL = check_rmq_available(self.config['MODULE'])
@@ -44,7 +44,7 @@ class MQWifiRetriever(threading.Thread):
     # @staticmethod
     def start_scanner(self):
         self.scanner = RabbitMQWifiScanner()
-        self.scanner.configure('wifi.json')
+        self.scanner.configure('wifi.json') # passing 'wifi', but reading 'net'!
         t = threading.Thread(target=self.scanner.run, daemon=True)
         t.start()
 
@@ -59,6 +59,6 @@ class MQWifiRetriever(threading.Thread):
         except Exception as e:
             wifi_logger.error(f"[{__name__}]: Exception: {e}")
 
-    def get_parsed_cells(self, airport_data):
+    def get_parsed_cells(self, airport_data): # a facåde to the actual method in the thing retrieving.
         return self.scanner.mq_wifi_retriever.get_parsed_cells(airport_data)
 

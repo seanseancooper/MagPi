@@ -54,16 +54,16 @@ class Scanner(threading.Thread):
         _, RMQ_OK = check_rmq_available(self.config['MODULE'].lower())
 
         if RMQ_OK:
-            golden_retriever = get_retriever(self.config['MQ_MODULE_RETRIEVER'])
+            golden_retriever = get_retriever(self.config['MQ_MODULE_RETRIEVER']) # this should have been a list.
         else:
             golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
 
         self.module_retriever = golden_retriever()
-        self.module_retriever.configure(config_file)
+        self.module_retriever.configure(config_file)  # passing module config 'wifi.json'
 
         module_tracker = get_retriever(self.config['MODULE_TRACKER'])
         self.module_tracker = module_tracker()
-        self.module_tracker.configure(config_file)
+        self.module_tracker.configure(config_file)  # passing module config 'wifi.json'
 
         self.signal_cache_max = self.config.get('SIGNAL_CACHE_MAX', self.signal_cache_max)
 
@@ -134,8 +134,11 @@ class Scanner(threading.Thread):
             self.scanned = self.module_retriever.scan()
 
             if len(self.scanned) > 0:
-
+                # use *current retriever* method to parse what it returned.
+                # return objects [cells] that tracker can
                 parsed_cells = self.module_retriever.get_parsed_cells(self.scanned)
+
+                # pick apart, assign workers (~signalpoints), and track the cells.
                 self.module_tracker.track(parsed_cells)
 
                 self.updated = datetime.now()

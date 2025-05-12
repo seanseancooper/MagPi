@@ -29,14 +29,14 @@ class RabbitMQWifiScanner(threading.Thread):
         self.producer = None
 
     def configure(self, config_file):
-        readConfig('net.json', self.config)
+        readConfig('net.json', self.config) # was passed 'wifi'!
 
         _ , RMQ_AVAIL = check_rmq_available(self.config['MODULE'])
 
         if RMQ_AVAIL:
             golden_retriever = get_retriever(self.config['MQ_WIFI_RETRIEVER'])
             self.mq_wifi_retriever = golden_retriever()
-            self.mq_wifi_retriever.configure(config_file)
+            self.mq_wifi_retriever.configure(config_file) # passing 'net'
             self.producer = RabbitMQProducer(self.config['MQ_WIFI_QUEUE'])
         else:
             exit(0)
