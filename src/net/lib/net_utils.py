@@ -80,7 +80,7 @@ def check_zmq_available():
         ZMQ_AVAILABLE = False
         net_logger.info(f'Error: NET::ZMQ is not available: {e}')
 
-    return ZMQ_AVAILABLE
+    return None, ZMQ_AVAILABLE
 
 def check_imq_available():
     """ IMQ uses ZMQ internally """
