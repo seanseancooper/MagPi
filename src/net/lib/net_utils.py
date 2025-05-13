@@ -72,9 +72,9 @@ def check_zmq_available():
             # loop = asyncio.get_event_loop()
             # loop.run_until_complete(producer.send_data(metadata, data))
 
-        except Exception:
+        except Exception as e:
             ZMQ_AVAILABLE = False
-            net_logger.debug(f'NET::ZMQ not available: healthcheck failed.')
+            net_logger.debug(f'NET::ZMQ not available: {e}.')
 
     except Exception as e:
         ZMQ_AVAILABLE = False
