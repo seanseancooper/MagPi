@@ -33,11 +33,8 @@ class ZeroMQWifiRetriever(threading.Thread):
 
         self.DEBUG = self.config.get('DEBUG')
 
-        if ZMQ_AVAIL:
-            self.consumer = ZeroMQAsyncConsumer()
-            self.start_consumer()
-        else:
-            exit(0)
+        self.consumer = ZeroMQAsyncConsumer()
+        self.start_consumer()
 
         self.start_scanner()
 
