@@ -25,7 +25,7 @@ class ZeroMQAsyncConsumer:
         self.metadata = None    # encapsulates 'text_attributes'
         self.data = None        # data as utf-8 decoded bytes.
 
-    def receive_data(self):
+    async def receive_data(self):
 
         self.message = self.socket.recv()
         metadata_part, data_part = self.message.split(b'||', 1)
@@ -36,11 +36,12 @@ class ZeroMQAsyncConsumer:
         shape = tuple(int(_) for _ in frame_shape)
 
         self.data = np.frombuffer(data_part, dtype=dtype).reshape(shape)
-        # self.metadata['time_diff'] = (datetime.now() - datetime.strptime(self.metadata['sent'], "%Y-%m-%d %H:%M:%S.%f")).total_seconds()
+        self.metadata['time_diff'] = (datetime.now() - datetime.strptime(self.metadata['sent'], "%Y-%m-%d %H:%M:%S.%f")).total_seconds()
 
         # do something with data & text_attributes
-        print(f'Received metadata :{self.metadata}')
-        print(f'Received audio_data :{self.metadata["id"]}')
+        net_logger.info(f'time diff:{self.metadata["time_diff"]}')
+        # print(f'Received metadata: {self.metadata}')
+        # print(f'Received audio_data: {self.data}')
 
     def get_message(self):
         return self.message
@@ -54,4 +55,6 @@ class ZeroMQAsyncConsumer:
 if __name__ == "__main__":
     consumer = ZeroMQAsyncConsumer()
     while True:
-        consumer.receive_data()
+        # consumer.receive_data()
+        import asyncio
+        asyncio.run(consumer.receive_data())

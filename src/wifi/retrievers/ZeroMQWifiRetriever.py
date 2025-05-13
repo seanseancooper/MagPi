@@ -34,9 +34,8 @@ class ZeroMQWifiRetriever(threading.Thread):
         self.DEBUG = self.config.get('DEBUG')
 
         self.consumer = ZeroMQAsyncConsumer()
-        self.start_consumer()
-
         self.start_scanner()
+        self.start_consumer()         # can't start later... it would 'miss' signal
 
     # @staticmethod
     def start_scanner(self):
@@ -52,8 +51,9 @@ class ZeroMQWifiRetriever(threading.Thread):
     def scan(self):
         """ called by Scanner to get scan data """
         try:
-            # go to MQ...
-            return self.consumer.data or []
+            # get data from MQ...
+            scanned = self.consumer.metadata['scanned']
+            return scanned or []
         except Exception as e:
             wifi_logger.error(f"[{__name__}]: Exception: {e}")
 
@@ -97,10 +97,15 @@ class ZeroMQWifiScanner(threading.Thread):
             scanned = self.mq_wifi_retriever.scan()
             if len(scanned) > 0:
 
-                import asyncio
+                metadata = {
+                    "id": 0,
+                    "scanned": scanned
+                }
+
                 import numpy as np
+                data = np.zeros((1024, 2), dtype=np.float64)
+                metadata['sent'] = str(datetime.now())
+                metadata["frame_shape"] = data.shape
+                metadata['dtype'] = str(data.dtype)
 
-                metadata = {"id": 0}
-                data = np.array(scanned)
-
-                asyncio.run(self.producer.send_data(metadata, data))
+                self.producer.send_data(metadata, data)
