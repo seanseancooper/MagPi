@@ -11,8 +11,8 @@ class ImageZMQAsyncProducer:
     def __init__(self, host, port):
         self.sender = ImageSender(connect_to=f'tcp://{host}:{port}')
 
-    def send_frame(self, frameobjekt: FrameObjekt):
-        metadata, f = frameobjekt
+    def send_frame(self, frame):
+        metadata, f = frame
         logger_root.info(f"Sending: {metadata['f_id']}")
         # self.sender.send_image(json.dumps(metadata), f)
 
