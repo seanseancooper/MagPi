@@ -52,6 +52,7 @@ class ZeroMQWifiRetriever(threading.Thread):
     def scan(self):
         """ called by Scanner to get scan data """
         try:
+            # go to MQ...
             return self.consumer.data or []
         except Exception as e:
             wifi_logger.error(f"[{__name__}]: Exception: {e}")
