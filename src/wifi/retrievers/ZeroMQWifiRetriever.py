@@ -1,6 +1,6 @@
 import threading
 from datetime import datetime, timedelta
-from src.net.lib.net_utils import get_retriever, check_zmq_available
+from src.net.lib.net_utils import get_retriever
 from src.config import readConfig
 from src.net.zeroMQ.ZeroMQAsyncConsumer import ZeroMQAsyncConsumer
 from src.net.zeroMQ.ZeroMQAsyncProducer import ZeroMQAsyncProducer
