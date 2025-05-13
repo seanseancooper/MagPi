@@ -32,7 +32,6 @@ class ZeroMQWifiRetriever(threading.Thread):
         readConfig(config_file, self.config)  # module config 'wifi.json'
 
         self.DEBUG = self.config.get('DEBUG')
-        _ , ZMQ_AVAIL = check_zmq_available() # self.config['MODULE']
 
         if ZMQ_AVAIL:
             self.consumer = ZeroMQAsyncConsumer()
