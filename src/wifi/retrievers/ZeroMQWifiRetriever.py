@@ -50,7 +50,7 @@ class ZeroMQWifiRetriever(threading.Thread):
         asyncio.run(self.consumer.receive_data())
 
     def scan(self):
-        """ get scan data from MQ """
+        """ called by Scanner to get scan data """
         try:
             return self.consumer.data or []
         except Exception as e:
