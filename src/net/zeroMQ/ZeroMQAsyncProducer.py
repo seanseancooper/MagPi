@@ -14,14 +14,13 @@ class ZeroMQAsyncProducer:
     def __init__(self):
         context = zmq.Context()
 
-        self.socket = context.socket(zmq.PUSH)   #???!!!!!!
-        self.socket.connect("tcp://127.0.0.1:5555")
+        self.socket = context.socket(zmq.PUB)   #???!!!!!!
+        self.socket.bind("tcp://127.0.0.1:5555")
 
-    async def send_data(self, metadata, data):
+    def send_data(self, metadata, data):
         message = json.dumps(metadata).encode('utf-8') + b'||' + data.tobytes()
         print(f"Sending data. {metadata['id']}")
         self.socket.send(message)
-
 
     def test(self):
 
@@ -61,4 +60,4 @@ if __name__ == "__main__":
         metadata = arxs.get_text_attributes()
         data = arxs.get_audio_data()
 
-        asyncio.run(producer.send_data(metadata, data))
+        producer.send_data(metadata, data)
