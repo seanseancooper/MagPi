@@ -79,15 +79,10 @@ class ZeroMQWifiScanner(threading.Thread):
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
-        _ , ZMQ_AVAIL = check_zmq_available()   # self.config['MODULE']
-
-        if ZMQ_AVAIL:
-            golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
-            self.mq_wifi_retriever = golden_retriever()
-            self.mq_wifi_retriever.configure(config_file)
-            self.producer = ZeroMQAsyncProducer()
-        else:
-            exit(0)
+        golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
+        self.mq_wifi_retriever = golden_retriever()
+        self.mq_wifi_retriever.configure(config_file)
+        self.producer = ZeroMQAsyncProducer()
 
     def parse_signals(self, readlines):
         self.parsed_signals = self.mq_wifi_retriever.get_parsed_cells(readlines)
