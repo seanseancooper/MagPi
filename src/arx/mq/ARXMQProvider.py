@@ -14,7 +14,7 @@ class ARXMQProvider(threading.Thread):
     def __init__(self):
         super().__init__()
         self.config = {}
-        self.zmq = ZeroMQAsyncProducer()
+        self.producer = ZeroMQAsyncProducer()
         self.DEBUG = False
 
     def configure(self, config_file):
@@ -24,7 +24,7 @@ class ARXMQProvider(threading.Thread):
     def send_frame(self, frame):
         metadata, data = frame
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.zmq.send_data(metadata, data))
+        loop.run_until_complete(self.producer.send_data(metadata, data))
 
     def send_sgnlpt(self, arxs):
         try:
@@ -44,7 +44,7 @@ class ARXMQConsumer(threading.Thread):
     def __init__(self):
         super().__init__()
         self.config = {}
-        self.zmq = ZeroMQAsyncConsumer()
+        self.consumer = ZeroMQAsyncConsumer()
         self.DEBUG = False
 
     def configure(self, config_file):
@@ -52,21 +52,18 @@ class ARXMQConsumer(threading.Thread):
         self.DEBUG = self.config.get('DEBUG')
 
     def get_data(self):
-        return self.zmq.get_data()
+        return self.consumer.data
 
     def get_metadata(self):
-        return self.zmq.get_metadata()
+        return self.consumer.metadata
 
     def get_frame(self):
         frame = self.get_metadata(), self.get_data(),
         return frame
 
-    def consume(self):
-        self.consume_zmq()
-
     def consume_zmq(self):
         try:
-            # asyncio.run(self.zmq.receive_data())
-            self.zmq.receive_data()
+            import asyncio
+            asyncio.run(self.consumer.receive_data())
         except Exception as e: # don't trap here
             print(f'NET::ZMQ Error {e}')
