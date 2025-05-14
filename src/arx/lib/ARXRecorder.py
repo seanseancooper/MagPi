@@ -202,6 +202,7 @@ class ARXRecorder(threading.Thread):
         arxs.set_text_attribute('channels', data.shape[1])
         arxs.set_text_attribute('sr', sr)
         arxs.set_text_attribute('frame_shape', data.shape)
+        arxs.set_text_attribute('dtype', str(data.dtype))
 
         return arxs
 
