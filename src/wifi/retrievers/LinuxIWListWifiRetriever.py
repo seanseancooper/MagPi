@@ -65,4 +65,20 @@ class LinuxIWListWifiRetriever(threading.Thread):
     @staticmethod
     def get_parsed_cells(readlines, rules=None):
         from src.wifi.iw_parse.iw_parse import get_parsed_cells
+
+        rules = {
+            "SSID"      : get_name,
+            "Quality"   : get_quality,
+            "Channel"   : get_channel,
+            "Frequency" : get_frequency,
+            "Encryption": get_encryption,
+            "BSSID"     : get_address,
+            "Signal"    : get_signal_level,
+            "Noise"     : get_noise_level,
+            "BitRates"  : get_bit_rates,
+            "Mode"      : get_mode,
+            # "Last"      : get_timing,
+            "Vendor"    : get_vendor,
+        }
+
         return get_parsed_cells(readlines, rules=rules)
