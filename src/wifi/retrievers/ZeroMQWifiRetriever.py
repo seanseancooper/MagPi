@@ -38,6 +38,7 @@ class ZeroMQWifiRetriever(threading.Thread):
         self.start_scanner(config_file)
 
     def start_scanner(self, config_file):
+        """ I/O bound process  """
         self.scanner = ZeroMQWifiScanner()
         self.scanner.configure(config_file)
         t = threading.Thread(target=self.scanner.run, daemon=True)
