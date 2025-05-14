@@ -89,8 +89,9 @@ class ZeroMQWifiScanner(threading.Thread):
            speech_logger.info('Zero MQ WiFi scanner started')
 
         while True:
-            scanned = self.wifi_retriever.scan() or []
-            if len(scanned) > 0:
+            # idea: I/O bound here, but I don't want to 'async' this
+            self.scanned = self.wifi_retriever.scan() or ''
+            if len(self.scanned) > 0:
 
                 data = {
                     'id': self.iters,
