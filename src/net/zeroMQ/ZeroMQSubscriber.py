@@ -1,3 +1,4 @@
+import threading
 from datetime import datetime
 
 import zmq
@@ -5,7 +6,7 @@ import json
 import logging
 net_logger = logging.getLogger('net_logger')
 
-class ZeroMQSubscriber:
+class ZeroMQSubscriber(threading.Thread):
     """
     Consume wifi retriever data.
     ZeroMQ Subscriber: consume a 'message' composed of:
@@ -13,11 +14,22 @@ class ZeroMQSubscriber:
             data: None
     """
     def __init__(self):
-        context = zmq.Context()
+        super().__init__()
+        context = zmq.Context().instance()
 
-        self.socket = context.socket(zmq.SUB)                       # make configurable
-        self.socket.connect("tcp://127.0.0.1:5555")                 # make configurable host & port
-        self.socket.setsockopt_string(zmq.SUBSCRIBE, '')            # make configurable
+        # PUB/SUB
+        # self.socket = context.socket(zmq.SUB)                       # make configurable
+        # self.socket.connect("tcp://127.0.0.1:5555")                 # make configurable host & port
+        # self.socket.setsockopt_string(zmq.SUBSCRIBE, '')            # make configurable
+
+        # PUSH/PULL
+        # self.socket = context.socket(zmq.PULL)                       # make configurable
+        # self.socket.bind("tcp://*:5555")                 # make configurable host & port
+
+        # PUSH/PROXY/PULL
+        o_url = 'tcp://127.0.0.1:5556'
+        self.socket = context.socket(zmq.PULL)                       # make configurable
+        self.socket.connect(o_url)                 # make configurable host & port
 
         self.message = None     # entire message
         self.data = None        # data as utf-8 decoded bytes.
