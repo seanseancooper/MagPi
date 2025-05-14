@@ -22,7 +22,7 @@ class ZeroMQSubscriber:
         self.message = None     # entire message
         self.data = None        # data as utf-8 decoded bytes.
 
-    async def receive_data(self):
+    def receive_data(self):
 
         self.message = self.socket.recv()
         self.data = json.loads(self.message.decode('utf-8'))
@@ -30,7 +30,7 @@ class ZeroMQSubscriber:
         self.data['time_diff'] = (datetime.now() - datetime.strptime(self.data['sent'], "%Y-%m-%d %H:%M:%S.%f")).total_seconds()
 
         # do something with data & text_attributes
-        net_logger.info(f'time diff:{self.data["time_diff"]}')
+        net_logger.info(f'time diff:{self.data["time_diff"]} iteration:{self.data["id"]}')
         net_logger.info(f'Received metadata: {self.data}')
 
     def get_message(self):

@@ -34,8 +34,9 @@ class ZeroMQWifiRetriever(threading.Thread):
         self.DEBUG = self.config.get('DEBUG')
 
         self.subcriber = ZeroMQSubscriber()
+        # self.start_subcriber()         # can't start later... it would 'miss' signal
+
         self.start_scanner(config_file)
-        self.start_subcriber()         # can't start later... it would 'miss' signal
 
     def start_scanner(self, config_file):
         self.scanner = ZeroMQWifiScanner()
@@ -43,14 +44,11 @@ class ZeroMQWifiRetriever(threading.Thread):
         t = threading.Thread(target=self.scanner.run, daemon=True)
         t.start()
 
-    def start_subcriber(self):
-        import asyncio
-        asyncio.run(self.subcriber.receive_data())
-
     def scan(self):
         """ called by 'Scanner' to get scan data """
         try:
             # get data from MQ...
+            self.subcriber.receive_data()
             return self.subcriber.data['scanned'] or []
         except Exception as e:
             wifi_logger.error(f"[{__name__}]: Exception: {e}")
