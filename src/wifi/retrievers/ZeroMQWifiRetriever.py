@@ -34,6 +34,12 @@ class ZeroMQWifiRetriever(threading.Thread):
 
         self.DEBUG = self.config.get('DEBUG')
 
+        i_url = 'tcp://127.0.0.1:5555'
+        o_url = 'tcp://127.0.0.1:5556'
+        self.proxy = ZeroMQProxy(i_url, o_url)
+        p = threading.Thread(target=self.proxy.run, daemon=True)
+        p.start()
+
         self.subcriber = ZeroMQSubscriber()
         self.start_scanner(config_file)
 
