@@ -44,7 +44,7 @@ class ARXController(threading.Thread):
                 try:
                     provider.send_sgnlpt(arxs)
                 except Exception as e:
-                    print(f"ARXController 'producer' failed : {e}")
+                    print(f"ARXController 'provider' failed : {e}")
 
             atexit.register(stop)
 
