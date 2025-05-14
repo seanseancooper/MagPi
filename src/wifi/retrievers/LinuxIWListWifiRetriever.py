@@ -61,3 +61,8 @@ class LinuxIWListWifiRetriever(threading.Thread):
         }
 
         self.parsed_signals = get_parsed_cells(readlines, rules=rules)
+
+    @staticmethod
+    def get_parsed_cells(readlines, rules=None):
+        from src.wifi.iw_parse.iw_parse import get_parsed_cells
+        return get_parsed_cells(readlines, rules=rules)
