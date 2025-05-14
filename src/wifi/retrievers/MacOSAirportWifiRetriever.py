@@ -35,6 +35,7 @@ class MacOSAirportWifiRetriever(threading.Thread):
     @staticmethod
     def scan():
         """ scan using airport """
+        # this is an I/O bound process; decouple it from callers
         try:
             # airport is being deprecated! This is only for development if available.
             process = subprocess.Popen(
