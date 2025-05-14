@@ -37,7 +37,7 @@ class ARXController(threading.Thread):
                 provider = ARXMQProvider()
                 provider.configure('arx.json')
             except Exception as e:
-                print(f"ARXController 'producer' failed : {e}")
+                print(f"ARXController 'provider' failed : {e}")
 
             def stop():
                 arxs = routes.arxRec.stop()  # required.
