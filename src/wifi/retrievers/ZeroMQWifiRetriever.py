@@ -34,7 +34,6 @@ class ZeroMQWifiRetriever(threading.Thread):
         self.DEBUG = self.config.get('DEBUG')
 
         self.subcriber = ZeroMQSubscriber()
-        # self.start_subcriber()         # can't start later... it would 'miss' signal
 
         self.start_scanner(config_file)
 
