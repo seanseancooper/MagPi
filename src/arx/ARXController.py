@@ -4,7 +4,7 @@ from flask_cors import CORS
 
 import routes
 from src.net.FlaskRESTServer import RESTServer
-from src.arx.mq.ARXMQProvider import ARXMQProvider
+from src.arx.mq.ARXZeroMQProvider import ARXMQProvider
 
 
 class ARXController(threading.Thread):
