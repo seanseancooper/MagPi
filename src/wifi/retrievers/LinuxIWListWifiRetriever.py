@@ -44,23 +44,7 @@ class LinuxIWListWifiRetriever(threading.Thread):
 
     def parse_signals(self, readlines):
         """ parse signals from iwlist """
-
-        rules = {
-            "SSID"      : get_name,
-            "Quality"   : get_quality,
-            "Channel"   : get_channel,
-            "Frequency" : get_frequency,
-            "Encryption": get_encryption,
-            "BSSID"     : get_address,
-            "Signal"    : get_signal_level,
-            "Noise"     : get_noise_level,
-            "BitRates"  : get_bit_rates,
-            "Mode"      : get_mode,
-            # "Last"      : get_timing,
-            "Vendor"    : get_vendor,
-        }
-
-        self.parsed_signals = self.get_parsed_cells(readlines, rules=rules)
+        self.parsed_signals = self.get_parsed_cells(readlines)
 
     @staticmethod
     def get_parsed_cells(readlines):
