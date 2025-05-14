@@ -10,8 +10,12 @@ class ZeroMQPublisher:
     """
     Publish wifi retriever data to subscriber.
     ZeroMQPublisher: Produce a 'message' composed of:
-            metadata: a mapping of iteration and scanned data.
-            data: None
+        {
+            'id'     : 0,
+            'sent'   : str(datetime.now()),
+            "scanned": scanned,
+        }
+            metadata: a mapping of iteration, time 'sent' and scanned data.
     """
     def __init__(self):
         context = zmq.Context()
