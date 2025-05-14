@@ -24,8 +24,7 @@ class ZeroMQPublisher:
         self.socket.bind("tcp://127.0.0.1:5555")    # make configurable host & port
 
     def send_data(self, data):
-        message = json.dumps(data).encode('utf-8')
-        self.socket.send(message)
+        self.socket.send(json.dumps(data).encode('utf-8'))
 
     def test(self):
         scanned = ""
