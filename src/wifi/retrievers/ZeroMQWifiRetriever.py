@@ -96,7 +96,7 @@ class ZeroMQWifiScanner(threading.Thread):
                 data = {
                     'id': self.iters,
                     'sent': str(datetime.now()),
-                    "scanned": scanned,
+                    "scanned": self.scanned,
                 }
 
                 self.publisher.send_data(data)
