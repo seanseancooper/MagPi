@@ -1,4 +1,6 @@
+import asyncio
 import threading
+import time
 from datetime import datetime, timedelta
 from src.net.lib.net_utils import get_retriever
 from src.config import readConfig
@@ -44,15 +46,16 @@ class ZeroMQWifiRetriever(threading.Thread):
 
     def scan(self):
         """ called by 'Scanner' to get scan data """
+        asyncio.run(self.subcriber.receive_data())
+
         try:
             # get data from MQ...
-            self.subcriber.receive_data()
             return self.subcriber.data['scanned'] or []
         except Exception as e:
             wifi_logger.error(f"[{__name__}]: Exception: {e}")
 
     def get_parsed_cells(self, airport_data): # a facåde to the actual method in the thing retrieving.
-        return self.scanner.mq_wifi_retriever.get_parsed_cells(airport_data)
+        return self.scanner.wifi_retriever.get_parsed_cells(airport_data)
 
 class ZeroMQWifiScanner(threading.Thread):
 
@@ -61,42 +64,39 @@ class ZeroMQWifiScanner(threading.Thread):
         super().__init__()
 
         self.config = {}
-
+        self.iters = 0
         self.created = datetime.now()
         self.updated = datetime.now()
         self.elapsed = timedelta()              # elapsed time since created
         self.parsed_signals = []
 
-        self.mq_wifi_retriever = None
-        self.publisher = None
+        self.wifi_retriever = None
+        self.publisher = ZeroMQPublisher()
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
         module_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
-        self.mq_wifi_retriever = module_retriever()
-        self.mq_wifi_retriever.configure(config_file)
-        self.publisher = ZeroMQPublisher()
+        self.wifi_retriever = module_retriever()
+        self.wifi_retriever.configure(config_file)
 
     def parse_signals(self, readlines):
-        self.parsed_signals = self.mq_wifi_retriever.get_parsed_cells(readlines)
+        self.parsed_signals = self.wifi_retriever.get_parsed_cells(readlines)
 
     def run(self):
 
-        self.created = datetime.now()
         if self.config['SPEECH_ENABLED']:
            speech_logger.info('Zero MQ WiFi scanner started')
 
-        iteration = 0
         while True:
-            scanned = self.mq_wifi_retriever.scan() # wifi 'MODULE_RETRIEVER'
+            scanned = self.wifi_retriever.scan() or []
             if len(scanned) > 0:
 
                 data = {
-                    'id': iteration,
+                    'id': self.iters,
                     'sent': str(datetime.now()),
                     "scanned": scanned,
                 }
 
                 self.publisher.send_data(data)
-                iteration += 1
+            self.iters += 1
