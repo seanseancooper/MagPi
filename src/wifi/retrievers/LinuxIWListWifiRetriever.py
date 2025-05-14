@@ -1,7 +1,7 @@
 import subprocess
 import threading
 
-from src.wifi.iw_parse.iw_parse import get_parsed_cells, get_name, get_quality, get_channel, get_frequency, \
+from src.wifi.iw_parse.iw_parse import get_name, get_quality, get_channel, get_frequency, \
     get_encryption, get_address, get_signal_level, get_noise_level, get_bit_rates, get_mode
 
 from src.wifi.lib.WifiVendors import get_vendor
