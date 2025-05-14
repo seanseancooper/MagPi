@@ -60,7 +60,7 @@ class LinuxIWListWifiRetriever(threading.Thread):
             "Vendor"    : get_vendor,
         }
 
-        self.parsed_signals = get_parsed_cells(readlines, rules=rules)
+        self.parsed_signals = self.get_parsed_cells(readlines, rules=rules)
 
     @staticmethod
     def get_parsed_cells(readlines, rules=None):
