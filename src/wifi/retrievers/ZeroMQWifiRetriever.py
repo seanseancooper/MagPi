@@ -1,6 +1,5 @@
 import asyncio
 import threading
-import time
 from datetime import datetime, timedelta
 from src.net.lib.net_utils import get_retriever
 from src.config import readConfig
