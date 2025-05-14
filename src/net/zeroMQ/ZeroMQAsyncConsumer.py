@@ -17,15 +17,14 @@ class ZeroMQAsyncConsumer:
     def __init__(self):
         context = zmq.Context()
 
-        self.socket = context.socket(zmq.SUB)  # this is hardcoded
-        self.socket.connect("tcp://127.0.0.1:5555")
-        self.socket.setsockopt_string(zmq.SUBSCRIBE, '')
+        self.socket = context.socket(zmq.PULL)
+        self.socket.connect("tcp://127.0.0.1:5555")                 # make configurable host & port
 
         self.message = None     # entire message
         self.metadata = None    # encapsulates 'text_attributes'
         self.data = None        # data as utf-8 decoded bytes.
 
-    async def receive_data(self):
+    def receive_data(self):
 
         self.message = self.socket.recv()
         metadata_part, data_part = self.message.split(b'||', 1)
@@ -40,8 +39,8 @@ class ZeroMQAsyncConsumer:
 
         # do something with data & text_attributes
         net_logger.info(f'time diff:{self.metadata["time_diff"]}')
-        # print(f'Received metadata: {self.metadata}')
-        # print(f'Received audio_data: {self.data}')
+        net_logger.info(f'Received metadata: {self.metadata}')
+        net_logger.info(f'Received audio_data: {self.data}')
 
     def get_message(self):
         return self.message
@@ -55,6 +54,4 @@ class ZeroMQAsyncConsumer:
 if __name__ == "__main__":
     consumer = ZeroMQAsyncConsumer()
     while True:
-        # consumer.receive_data()
-        import asyncio
-        asyncio.run(consumer.receive_data())
+        consumer.receive_data()

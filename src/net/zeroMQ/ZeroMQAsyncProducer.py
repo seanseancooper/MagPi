@@ -14,8 +14,8 @@ class ZeroMQAsyncProducer:
     def __init__(self):
         context = zmq.Context()
 
-        self.socket = context.socket(zmq.PUB)   #???!!!!!!
-        self.socket.bind("tcp://127.0.0.1:5555")
+        self.socket = context.socket(zmq.PUSH)
+        self.socket.bind("tcp://127.0.0.1:5555")    # make configurable host & port
 
     def send_data(self, metadata, data):
         message = json.dumps(metadata).encode('utf-8') + b'||' + data.tobytes()
@@ -52,7 +52,6 @@ class ZeroMQAsyncProducer:
 
 
 if __name__ == "__main__":
-    import asyncio
     producer = ZeroMQAsyncProducer()
     arxs = producer.test()
 

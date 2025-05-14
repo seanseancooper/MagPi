@@ -23,8 +23,7 @@ class ARXMQProvider(threading.Thread):
 
     def send_frame(self, frame):
         metadata, data = frame
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.producer.send_data(metadata, data))
+        self.producer.send_data(metadata, data)
 
     def send_sgnlpt(self, arxs):
         try:
@@ -37,9 +36,10 @@ class ARXMQProvider(threading.Thread):
             self.send_frame(frame)
 
         except Exception as e:
-            print(f'{e}')
+            print(f'Exception passing signalpoint: {e}')
 
 class ARXMQConsumer(threading.Thread):
+    """ To be used by ARXEEncoder """
 
     def __init__(self):
         super().__init__()
@@ -63,7 +63,6 @@ class ARXMQConsumer(threading.Thread):
 
     def consume_zmq(self):
         try:
-            import asyncio
-            asyncio.run(self.consumer.receive_data())
+            self.consumer.receive_data()
         except Exception as e: # don't trap here
             print(f'NET::ZMQ Error {e}')
