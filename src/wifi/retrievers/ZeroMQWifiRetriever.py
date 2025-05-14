@@ -73,8 +73,8 @@ class ZeroMQWifiScanner(threading.Thread):
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
-        golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
-        self.mq_wifi_retriever = golden_retriever()
+        module_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
+        self.mq_wifi_retriever = module_retriever()
         self.mq_wifi_retriever.configure(config_file)
         self.publisher = ZeroMQPublisher()
 
