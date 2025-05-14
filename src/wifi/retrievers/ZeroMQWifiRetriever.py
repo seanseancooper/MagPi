@@ -68,6 +68,7 @@ class ZeroMQWifiScanner(threading.Thread):
         self.updated = datetime.now()
         self.elapsed = timedelta()              # elapsed time since created
         self.parsed_signals = []
+        self.scanned = None
 
         self.wifi_retriever = None
         self.publisher = ZeroMQPublisher()
