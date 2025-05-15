@@ -1,3 +1,5 @@
+# HOSTS FILE
+
 ```commandline
 ##
 # Host Database
@@ -28,56 +30,57 @@
 127.0.0.1 view.localhost
 ```
 
-# ALL PORTS
+# PORT ASSIGNMENTS
 
 ```
 127.0.0.1:5001 arx.localhost
         
         ZMQ_HOST: 127.0.0.1
-        ZMQ_PORT: 5555
+        ZMQ_PORT: 5011
     
 127.0.0.1:5002 cam.localhost
 
         VIDEO_URL_ : 10.99.77.1:80
         
         streaming_host: localhost
-        streaming_port: 6100
+        streaming_port: 5102
         
         IMQ_HOST : 127.0.0.1
-        IMQ_PORT : 5555
+        IMQ_PORT : 5012
+
+127.0.0.1:5003 xxx.localhost
+127.0.0.1:5004 xxx.localhost
 
 127.0.0.1:5005 map.localhost
+127.0.0.1:5005 gps.localhost                                <-- MAINTAINS DOMAIN FOR GPS RESOLUTION
 
-        MAP_HOST: localhost:5173
-        ELASTIC_HOST: https://localhost:9200
-        ELASTIC_DASHBOARD_URL: https://localhost:5601
+        MAP_HOST: localhost:5105
+        ELASTIC_HOST: https://localhost:9200                <-- 9200 DO NOT CONFIGURE
+        ELASTIC_DASHBOARD_URL: https://localhost:5601       <-- 5601 DO NOT CONFIGURE
 
-127.0.0.1:5005 gps.localhost
-
-        JS_GPS_HOST: localhost
-        JS_GPS_PORT: 5014
-        GPS_HOST: 10.99.77.1
-        GPS_PORT: 80
+        JS_GPS_HOST: localhost 
+        JS_GPS_PORT: 5015
+        GPS_HOST: 10.99.77.1                                <-- HARDWARE NOT CONFIGURABLE
+        GPS_PORT: 80                                        <-- HARDWARE NOT CONFIGURABLE
 
 127.0.0.1:5006 wifi.localhost
 
-        ZMQ_HOST: localhost
-        ZMQ_PORT: 5555
+        IN_ZMQ_HOST: localhost
+        IN_ZMQ_PORT: 5016
 
-127.0.0.1:5006 net.localhost
+        OUT_ZMQ_HOST: localhost
+        OUT_ZMQ_PORT: 5026
 
-        IMQ_HOST: localhost
-        IMQ_PORT: 5555
-        
-        ZMQ_HOST: localhost
-        ZMQ_PORT: 5555
-        
-        RMQ_HOST: localhost
-        RMQ_PORT: 15672
+127.0.0.1:5007 net.localhost                            
 
-        ELASTIC_HOST: https://localhost:9200
-        ELASTIC_DASHBOARD_URL: https://localhost:5601
+        RMQ_HOST: localhost                             <-- DO NOT CONFIGURE
+        RMQ_PORT: 15672                                 <-- DO NOT CONFIGURE
+
+        ELASTIC_HOST: https://localhost:9200            <-- DO NOT CONFIGURE
+        ELASTIC_DASHBOARD_URL: https://localhost:5601   <-- DO NOT CONFIGURE
 	
+127.0.0.1:5008 sdr.localhost
+
 127.0.0.1:5009 trx.localhost
 
 127.0.0.1:5110 view.localhost
