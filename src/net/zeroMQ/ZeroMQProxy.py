@@ -7,7 +7,10 @@ net_logger = logging.getLogger('net_logger')
 
 class ZeroMQProxy(threading.Thread):
     """
-    ZeroMQProxy to decouple data.
+    ZeroMQProxy: Decouple PUSH from PULL; bind to an input socket and
+    an output socket. PULL from the input socket and PUSH same out of
+    the output socket. There will always be a socket to connect to,
+    though data may be not be available or read.
     """
     def __init__(self, i_url, o_url):
         super().__init__()
