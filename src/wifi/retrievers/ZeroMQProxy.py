@@ -7,7 +7,7 @@ net_logger = logging.getLogger('net_logger')
 
 class ZeroMQProxy(threading.Thread):
     """
-    XSUBZeroMQProxy to decouple wifi retriever data.
+    ZeroMQProxy to decouple data.
     """
     def __init__(self, i_url, o_url):
         super().__init__()
