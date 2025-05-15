@@ -57,8 +57,6 @@
 			{
 				"OUT_PATH": "gps.out"
 			},
-
-
 		{
 			"DATE_FORMAT": "%Y-%m-%d"
 		},
