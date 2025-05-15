@@ -80,7 +80,7 @@ def trx_stats():
     return jsonify(stats)
 
 
-@trx_bp.route('/stop', methods=['POST'], subdomain='wifi')
+@trx_bp.route('/stop', methods=['POST'], subdomain='trx')
 def trx_stop():
     return trxRet.retriever.stop()
 
