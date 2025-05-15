@@ -85,7 +85,7 @@ def trx_stop():
     return trxRet.retriever.stop()
 
 
-@trx_bp.route('/write', methods=['POST'], subdomain='wifi')
+@trx_bp.route('/write', methods=['POST'], subdomain='trx')
 def trx_write():
     # from lib.wifi_utils import write_to_scanlist
     # if write_to_scanlist(scanner.config, scanner.tracked_signals):
