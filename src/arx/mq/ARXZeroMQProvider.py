@@ -1,7 +1,7 @@
 import threading
 from src.config import readConfig
-from src.net.zeroMQ.ZeroMQAsyncProducer import ZeroMQAsyncProducer
-from src.net.zeroMQ.ZeroMQAsyncConsumer import ZeroMQAsyncConsumer
+from src.arx.mq.ZeroMQARXPush import ZeroMQARXPush
+from src.arx.mq.ZeroMQARXPull import ZeroMQARXPull
 
 import logging
 
@@ -9,11 +9,15 @@ arx_logger = logging.getLogger('arx_logger')
 
 
 class ARXMQProvider(threading.Thread):
-
+    """ Because signal processing occurs on stop() for ARXSignalPoint audio data offline processing,
+    this ARXMQProvider uses ZeroMQAsyncProducer & ZeroMQAsyncConsumer . We need to wait for the entire file to be rendered as a .wav
+    before trying to process it with ARXEncoder. There is no need/opportunity for
+    reconnection (process is dead) and a
+    """
     def __init__(self):
         super().__init__()
         self.config = {}
-        self.producer = ZeroMQAsyncProducer()
+        self.producer = ZeroMQARXPush()
         self.DEBUG = False
 
     def configure(self, config_file):
@@ -43,7 +47,7 @@ class ARXMQConsumer:
     def __init__(self):
         super().__init__()
         self.config = {}
-        self.consumer = ZeroMQAsyncConsumer()
+        self.consumer = ZeroMQARXPull()
         self.DEBUG = False
 
     def configure(self, config_file):

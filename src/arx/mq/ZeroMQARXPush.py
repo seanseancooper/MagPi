@@ -4,7 +4,7 @@ import logging
 
 net_logger = logging.getLogger('net_logger')
 
-class ZeroMQAsyncProducer:
+class ZeroMQARXPush:
     """
     Publish ARXSignalPoint audio data to offline processing.
     ZeroMQ Producer: Produce a 'message' composed of:
@@ -52,7 +52,7 @@ class ZeroMQAsyncProducer:
 
 
 if __name__ == "__main__":
-    producer = ZeroMQAsyncProducer()
+    producer = ZeroMQARXPush()
     arxs = producer.test()
 
     while True:

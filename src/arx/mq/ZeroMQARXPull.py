@@ -7,7 +7,7 @@ import json
 import logging
 net_logger = logging.getLogger('net_logger')
 
-class ZeroMQAsyncConsumer:
+class ZeroMQARXPull:
     """
     Consume ARXSignalPoint audio data for offline processing.
     ZeroMQ Consumer: consume a 'message' composed of:
@@ -52,6 +52,6 @@ class ZeroMQAsyncConsumer:
         return self.data
 
 if __name__ == "__main__":
-    consumer = ZeroMQAsyncConsumer()
+    consumer = ZeroMQARXPull()
     while True:
         consumer.receive_data()
