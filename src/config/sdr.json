@@ -10,7 +10,7 @@
 			"SPEECH_ENABLED": false
 		},
 		{
-			"SERVER_NAME": "localhost:?"
+			"SERVER_NAME": "localhost:5008"
 		},
 		{
 			"TEMPLATE_FOLDER": "templates"
