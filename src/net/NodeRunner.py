@@ -80,6 +80,6 @@ class NodeRunner(threading.Thread):
 if __name__ == '__main__':
 
     node = NodeRunner()
-    node.configure('gps.json')
+    node.configure('map.json')
     node.run()
 
