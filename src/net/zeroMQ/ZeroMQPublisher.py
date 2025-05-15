@@ -9,15 +9,15 @@ net_logger = logging.getLogger('net_logger')
 
 class ZeroMQPublisher(threading.Thread):
     """
-    Publish wifi retriever data to subscriber.
-    ZeroMQPublisher: Publisher a 'message' composed of metadata.
+    ZeroMQPublisher: bind to a socket and Publish a 'message' to a Subscriber.
+    The PUB/SUB pattern is used for wide message distribution according to topics.
+    A PUB socket sends the same message to all subscriber and drops messages when there’s no recipient.
     """
     def __init__(self):
         super().__init__()
         context = zmq.Context().instance()
 
-        # PUB/SUB
-        self.socket = context.socket(zmq.PUB)       # make configurable
+        self.socket = context.socket(zmq.PUB)
         self.socket.bind("tcp://127.0.0.1:5555")    # make configurable host & port
 
     def send_data(self, data):
@@ -36,8 +36,8 @@ class ZeroMQPublisher(threading.Thread):
 
 
 if __name__ == "__main__":
-    producer = ZeroMQPublisher()
-    data = producer.test()
+    publisher = ZeroMQPublisher()
+    data = publisher.test()
 
     while True:
-        producer.send_data(data)
+        publisher.send_data(data)
