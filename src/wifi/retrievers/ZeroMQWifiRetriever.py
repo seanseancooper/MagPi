@@ -3,7 +3,6 @@ import threading
 from datetime import datetime, timedelta
 from src.net.lib.net_utils import get_retriever
 from src.config import readConfig
-from src.net.zeroMQ.ZeroMQProxy import ZeroMQProxy
 from src.net.zeroMQ.ZeroMQPull import ZeroMQPull
 from src.net.zeroMQ.ZeroMQPush import ZeroMQPush
 
