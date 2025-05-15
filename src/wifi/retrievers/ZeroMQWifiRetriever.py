@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 from src.net.lib.net_utils import get_retriever
 from src.config import readConfig
 from src.net.zeroMQ.ZeroMQProxy import ZeroMQProxy
-from src.net.zeroMQ.ZeroMQSubscriber import ZeroMQSubscriber
-from src.net.zeroMQ.ZeroMQPublisher import ZeroMQPublisher
+from src.net.zeroMQ.ZeroMQPull import ZeroMQPull
+from src.net.zeroMQ.ZeroMQPush import ZeroMQPush
 
 import logging
 
@@ -22,7 +22,7 @@ class ZeroMQWifiRetriever(threading.Thread):
         self.config = {}
         self.interface = None
 
-        self.subcriber = None
+        self.pull = None
         self.proxy = None
         self.scanner = None                     # want to use retriever method
 
@@ -42,7 +42,7 @@ class ZeroMQWifiRetriever(threading.Thread):
         p = threading.Thread(target=self.proxy.run, daemon=True)
         p.start()
 
-        self.subcriber = ZeroMQSubscriber()
+        self.pull = ZeroMQPull()
         self.start_scanner(config_file)
 
     def start_scanner(self, config_file):
@@ -54,12 +54,12 @@ class ZeroMQWifiRetriever(threading.Thread):
 
     def scan(self):
         """ called by 'Scanner' to get scan data """
-        asyncio.run(self.subcriber.receive_data())
+        asyncio.run(self.pull.receive_data())
 
         try:
             # get data from MQ...
             # idea: perhaps caching here???
-            return self.subcriber.data['scanned'] or []
+            return self.pull.data['scanned'] or []
         except Exception as e:
             wifi_logger.error(f"[{__name__}]: Exception: {e}")
 
@@ -81,7 +81,7 @@ class ZeroMQWifiScanner(threading.Thread):
         self.scanned = None
 
         self.wifi_retriever = None
-        self.publisher = ZeroMQPublisher()
+        self.push = ZeroMQPush()
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
@@ -109,5 +109,5 @@ class ZeroMQWifiScanner(threading.Thread):
                     "scanned": self.scanned,
                 }
 
-                self.publisher.send_data(data)
+                self.push.send_data(data)
             self.iters += 1

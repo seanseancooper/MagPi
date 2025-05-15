@@ -7,18 +7,24 @@ import logging
 
 net_logger = logging.getLogger('net_logger')
 
-class ZeroMQPublisher(threading.Thread):
+class ZeroMQPush(threading.Thread):
     """
     Publish wifi retriever data to subscriber.
-    ZeroMQPublisher: Publisher a 'message' composed of metadata.
+    ZeroMQPublisher: Produce a 'message' composed of:
+        {
+            'id'     : 0,
+            'sent'   : str(datetime.now()),
+            "scanned": scanned,
+        }
+            metadata: a mapping of iteration, time 'sent' and scanned data.
     """
     def __init__(self):
         super().__init__()
         context = zmq.Context().instance()
 
-        # PUB/SUB
-        self.socket = context.socket(zmq.PUB)       # make configurable
-        self.socket.bind("tcp://127.0.0.1:5555")    # make configurable host & port
+        # PUSH/PULL
+        self.socket = context.socket(zmq.PUSH)       # make configurable
+        self.socket.connect("tcp://127.0.0.1:5555")    # make configurable host & port
 
     def send_data(self, data):
         self.socket.send(json.dumps(data).encode('utf-8'))
@@ -36,8 +42,8 @@ class ZeroMQPublisher(threading.Thread):
 
 
 if __name__ == "__main__":
-    producer = ZeroMQPublisher()
-    data = producer.test()
+    push = ZeroMQPush()
+    data = push.test()
 
     while True:
-        producer.send_data(data)
+        push.send_data(data)
