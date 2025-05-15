@@ -94,7 +94,7 @@ class GPSRetriever(threading.Thread):
     @register_retriever
     def DummyGPSRetriever(self, *, c, **retriever_args):
 
-        lines = [line.replace('LATITUDE', 'lat').replace('LONGITUDE', 'lon').strip() for line in open(self.config['TEST_FILE'], 'r')]
+        lines = [line.replace('LATITUDE', 'lat').replace('LONGITUDE', 'lon').strip() for line in open(self.config['GPS_TEST_FILE'], 'r')]
         lines = [json.loads(line.replace("\'", "\"")) for line in lines]
 
         while True:
@@ -119,7 +119,7 @@ class GPSRetriever(threading.Thread):
 
         while True:
             time.sleep(self.config.get('GPS_RETRIEVER_TIMEOUT', 1))
-            res = requests.get(f'http://{self.config.get("GPS_HOST", "localhost")}:{self.config.get("GPS_POST", 5015)}')
+            res = requests.get(f'http://{self.config.get("GPS_HOST", "localhost")}:{self.config.get("GPS_PORT", 5015)}')
             result = json.loads(res.text)
 
             self.result = {"lat": result['lat'],
@@ -178,5 +178,5 @@ if __name__ == '__main__':
     from src.config.__init__ import CONFIG_PATH
 
     gpsRet = GPSRetriever()
-    gpsRet.configure(os.path.join(CONFIG_PATH, 'gps.json'))
+    gpsRet.configure(os.path.join(CONFIG_PATH, 'map.json'))
     gpsRet.run()
