@@ -85,8 +85,6 @@
 
 ```
 
-
-
 ## arx
     ARXSignalPoint(self, worker_id, lon, lat, sgnl)
     DATA: ZeroMQ 'frame' composed of metatdata and data
