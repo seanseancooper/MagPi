@@ -40,9 +40,9 @@ const requestListener = (req, res) => {
 
 const server = http.createServer(requestListener);
 
-const config = require('../../config/gps.json');
-const server_host = config.GPS.find(item => item.GPS_HOST)['GPS_HOST'];
-const server_port = config.GPS.find(item => item.GPS_PORT)['GPS_PORT'];
+const config = require('../../config/map.json');
+const server_host = config.MAP.find(item => item.GPS_HOST)['GPS_HOST'];
+const server_port = config.MAP.find(item => item.GPS_PORT)['GPS_PORT'];
 
 server.listen(server_port, server_host , () => {
     console.log("JS GPS is listening on " + server_host + ":" + server_port);
