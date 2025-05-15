@@ -1,3 +1,92 @@
+```commandline
+##
+# Host Database
+#
+# localhost is used to configure the loopback interface
+# when the system is booting.  Do not change this entry.
+##
+127.0.0.1       localhost
+255.255.255.255 broadcasthost
+::1             localhost
+# 127.0.0.1       x86_64-apple-darwin13.4.0 
+
+
+# Added by Docker Desktop
+# To allow the same kube context to work on the host and the container:
+# 127.0.0.1 kubernetes.docker.internal
+# End of section
+
+# MagPy subdomains
+127.0.0.1 arx.localhost
+127.0.0.1 cam.localhost
+127.0.0.1 gps.localhost
+127.0.0.1 wifi.localhost
+127.0.0.1 trx.localhost
+127.0.0.1 map.localhost
+127.0.0.1 sdr.localhost
+127.0.0.1 net.localhost
+127.0.0.1 view.localhost
+```
+
+# ALL PORTS
+
+```
+127.0.0.1:5001 arx.localhost
+        
+        ZMQ_HOST: 127.0.0.1
+        ZMQ_PORT: 5555
+    
+127.0.0.1:5002 cam.localhost
+
+        VIDEO_URL_ : 10.99.77.1:80
+        
+        streaming_host: localhost
+        streaming_port: 6100
+        
+        IMQ_HOST : 127.0.0.1
+        IMQ_PORT : 5555
+
+127.0.0.1:5005 map.localhost
+
+        MAP_HOST: localhost:5173
+        ELASTIC_HOST: https://localhost:9200
+        ELASTIC_DASHBOARD_URL: https://localhost:5601
+
+127.0.0.1:5005 gps.localhost
+
+        JS_GPS_HOST: localhost
+        JS_GPS_PORT: 5014
+        GPS_HOST: 10.99.77.1
+        GPS_PORT: 80
+
+127.0.0.1:5006 wifi.localhost
+
+        ZMQ_HOST: localhost
+        ZMQ_PORT: 5555
+
+127.0.0.1:5006 net.localhost
+
+        IMQ_HOST: localhost
+        IMQ_PORT: 5555
+        
+        ZMQ_HOST: localhost
+        ZMQ_PORT: 5555
+        
+        RMQ_HOST: localhost
+        RMQ_PORT: 15672
+
+        ELASTIC_HOST: https://localhost:9200
+        ELASTIC_DASHBOARD_URL: https://localhost:5601
+	
+127.0.0.1:5009 trx.localhost
+
+127.0.0.1:5110 view.localhost
+
+
+```
+
+
+
 ## arx
     ARXSignalPoint(self, worker_id, lon, lat, sgnl)
     DATA: ZeroMQ 'frame' composed of metatdata and data
