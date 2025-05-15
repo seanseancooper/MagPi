@@ -1,9 +1,11 @@
-
 <!-- https://stackoverflow.com/questions/5867985/full-screen-iframe-with-a-height-of-100 -->
 {% if container %}
 <div id="map" class="module_tab" style="position:relative;display:none;">
+    {% set config = container.get_module_config('map') %}
 {% else %}
-<div id="map" class="module_tab" style="position:relative;display:block;">
+    <div id="map" class="module_tab" style="position:relative;display:block;">
 {% endif %}
-    <iframe src="http://localhost:5173/" allow="geolocation" height="720px;" width="100%"></iframe>
+{% set map_host = config['MAP_HOST'] %}
+{% set map_port = config['MAP_PORT'] %}
+    <iframe src="http://{{ map_host }}:{{ map_port }}/" allow="geolocation" height="720px;" width="100%"></iframe>
 </div>
