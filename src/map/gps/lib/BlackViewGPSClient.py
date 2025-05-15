@@ -35,7 +35,7 @@ class BlackViewGPSClient:
         return self.resp
 
     def configure(self):
-        readConfig('gps.json', self.config)
+        readConfig('map.json', self.config)
 
     def json_stream(self):
         for line in self.blackview_lines():
