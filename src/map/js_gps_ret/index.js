@@ -19,7 +19,7 @@ const requestListener = (req, res) => {
         req.on('end', () => {
             try {
                 const data = JSON.parse(body);
-                console.log("body: " + body);
+                // console.log("body: " + body);
                 if (data.lon !== undefined && data.lat !== undefined) {
                     currentCoords = { lon: data.lon, lat: data.lat };
                     res.end(JSON.stringify({ status: 'ok' }));
