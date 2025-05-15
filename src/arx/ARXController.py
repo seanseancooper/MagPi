@@ -4,7 +4,7 @@ from flask_cors import CORS
 
 import routes
 from src.net.FlaskRESTServer import RESTServer
-from src.arx.mq.ARXZeroMQProvider import ARXMQProvider
+from src.arx.mq.ARXZeroMQProvider import ARXMQProvider, ARXMQConsumer
 
 
 class ARXController(threading.Thread):
@@ -36,13 +36,17 @@ class ARXController(threading.Thread):
             try:
                 provider = ARXMQProvider()
                 provider.configure('arx.json')
+                consumer = ARXMQConsumer()
+                consumer.configure('arx.json')
             except Exception as e:
                 print(f"ARXController 'provider' failed : {e}")
 
             def stop():
                 arxs = routes.arxRec.stop()  # required.
                 try:
+
                     provider.send_sgnlpt(arxs)
+                    consumer.consume_zmq()
                 except Exception as e:
                     print(f"ARXController 'provider' failed : {e}")
 

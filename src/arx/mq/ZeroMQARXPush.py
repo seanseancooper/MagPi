@@ -19,7 +19,7 @@ class ZeroMQARXPush:
 
     def send_data(self, metadata, data):
         message = json.dumps(metadata).encode('utf-8') + b'||' + data.tobytes()
-        print(f"Sending data. {metadata['id']}")
+        net_logger.debug(f"Sending data. {metadata['id']}")
         self.socket.send(message)
 
     def test(self):

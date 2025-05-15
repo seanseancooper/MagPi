@@ -38,7 +38,7 @@ class ZeroMQARXPull:
         self.metadata['time_diff'] = (datetime.now() - datetime.strptime(self.metadata['sent'], "%Y-%m-%d %H:%M:%S.%f")).total_seconds()
 
         # do something with data & text_attributes
-        net_logger.info(f'time diff:{self.metadata["time_diff"]}')
+        net_logger.debug(f'time diff:{self.metadata["time_diff"]}')
         net_logger.info(f'Received metadata: {self.metadata}')
         net_logger.info(f'Received audio_data: {self.data}')
 

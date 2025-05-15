@@ -21,7 +21,7 @@ class ARXMQProvider(threading.Thread):
     def __init__(self):
         super().__init__()
         self.config = {}
-        self.producer = ZeroMQARXPush()
+        self.push = ZeroMQARXPush()
         self.DEBUG = False
 
     def configure(self, config_file):
@@ -30,7 +30,7 @@ class ARXMQProvider(threading.Thread):
 
     def send_frame(self, frame):
         metadata, data = frame
-        self.producer.send_data(metadata, data)
+        self.push.send_data(metadata, data)
 
     def send_sgnlpt(self, arxs):
         try:
@@ -51,7 +51,7 @@ class ARXMQConsumer:
     def __init__(self):
         super().__init__()
         self.config = {}
-        self.consumer = ZeroMQARXPull()
+        self.pull = ZeroMQARXPull()
         self.DEBUG = False
 
     def configure(self, config_file):
@@ -59,10 +59,10 @@ class ARXMQConsumer:
         self.DEBUG = self.config.get('DEBUG')
 
     def get_data(self):
-        return self.consumer.data
+        return self.pull.data
 
     def get_metadata(self):
-        return self.consumer.metadata
+        return self.pull.metadata
 
     def get_frame(self):
         frame = self.get_metadata(), self.get_data(),
@@ -70,6 +70,6 @@ class ARXMQConsumer:
 
     def consume_zmq(self):
         try:
-            self.consumer.receive_data()
+            self.pull.receive_data()
         except Exception as e: # don't trap here
             print(f'NET::ZMQ Error {e}')
