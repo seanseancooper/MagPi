@@ -186,7 +186,7 @@ class Trilaterator(threading.Thread):
 
 if __name__ == '__main__':
     trilaterator = Trilaterator()
-    trilaterator.configure('gps.json')
+    trilaterator.configure('map.json')
 
     # Example:
     # Let's say you have the following coordinates:
@@ -208,7 +208,7 @@ if __name__ == '__main__':
     print("Estimated location:", result)
     ################################################################################################
     trilaterator = Trilaterator()
-    trilaterator.configure('gps.json')
+    trilaterator.configure('map.json')
 
     locations = [
         [40.7128, -74.0060] # Point B: 40.7128° N, 74.0060° W (New York)
@@ -226,7 +226,7 @@ if __name__ == '__main__':
     print("Estimated location:", result)
     ################################################################################################
     trilaterator = Trilaterator()
-    trilaterator.configure('gps.json')
+    trilaterator.configure('map.json')
 
     locations = [
         [37.7749, -122.4194] # Point B: 37.7749° N, 122.4194° W (San Francisco)
