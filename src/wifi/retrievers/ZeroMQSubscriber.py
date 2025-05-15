@@ -17,19 +17,13 @@ class ZeroMQSubscriber(threading.Thread):
         super().__init__()
         context = zmq.Context().instance()
 
-        # PUB/SUB
-        # self.socket = context.socket(zmq.SUB)                       # make configurable
-        # self.socket.connect("tcp://127.0.0.1:5555")                 # make configurable host & port
-        # self.socket.setsockopt_string(zmq.SUBSCRIBE, '')            # make configurable
-
-        # PUSH/PULL
-        # self.socket = context.socket(zmq.PULL)                       # make configurable
-        # self.socket.bind("tcp://*:5555")                 # make configurable host & port
-
-        # PUSH/PROXY/PULL
-        o_url = 'tcp://127.0.0.1:5556'
-        self.socket = context.socket(zmq.PULL)                       # make configurable
-        self.socket.connect(o_url)                 # make configurable host & port
+        # PUB/SUB *
+        # pub/sub pattern is used for wide message distribution according to topics.
+        # PUB socket sends the same message to all subscribers
+        # if the publishing node sends data through ZMQ.PUB but the subscriber is disconnected, the data will be dropped.
+        self.socket = context.socket(zmq.SUB)                       # make configurable
+        self.socket.connect("tcp://127.0.0.1:5555")                 # make configurable host & port
+        self.socket.setsockopt_string(zmq.SUBSCRIBE, '')            # make configurable
 
         self.message = None     # entire message
         self.data = None        # data as utf-8 decoded bytes.
