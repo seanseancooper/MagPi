@@ -23,7 +23,6 @@ class ZeroMQWifiRetriever(threading.Thread):
         self.interface = None
 
         self.pull = None
-        self.proxy = None
         self.scanner = None                     # want to use retriever method
 
         self.stats = {}                         # new, not yet used
