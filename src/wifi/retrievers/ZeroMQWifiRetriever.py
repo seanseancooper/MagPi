@@ -51,7 +51,6 @@ class ZeroMQWifiRetriever(threading.Thread):
 
         try:
             # get data from MQ...
-            # idea: perhaps caching here???
             return self.pull.data['scanned'] or []
         except Exception as e:
             wifi_logger.error(f"[{__name__}]: Exception: {e}")
