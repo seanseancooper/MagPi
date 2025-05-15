@@ -42,6 +42,21 @@
 			{
 				"GPS_PORT": 5015
 			},
+			{
+				"GPS_MODULE_RETRIEVER": "src.map.gps.GPSRetriever.JSGPSRetriever"
+			},
+			{
+				"GPS_RETRIEVER_TIMEOUT": 1
+			},
+			{
+				"GPS_CONNECT_TIMEOUT": 10
+			},
+			{
+				"GPS_TEST_FILE": "./lib/TEST_FILE.txt"
+			},
+			{
+				"OUT_PATH": "gps.out"
+			},
 
 
 		{
