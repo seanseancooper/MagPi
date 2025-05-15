@@ -28,7 +28,7 @@
 			"MAP_HOST": "localhost"
 		},
 		{
-			"MAP_PORT": "5105"
+			"MAP_PORT": 5105
 		},
 		{
 			"NODE_START_COMMAND": ["npm", "start"]
@@ -43,7 +43,7 @@
 				"GPS_HOST": "localhost"
 			},
 			{
-				"GPS_PORT": 5015
+				"GPS_PORT": 5205
 			},
 			{
 				"GPS_MODULE_RETRIEVER": "src.map.gps.GPSRetriever.JSGPSRetriever"
