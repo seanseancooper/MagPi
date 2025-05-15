@@ -9,9 +9,7 @@ net_logger = logging.getLogger('net_logger')
 class ZeroMQSubscriber(threading.Thread):
     """
     Consume wifi retriever data.
-    ZeroMQ Subscriber: consume a 'message' composed of:
-            metadata: a mapping of iteration and scanned data.
-            data: None
+    ZeroMQ Subscriber: consume a 'message' composed a mapping of metadata.
     """
     def __init__(self):
         super().__init__()
