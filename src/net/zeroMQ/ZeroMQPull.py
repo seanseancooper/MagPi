@@ -8,19 +8,17 @@ net_logger = logging.getLogger('net_logger')
 
 class ZeroMQPull(threading.Thread):
     """
-    Consume wifi retriever data.
-    ZeroMQPull:
+    ZeroMQPull: bind to a socket and PULL data from PUSH.
+    The PUSH/PULL pattern is really a pipelining mechanism.
+    PUSH/PULL doesn’t drop messages when there’s no recipient.
+    PUSH blocks when there’s no Peer ready to receive a message
     """
     def __init__(self):
         super().__init__()
         context = zmq.Context().instance()
 
-        # PUSH/PULL
-        # The push/pull pattern is really a pipelining mechanism.
-        # PUSH blocks when there’s no Peer ready to receive a message whereas PUB doesn’t.
-        # Push/Pull doesn’t drop messages when there’s no recipient.
-        self.socket = context.socket(zmq.PULL)                        # make configurable
-        self.socket.bind("tcp://*:5555")                              # make configurable host & port
+        self.socket = context.socket(zmq.PULL)
+        self.socket.bind("tcp://*:5555")            # make configurable host & port
 
         self.message = None     # entire message
         self.data = None        # data as utf-8 decoded bytes.

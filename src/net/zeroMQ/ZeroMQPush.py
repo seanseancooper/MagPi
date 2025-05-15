@@ -9,21 +9,17 @@ net_logger = logging.getLogger('net_logger')
 
 class ZeroMQPush(threading.Thread):
     """
-    Publish wifi retriever data to subscriber.
-    ZeroMQPublisher: Produce a 'message' composed of:
-        {
-            'id'     : 0,
-            'sent'   : str(datetime.now()),
-            "scanned": scanned,
-        }
-            metadata: a mapping of iteration, time 'sent' and scanned data.
+    ZeroMQPush: connect to a socket and PUSH data to PULL.
+    The PUSH/PULL pattern is really a pipelining mechanism.
+    PUSH/PULL doesn’t drop messages when there’s no recipient.
+    PUSH blocks when there’s no Peer ready to receive a message
     """
     def __init__(self):
         super().__init__()
         context = zmq.Context().instance()
 
         # PUSH/PULL
-        self.socket = context.socket(zmq.PUSH)       # make configurable
+        self.socket = context.socket(zmq.PUSH)
         self.socket.connect("tcp://127.0.0.1:5555")    # make configurable host & port
 
     def send_data(self, data):
