@@ -40,9 +40,9 @@ const requestListener = (req, res) => {
 
 const server = http.createServer(requestListener);
 
-//todo: set this host:port using config; perhaps this is index.js.j2 and a template??
-let server_host = 'localhost';
-let server_port = 5014;
+const config = require('../../config/gps.json');
+const server_host = config.GPS.find(item => item.GPS_HOST)['GPS_HOST'];
+const server_port = config.GPS.find(item => item.GPS_PORT)['GPS_PORT'];
 
 server.listen(server_port, server_host , () => {
     console.log("JS GPS is listening on " + server_host + ":" + server_port);

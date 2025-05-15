@@ -36,6 +36,14 @@
 		{
 			"NODE_BUILD": false
 		},
+			{
+				"GPS_HOST": "localhost"
+			},
+			{
+				"GPS_PORT": 5015
+			},
+
+
 		{
 			"DATE_FORMAT": "%Y-%m-%d"
 		},

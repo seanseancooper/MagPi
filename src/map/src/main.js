@@ -15,6 +15,7 @@ import {toStringHDMS, toStringXY, degreesToStringHDMS} from 'ol/coordinate.js';
 import {transform as xform, fromLonLat, toLonLat} from 'ol/proj.js';
 import {Heatmap as HeatmapLayer} from 'ol/layer.js';
 
+import map_config from '../../config/map.json' assert { type: 'json' };
 
 /*
 docs @ https://openlayers.org/en/latest/apidoc/
@@ -189,13 +190,16 @@ geolocation.on('change', function () {
         lat: jsCoords[1]
     };
 
+    // read config
+    const server_host = map_config.MAP.find(item => item.GPS_HOST)['GPS_HOST'];
+    const server_port = map_config.MAP.find(item => item.GPS_PORT)['GPS_PORT'];
+
     // Send coords to Node server
-    fetch('http://localhost:5014', {
+    fetch('http://' + server_host + ':' + server_port , {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     });
-    // console.log("hi " + payload['lon'] + ", " + payload['lat']);
 });
 
 geolocation.on('error', function (error) {

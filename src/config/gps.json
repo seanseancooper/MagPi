@@ -3,39 +3,39 @@
 		{
 			"DEBUG": false
 		},
-		{
-			"SPEECH_ENABLED": true
-		},
-		{
-			"TEST_FILE": "./lib/TEST_FILE.txt"
-		},
+			{
+				"SPEECH_ENABLED": true
+			},
+			{
+				"TEST_FILE": "./lib/TEST_FILE.txt"
+			},
 		{
 			"SERVER_NAME": "localhost:5005"
 		},
-		{
-			"GPS_MODULE_RETRIEVER": "src.map.gps.GPSRetriever.JSGPSRetriever"
-		},
-		{
-			"GPS_RETRIEVER_TIMEOUT": 1
-		},
-		{
-			"GPS_HOST": "10.99.77.1"
-		},
-		{
-			"GPS_PORT": 80
-		},
-		{
-			"GPS_CONNECT_TIMEOUT": 10
-		},
-		{
-			"NODE_START_COMMAND": ["npm", "start"]
-		},
-		{
-			"NODE_BUILD_COMMAND": ["npm", "run", "build"]
-		},
-		{
-			"NODE_BUILD": false
-		},
+			{
+				"GPS_MODULE_RETRIEVER": "src.map.gps.GPSRetriever.JSGPSRetriever"
+			},
+			{
+				"GPS_RETRIEVER_TIMEOUT": 1
+			},
+			{
+				"GPS_HOST": "localhost"
+			},
+			{
+				"GPS_PORT": 5015
+			},
+			{
+				"GPS_CONNECT_TIMEOUT": 10
+			},
+				{
+					"NODE_START_COMMAND": ["npm", "start"]
+				},
+				{
+					"NODE_BUILD_COMMAND": ["npm", "run", "build"]
+				},
+				{
+					"NODE_BUILD": false
+				},
 		{
 			"DATE_FORMAT": "%Y-%m-%d"
 		},
@@ -45,8 +45,8 @@
 		{
 			"DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S.%f"
 		},
-		{
-			"OUT_PATH": "gps.out"
-		}
+			{
+				"OUT_PATH": "gps.out"
+			}
 	]
 }
