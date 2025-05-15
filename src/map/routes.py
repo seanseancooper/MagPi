@@ -8,7 +8,7 @@ mapAgg.configure('map.json', non_config_files=non_config_files)
 
 from src.map.gps.GPSRetriever import GPSRetriever
 gpsRet = GPSRetriever()
-gpsRet.configure('gps.json')
+gpsRet.configure('map.json')
 
 from src.net.NodeRunner import NodeRunner
 # node map service on :5173
