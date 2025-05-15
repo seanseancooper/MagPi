@@ -1,5 +1,4 @@
 import threading
-import asyncio
 from src.config import readConfig
 from src.net.zeroMQ.ZeroMQAsyncProducer import ZeroMQAsyncProducer
 from src.net.zeroMQ.ZeroMQAsyncConsumer import ZeroMQAsyncConsumer
@@ -38,7 +37,7 @@ class ARXMQProvider(threading.Thread):
         except Exception as e:
             print(f'Exception passing signalpoint: {e}')
 
-class ARXMQConsumer(threading.Thread):
+class ARXMQConsumer:
     """ To be used by ARXEEncoder """
 
     def __init__(self):
