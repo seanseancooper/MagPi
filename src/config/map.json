@@ -28,6 +28,9 @@
 			"MAP_HOST": "localhost"
 		},
 		{
+			"MAP_PORT": "5105"
+		},
+		{
 			"NODE_START_COMMAND": ["npm", "start"]
 		},
 		{
