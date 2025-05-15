@@ -38,7 +38,7 @@ class ARXMQProvider(threading.Thread):
             print(f'Exception passing signalpoint: {e}')
 
 class ARXMQConsumer:
-    """ To be used by ARXEEncoder """
+    """ To be used by ARXEncoder """
 
     def __init__(self):
         super().__init__()
