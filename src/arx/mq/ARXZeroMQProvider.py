@@ -9,10 +9,14 @@ arx_logger = logging.getLogger('arx_logger')
 
 
 class ARXMQProvider(threading.Thread):
-    """ Because signal processing occurs on stop() for ARXSignalPoint audio data offline processing,
-    this ARXMQProvider uses ZeroMQAsyncProducer & ZeroMQAsyncConsumer . We need to wait for the entire file to be rendered as a .wav
-    before trying to process it with ARXEncoder. There is no need/opportunity for
-    reconnection (process is dead) and a
+    """ Signal processing occurs on stop() to trigger ARXSignalPoint offline processing.
+    ARXMQProvider uses ZeroMQARXPush & ZeroMQARXPull to pass an ARXSignalPoint type. We
+    need to wait for the entire file to be rendered as .wav before trying to process it
+    with ARXEncoder. Note there is no need/opportunity for reconnection here.
+
+    ARXMQProvider splits the ARXSignalPoint into data and metadata, then uses ARXMQProvider
+    to PUSH the unit as a frame. The ZeroMQARXPull frame is reconstructed as metadata and
+    data by ARXMQConsumer.
     """
     def __init__(self):
         super().__init__()
