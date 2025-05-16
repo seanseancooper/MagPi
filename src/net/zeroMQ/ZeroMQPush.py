@@ -14,13 +14,14 @@ class ZeroMQPush(threading.Thread):
     PUSH/PULL doesn’t drop messages when there’s no recipient.
     PUSH blocks when there’s no Peer ready to receive a message
     """
-    def __init__(self):
+    def __init__(self, I_ZMQ_HOST, I_ZMQ_PORT):
         super().__init__()
+        self.host = I_ZMQ_HOST
+        self.port = I_ZMQ_PORT
         context = zmq.Context().instance()
 
-        # PUSH/PULL
         self.socket = context.socket(zmq.PUSH)
-        self.socket.connect("tcp://127.0.0.1:5555")    # make configurable host & port
+        self.socket.connect(f'tcp://{self.host}:{self.port}')    # make configurable host & port
 
     def send_data(self, data):
         self.socket.send(json.dumps(data).encode('utf-8'))

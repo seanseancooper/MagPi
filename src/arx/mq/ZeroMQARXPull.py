@@ -14,11 +14,13 @@ class ZeroMQARXPull:
             metadata: a mapping of 'text_attributes' sent [utf-8].
             data: byte array of data sent
     """
-    def __init__(self):
+    def __init__(self, I_ZMQ_HOST, I_ZMQ_PORT):
+        self.host = I_ZMQ_HOST
+        self.port = I_ZMQ_PORT
         context = zmq.Context()
 
         self.socket = context.socket(zmq.PULL)
-        self.socket.connect("tcp://127.0.0.1:5555")                 # make configurable host & port
+        self.socket.connect(f'tcp://{self.host}:{self.port}')
 
         self.message = None     # entire message
         self.metadata = None    # encapsulates 'text_attributes'

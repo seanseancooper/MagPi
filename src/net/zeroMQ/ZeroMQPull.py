@@ -4,6 +4,7 @@ from datetime import datetime
 import zmq
 import json
 import logging
+
 net_logger = logging.getLogger('net_logger')
 
 class ZeroMQPull(threading.Thread):
@@ -13,12 +14,14 @@ class ZeroMQPull(threading.Thread):
     PUSH/PULL doesn’t drop messages when there’s no recipient.
     PUSH blocks when there’s no Peer ready to receive a message
     """
-    def __init__(self):
+    def __init__(self, I_ZMQ_HOST, I_ZMQ_PORT):
         super().__init__()
+        self.host = I_ZMQ_HOST
+        self.port = I_ZMQ_PORT
         context = zmq.Context().instance()
 
         self.socket = context.socket(zmq.PULL)
-        self.socket.bind("tcp://*:5555")            # make configurable host & port
+        self.socket.bind(f'tcp://{self.host}:{self.port}')            # make configurable host & port
 
         self.message = None     # entire message
         self.data = None        # data as utf-8 decoded bytes.

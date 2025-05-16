@@ -32,10 +32,10 @@ class ARXController(threading.Thread):
     def run(self) -> None:
         try:
             import atexit
-
+            provider = ARXMQProvider()
+            provider.configure('arx.json')
             try:
-                provider = ARXMQProvider()
-                provider.configure('arx.json')
+
                 consumer = ARXMQConsumer()
                 consumer.configure('arx.json')
             except Exception as e:

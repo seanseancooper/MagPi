@@ -40,7 +40,16 @@
 			"LATENCY": 0.1
 		},
 		{
-			"ARX_QUEUE": "arx_queue"
+			"I_ZMQ_HOST": "127.0.0.1"
+		},
+		{
+			"I_ZMQ_PORT": "5011"
+		},
+		{
+			"O_ZMQ_HOST": "127.0.0.1"
+		},
+		{
+			"O_ZMQ_PORT": "5021"
 		},
 		{
 			"OUTFILE_NAME": "arx_audio"

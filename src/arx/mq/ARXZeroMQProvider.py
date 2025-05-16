@@ -21,12 +21,13 @@ class ARXMQProvider(threading.Thread):
     def __init__(self):
         super().__init__()
         self.config = {}
-        self.push = ZeroMQARXPush()
+        self.push = None
         self.DEBUG = False
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
         self.DEBUG = self.config.get('DEBUG')
+        self.push = ZeroMQARXPush(self.config.get('I_ZMQ_HOST'), self.config.get('I_ZMQ_PORT'))
 
     def send_frame(self, frame):
         metadata, data = frame
@@ -51,12 +52,13 @@ class ARXMQConsumer:
     def __init__(self):
         super().__init__()
         self.config = {}
-        self.pull = ZeroMQARXPull()
+        self.pull = None
         self.DEBUG = False
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
         self.DEBUG = self.config.get('DEBUG')
+        self.pull = ZeroMQARXPull(self.config.get('I_ZMQ_HOST'), self.config.get('I_ZMQ_PORT'))
 
     def get_data(self):
         return self.pull.data
