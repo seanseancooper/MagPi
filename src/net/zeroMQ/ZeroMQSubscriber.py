@@ -41,7 +41,9 @@ class ZeroMQSubscriber(threading.Thread):
         return self.data
 
 if __name__ == "__main__":
-    subscriber = ZeroMQSubscriber()
+    host = '127.0.0.1'
+    port = 5555
+    subscriber = ZeroMQSubscriber(host, port)
     while True:
         # consumer.receive_data()
         import asyncio
