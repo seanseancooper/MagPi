@@ -19,7 +19,7 @@ class ZeroMQSubscriber(threading.Thread):
         context = zmq.Context().instance()
 
         self.socket = context.socket(zmq.SUB)
-        self.socket.connect("tcp://127.0.0.1:5555")                 # make configurable host & port
+        self.socket.connect(f'tcp://{self.host}:{self.port}')       # make configurable host & port
         self.socket.setsockopt_string(zmq.SUBSCRIBE, '')            # make configurable
 
         self.message = None     # entire message
