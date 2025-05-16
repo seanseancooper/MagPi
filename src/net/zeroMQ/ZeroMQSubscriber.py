@@ -14,6 +14,8 @@ class ZeroMQSubscriber(threading.Thread):
     """
     def __init__(self):
         super().__init__()
+        self.host = I_ZMQ_HOST
+        self.port = I_ZMQ_PORT
         context = zmq.Context().instance()
 
         self.socket = context.socket(zmq.SUB)
