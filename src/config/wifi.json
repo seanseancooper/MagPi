@@ -238,7 +238,16 @@
 			}
 		},
 		{
-			"WIFI_QUEUE": "wifi_queue"
+			"I_ZMQ_HOST": "127.0.0.1"
+		},
+		{
+			"I_ZMQ_PORT": "5016"
+		},
+		{
+			"O_ZMQ_HOST": "127.0.0.1"
+		},
+		{
+			"O_ZMQ_PORT": "5026"
 		},
 		{
 			"OUTFILE_PATH": "../../_out"

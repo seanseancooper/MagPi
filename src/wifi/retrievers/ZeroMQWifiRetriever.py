@@ -34,7 +34,7 @@ class ZeroMQWifiRetriever(threading.Thread):
 
         self.DEBUG = self.config.get('DEBUG')
 
-        self.pull = ZeroMQPull()
+        self.pull = ZeroMQPull(self.config.get('I_ZMQ_HOST'), self.config.get('I_ZMQ_PORT'))
         self.start_scanner(config_file)
 
     def start_scanner(self, config_file):
@@ -72,7 +72,7 @@ class ZeroMQWifiScanner(threading.Thread):
         self.scanned = None
 
         self.wifi_retriever = None
-        self.push = ZeroMQPush()
+        self.push = None
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
@@ -80,6 +80,8 @@ class ZeroMQWifiScanner(threading.Thread):
         module_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
         self.wifi_retriever = module_retriever()
         self.wifi_retriever.configure(config_file)
+
+        self.push = ZeroMQPush(self.config.get('I_ZMQ_HOST'), self.config.get('I_ZMQ_PORT'))
 
     def parse_signals(self, readlines):
         self.parsed_signals = self.wifi_retriever.get_parsed_cells(readlines)
