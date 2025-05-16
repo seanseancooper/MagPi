@@ -10,7 +10,7 @@ import requests
 from src.config import readConfig, CONFIG_PATH
 
 from src.lib.utils import format_delta
-from src.net.lib.net_utils import get_retriever, check_rmq_available
+from src.net.lib.net_utils import get_retriever, check_rmq_available, check_zmq_available, check_imq_available
 import jinja2
 
 from src.view.aggregator.MQAggregator import MQAggregator
@@ -36,7 +36,7 @@ class ViewContainer(threading.Thread):
         self.dead_modules = []
 
         self.aggregator  = None
-        self.mq_retrievers = defaultdict(dict)
+        self.mq_retrievers = {}
         self.module_stats = defaultdict(dict)
         self.module_configs = defaultdict(dict)
         self.module_data = defaultdict(dict)
@@ -87,15 +87,18 @@ class ViewContainer(threading.Thread):
 
     def load_mq_retriever(self, m):
         """ load the retriever once """
+        _, ZMQ_OK = check_zmq_available()
+        # _, IMQ_OK = check_imq_available()
         _, RMQ_OK = check_rmq_available(m)
         mq_retriever = self.module_configs[m].get('MODULE_RETRIEVER', None)
 
-        if mq_retriever and self.mq_retrievers[m] == {} and RMQ_OK:
+        # the check for MQ should be specific to the retriever type.
+        if mq_retriever and ZMQ_OK:
             retriever = get_retriever(mq_retriever)
             retriever = retriever()
             retriever.configure(f'{m}.json')
             self.mq_retrievers[m] = retriever
-            print(self.mq_retrievers[m])
+            # print(self.mq_retrievers[m])
 
     def register_modules(self):
         """ discover 'live' module REST contexts """
@@ -116,23 +119,29 @@ class ViewContainer(threading.Thread):
 
     def aggregate(self, mod):
         """ collect data and stats into aggregation """
+        # REST needs a try...
+        try:
 
-        if self.mq_retrievers[mod]:
-            self.module_data[mod] = self.mq_retrievers[mod].scan()
-        else:
-            data = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
-            if data.ok:
-                self.module_data[mod] = data.json()
+            if self.mq_retrievers[mod]:
+                self.module_data[mod] = self.mq_retrievers[mod].scan()
             else:
-                view_logger.warning(f'Data Aggregator REST Exception [{mod}]')
+                try:
+                    data = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
+                    if data.ok:
+                        self.module_data[mod] = data.json()
 
-        # stats only available via REST?
-        stats = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'] + '/stats')
+                    # stats only available via REST?
+                    stats = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'] + '/stats')
 
-        if stats.ok:
-            self.module_stats[mod] = stats.json() # current module stats
-        else:
-            view_logger.warning(f'Statistics Aggregator Warning [{mod}] not loaded.')
+                    if stats.ok:
+                        self.module_stats[mod] = stats.json()  # current module stats
+                    else:
+                        view_logger.warning(f'Statistics Aggregator Warning [{mod}] not loaded.')
+
+                except Exception:
+                    view_logger.warning(f'Data Aggregator REST Exception [{mod}]')
+
+        except KeyError: pass
 
     def get_module_stats(self, mod):
         """ return all stats """
