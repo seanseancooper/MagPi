@@ -119,8 +119,7 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
         self.krnl = self.plugin_config.get('krnl', 10.0)
         self.threshold = self.plugin_config.get('threshold', 10.0)
 
-        # if check_imq_available():
-        if True:
+        if check_imq_available():
             self.mq_provider = CAMMQProvider()
             self.mq_provider.configure('cam.json')
 
@@ -257,8 +256,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                     self.tracked = self.tracker.track_objects(self.frame_id, frame, cnt, wall, rect, stats)
 
                     if self.tracked:
-                        if self.mq_provider:
-                            [self.mq_provider.send_frameobjekt(o) for o in self.tracked.values() if o.f_id > 0]
+                        # if self.mq_provider:
+                        #     [self.mq_provider.send_frameobjekt(o) for o in self.tracked.values() if o.f_id > 0]
 
                         self.print_tracked(self, frame)
                         self.print_symbology(self, frame, rect)
