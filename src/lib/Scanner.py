@@ -51,10 +51,10 @@ class Scanner(threading.Thread):
         self.CELL_NAME_FIELD = self.config['CELL_NAME_FIELD']
         self.CELL_STRENGTH_FIELD = self.config['CELL_STRENGTH_FIELD']
 
-        # _, ZMQ_OK = check_zmq_available()  # self.config['MODULE'].lower()
+        _, ZMQ_OK = check_zmq_available()  # self.config['MODULE'].lower()
 
-        if True:
-            golden_retriever = get_retriever(self.config['MQ_MODULE_RETRIEVER']) # this should have been a list.
+        if ZMQ_OK:
+            golden_retriever = get_retriever(self.config['MQ_MODULE_RETRIEVER'])
         else:
             golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
 
