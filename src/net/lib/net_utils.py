@@ -6,11 +6,10 @@ import requests
 
 from src.arx.mq.ZeroMQARXPush import ZeroMQARXPush
 
-logger_root = logging.getLogger('root_logger')
 net_logger = logging.getLogger('net_logger')
 
 def get_retriever(name):
-    logger_root.debug(f'attempting to load retriever {name}')
+    net_logger.info(f'attempting to load retriever {name}')
     try:
         components = name.split('.')
         mod = __import__(components[0])
@@ -18,7 +17,7 @@ def get_retriever(name):
             mod = getattr(mod, comp)
         return mod
     except AttributeError as a:
-        logger_root.fatal(f'Failed to load retriever {name} {a}')
+        net_logger.fatal(f'Failed to load retriever {name} {a}')
         exit(1)
 
 def check_rmq_available(module):
@@ -52,6 +51,7 @@ def check_rmq_available(module):
         RMQ_AVAILABLE = False
         net_logger.debug(f'Error: NET::RMQ {module_queue} is not available: {e}')
 
+    net_logger.info(f'NET::RMQ online.')
     return module, RMQ_AVAILABLE
 
 def check_zmq_available():
@@ -73,6 +73,7 @@ def check_zmq_available():
 
             while True:
                 pull.receive_data()
+                net_logger.info(f'NET::ZMQ online.')
                 return None, ZMQ_AVAILABLE
 
         except Exception as e:
@@ -83,6 +84,7 @@ def check_zmq_available():
         ZMQ_AVAILABLE = False
         net_logger.info(f'Error: NET::ZMQ is not available: {e}')
 
+    net_logger.info(f'NET::ZMQ online.')
     return None, ZMQ_AVAILABLE
 
 def check_imq_available():
