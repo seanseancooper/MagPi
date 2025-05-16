@@ -59,11 +59,12 @@ class Scanner(threading.Thread):
             golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
 
         self.module_retriever = golden_retriever()
-        self.module_retriever.configure(config_file)  # passing module config 'wifi.json'
+        self.module_retriever.configure(config_file)
 
+        # I could import Tracker now...
         module_tracker = get_retriever(self.config['MODULE_TRACKER'])
         self.module_tracker = module_tracker()
-        self.module_tracker.configure(config_file)  # passing module config 'wifi.json'
+        self.module_tracker.configure(config_file)
 
         self.signal_cache_max = self.config.get('SIGNAL_CACHE_MAX', self.signal_cache_max)
 
