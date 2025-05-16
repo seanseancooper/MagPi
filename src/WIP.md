@@ -49,7 +49,8 @@
         IMQ_PORT : 5012
 
 127.0.0.1:5003 xxx.localhost
-127.0.0.1:5004 xxx.localhost
+
+127.0.0.1:5004 mcp.localhost                                <-- NOT YET ASSIGNED IN HOSTS
 
 127.0.0.1:5005 map.localhost
 127.0.0.1:5005 gps.localhost                                <-- MAINTAINS DOMAIN FOR GPS RESOLUTION
@@ -93,8 +94,8 @@
     DATA: ZeroMQ 'frame' composed of metatdata and data
 
 >- [DONE] ARXSignalPoint RabbitMq & ZeroMQ to ARXAudioEncoder
->- [XX] Elasticsearch mappings?
->- [XX] Processing germane to audio:back to original requirements + new **IDEA:**s.
+>- [NO] Elasticsearch mappings?
+>- [XX] Processing germane to audio:back to original requirements.
 >- **IDEA:** project-keyword-spotter integration? feasible? alt. solution --> MCP
 >- **IDEA:** ML Models germane to audio, speech and sound analysis 
 >  - 'AudioEncoder' subproject
@@ -141,7 +142,7 @@
 >- [NO] Elastic Integration:
 >- [NO] Elastic pull()
 >- [DONE] GPS subcomponent
->>- MAP & GPS node process configuration: hosts, ports, jinja templates.
+>>-[DONE] MAP & GPS node process configuration: hosts, ports, jinja templates.
 >- [??] WX subcomponent
 >- [IP] MapAggregator refresh; read from rabbitMQ, not REST
 >- [XX] Hyperspectral imaging: BLOCKED DUE TO ENVIRONMENT
@@ -246,7 +247,7 @@ TRXSignalPoint(self, worker_id, lon, lat, sgnl, text_data={}, audio_data=None, s
 
 ## wifi
     WifiSignalPoint(self, worker_id, lon, lat, sgnl, bssid=None) 
-    DATA: REST endpoints and readlines via RabbitMQ
+    [DONE]: REST endpoints and readlines via ZeroMQ
 - Produces and reads data over REST & MQ
 
 ```
