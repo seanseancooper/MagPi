@@ -21,15 +21,7 @@
 		{
 			"STATIC_FOLDER": "/static"
 		},
-		{
-			"MAP_AGGREGATOR_INTERVAL": 1.0
-		},
-		{
-			"MAP_HOST": "localhost"
-		},
-		{
-			"MAP_PORT": 5105
-		},
+
 		{
 			"NODE_START_COMMAND": ["npm", "start"]
 		},
@@ -39,27 +31,36 @@
 		{
 			"NODE_BUILD": false
 		},
-			{
-				"GPS_HOST": "localhost"
-			},
-			{
-				"GPS_PORT": 5205
-			},
-			{
-				"GPS_MODULE_RETRIEVER": "src.map.gps.GPSRetriever.JSGPSRetriever"
-			},
-			{
-				"GPS_RETRIEVER_TIMEOUT": 1
-			},
-			{
-				"GPS_CONNECT_TIMEOUT": 10
-			},
-			{
-				"GPS_TEST_FILE": "./lib/TEST_FILE.txt"
-			},
-			{
-				"OUT_PATH": "gps.out"
-			},
+
+		{
+			"MAP_AGGREGATOR_INTERVAL": 1.0
+		},
+		{
+			"MAP_HOST": "localhost"
+		},
+		{
+			"MAP_PORT": 5105
+		},
+
+		{
+			"GPS_TEST_FILE": "./lib/TEST_FILE.txt"
+		},
+		{
+			"GPS_MODULE_RETRIEVER": "src.map.gps.GPSRetriever.JSGPSRetriever"
+		},
+		{
+			"GPS_RETRIEVER_TIMEOUT": 1
+		},
+		{
+			"GPS_HOST": "localhost"
+		},
+		{
+			"GPS_PORT": 5205
+		},
+		{
+			"GPS_CONNECT_TIMEOUT": 10
+		},
+
 		{
 			"DATE_FORMAT": "%Y-%m-%d"
 		},
