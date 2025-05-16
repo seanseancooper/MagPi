@@ -4,7 +4,7 @@ from imagezmq import ImageHub
 from src.cam.lib.FrameObjekt import FrameObjekt
 from datetime import datetime
 
-logger_root = logging.getLogger('logger_root')
+logger_root = logging.getLogger('cam_logger')
 
 class ImageZMQAsyncConsumer:
     """ Transport FrameObjekt in the CAM module """
@@ -28,7 +28,7 @@ class ImageZMQAsyncConsumer:
             # encoder = FrameObjektEncoder(frame_objekt)
             # encoder.start()
 
-            logger_root.info(f"Received {metadata}")
+            logger_root.debug(f"Received {metadata}")
             self.hub.send_reply(b"OK")
 
 if __name__ == "__main__":

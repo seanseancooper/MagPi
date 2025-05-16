@@ -257,8 +257,8 @@ class ShowxatingBlackviewPlugin(ShowxatingPlugin):
                     self.tracked = self.tracker.track_objects(self.frame_id, frame, cnt, wall, rect, stats)
 
                     if self.tracked:
-                        # if self.mq_provider:
-                        #     [self.mq_provider.send_frameobjekt(o) for o in self.tracked.values() if o.f_id > 0]
+                        if self.mq_provider:
+                            [self.mq_provider.send_frameobjekt(o) for o in self.tracked.values() if o.f_id > 0]
 
                         self.print_tracked(self, frame)
                         self.print_symbology(self, frame, rect)

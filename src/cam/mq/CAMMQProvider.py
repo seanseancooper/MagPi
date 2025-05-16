@@ -14,17 +14,12 @@ class CAMMQProvider(threading.Thread):
         super().__init__()
         self.config = {}
         self.imq = None
-        self.imq_host = None
-        self.imq_port = None
         self.DEBUG = False
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
         self.DEBUG = self.config.get('DEBUG')
-
-        self.imq_host = self.config.get('IMQ_HOST')
-        self.imq_port = self.config.get('IMQ_PORT')
-        self.imq = ImageZMQAsyncProducer(self.imq_host, self.imq_port)
+        self.imq = ImageZMQAsyncProducer(self.config.get('IMQ_HOST'),self.config.get('IMQ_PORT'))
 
     def send_frame(self, frame):        # metadata & image arrays via ImageZMQ
         self.imq.send_frame(frame)

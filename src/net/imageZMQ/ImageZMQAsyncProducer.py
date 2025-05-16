@@ -3,7 +3,7 @@ import logging
 from imagezmq import ImageSender
 from src.cam.lib.FrameObjekt import FrameObjekt
 
-logger_root = logging.getLogger('logger_root')
+logger_root = logging.getLogger('cam_logger')
 
 class ImageZMQAsyncProducer:
     """ Transport FrameObjekt in the CAM module """
@@ -13,8 +13,9 @@ class ImageZMQAsyncProducer:
 
     def send_frame(self, frame):
         metadata, f = frame
-        logger_root.info(f"Sending: {metadata['f_id']}")
-        # self.sender.send_image(json.dumps(metadata), f)
+        logger_root.debug(f"Sending: {metadata['f_id']}")
+        self.sender.send_image(json.dumps(metadata), f)
+        logger_root.debug(f"Sending: {metadata['f_id']}")
 
 if __name__ == "__main__":
     import threading
