@@ -89,9 +89,11 @@ def check_imq_available():
     """ IMQ uses ZMQ internally """
 
     try:
-        return True
+        return check_zmq_available()
     except Exception as e:
         net_logger.debug(f'Error: NET::IMQ is not available: {e}')
 
 if __name__ == '__main__':
-    print(check_zmq_available())
+    print(f'RabbitMQ: {check_rmq_available("wifi")}')
+    print(f'ZeroMQ: {check_zmq_available()}')
+    print(f'ImageMQ: {check_imq_available()}')
