@@ -1,9 +1,10 @@
 import logging
+
+from src.arx.mq.ZeroMQARXPull import ZeroMQARXPull
 from src.config import readConfig
 import requests
 
-from src.net.zeroMQ.ZeroMQAsyncConsumer import ZeroMQAsyncConsumer
-from src.net.zeroMQ.ZeroMQAsyncProducer import ZeroMQAsyncProducer
+from src.arx.mq.ZeroMQARXPush import ZeroMQARXPush
 
 logger_root = logging.getLogger('root_logger')
 net_logger = logging.getLogger('net_logger')
@@ -58,19 +59,21 @@ def check_zmq_available():
     config = {}
     readConfig('net.json', config)
     ZMQ_AVAILABLE = True
-
+    host = '127.0.0.1'
+    port = 5555
     try:
-        producer = ZeroMQAsyncProducer()
-        arxs = producer.test()
+        push = ZeroMQARXPush(host, port)
+        pull = ZeroMQARXPull(host, port)
+        arxs = push.test()
         try:
             metadata = arxs.get_text_attributes()
             data = arxs.get_audio_data()
 
-            import asyncio
-            asyncio.run(producer.send_data(metadata, data))
+            push.send_data(metadata, data)
 
-            # loop = asyncio.get_event_loop()
-            # loop.run_until_complete(producer.send_data(metadata, data))
+            while True:
+                pull.receive_data()
+                return None, ZMQ_AVAILABLE
 
         except Exception as e:
             ZMQ_AVAILABLE = False
@@ -92,7 +95,3 @@ def check_imq_available():
 
 if __name__ == '__main__':
     print(check_zmq_available())
-
-    # consumer = ZeroMQAsyncConsumer()
-    # consumer.run()
-
