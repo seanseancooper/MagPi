@@ -4,6 +4,7 @@ from datetime import datetime
 import zmq
 import json
 import logging
+
 net_logger = logging.getLogger('net_logger')
 
 class ZeroMQSubscriber(threading.Thread):
