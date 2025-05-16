@@ -159,7 +159,12 @@ geolocation.setTracking(true);
 function getLocation(){
     var xhttp = new XMLHttpRequest();
     var block = true;
-    xhttp.open("GET", 'http://map.localhost:5005/position', block);  // #ToDO: find a way to not hardcode URL
+
+    // read config
+    const server_host = map_config.MAP.find(item => item.GPS_HOST)['GPS_HOST'];
+    const server_port = map_config.MAP.find(item => item.GPS_PORT)['GPS_PORT'];
+
+    xhttp.open("GET", 'http://map.' + server_host + ':'+ server_port +'/position', block);
     setHeaders(xhttp, 'map.localhost:5005');
 
     xhttp.onload = function(){
