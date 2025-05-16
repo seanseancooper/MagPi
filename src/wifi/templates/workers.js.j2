@@ -37,11 +37,19 @@
                     var p_signal_color = 'rgba(' + _color + ', 1.0)';
                     var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
 
-                    if (data.is_mute == false) {
-                        return "<button id='remove_button_"+ data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='width:24px;' class='trk_btn rem_button' value='"+data.{{ scanner.CELL_IDENT_FIELD  }}+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
+                    return "<button id='add_button_" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='width:96px;color:" + text_color +"; background-color:" + p_signal_color +";'  class='trk_btn add_button button' value='"+data.{{ scanner.CELL_IDENT_FIELD  }}+"' data-action='ADD' data-target=" + trgt + ">ADD</button>";
+                    /*
+                    if (data.tracked == true) {
+                        if (data.is_mute == false) {
+                            return "<button id='remove_button_" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='width:24px;' class='trk_btn rem_button' value='"+data.{{ scanner.CELL_IDENT_FIELD  }}+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
+                        } else {
+                            return "<button id='remove_button_" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='width:24px;' class='trk_btn rem_button' value='"+data.{{ scanner.CELL_IDENT_FIELD  }}+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
+                        }
                     } else {
-                        return "<button id='remove_button_"+ data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='width:24px;' class='trk_btn rem_button' value='"+data.{{ scanner.CELL_IDENT_FIELD  }}+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
+                        return "<button id='add_button_" + data.{{ scanner.CELL_IDENT_FIELD  }} + "' style='width:96px;' class='trk_btn add_button button' value='"+data.{{ scanner.CELL_IDENT_FIELD  }}+"' data-action='ADD' data-target=" + trgt + ">ADD</button>";
                     }
+                    */
+
                 }},
                 {title:"{{ scanner.CELL_IDENT_FIELD  }}", field:"{{ scanner.CELL_IDENT_FIELD  }}", width:120},
 
@@ -50,7 +58,18 @@
                     colors:["red", "orange", "yellow", "#008800", "#00FF00"]
                 }},
 
-                {title:"db", field:"{{ scanner.CELL_STRENGTH_FIELD  }}", width:30},
+                {title:"Last", field:"signal_cache", width:30, formatter: function(cell, formatterParams) {
+
+                    var content = document.createElement("span");
+                    var values = cell.getValue();
+
+                    let last = values[values.length-1];
+                    content.innerHTML += last;
+
+                    return content;
+
+                }},
+
                 {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, sorter:"array", sorterParams:{
                     type:"length"
                 }},
