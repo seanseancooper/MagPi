@@ -12,7 +12,7 @@ class ZeroMQSubscriber(threading.Thread):
     The PUB/SUB pattern is used for wide message distribution according to topics.
     SUB socket receives messages according to topic zmq.SUBSCRIBE
     """
-    def __init__(self):
+    def __init__(self, I_ZMQ_HOST, I_ZMQ_PORT):
         super().__init__()
         self.host = I_ZMQ_HOST
         self.port = I_ZMQ_PORT
