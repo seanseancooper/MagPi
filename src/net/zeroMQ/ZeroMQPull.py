@@ -44,7 +44,9 @@ class ZeroMQPull(threading.Thread):
         return self.data
 
 if __name__ == "__main__":
-    pull = ZeroMQPull()
+    host = '127.0.0.1'
+    port = 5555
+    pull = ZeroMQPull(host, port)
     while True:
         # pull.receive_data()
         import asyncio
