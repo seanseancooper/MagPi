@@ -49,7 +49,7 @@
 
 				"streams": true,
 				"streaming_host": "localhost",
-				"streaming_port": 6100,
+				"streaming_port": 5102,
 				"streaming_path": "/stream",
 
 				"outfile_path": "../../_out",
