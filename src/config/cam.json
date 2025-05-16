@@ -25,7 +25,7 @@
 			"IMQ_HOST" : "127.0.0.1"
 		},
 		{
-			"IMQ_PORT" : "5555"
+			"IMQ_PORT" : 5012
 		},
 		{
 			"PLUGIN": {
