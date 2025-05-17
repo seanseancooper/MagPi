@@ -1,6 +1,7 @@
 from datetime import datetime
 import numpy as np
-import uuid
+
+from src.lib.utils import generate_uuid
 
 
 class FrameObjekt:
@@ -93,7 +94,7 @@ class FrameObjekt:
 
     @staticmethod
     def create_tag(f_id):
-        tag = f"{f_id}_{str(uuid.uuid4())}"
+        tag = f"{f_id}_{str(generate_uuid())}"
         return tag
 
     def get_rect(self):

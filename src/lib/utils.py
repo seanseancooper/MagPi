@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import uuid
 from datetime import datetime
 from string import Template
 import requests
@@ -11,6 +12,9 @@ logger_root = logging.getLogger('root')
 speech_logger = logging.getLogger('speech_logger')
 gps_logger = logging.getLogger('gps_logger')
 
+
+def generate_uuid():
+    return uuid.uuid4()
 
 def mute(mutable):
     ''' mutes/unmutes object passed into it '''

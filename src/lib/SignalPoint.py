@@ -1,7 +1,8 @@
-import uuid
 from datetime import datetime
 import hashlib
 import geohash
+
+from src.lib.utils import generate_uuid
 
 
 class SignalPoint(object):
@@ -14,7 +15,7 @@ class SignalPoint(object):
     """
     def __init__(self, lon, lat, sgnl):
         self._created = datetime.now()
-        self._id = uuid.uuid4()
+        self._id = generate_uuid()
         self._lon = lon
         self._lat = lat
         self._sgnl = sgnl               # a discrete value

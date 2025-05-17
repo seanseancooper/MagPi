@@ -1,4 +1,3 @@
-import uuid
 from datetime import datetime, timedelta
 import numpy as np
 import librosa
@@ -7,7 +6,7 @@ from librosa import feature
 from src.lib.Signal import Signal
 from src.lib.SignalPoint import SignalPoint
 
-from src.lib.utils import format_time
+from src.lib.utils import format_time, generate_uuid
 
 
 class TRXSignalPoint(SignalPoint):
@@ -19,7 +18,7 @@ class TRXSignalPoint(SignalPoint):
     """
     def __init__(self, worker_id, lon, lat, sgnl, text_data: dict, audio_data=None, signal_type="object", sr=48000):
         super().__init__(lon, lat, sgnl)
-        self._id = uuid.uuid4()
+        self._id = generate_uuid()
         self._worker_id = worker_id
         self._signal_type = signal_type         # object || continuous Emission type (radar, voice, data): This is in line with the SignalPoint type
 

@@ -1,9 +1,8 @@
 import json
 from datetime import datetime, timedelta
 import random
-import uuid
 import logging
-from src.lib.utils import make_path, write_file
+from src.lib.utils import make_path, write_file, generate_uuid
 
 json_logger = logging.getLogger('json_logger')
 
@@ -70,7 +69,7 @@ def generate_signal(worker_id):
 
     return {
         "created"  : (datetime.now() - timedelta(minutes=random.randint(1, 1000))).isoformat(),
-        "id"       : str(uuid.uuid4()),
+        "id"       : str(generate_uuid()),
         "worker_id": worker_id,
         "lat"      : round(base_lat + offset_lat, 6),
         "lon"      : round(base_lon + offset_lon, 6),

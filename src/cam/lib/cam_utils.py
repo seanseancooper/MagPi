@@ -1,7 +1,8 @@
-import uuid
-
 import cv2 as cv
 import numpy as np
+
+from src.lib.utils import generate_uuid
+
 
 def getRectsFromContours(contours):
     rects = np.empty(shape=(1, 4), dtype=np.int32)
@@ -101,7 +102,7 @@ def get_mean_locations(contours):  # contours are sorted.
         _y = []
         [(_x.append(a), _y.append(b)) for [[a, b]] in cnt]
 
-        _cnts.append({id: uuid.uuid4()})
+        _cnts.append({id: generate_uuid()})
         _locs.append({id: np.mean(np.array([_x, _y]), axis=1, dtype=int)})
 
     return _locs, _cnts

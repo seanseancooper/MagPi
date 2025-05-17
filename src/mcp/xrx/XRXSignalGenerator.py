@@ -2,6 +2,8 @@ import datetime
 import random
 import uuid
 
+from src.lib.utils import generate_uuid
+
 
 class XRXSignalGenerator:
 
@@ -48,7 +50,7 @@ class XRXSignalGenerator:
 
         # Function to generate a random worker record
         def generate_worker():
-            worker_id = str(uuid.uuid4())
+            worker_id = str(generate_uuid())
             data = {
                 "worker_id" : worker_id,
                 "SSID"      : random.choice(SSIDs),

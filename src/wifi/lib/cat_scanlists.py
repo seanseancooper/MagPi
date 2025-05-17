@@ -1,7 +1,6 @@
 import json
 import glob
-import uuid
-from src.lib.utils import format_time
+from src.lib.utils import format_time, generate_uuid
 from src.wifi.lib.wifi_utils import generate_signal
 from src.wifi.lib.WifiVendors import vendorsMacs_XML, proc_vendors
 from datetime import datetime, timedelta
@@ -106,7 +105,7 @@ class cat_scanlists:
                     def process_sgnl(sgnl):
                         return {
                             "created": sgnl.get('created', record['created']),   # this should match the created date of the record
-                            "id": sgnl.get('id', str(uuid.uuid4())),
+                            "id": sgnl.get('id', str(generate_uuid())),
                             "worker_id": record['id'],
                             "lon": sgnl.get('lon', self.lon),
                             "lat": sgnl.get('lat', self.lat),
