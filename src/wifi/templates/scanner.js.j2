@@ -158,16 +158,13 @@
 
                     var content = document.createElement("span");
                     var values = cell.getValue();
-
                     let last = values[values.length-1];
                     content.innerHTML += last;
 
                     return content;
 
                 }},
-                {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, sorter:"array", sorterParams:{
-                    type:"length"
-                }},
+                {title:"History", field:"signal_cache", mutator:"signalMutator",  width:162, formatter:chartFormatter, sorter:"array", sorterParams:{type:"length"}},
 
                 // should 'iterate' text_attributes instead.
                 {title:"Ch.", field:"text_attributes.Channel", width:50},
