@@ -530,8 +530,8 @@ function animate(coordinate) {
                     }
                 });
             }
-
-            if (_signals.sdr) {
+            /*
+            if (_signals.sdr.length > 0) {
                 _signals.sdr.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
                         console.log('SDR: ' +  cell);
