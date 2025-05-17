@@ -551,7 +551,7 @@ function animate(coordinate) {
                 });
             }
 
-            if (_signals.arx) {
+            if (_signals.arx.length > 0) {
                 _signals.arx.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
                         console.log('ARX: ' +  cell);
