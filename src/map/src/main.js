@@ -584,7 +584,7 @@ function animate(coordinate) {
 
 function update(coordinate) {
 
-    console.log('update coordinate: ' + coordinate);
+    //console.log('update coordinate: ' + coordinate);
     var source = v_layer.getSource();
 
     var coordinatesList = document.getElementById("coordinatesList");
