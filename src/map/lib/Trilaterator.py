@@ -5,7 +5,8 @@ from datetime import datetime, timedelta
 import numpy as np
 from scipy.optimize import minimize
 
-from src.lib.utils import get_location, format_time, format_delta
+from src.lib.utils import format_time, format_delta
+from src.map.gps import get_location
 from src.config import readConfig
 import requests
 import json

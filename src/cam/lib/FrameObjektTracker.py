@@ -7,7 +7,7 @@ from sklearn.metrics import euclidean_distances
 
 from src.cam.lib.cam_utils import is_in_range, is_inside
 from src.config import readConfig
-from src.lib.utils import get_location
+from src.map.gps import get_location
 
 import logging
 cam_logger = logging.getLogger('cam_logger')

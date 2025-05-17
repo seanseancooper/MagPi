@@ -9,7 +9,7 @@ import usb.util
 import usb.backend.libusb1
 
 from src.config import readConfig
-from src.lib.utils import get_location
+from src.map.gps import get_location
 from src.trx.lib.TRXWorker import TRXWorker
 from src.trx.lib.TRXSignalPoint import TRXSignalPoint
 

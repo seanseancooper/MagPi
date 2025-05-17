@@ -9,7 +9,8 @@ import sounddevice as sd
 import soundfile as sf
 
 from src.arx.lib.ARXSignalPoint import ARXSignalPoint
-from src.lib.utils import get_location, format_time
+from src.lib.utils import format_time
+from src.map.gps import get_location
 from src.config import readConfig
 
 import logging

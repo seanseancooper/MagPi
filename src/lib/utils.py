@@ -4,7 +4,6 @@ import subprocess
 import uuid
 from datetime import datetime
 from string import Template
-import requests
 import json
 import logging
 
@@ -94,19 +93,6 @@ def runOSCommand(command: list):
     except OSError as e:
         logger_root.fatal(f"[{__name__}]:couldn't create a process for \'{command}\': {e}")
     return 0
-
-
-def get_location(locator):
-    """ gets location from GPS endpoint"""
-    try:
-        resp = requests.get(locator.config.get('GPS_ENDPOINT', 'http://map.localhost:5005/position'))
-        position = json.loads(resp.text)
-        locator.lat = position.get('LATITUDE', position.get('lat'))
-        locator.lon = position.get('LONGITUDE', position.get('lon'))
-    except Exception as e:
-        if locator.config['SPEECH_ENABLED']:
-            speech_logger.warning(f"GPS Error")
-        gps_logger.debug(f"GPS Retrieval Error for {locator.config['MODULE']}: {e}")
 
 
 def write_to_scanlist(config, searchmap):

@@ -2,7 +2,7 @@ from datetime import datetime, timezone, timedelta
 from collections import defaultdict
 
 from src.config import readConfig
-from src.lib.utils import get_location
+from src.map.gps import get_location
 
 from src.lib.Worker import Worker
 
