@@ -541,7 +541,7 @@ function animate(coordinate) {
                 });
             }
 
-            if (_signals.cam) {
+            if (_signals.cam.length > 0) {
                 _signals.cam.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
                         console.log('CAM: ' +  cell);
