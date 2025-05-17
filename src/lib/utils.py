@@ -102,7 +102,7 @@ def get_location(locator):
     except Exception as e:
         if locator.config['SPEECH_ENABLED']:
             speech_logger.warning(f"GPS Error")
-        gps_logger.warning(f"GPS Retrieval Error: {e}")
+        gps_logger.debug(f"GPS Retrieval Error for {locator.config['MODULE']}: {e}")
 
 
 def write_to_scanlist(config, searchmap):
