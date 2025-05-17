@@ -5,7 +5,7 @@ from sklearn.tree import DecisionTreeRegressor
 from src.cam.lib.FrameObjekt import FrameObjekt
 from sklearn.metrics import euclidean_distances
 
-from src.cam.lib.utils import is_in_range, is_inside
+from src.cam.lib.cam_utils import is_in_range, is_inside
 from src.config import readConfig
 from src.lib.utils import get_location
 
