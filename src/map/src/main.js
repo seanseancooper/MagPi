@@ -453,7 +453,7 @@ new VectorLayer({
 
 function animate(coordinate) {
 
-    console.log('animate coordinate: ' + coordinate);
+    //console.log('animate coordinate: ' + coordinate);
 
     function colorUniqId(data, splt){
            var parts = data.split(splt);
