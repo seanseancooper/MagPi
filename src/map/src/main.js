@@ -171,7 +171,6 @@ setInterval(function() {
     animate(coordinate);
     update(coordinate);
 }, 1000);
-//};
 
 geolocation.on('change', function () {
 
