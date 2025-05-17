@@ -165,7 +165,6 @@ function getLocation(){
     xhttp.send();
 }
 
-//if (enable_hardware) {
 //coordinate = currentWebMercator;
 setInterval(function() {
     getLocation();
