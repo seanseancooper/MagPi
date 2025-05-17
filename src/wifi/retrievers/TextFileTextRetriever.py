@@ -39,7 +39,7 @@ def looper(q):
 
 
 class TextFileTextRetriever(threading.Thread):
-    """ Apple MacOS specific Wifi Retriever class """
+
     def __init__(self):
         super().__init__()
 
