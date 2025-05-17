@@ -6,7 +6,8 @@ from collections import defaultdict
 from src.net.lib.net_utils import check_zmq_available
 from src.config import readConfig
 from src.net.lib.net_utils import get_retriever
-from src.lib.utils import get_location, format_time, format_delta
+from src.lib.utils import format_time, format_delta
+from src.map.gps import get_location
 from src.lib.utils import write_to_scanlist
 
 import logging
