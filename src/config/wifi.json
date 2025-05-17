@@ -7,9 +7,6 @@
 			"MODULE": "wifi"
 		},
 		{
-			"DEBUG": false
-		},
-		{
 			"SPEECH_ENABLED": false
 		},
 		{
