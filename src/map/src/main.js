@@ -195,12 +195,6 @@ geolocation.on('change', function () {
 });
 
 geolocation.on('error', function (error) {
-    /*
-    if  (!enable_hardware) {
-        output.innerHTML = error.message;
-        output.style.display = '';
-    }
-    */
     output.innerHTML = error.message;
     output.style.display = '';
     handleTrackingButton();
