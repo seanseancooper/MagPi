@@ -15,7 +15,7 @@ class ImageZMQAsyncProducer:
         metadata, f = frame
         logger_root.debug(f"Sending: {metadata['f_id']}")
         self.sender.send_image(json.dumps(metadata), f)
-        logger_root.debug(f"Sending: {metadata['f_id']}")
+        logger_root.debug(f"Sent: {metadata['f_id']}")
 
 if __name__ == "__main__":
     import threading
