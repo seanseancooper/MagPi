@@ -170,7 +170,6 @@ setInterval(function() {
     getLocation();
     animate(coordinate);
     update(coordinate);
-    console.log('coordinate: ' + coordinate);
 }, 1000);
 //};
 
