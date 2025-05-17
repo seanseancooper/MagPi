@@ -59,12 +59,9 @@ class TextFileTextRetriever(threading.Thread):
 
     def scan(self):
         try:
-            process = subprocess.Popen(
-                    ['/usr/local/bin/airport', '-s', '-x'],
-                    stdout=subprocess.PIPE)
-
-            while process.stdout:
-                return str(b''.join(process.stdout.readlines()).decode(encoding='latin-1'))
+            with open('/Users/scooper/PycharmProjects/MagPi/src/lib/scanned.xml') as f:
+                scanned = f.read()
+            return scanned
 
         except Exception as e:
             wifi_logger.error(f"[{__name__}]: Exception: {e}")
