@@ -486,6 +486,7 @@ function animate(coordinate) {
                 _signals.wifi.forEach(function(cell) {
 
                     if (!cell.is_mute && cell.tracked){
+                        console.log("SIGNALPOINT: [" + cell + "] " + cell.BSSID);
 
                         for (const sgnl of cell.signal_cache) {
 
