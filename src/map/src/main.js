@@ -482,7 +482,7 @@ function animate(coordinate) {
             var source = v_layer.getSource();
             source.clear();
 
-            if (_signals.wifi) {
+            if (_signals.wifi.length > 0) {
                 _signals.wifi.forEach(function(cell) {
 
                     if (!cell.is_mute && cell.tracked){
