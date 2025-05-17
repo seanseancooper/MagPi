@@ -34,7 +34,7 @@ def index():
 
 @map_bp.route("/map", methods=['GET'], subdomain='map')
 def map():
-    return render_template(mapAgg.config['MAP_TEMPLATE'])
+    return render_template(mapAgg.config['MAP_TEMPLATE'], config=gpsRet.config)
 
 
 @map_bp.route('/stats', methods=['GET'], subdomain='map')
