@@ -3,7 +3,8 @@
 <div id="map" class="module_tab" style="position:relative;display:none;">
     {% set config = container.get_module_config('map') %}
 {% else %}
-    <div id="map" class="module_tab" style="position:relative;display:block;">
+<div id="map" class="module_tab" style="position:relative;display:block;">
+    {% set config = config %}
 {% endif %}
 {% set map_host = config['MAP_HOST'] %}
 {% set map_port = config['MAP_PORT'] %}
