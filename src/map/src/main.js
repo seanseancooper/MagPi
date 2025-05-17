@@ -510,8 +510,8 @@ function animate(coordinate) {
                     }
                 });
             };
-            /*
-            if (_signals.trx) {
+
+            if (_signals.trx.length > 0) {
                 _signals.trx.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
 
