@@ -21,7 +21,7 @@ import map_config from '../../config/map.json' assert { type: 'json' };
 docs @ https://openlayers.org/en/latest/apidoc/
 */
 
-const enable_hardware = false;
+const enable_hardware = true;
 var fix;
 var click = 0;
 var features = [];
@@ -58,33 +58,25 @@ function handleTrackingButton() {
 
     tracking_ind.innerHTML = "<div id='tracking_ind' class='ol-unselectable' style='' width='6' height='22'>&nbsp;</div>";
 
-    if (enable_hardware){
-        if (fix == true) {
-            tracking_ind.style='background:purple'; // online w/fix
+    if (geolocation){
+
+        geolocation.setTracking = !geolocation.getTracking();
+        if (geolocation.getTracking() == false){
+            tracking_ind.style='background:yellow'; // warning
         } else {
-            tracking_ind.style='background:orange'; // offline
+            tracking_ind.style='background:red';    // offline
         }
+
+        const coordJS = geolocation.getPosition();
+        if (coordJS) {
+            positionFeature.setGeometry(new Point(coordJS));
+            view.setCenter(coordJS);
+            output.innerHTML = '';
+            tracking_ind.style='background:green';  // online
+        }
+
     } else {
-        if (geolocation){
-
-            geolocation.setTracking = !geolocation.getTracking();
-            if (geolocation.getTracking() == false){
-                tracking_ind.style='background:yellow'; // warning
-            } else {
-                tracking_ind.style='background:red';    // offline
-            }
-
-            const coordJS = geolocation.getPosition();
-            if (coordJS) {
-                positionFeature.setGeometry(new Point(coordJS));
-                view.setCenter(coordJS);
-                output.innerHTML = '';
-                tracking_ind.style='background:green';  // online
-            }
-
-        } else {
-            tracking_ind.style='background:red';
-        }
+        tracking_ind.style='background:red';
     }
 }
 
@@ -155,18 +147,15 @@ const geolocation = new Geolocation({
 
 geolocation.setTracking(true);
 
-
 function getLocation(){
     var xhttp = new XMLHttpRequest();
     var block = true;
 
     // read config
-    const server_host = map_config.MAP.find(item => item.GPS_HOST)['GPS_HOST'];
-    const server_port = map_config.MAP.find(item => item.GPS_PORT)['GPS_PORT'];
+    const server_name = map_config.MAP.find(item => item.SERVER_NAME)['SERVER_NAME'];
 
-    xhttp.open("GET", 'http://map.' + server_host + ':'+ server_port +'/position', block);
-    setHeaders(xhttp, 'map.localhost:5005');
-
+    xhttp.open("GET", 'http://map.' + server_name +'/position', block);
+    setHeaders(xhttp, 'map.' + server_name);
     xhttp.onload = function(){
         const resp = xhttp.response;
         let json = JSON.parse(resp);
@@ -176,15 +165,15 @@ function getLocation(){
     xhttp.send();
 }
 
-if (enable_hardware) {
-    coordinate = currentWebMercator;
-    setInterval(function() {
-        getLocation();
-        animate(coordinate);
-        update(coordinate);
-        console.log('enable_hardware: ' + coordinate);
-    }, 1000);
-};
+//if (enable_hardware) {
+//coordinate = currentWebMercator;
+setInterval(function() {
+    getLocation();
+    animate(coordinate);
+    update(coordinate);
+    console.log('coordinate: ' + coordinate);
+}, 1000);
+//};
 
 geolocation.on('change', function () {
 
@@ -196,22 +185,27 @@ geolocation.on('change', function () {
     };
 
     // read config
-    const server_host = map_config.MAP.find(item => item.GPS_HOST)['GPS_HOST'];
-    const server_port = map_config.MAP.find(item => item.GPS_PORT)['GPS_PORT'];
+    const gps_host = map_config.MAP.find(item => item.GPS_HOST)['GPS_HOST'];
+    const gps_port = map_config.MAP.find(item => item.GPS_PORT)['GPS_PORT'];
 
     // Send coords to Node server
-    fetch('http://' + server_host + ':' + server_port , {
+    fetch('http://' + gps_host + ':' + gps_port , {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     });
+    getLocation();
 });
 
 geolocation.on('error', function (error) {
+    /*
     if  (!enable_hardware) {
         output.innerHTML = error.message;
         output.style.display = '';
     }
+    */
+    output.innerHTML = error.message;
+    output.style.display = '';
     handleTrackingButton();
 });
 
@@ -291,7 +285,6 @@ function getPointStyle(signal_color) {
     });
     return pointstyle;
 }
-
 
 function getCircleStyle(signal_color, strength) {
     // Wifi Signals
@@ -482,10 +475,11 @@ function animate(coordinate) {
     const hdweCoords = fromLonLat(coordinate);
 
     var xhttp = new XMLHttpRequest();
-    let URL = "http://map.localhost:5005/data";  // #ToDO: find a way to not hardcode URL
+    const server_name = map_config.MAP.find(item => item.SERVER_NAME)['SERVER_NAME'];
+    let URL = 'http://map.' + server_name +'/data';
     xhttp.open("GET", URL, true);
 
-    setHeaders(xhttp, 'map.localhost:5005');
+    setHeaders(xhttp, 'map.' + server_name);
 
     xhttp.onload = function(){
         const resp = xhttp.response;
@@ -497,7 +491,7 @@ function animate(coordinate) {
             var source = v_layer.getSource();
             source.clear();
 
-            if (_signals.wifi > null) {
+            if (_signals.wifi) {
                 _signals.wifi.forEach(function(cell) {
 
                     if (!cell.is_mute && cell.tracked){
@@ -512,7 +506,7 @@ function animate(coordinate) {
                             var c_signal_color = 'rgba(' + _color + ',' + parseFloat( ((sgnlStrength + 100)/100).toFixed(2) ) + ')';
                             var p_signal_color = 'rgba(' + _color + ', 1.0)';
 
-                            //console.log("SIGNALPOINT: [" + sgnl.id + "] " + cell.BSSID + " c_signal_color:" + c_signal_color + " sgnl.lon:" + sgnl.lon + " sgnl.lat:" +  sgnl.lat + " sgnl.sgnl:" +  sgnlStrength );
+                            // console.log("SIGNALPOINT: [" + sgnl.id + "] " + cell.BSSID + " c_signal_color:" + c_signal_color + " sgnl.lon:" + sgnl.lon + " sgnl.lat:" +  sgnl.lat + " sgnl.sgnl:" +  sgnlStrength );
 
                             // choose the feature based on signal type and
                             // pass one call
@@ -525,8 +519,8 @@ function animate(coordinate) {
                     }
                 });
             };
-
-            if (_signals.trx > null) {
+            /*
+            if (_signals.trx) {
                 _signals.trx.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
 
@@ -545,7 +539,7 @@ function animate(coordinate) {
                     }
                 });
             }
-            /*
+
             if (_signals.sdr) {
                 _signals.sdr.forEach(function(cell) {
                     if (!cell.is_mute && cell.tracked) {
