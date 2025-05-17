@@ -116,8 +116,7 @@ class ViewContainer(threading.Thread):
 
         [test(mod) for mod in self.modules]
 
-
-    def aggregate(self, mod):
+    def mq_aggregate(self, mod):
         """ collect data and stats into aggregation """
         # REST needs a try...
         try:
@@ -142,6 +141,24 @@ class ViewContainer(threading.Thread):
                     view_logger.warning(f'Data Aggregator REST Exception [{mod}]')
 
         except KeyError: pass
+
+    def aggregate(self, mod):
+        """ collect data and stats into aggregation """
+        try:
+            data = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'])
+            if data.ok:
+                self.module_data[mod] = data.json()
+
+            # stats only available via REST?
+            stats = requests.get('http://' + mod + '.' + self.module_configs[mod]['SERVER_NAME'] + '/stats')
+
+            if stats.ok:
+                self.module_stats[mod] = stats.json()  # current module stats
+            else:
+                view_logger.warning(f'Statistics Aggregator Warning [{mod}] not loaded.')
+
+        except Exception:
+            view_logger.warning(f'Data Aggregator REST Exception [{mod}]')
 
     def get_module_stats(self, mod):
         """ return all stats """
