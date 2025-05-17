@@ -25,8 +25,9 @@ class Scanner(threading.Thread):
         self.module_tracker = None
 
         self.scanned = None
-        self.signal_cache = defaultdict(list)   # a mapping of lists of SignalPoint for all signals received.
-        self.signal_cache_max = 160             # max size of these lists of SignalPoint. overridden via config
+        self.parsed_signals = []
+        self.signal_cache = defaultdict(list)   # mapping of lists of SignalPoint for all signals received.
+        self.signal_cache_max = 160             # max size of lists of SignalPoint. overridden via config
 
         self.stats =  {}
         self.created = datetime.now()
@@ -69,7 +70,7 @@ class Scanner(threading.Thread):
         self.signal_cache_max = self.config.get('SIGNAL_CACHE_MAX', self.signal_cache_max)
 
     def get_parsed_signals(self):
-        return self.module_tracker.parsed_signals or []
+        return self.parsed_signals or []
 
     def get_workers(self):
         return [worker.get_sgnl() for worker in self.module_tracker.workers]
@@ -126,7 +127,7 @@ class Scanner(threading.Thread):
                 'polling_count': self.polling_count,
                 'lat'          : self.lat,
                 'lon'          : self.lon,
-                'signals'      : len(self.module_tracker.parsed_signals),
+                'signals'      : len(self.parsed_signals),
                 'workers'      : len(self.module_tracker.workers),
                 'tracked'      : len(self.module_tracker.tracked_signals),
                 'ghosts'       : len(self.module_tracker.ghost_signals),
@@ -140,7 +141,7 @@ class Scanner(threading.Thread):
                 parsed_cells = self.module_retriever.get_parsed_cells(self.scanned)
 
                 # pick apart, assign workers (~signalpoints), and track the cells.
-                self.module_tracker.track(parsed_cells)
+                self.parsed_signals = self.module_tracker.track(parsed_cells)
 
                 self.updated = datetime.now()
                 self.elapsed = self.updated - self.created
@@ -156,3 +157,10 @@ class Scanner(threading.Thread):
 
             # throttle MQ requests vs. further delay an I/O bound process that blocks....
             time.sleep(self.config.get('SCAN_TIMEOUT', 5))
+
+
+if __name__ == '__main__':
+    scanner = Scanner()
+    scanner.configure('scanner.json')
+    t = threading.Thread(target=scanner.run)
+    t.start()

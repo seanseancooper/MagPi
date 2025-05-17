@@ -30,24 +30,23 @@ class Tracker(object):
 
         self.searchmap = {}
 
-        self.parsed_cells = [defaultdict()]                  # parsed cells from retirever...
-        self.parsed_signals = [defaultdict()]                # product of scanning
+        self.parsed_cells = [defaultdict()]         # parsed cells from retriever...
+        self.parsed_signals = [defaultdict()]       # product of scanning
         self.polling_count = 0
 
-        ''' all items represented as a list of dictionaries.  '''
         self.workers = []                           # list of workers assigned to monitor a discrete signal.
         self.tracked_signals = []                   # parsed_cells currently being tracked.
         self.ghost_signals = []                     # signals no longer received, but tracked -- 'ghost' signals
         self.signal_cache = defaultdict(list)       # a mapping of lists of SignalPoint for all signals received.
         self.signal_cache_max = 160                 # max size of these lists of SignalPoint. overridden via config
 
-        self.blacklist = {}                     # ignored signals
-        self.sort_order = None                  # sort order for printed output; consider not support printing.
-        self.reverse = False                    # reverse the sort...
+        self.blacklist = {}                         # ignored signals
+        self.sort_order = None                      # sort order for printed output; consider not support printing.
+        self.reverse = False                        # reverse the sort...
         self.tz = None
 
-        self.lat = 0.0  # this lat; used in SignalPoint creation
-        self.lon = 0.0  # this lon; used in SignalPoint creation
+        self.lat = 0.0                              # this lat; used in SignalPoint creation
+        self.lon = 0.0                              # this lon; used in SignalPoint creation
 
         self._OUTFILE = None
         self.DEBUG = False
@@ -106,7 +105,7 @@ class Tracker(object):
         """ retrieve, classify, filter, sort and find missing signals in parsed_cells"""
 
         for cell in self.parsed_cells:
-            try:  # not maintainable; see 'multibutton'
+            try:                        # not maintainable; see 'multibutton'
                 if cell['BSSID']:
                     cell['type'] = 'wifi'
                 elif cell['ARX_TYPE']:
@@ -135,17 +134,14 @@ class Tracker(object):
 
         self.load_ghosts()
 
-        """ 
-        process cells to include 'worker' fields making them signals 
-        to fill parsed_signals
-        """
+        # process cells to include 'worker' fields making them signals to fill parsed_signals
         self.parsed_signals.clear()
         for sgnl in self.parsed_cells:
             wrkr = self.get_worker(sgnl[f'{self.CELL_IDENT_FIELD}'])
             self.parsed_signals.append(wrkr.get_sgnl())
 
     def update(self, ident, _signals):
-        wrkr = self.get_worker(ident)       # should be current fields of worker
+        wrkr = self.get_worker(ident)                   # should be current fields of worker
         _signals.append(wrkr.get_sgnl())
 
     def process_signals(self):
