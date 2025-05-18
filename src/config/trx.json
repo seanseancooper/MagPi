@@ -104,6 +104,12 @@
 		},
 		{
 			"OUTFILE_EXTENSION": ".wav"
+		},
+		{
+			"INDEX_TIMEDELTA": 6
+		},
+		{
+			"INDEX_TZ": "MST"
 		}
 	]
 }
