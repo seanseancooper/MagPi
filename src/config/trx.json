@@ -28,7 +28,7 @@
 			"SCANNER": "Tabulator"
 		},
 		{
-			"MODULE_RETRIEVER": "src.trx.retrievers.TRXUSBRetriever"
+			"MODULE_RETRIEVER": "src.trx.retrievers.TRXRetriever"
 		},
 		{
 			"USB_SERIAL_MODE": "serial"
