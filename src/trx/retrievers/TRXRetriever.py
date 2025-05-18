@@ -319,6 +319,7 @@ class TRXRetriever(threading.Thread):
 
     def stop(self):
         print("TRX Retriever stopping...")
+        exit(0) # required to exit thread
 
 if __name__ == '__main__':
     retriever = TRXRetriever()
