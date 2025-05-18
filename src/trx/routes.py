@@ -27,7 +27,8 @@ def trx_scan():
 
 @trx_bp.route("/scanned", methods=['GET'], subdomain="trx")
 def trx_scanned():
-    return jsonify(trxRet.get_scanned())
+    # return jsonify(trxRet.get_scanned())
+    return jsonify(trxRet.get_parsed_signals())
 
 
 @trx_bp.route("/tracked", methods=['GET'], subdomain="trx")
