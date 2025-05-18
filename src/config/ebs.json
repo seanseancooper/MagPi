@@ -1,13 +1,7 @@
 {
 	"EBS": [
 		{
-			"RESTART_COMMAND": ["systemd/systemctl", "--user", "restart", "ebs"]
-		},
-		{
-			"START_COMMAND": ["systemd/systemctl", "--user", "start", "ebs"]
-		},
-		{
-			"STOP_COMMAND": ["systemd/systemctl", "--user", "stop", "ebs"]
+			"DEBUG": false
 		},
 		{
 			"INTERVAL": 300
@@ -29,18 +23,6 @@
 		},
 		{
 			"ENUNCIATOR_LOOP_POLLING_INTERVAL": 1
-		},
-		{
-			"SERVER_NAME": "localhost:5003"
-		},
-		{
-			"TEMPLATE_FOLDER": "templates"
-		},
-		{
-			"STATIC_FOLDER": "static"
-		},
-		{
-			"DATE_FORMAT": "%Y-%m-%d %H:%M:%S.%f"
 		}
 	]
 }
