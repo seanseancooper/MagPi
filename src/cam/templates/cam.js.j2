@@ -3,7 +3,7 @@
     {% if 'cam' in container.live_modules %}
         {% set plugin = container.get_module_stats('cam') %}
     {% else %}
-        {% set plugin = { 'frame_shape': (480, 702, 0), 'majic_color': (255, 0, 0) } %}
+        {% set plugin = { 'frame_shape': (720, 1280, 0), 'majic_color': (255, 0, 0) } %}
     {% endif %}
 {% endif %}
 
