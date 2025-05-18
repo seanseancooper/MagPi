@@ -58,19 +58,6 @@ class TRXSerialRetriever(threading.Thread):
         new_worker.run()
         return new_worker
 
-    def configure(self, config_file):
-        readConfig(config_file, self.config)
-        self.device = self.config['DEVICE']
-        self.rate = self.config['RATE']
-        self.parity = self.config['PARITY']
-        self.bytesize = self.config['BYTESIZE']
-        self.stopbits = self.config['STOPBITS']
-
-        for freq in self.tracked_signals.keys():
-            worker = TRXWorker(freq)
-            self.config_worker(worker)
-            self.workers.append(worker)
-
     def make_signal_point(self):
         get_location(self)
         sgnl = TRXSignalPoint(
