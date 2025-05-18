@@ -108,8 +108,9 @@ class Worker:
         sgnlPt = None
 
         # SignalPoint       (self, lon, lat, sgnl)
-        kwargs = {}
-        sgnlPt = None
+        if self.TYPE == 'generic':
+            from src.lib.SignalPoint import SignalPoint
+            sgnlPt = SignalPoint(lon=self.scanner.lon, lat=self.scanner.lat, sgnl=sgnl)
 
         # ARXSignalPoint    (self, worker_id, lon, lat, sgnl)
         if self.TYPE == 'arx':
