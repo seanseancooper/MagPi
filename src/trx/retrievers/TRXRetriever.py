@@ -64,7 +64,7 @@ class TRXRetriever(threading.Thread):
 
     def __init__(self, mode='serial'):
         super().__init__()
-        self.DEBUG = True
+        self.DEBUG = False
         self.config = {}
         self.worker_id = 'TRXRetriever'
         self.signal_cache = []
