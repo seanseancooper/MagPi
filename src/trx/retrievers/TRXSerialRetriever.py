@@ -38,6 +38,20 @@ class TRXSerialRetriever(threading.Thread):
     def __str__(self):
         return f"TRXRetriever: {self.worker_id}"
 
+    def configure(self, config_file):
+        readConfig(config_file, self.config)
+
+        for freq in self.tracked_signals.keys():
+            worker = TRXWorker(freq)
+            self.config_worker(worker)
+            self.workers.append(worker)
+
+        self.device = self.config['DEVICE']
+        self.rate = self.config['RATE']
+        self.parity = self.config['PARITY']
+        self.bytesize = self.config['BYTESIZE']
+        self.stopbits = self.config['STOPBITS']
+
     def config_worker(self, worker):
         worker.retriever = self
         worker.config = self.config
