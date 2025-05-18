@@ -70,7 +70,7 @@
 			"PRODUCT_ID": "0x10"
 		},
 		{
-			"CELL_IDENT_FIELD": "FREQ"
+			"CELL_IDENT_FIELD": "FREQ1"
 		},
 		{
 			"CELL_NAME_FIELD": "ALPHATAG"
