@@ -1,6 +1,4 @@
 from flask import Blueprint, redirect, jsonify
-from src.config import readConfig
-from src.net.lib.net_utils import get_retriever
 
 # scanning at the route level
 config = {}
