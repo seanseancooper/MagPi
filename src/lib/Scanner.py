@@ -8,7 +8,7 @@ from src.config import readConfig
 from src.net.lib.net_utils import get_retriever
 from src.lib.utils import format_time, format_delta
 from src.map.gps import get_location
-from src.lib.utils import write_to_scanlist
+from src.wifi.lib.wifi_utils import write_to_scanlist
 
 import logging
 
