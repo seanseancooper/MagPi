@@ -324,6 +324,7 @@ class TRXRetriever(threading.Thread):
 
 if __name__ == '__main__':
     retriever = TRXRetriever()
+    retriever.configure('trx.json')
     try:
         retriever.start()
         while True:
