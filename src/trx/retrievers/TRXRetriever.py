@@ -89,6 +89,7 @@ class TRXRetriever(threading.Thread):
         self.polling_count = 0
         self.lat = 0.0
         self.lon = 0.0
+
         self.retrieving = False
 
     def configure(self, config_file):
