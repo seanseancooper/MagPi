@@ -1,9 +1,6 @@
 from flask import Blueprint, redirect, jsonify
 
-# scanning at the route level
-config = {}
-readConfig('trx.json', config)
-golden_retriever = get_retriever(config['MODULE_RETRIEVER'])
+from src.lib.Scanner import Scanner
 
 trxRet = golden_retriever()
 trxRet.configure('trx.json')
