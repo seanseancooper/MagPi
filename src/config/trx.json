@@ -73,6 +73,9 @@
 			"CELL_IDENT_FIELD": "FREQ"
 		},
 		{
+			"CELL_NAME_FIELD": "ALPHATAG"
+		},
+		{
 			"CELL_STRENGTH_FIELD": "?"
 		},
 		{
