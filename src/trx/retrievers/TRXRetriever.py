@@ -227,9 +227,9 @@ class TRXRetriever(threading.Thread):
                 self.elapsed = self.updated - self.created
                 self.polling_count += 1
 
-                for worker in self.workers:
-                    self.config_worker(worker)
-                    worker.run()
+                # for worker in self.workers:
+                #     self.config_worker(worker)
+                #     worker.run()
 
                 if self.DEBUG:
                     print(self.out)
