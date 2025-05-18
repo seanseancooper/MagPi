@@ -2,7 +2,7 @@ from flask import Blueprint, redirect, jsonify
 
 from src.lib.Scanner import Scanner
 
-trxRet = golden_retriever()
+trxRet = Scanner()
 trxRet.configure('trx.json')
 
 trx_bp = Blueprint(
