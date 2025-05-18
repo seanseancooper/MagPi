@@ -94,6 +94,8 @@ class TRXRetriever(threading.Thread):
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
+        self.mode = self.config['USB_SERIAL_MODE']
+
         for freq in self.tracked_signals.keys():
             worker = TRXWorker(freq)
             self.config_worker(worker)
