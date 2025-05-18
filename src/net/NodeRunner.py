@@ -1,16 +1,27 @@
 import os
+import shutil
 import signal
+import subprocess
 import threading
 import logging
 import time
 
 import psutil
 
-from src.lib.utils import runOSCommand
 from src.config import readConfig
 
 gps_logger = logging.getLogger('gps_logger')
 DEADCODES = (psutil.STATUS_DEAD, psutil.STATUS_ZOMBIE,)
+
+def runOSCommand(command: list):
+    try:
+        command[0] = shutil.which(command[0])
+        ps = subprocess.Popen(command)
+        gps_logger.debug(f"[{__name__}]: PID --> {ps.pid}")
+        return ps.pid
+    except OSError as e:
+        gps_logger.fatal(f"[{__name__}]:couldn't create a process for \'{command}\': {e}")
+    return 0
 
 
 def kills_pids_and_kids(pid):
