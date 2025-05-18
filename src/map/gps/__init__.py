@@ -1,5 +1,6 @@
 import json
 import requests
+import logging
 from src.lib.utils import speech_logger, gps_logger
 from src.map.gps.GPSRetriever import GPSRetriever
 
