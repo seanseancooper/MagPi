@@ -137,6 +137,7 @@ class Worker:
             kwargs["signal_type"] =  self.get_text_attribute('signal_type'),
             from src.trx.lib.TRXSignalPoint import TRXSignalPoint
             sgnlPt = TRXSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=sgnl, **kwargs)
+            sgnlPt.get() # stop & look
 
         self.scanner.signal_cache[ident].append(sgnlPt)
 
