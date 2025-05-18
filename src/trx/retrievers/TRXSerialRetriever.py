@@ -146,17 +146,6 @@ class TRXSerialRetriever(threading.Thread):
         # SIGNAL: REMOVED ITEM
         return True
 
-    def run(self):
-        self.configure('trx.json')
-
-        try:
-            if self.config.get('TEST_FILE'):
-                self._run_test_mode()
-            else:
-                self._run_serial_mode()
-        except Exception as e:
-            print(f'[ERROR] General Exception: {e}')
-
     def _run_test_mode(self):
         with open(self.config['TEST_FILE'], 'r') as f:
             lines = [line.strip().replace('"', '').replace('<', '').replace('  ', '')
