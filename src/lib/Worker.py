@@ -104,6 +104,8 @@ class Worker:
         [aggregate(k, str(v)) for k, v in text_data.copy().items()]
 
     def make_signalpoint(self, worker_id, ident, sgnl):
+        kwargs = {}
+        sgnlPt = None
 
         # SignalPoint       (self, lon, lat, sgnl)
         kwargs = {}
