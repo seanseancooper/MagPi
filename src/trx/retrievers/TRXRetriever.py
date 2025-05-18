@@ -91,6 +91,8 @@ class TRXRetriever(threading.Thread):
         self.lon = 0.0
 
         self.retrieving = False
+        self.configure('trx.json')
+        self.start()
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
