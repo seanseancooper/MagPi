@@ -154,7 +154,7 @@ class Scanner(threading.Thread):
                 self.report(True)
                 if self.config['SPEECH_ENABLED']:
                     speech_logger.info(f'looking for data {self.polling_count} ...')
-                time.sleep(self.config.get('SCAN_TIMEOUT') * 5)
+                time.sleep(self.config.get('SCAN_TIMEOUT', 5) * 5)
 
             # throttle MQ requests vs. further delay an I/O bound process that blocks....
             time.sleep(self.config.get('SCAN_TIMEOUT', 5))
