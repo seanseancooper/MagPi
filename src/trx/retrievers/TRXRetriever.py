@@ -325,7 +325,6 @@ if __name__ == '__main__':
     retriever = TRXRetriever()
     retriever.configure('trx.json')
     try:
-        retriever.start()
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
