@@ -326,6 +326,7 @@ if __name__ == '__main__':
     retriever.configure('trx.json')
     try:
         while True:
+            print(f'scanned: {retriever.scan()}')
             time.sleep(1)
     except KeyboardInterrupt:
         retriever.stop()
