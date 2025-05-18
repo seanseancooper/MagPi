@@ -90,7 +90,6 @@ class TRXRetriever(threading.Thread):
         self.lat = 0.0
         self.lon = 0.0
 
-        self.retrieving = False
         self.configure('trx.json')
         self.daemon = True # required to exit thread
         self.start()
