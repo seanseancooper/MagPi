@@ -40,6 +40,9 @@
 			"MODULE_RETRIEVER": "src.trx.retrievers.TRXRetriever"
 		},
 		{
+			"MQ_MODULE_RETRIEVER": "src.trx.retrievers.TRXRetriever"
+		},
+		{
 			"USB_SERIAL_MODE": "serial"
 		},
 		{
