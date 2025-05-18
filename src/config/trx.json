@@ -28,6 +28,15 @@
 			"SCANNER": "Tabulator"
 		},
 		{
+			"MODULE_TRACKER": "src.lib.Tracker"
+		},
+		{
+			"BLACKLIST": []
+		},
+		{
+			"SCAN_TIMEOUT": 1.0
+		},
+		{
 			"MODULE_RETRIEVER": "src.trx.retrievers.TRXRetriever"
 		},
 		{
