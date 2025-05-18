@@ -304,9 +304,9 @@ class TRXRetriever(threading.Thread):
         try:
             if self.config.get('TEST_FILE'):
                 self._run_test_mode()
-            elif self.mode == 'usb':
+            elif self.mode.lower() == 'usb':
                 self._usb_command_loop()
-            elif self.mode == 'serial':     # default
+            elif self.mode.lower() == 'serial':     # default
                 self._run_serial_mode()
         except Exception as e:
             print(f'[ERROR] General Exception: {e}')
