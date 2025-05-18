@@ -92,6 +92,7 @@ class TRXRetriever(threading.Thread):
 
         self.retrieving = False
         self.configure('trx.json')
+        self.daemon = True # required to exit thread
         self.start()
 
     def configure(self, config_file):
