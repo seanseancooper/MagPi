@@ -21,8 +21,8 @@ class TRXController(threading.Thread):
 
         with app.app_context():
             if __name__ == '__main__':
-                app.config['SERVER_NAME'] = routes.trxRet.config['SERVER_NAME']
-                app.config['DEBUG'] = routes.trxRet.config['DEBUG']
+                app.config['SERVER_NAME'] = routes.scanner.config['SERVER_NAME']
+                app.config['DEBUG'] = routes.scanner.config['DEBUG']
                 app.register_blueprint(routes.trx_bp)
             return app
 
