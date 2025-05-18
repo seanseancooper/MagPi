@@ -7,7 +7,7 @@
 			"MODULE": "trx"
 		},
 		{
-			"SPEECH_ENABLED": true
+			"SPEECH_ENABLED": false
 		},
 		{
 			"TEST_FILE": "/Users/scooper/PycharmProjects/MagPiDev/trx/TEST_FILE.csv"
