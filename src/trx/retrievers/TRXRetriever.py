@@ -215,7 +215,6 @@ class TRXRetriever(threading.Thread):
         fix_time = self.config.get('FIX_TIME', False)
 
         while True:
-            print('TRXRetriever scanning...')
             for line in lines[1:]:
                 vals = line.split(',')
                 self.out = {keys[i]: vals[i] for i in range(len(keys))}
