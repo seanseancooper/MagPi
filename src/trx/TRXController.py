@@ -31,7 +31,7 @@ class TRXController(threading.Thread):
             import atexit
 
             def stop():
-                routes.trxRet.stop()
+                routes.scanner.stop()
 
             atexit.register(stop)
 
