@@ -1,16 +1,12 @@
 import os
-import shutil
-import subprocess
 import uuid
 from datetime import datetime
 from string import Template
-import json
 import logging
 
 logger_root = logging.getLogger('root')
 speech_logger = logging.getLogger('speech_logger')
 gps_logger = logging.getLogger('gps_logger')
-
 
 def generate_uuid():
     return uuid.uuid4()
@@ -21,32 +17,8 @@ def mute(mutable):
     mutable.updated = datetime.now()
     return mutable.is_mute
 
-
-def time_traveller(o):
-    ''' experiment: mutate object AND provide data to caller '''
-
-    o.updated = datetime.now()
-    o.elapsed = o.updated - o.created
-
-    map = {
-        'updated': o.updated,
-        'elapsed': o.elapsed,
-    }
-
-    return o.elapsed, map
-
-
-def enunciate(speakable, message):
-    if not speakable.is_mute:
-        speakable.speaker.broadcast(f"{message}")
-
-    if speakable.DEBUG:
-        logger_root.debug(f"[{__name__}]:{message}")
-
-
 def format_time(_, fmt):
     return f'{_.strftime(fmt)}'
-
 
 def format_delta(_, fmt):
     # https://stackoverflow.com/questions/8906926/formatting-timedelta-objects
@@ -66,40 +38,12 @@ def format_delta(_, fmt):
 
     return DeltaTemplate.formats_delta(_, fmt)
 
-
 def make_path(outdir):
     PATH = os.path.join(os.getcwd(), outdir)
     if not os.path.exists(PATH):
         os.makedirs(PATH)
 
-
 def write_file(path, filename, message, mode):
     with open(os.path.join(path, filename), mode) as outfile:
         outfile.write(f"{message}\n")
         return True
-
-
-def read_file(path, filename, mode):
-    with open(os.path.join(path, filename), mode) as infile:
-        return infile.read()
-
-
-def runOSCommand(command: list):
-    try:
-        command[0] = shutil.which(command[0])
-        ps = subprocess.Popen(command)
-        logger_root.debug(f"[{__name__}]: PID --> {ps.pid}")
-        return ps.pid
-    except OSError as e:
-        logger_root.fatal(f"[{__name__}]:couldn't create a process for \'{command}\': {e}")
-    return 0
-
-
-def write_to_scanlist(config, searchmap):
-    """Write current searchmap out as JSON"""
-    make_path(config.get('OUTFILE_PATH', "out"))
-    _time = datetime.now().strftime(config.get('DATETIME_FORMAT', "%Y%m%d_%H%M%S"))
-    if len(searchmap) > 0:  # don't write nothing; write something.
-        # todo: process this as above....
-        return write_file(config['OUTFILE_PATH'], "scanlist_" + _time + ".json", json.dumps(searchmap, indent=1), "x")
-
