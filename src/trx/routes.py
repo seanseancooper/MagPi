@@ -33,8 +33,8 @@ def trx_scanned():
 
 @trx_bp.route("/tracked", methods=['GET'], subdomain="trx")
 def trx_tracked():
-    return jsonify(trxRet.get_tracked())
-
+    # return jsonify(trxRet.get_tracked())
+    return jsonify(trxRet.get_tracked_signals())
 
 @trx_bp.route('/add/<id>', methods=['GET', 'POST'], subdomain="trx")
 def add(id):
