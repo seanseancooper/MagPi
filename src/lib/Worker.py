@@ -20,9 +20,9 @@ class Worker:
 
     def __init__(self, ident):
         self.config = {}
-        self.scanner = None
+        self.tracker = None
         self.id = None                  # filled if match(), 'marks' SignalPoint type.
-        self.ident = ident              # used in object lookups and coloring UI, value of 'self.scanner.CELL_IDENT_FIELD'
+        self.ident = ident              # used in object lookups and coloring UI, value of 'self.tracker.CELL_IDENT_FIELD'
 
         self.created = datetime.now()   # when signal was found
         self.updated = datetime.now()   # when signal was last reported
@@ -62,7 +62,7 @@ class Worker:
         sgnl['is_mute'] = self.is_mute
         sgnl['tracked'] = self.tracked
 
-        # sgnl['signal_cache'] = [x.get() for x in self.scanner.signal_cache[self.ident]]
+        # sgnl['signal_cache'] = [x.get() for x in self.tracker.signal_cache[self.ident]]
         sgnl['text_attributes'] = self.get_text_attributes()
 
         # put text attributes into worker representation
@@ -76,13 +76,13 @@ class Worker:
     def set_type(self, TYPE):
         self.TYPE = TYPE
 
-    def config_worker(self, scanner):
+    def config_worker(self, tracker):
         """ worker append itself, pulls config when created. """
-        self.scanner = scanner
-        self.config = scanner.config
+        self.tracker = tracker
+        self.config = tracker.config
         self.created = datetime.now()
-        self.cache_max = max(int(scanner.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -5)
-        self.DEBUG = scanner.config['DEBUG']
+        self.cache_max = max(int(tracker.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -5)
+        self.DEBUG = tracker.config['DEBUG']
 
     def get_text_attributes(self):
         return self._text_attributes
@@ -99,7 +99,7 @@ class Worker:
     def set_text_attributes(self, text_data):
         def aggregate(k, v):
             self._text_attributes[k] = v
-            if k not in [self.scanner.CELL_IDENT_FIELD, self.scanner.CELL_NAME_FIELD, self.scanner.CELL_STRENGTH_FIELD]:
+            if k not in [self.tracker.CELL_IDENT_FIELD, self.tracker.CELL_NAME_FIELD, self.tracker.CELL_STRENGTH_FIELD]:
                 text_data.pop(k)
         [aggregate(k, str(v)) for k, v in text_data.copy().items()]
 
@@ -110,18 +110,18 @@ class Worker:
         # SignalPoint       (self, lon, lat, sgnl)
         if self.TYPE == 'generic':
             from src.lib.SignalPoint import SignalPoint
-            sgnlPt = SignalPoint(lon=self.scanner.lon, lat=self.scanner.lat, sgnl=sgnl)
+            sgnlPt = SignalPoint(lon=self.tracker.lon, lat=self.tracker.lat, sgnl=sgnl)
 
         # ARXSignalPoint    (self, worker_id, lon, lat, sgnl)
         if self.TYPE == 'arx':
             from src.arx.lib.ARXSignalPoint import ARXSignalPoint
-            sgnlPt = ARXSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=sgnl)
+            sgnlPt = ARXSignalPoint(worker_id=worker_id, lon=self.tracker.lon, lat=self.tracker.lat, sgnl=sgnl)
 
         # WifiSignalPoint   (self, worker_id, lon, lat, sgnl, bssid=None)
         if self.TYPE == 'wifi':
-            kwargs["bssid"] =  self.get_text_attribute(self.scanner.CELL_IDENT_FIELD)
+            kwargs["bssid"] =  self.get_text_attribute(self.tracker.CELL_IDENT_FIELD)
             from src.wifi.lib.WifiSignalPoint import WifiSignalPoint
-            sgnlPt = WifiSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=sgnl, **kwargs)
+            sgnlPt = WifiSignalPoint(worker_id=worker_id, lon=self.tracker.lon, lat=self.tracker.lat, sgnl=sgnl, **kwargs)
 
         # SDRSignalPoint    (self, worker_id, lon, lat, sgnl, array_data=None, audio_data=None, sr=48000)
         if self.TYPE == 'sdr':
@@ -129,20 +129,20 @@ class Worker:
             kwargs["audio_data"] =  self.get_text_attribute('audio_data'),
             kwargs["sr"] =  self.get_text_attribute('sr'),
             from src.sdr.lib.SDRSignalPoint import SDRSignalPoint
-            sgnlPt = SDRSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=sgnl, **kwargs)
+            sgnlPt = SDRSignalPoint(worker_id=worker_id, lon=self.tracker.lon, lat=self.tracker.lat, sgnl=sgnl, **kwargs)
 
         # TRXSignalPoint    (self, worker_id, lon, lat, sgnl, text_data={}, audio_data=None, signal_type="object", sr=48000)
         if self.TYPE == 'trx':
             kwargs["text_data"] = {} # self._text_attributes,
             kwargs["signal_type"] =  self.get_text_attribute('type'),
             from src.trx.lib.TRXSignalPoint import TRXSignalPoint
-            sgnlPt = TRXSignalPoint(worker_id=worker_id, lon=self.scanner.lon, lat=self.scanner.lat, sgnl=sgnl, **kwargs)
+            sgnlPt = TRXSignalPoint(worker_id=worker_id, lon=self.tracker.lon, lat=self.tracker.lat, sgnl=sgnl, **kwargs)
             sgnlPt.get() # stop & look
 
-        self.scanner.signal_cache[ident].append(sgnlPt)
+        self.tracker.signal_cache[ident].append(sgnlPt)
 
-        while len(self.scanner.signal_cache[ident]) >= self.scanner.signal_cache_max:
-            self.scanner.signal_cache[ident].pop(0)
+        while len(self.tracker.signal_cache[ident]) >= self.tracker.signal_cache_max:
+            self.tracker.signal_cache[ident].pop(0)
 
     def process_cell(self, cell):
         """ update static fields, tests"""
@@ -155,9 +155,9 @@ class Worker:
             # need to identify the test...
             # provides [{testname: result}, {...}]
             try:
-                tests = self.scanner.searchmap[self.ident]['tests']
+                tests = self.tracker.searchmap[self.ident]['tests']
                 # return all results or only ones that passed?
-                self.return_all = self.scanner.searchmap[self.ident]['RETURN_ALL']
+                self.return_all = self.tracker.searchmap[self.ident]['RETURN_ALL']
 
                 [[self.results.append(eval(str(v.strip() + t_v.strip()))) for t_k, t_v in tests.items() if k == t_k] for k, v in cell.items()]
 
@@ -181,10 +181,10 @@ class Worker:
         """ updates *dynamic* fields"""
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
-        self.tracked = self.ident in self.scanner.tracked_signals
-        self.make_signalpoint(self.id, self.ident, int(sgnl.get(self.scanner.CELL_STRENGTH_FIELD, -99)))
+        self.tracked = self.ident in self.tracker.tracked_signals
+        self.make_signalpoint(self.id, self.ident, int(sgnl.get(self.tracker.CELL_STRENGTH_FIELD, -99)))
         # self._signal_cache_frequency_features = self.extract_signal_cache_features(
-        #         [pt.getSgnl() for pt in self.scanner.signal_cache[self.id]]
+        #         [pt.getSgnl() for pt in self.tracker.signal_cache[self.id]]
         # )
 
     def get_signal_cache_frequency_features(self):
@@ -192,7 +192,7 @@ class Worker:
 
     def match(self, cell):
         """ match id, derive the 'id' and set mute status """
-        if self.ident.upper() == cell[f'{self.scanner.CELL_IDENT_FIELD}'].upper():
+        if self.ident.upper() == cell[f'{self.tracker.CELL_IDENT_FIELD}'].upper():
             if not self.id:
                 # self.id = str(self.ident).replace(':', '').lower()
                 self.id = str(uuid.uuid1()).lower()
@@ -214,13 +214,13 @@ class Worker:
     def add(self, ident):
 
         try:
-            worker = self.scanner.get_worker(ident)
+            worker = self.tracker.get_worker(ident)
 
             if worker:
                 worker.tracked = True
-                self.scanner.tracked_signals.append(ident)
-                if worker not in self.scanner.workers:
-                    self.scanner.workers.append(worker)
+                self.tracker.tracked_signals.append(ident)
+                if worker not in self.tracker.workers:
+                    self.tracker.workers.append(worker)
                 return True
 
             return False
@@ -228,8 +228,8 @@ class Worker:
             return False
 
     def remove(self, ident):
-        _copy = self.scanner.tracked_signals.copy()
-        self.scanner.tracked_signals.clear()
+        _copy = self.tracker.tracked_signals.copy()
+        self.tracker.tracked_signals.clear()
         [self.add(remaining) for remaining in _copy if remaining != ident]
         return True
 
@@ -244,8 +244,8 @@ class Worker:
                     "id"                : sgnl['id'],
                     "type"              : sgnl['type'],
                     "ident"             : sgnl['ident'],
-                    f"{self.scanner.CELL_IDENT_FIELD}"  : sgnl[self.scanner.CELL_IDENT_FIELD],
-                    f"{self.scanner.CELL_NAME_FIELD}"   : sgnl[self.scanner.CELL_NAME_FIELD],
+                    f"{self.tracker.CELL_IDENT_FIELD}"  : sgnl[self.tracker.CELL_IDENT_FIELD],
+                    f"{self.tracker.CELL_NAME_FIELD}"   : sgnl[self.tracker.CELL_NAME_FIELD],
 
                     "created"           : sgnl['created'],
                     "updated"           : sgnl['updated'],
@@ -267,4 +267,4 @@ class Worker:
 
     def run(self):
         """ match an ID and populate data """
-        [self.match(cell) for cell in self.scanner.parsed_cells]
+        [self.match(cell) for cell in self.tracker.parsed_cells]
