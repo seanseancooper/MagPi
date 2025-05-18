@@ -31,6 +31,9 @@
 			"MODULE_RETRIEVER": "src.trx.retrievers.TRXUSBRetriever"
 		},
 		{
+			"USB_SERIAL_MODE": "serial"
+		},
+		{
 			"DEVICE": "/dev/cu.URT1"
 		},
 		{
