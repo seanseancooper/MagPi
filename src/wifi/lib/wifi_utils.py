@@ -1,8 +1,7 @@
 import json
-from datetime import datetime, timedelta
-import random
+from datetime import datetime
 import logging
-from src.lib.utils import make_path, write_file, generate_uuid
+from src.lib.utils import make_path, write_file
 
 json_logger = logging.getLogger('json_logger')
 
@@ -58,72 +57,8 @@ def print_signals(sgnls, columns):
     print_table(table)
 
 
-def generate_signal(worker_id):
-    base_lat = 39.915
-    base_lon = -105.065
-    spread = 0.003
-    signals = list(range(-100, 0))
-
-    offset_lat = random.uniform(-spread, spread)
-    offset_lon = random.uniform(-spread, spread)
-
-    return {
-        "created"  : (datetime.now() - timedelta(minutes=random.randint(1, 1000))).isoformat(),
-        "id"       : str(generate_uuid()),
-        "worker_id": worker_id,
-        "lat"      : round(base_lat + offset_lat, 6),
-        "lon"      : round(base_lon + offset_lon, 6),
-        "sgnl"     : random.choice(signals)
-    }
-
-
 def append_to_outfile(cls, config, cell):
     """Append found cells to a rolling JSON list"""
-    from src.lib.utils import format_time, format_delta
-    # unwrap the cell and format the dates, guids and whatnot.
-    # {'EE:55:A8:24:B1:0A':
-    #   {
-    #   'id': 'ee55a824b10a',
-    #   'SSID': 'Goodtimes Entertainment Inc.',
-    #   'BSSID': 'EE:55:A8:24:B1:0A',
-    #   'created': '2025-03-12 00:36:07',
-    #   'updated': '2025-03-12 00:36:10',
-    #   'elapsed': '00:00:03',
-    #   'Vendor': 'UNKNOWN',
-    #   'Channel': 11,
-    #   'Frequency': 5169,
-    #   'Signal': -89,
-    #   'Quality': 11,
-    #   'Encryption': True,
-    #   'is_mute': False,
-    #   'tracked': True,
-    #   'signal_cache': [
-    #       {
-    #       'created': '2025-03-12 00:36:07.511398',
-    #       'id': '6fb74555-e1f5-440a-9c42-f5649a536279',
-    #       'worker_id': 'ee55a824b10a',
-    #       'lon': -105.068195,
-    #       'lat': 39.9168,
-    #       'sgnl': -89
-    #       },
-    #       {'created': '2025-03-12 00:36:10.641924',
-    #       'id': '18967444-39bf-4082-9aa4-d833fbb9ed28',
-    #       'worker_id': 'ee55a824b10a',
-    #       'lon': -105.068021,
-    #       'lat': 39.916915,
-    #       'sgnl': -89
-    #       }
-    #   ],
-    #   'tests': []
-    #   }
-    # }
-    #
-    # config.get('CREATED_FORMATTER', '%Y-%m-%d %H:%M:%S')
-    # config.get(UPDATED_FORMATTER', '%Y-%m-%d %H:%M:%S')
-    # config.get(ELAPSED_FORMATTER', '%H:%M:%S')
-
-    # format created timestamp in signals
-    # SGNL_CREATED_FORMAT: "%Y-%m-%d %H:%M:%S.%f"
     formatted = {
                 "id"          : cell['id'],
                 "SSID"        : cell['SSID'],
