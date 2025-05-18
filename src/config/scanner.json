@@ -4,13 +4,13 @@
 			"DEBUG": false
 		},
 		{
-			"MODULE": "testscanner"
+			"MODULE": "generic"
 		},
 		{
 			"SPEECH_ENABLED": false
 		},
 		{
-			"SERVER_NAME": "localhost:5006"
+			"SERVER_NAME": "localhost:5003"
 		},
 		{
 			"TEMPLATE_FOLDER": "templates"
@@ -241,13 +241,13 @@
 			"I_ZMQ_HOST": "127.0.0.1"
 		},
 		{
-			"I_ZMQ_PORT": "5016"
+			"I_ZMQ_PORT": "5013"
 		},
 		{
 			"O_ZMQ_HOST": "127.0.0.1"
 		},
 		{
-			"O_ZMQ_PORT": "5026"
+			"O_ZMQ_PORT": "5023"
 		},
 		{
 			"OUTFILE_PATH": "../../_out"
