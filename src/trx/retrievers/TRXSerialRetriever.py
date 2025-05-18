@@ -229,6 +229,17 @@ class TRXSerialRetriever(threading.Thread):
         except serial.SerialException as e:
             print(f'[ERROR] Serial communication failed: {e}')
 
+    def run(self):
+        self.configure('trx.json')
+
+        try:
+            if self.config.get('TEST_FILE'):
+                self._run_test_mode()
+            else:
+                self._run_serial_mode()
+        except Exception as e:
+            print(f'[ERROR] General Exception: {e}')
+
     def stop(self):
         print("[USB] Retriever stopping...")
 
