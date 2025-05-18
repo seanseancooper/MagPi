@@ -1,10 +1,10 @@
 {
 	"SCANNER": [
 		{
-			"MODULE": "WIFI"
+			"DEBUG": false
 		},
 		{
-			"DEBUG": false
+			"MODULE": "testscanner"
 		},
 		{
 			"SPEECH_ENABLED": false
@@ -22,7 +22,7 @@
 			"SCANNER": "Tabulator"
 		},
 		{
-			"MODULE_RETRIEVER": "src.wifi.retrievers.TextFileTextRetriever"
+			"MODULE_RETRIEVER": "src.lib.TextFileTextRetriever"
 		},
 		{
 			"MQ_MODULE_RETRIEVER": "src.wifi.retrievers.ZeroMQWifiRetriever"
