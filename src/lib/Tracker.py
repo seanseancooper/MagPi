@@ -104,16 +104,10 @@ class Tracker(object):
     def process_cells(self):
         """ retrieve, classify, filter, sort and find missing signals in parsed_cells"""
 
-        for cell in self.parsed_cells:
-            try:                        # not maintainable; see 'multibutton'
-                if cell['BSSID']:
-                    cell['type'] = 'wifi'
-                elif cell['ARX_TYPE']:
-                    cell['type'] = 'arx'
-                elif cell['SDR_TYPE']:
-                    cell['type'] = 'sdr'
-                elif cell['ALPHATAG']:
-                    cell['type'] = 'trx'
+        for cell in self.parsed_cells:  # list of dicts
+            try:
+                if self.config['MODULE']:
+                    cell['type'] = self.config['MODULE']
                 else:
                     cell['type'] = 'generic'
             except KeyError:
