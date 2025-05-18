@@ -222,7 +222,7 @@ class TRXRetriever(threading.Thread):
                         'SCAN_TIME': now.strftime(self.config['TIME_FORMAT']),
                     })
 
-                self.make_signal_point()
+                # self.make_signal_point()
                 self.updated = datetime.now()
                 self.elapsed = self.updated - self.created
                 self.polling_count += 1
