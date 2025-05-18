@@ -318,7 +318,6 @@ class TRXRetriever(threading.Thread):
             print(f'[ERROR] General Exception: {e}')
 
     def stop(self):
-        self.retrieving = False
         print("TRX Retriever stopping...")
 
 if __name__ == '__main__':
