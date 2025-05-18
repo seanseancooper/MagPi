@@ -13,7 +13,7 @@
 			"TEST_FILE": "/Users/scooper/PycharmProjects/MagPiDev/trx/TEST_FILE.csv"
 		},
 		{
-			"TEST_FILE_TIME_MAX": 300
+			"TEST_FILE_TIME_MAX": 30
 		},
 		{
 			"SERVER_NAME": "localhost:5009"
