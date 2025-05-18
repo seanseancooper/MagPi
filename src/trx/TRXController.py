@@ -38,7 +38,7 @@ class TRXController(threading.Thread):
             if __name__ == '__main__':
                 RESTServer(self.create_app()).run()
 
-            routes.trxRet.run()
+            routes.scanner.run()
         except KeyboardInterrupt:
             pass
 
