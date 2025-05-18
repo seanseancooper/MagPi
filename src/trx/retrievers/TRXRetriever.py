@@ -152,7 +152,10 @@ class TRXRetriever(threading.Thread):
         return [sgnl for sgnl in self.tracked_signals]
 
     def scan(self):
-        return self.out
+        return self.out or ''
+
+    def get_parsed_cells(self, scanned):
+        return [scanned]
 
     def mute(self, uniqId):
         from src.lib.utils import mute
