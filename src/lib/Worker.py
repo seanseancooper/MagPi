@@ -262,9 +262,6 @@ class Worker:
 
             append_to_outfile(self.get_sgnl())
 
-
-
-
     def run(self):
         """ match an ID and populate data """
         [self.match(cell) for cell in self.tracker.parsed_cells]
