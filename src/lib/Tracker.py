@@ -89,9 +89,10 @@ class Tracker(object):
     def load_ghosts(self):
         """ find 'ghost' signals (handle tracked signals not detected
         during parsing), and make a signalpoint for them """
-        tracked = frozenset([x for x in self.tracked_signals])
-        parsed = frozenset([key[f'{self.CELL_IDENT_FIELD}'] for key in self.parsed_cells])
-        self.ghost_signals = tracked.difference(parsed)
+        if self.SCAN_GHOSTS:
+            tracked = frozenset([x for x in self.tracked_signals])
+            parsed = frozenset([key[f'{self.CELL_IDENT_FIELD}'] for key in self.parsed_cells])
+            self.ghost_signals = tracked.difference(parsed)
 
         def _ghost(item):
             w = self.get_worker(item)
