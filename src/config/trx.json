@@ -40,6 +40,15 @@
 			"SCAN_TIMEOUT": 1.0
 		},
 		{
+			"GPS_ENDPOINT": "http://map.localhost:5005/position"
+		},
+		{
+			"TEMPLATE_AJAX_URL": "http://trx.localhost:5009/scanned"
+		},
+		{
+			"VIEW_TIMEOUT": 30
+		},
+		{
 			"MODULE_RETRIEVER": "src.trx.retrievers.TRXRetriever"
 		},
 		{
