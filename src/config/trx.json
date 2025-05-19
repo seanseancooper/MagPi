@@ -28,6 +28,9 @@
 			"SCANNER": "Tabulator"
 		},
 		{
+			"SCAN_GHOSTS": false
+		},
+		{
 			"MODULE_TRACKER": "src.lib.Tracker"
 		},
 		{
