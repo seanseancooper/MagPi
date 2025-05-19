@@ -54,6 +54,7 @@ class Tracker(object):
         self.CELL_IDENT_FIELD = None
         self.CELL_NAME_FIELD = None
         self.CELL_STRENGTH_FIELD = None
+        self.SCAN_GHOSTS = True
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
