@@ -102,7 +102,7 @@ class Tracker(object):
                 w.updated = datetime.now()
                 w.make_signalpoint(w.id, w.ident, w.signal)
 
-        [_ghost(item) for item in self.ghost_signals]
+            [_ghost(item) for item in self.ghost_signals]
 
     def process_cells(self):
         """ retrieve, classify, filter, sort and find missing signals in parsed_cells"""
