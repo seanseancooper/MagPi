@@ -96,11 +96,11 @@ class Tracker(object):
             parsed = frozenset([key[f'{self.CELL_IDENT_FIELD}'] for key in self.parsed_cells])
             self.ghost_signals = tracked.difference(parsed)
 
-        def _ghost(item):
-            w = self.get_worker(item)
-            w.signal = -99
-            w.updated = datetime.now()
-            w.make_signalpoint(w.id, w.ident, w.signal)
+            def _ghost(item):
+                w = self.get_worker(item)
+                w.signal = -99
+                w.updated = datetime.now()
+                w.make_signalpoint(w.id, w.ident, w.signal)
 
         [_ghost(item) for item in self.ghost_signals]
 
