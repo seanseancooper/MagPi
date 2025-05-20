@@ -192,7 +192,6 @@ class Worker:
 
     def match(self, cell):
         """ match id, derive the 'id' and set mute status """
-        print(f"running  {cell[f'{self.tracker.CELL_IDENT_FIELD}']}...")
         if self.ident.upper() == cell[f'{self.tracker.CELL_IDENT_FIELD}'].upper():
             if not self.id:
                 # self.id = str(self.ident).replace(':', '').lower()
