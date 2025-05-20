@@ -246,7 +246,7 @@ class TRXRetriever(threading.Thread):
             # simulate a random amount of radio silence ...
             time.sleep(random.randint(1, self.config['TEST_FILE_TIME_MAX']))
 
-            line = lines[random.randint(1,len(lines))]  # choose a random line
+            line = lines[random.randint(1,len(lines)-1)]  # choose a random line
 
             vals = line.split(',')
             self.out = {keys[i]: vals[i] for i in range(len(keys))}
