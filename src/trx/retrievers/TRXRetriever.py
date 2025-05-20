@@ -110,38 +110,28 @@ class TRXRetriever(threading.Thread):
         self.bytesize = self.config['BYTESIZE']
         self.stopbits = self.config['STOPBITS']
 
-    def config_worker(self, worker):
-        worker.tracker = self
-        worker.config = self.config
-        worker.created = datetime.now()
-        worker.id = worker.get_text_attribute['id']
-        worker.ident = worker.get_text_attribute['ident']
-        worker.DEBUG = self.config.get('DEBUG', False)
-        worker.cache_max = max(
-            int(self.config.get('SIGNAL_CACHE_LOG_MAX', -5)),
-            -self.config.get('SIGNAL_CACHE_MAX', 150)
-        )
-
-    def get_worker(self, ident):
-        for worker in self.workers:
-            if worker.ident == ident:
-                return worker
-        new_worker = Worker(ident)
-        self.config_worker(new_worker)
-        self.workers.append(new_worker)
-        new_worker.run()
-        return new_worker
-
-    def make_signal_point(self):
-        get_location(self)
-        sgnl = TRXSignalPoint(
-            self.worker_id, self.lon, self.lat, 0.0, text_data=self.out
-        )
-
-        while len(self.signal_cache) >= self.config.get('SIGNAL_CACHE_MAX', 150):
-            self.signal_cache.pop(0)
-
-        self.signal_cache.append(sgnl)
+    # def config_worker(self, worker):
+    #     worker.tracker = self
+    #     worker.config = self.config
+    #     worker.created = datetime.now()
+    #     worker.id = worker.get_text_attribute['id']
+    #     worker.ident = worker.get_text_attribute['ident']
+    #     worker.DEBUG = self.config.get('DEBUG', False)
+    #     worker.cache_max = max(
+    #         int(self.config.get('SIGNAL_CACHE_LOG_MAX', -5)),
+    #         -self.config.get('SIGNAL_CACHE_MAX', 150)
+    #     )
+    #
+    # def get_worker(self, ident):
+    #     for worker in self.workers:
+    #         if worker.ident == ident:
+    #             return worker
+    #     new_worker = Worker(ident)
+    #     self.config_worker(new_worker)
+    #     self.
+    #     .append(new_worker)
+    #     new_worker.run()
+    #     return new_worker
 
     def get_scanned(self):
         return [sgnl.get() for sgnl in self.signal_cache]
