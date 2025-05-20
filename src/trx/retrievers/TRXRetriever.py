@@ -221,6 +221,7 @@ class TRXRetriever(threading.Thread):
 
             return True
         except IndexError:
+
             return False  # not in tracked_signals
 
     def remove(self, uniqId):
