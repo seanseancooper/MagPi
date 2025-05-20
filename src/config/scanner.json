@@ -4,7 +4,7 @@
 			"DEBUG": false
 		},
 		{
-			"MODULE": "generic"
+			"MODULE": "wifi"
 		},
 		{
 			"SPEECH_ENABLED": false
