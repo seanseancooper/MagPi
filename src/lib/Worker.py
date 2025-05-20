@@ -62,7 +62,7 @@ class Worker:
         sgnl['is_mute'] = self.is_mute
         sgnl['tracked'] = self.tracked
 
-        sgnl['signal_cache'] = [x.get() for x in self.tracker.signal_cache[self.ident] if self.tracker.signal_cache]  # some types don't have cache!
+        sgnl['signal_cache'] = [x.get() for x in self.tracker.signal_cache[self.ident] if x is not None]
         sgnl['text_attributes'] = self.get_text_attributes()
 
         # put text attributes into worker representation
@@ -192,6 +192,7 @@ class Worker:
 
     def match(self, cell):
         """ match id, derive the 'id' and set mute status """
+        print(f"running  {cell[f'{self.tracker.CELL_IDENT_FIELD}']}...")
         if self.ident.upper() == cell[f'{self.tracker.CELL_IDENT_FIELD}'].upper():
             if not self.id:
                 # self.id = str(self.ident).replace(':', '').lower()
