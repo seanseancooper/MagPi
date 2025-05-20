@@ -99,8 +99,8 @@ class Worker:
     def set_text_attributes(self, text_data):
         def aggregate(k, v):
             self._text_attributes[k] = v
-            if k not in [self.tracker.CELL_IDENT_FIELD, self.tracker.CELL_NAME_FIELD, self.tracker.CELL_STRENGTH_FIELD]:
-                text_data.pop(k)
+            # if k not in [self.tracker.CELL_IDENT_FIELD, self.tracker.CELL_NAME_FIELD, self.tracker.CELL_STRENGTH_FIELD]:
+            #     text_data.pop(k)
         [aggregate(k, str(v)) for k, v in text_data.copy().items()]
 
     def make_signalpoint(self, worker_id, ident, sgnl):
