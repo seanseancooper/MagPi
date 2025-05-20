@@ -46,7 +46,7 @@ def add(uniqId):
 
 @trx_bp.route('/mute/<uniqId>', methods=['GET', 'POST'], subdomain="trx")
 def mute(uniqId):
-    return str(scanner.module_retriever.mute(uniqId, scanner)), 200
+    return str(scanner.module_retriever.mute(uniqId)), 200
 
 
 @trx_bp.route('/remove/<uniqId>', methods=['GET', 'POST'], subdomain="trx")
