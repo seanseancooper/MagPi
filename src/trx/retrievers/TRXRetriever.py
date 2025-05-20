@@ -219,7 +219,6 @@ class TRXRetriever(threading.Thread):
             sgnl['tracked'] = True
             self.tracked_signals.update({uniqId: sgnl})
 
-            # SIGNAL: ADDED ITEM
             return True
         except IndexError:
             return False  # not in tracked_signals
