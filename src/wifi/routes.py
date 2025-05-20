@@ -96,7 +96,7 @@ def wifi_stop():
 
 @wifi_bp.route('/write', methods=['POST'], subdomain='wifi')
 def wifi_write():
-    from src.lib.utils import write_to_scanlist
+    from src.wifi.lib.wifi_utils import write_to_scanlist
     if write_to_scanlist(scanner.config, scanner.get_tracked_signals()):
         if scanner.config['SPEECH_ENABLED']:
             speech_logger.info(f'logged {len(scanner.get_tracked_signals())} items')
