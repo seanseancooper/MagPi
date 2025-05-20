@@ -1,0 +1,209 @@
+<div id="trx" class="module_tab" style="position:relative;display:block;">
+{% if container %}
+    {% set scanner = {} %}
+    {% set config = scanner.__setitem__("config", {}) %}
+    {% set CELL_IDENT_FIELD = scanner.__setitem__("CELL_IDENT_FIELD", "BSSID") %}
+    {% set CELL_NAME_FIELD = scanner.__setitem__("CELL_NAME_FIELD", "SSID") %}
+    {% set CELL_STRENGTH_FIELD = scanner.__setitem__("CELL_STRENGTH_FIELD", "Signal") %}
+    {% set TEMPLATE_AJAX_URL = scanner.config.__setitem__("TEMPLATE_AJAX_URL", "http://trx.localhost:5009/scan") %}
+{% endif %}
+    <script>
+        peity.defaults.line = {
+            delimiter: ",",
+            fill: "#777",
+            height: 18,
+            width: 150,
+            max: -100,
+            min: 0,
+            stroke: "#00ff00",
+            strokeWidth: 2
+        }
+
+        Tabulator.extendModule("mutator", "mutators", {
+            signalMutator:function(value, data, type, mutatorParams){
+
+            var sgnlList = [];
+            for (const pt of value) {
+                sgnlList.push(pt['sgnl'])
+            }
+            return sgnlList;
+
+            },
+        });
+
+        // Formatter to generate peity charts
+        var chartFormatter = function(cell, formatterParams, onRendered){
+
+            var content = document.createElement("span");
+            var values = cell.getValue();
+            content.classList.add('line');
+            content.innerHTML = values.join(",");
+
+            // after the cell element has been added to the DOM
+            onRendered(function(){
+                peity(content, 'line');
+            });
+
+            return content;
+        };
+
+        // Formatter to generate SSID Quality indicia
+        // todo: needs refactor to base color on configurable attribute
+
+        var ssidFormatter = function(cell, params){
+            var content = document.createElement("span");
+
+            max = params && params.max ? params.max : 100;
+            min = params && params.min ? params.min : 0;
+            var colors = params.colors;
+            var color = "#666666";
+            var percent;
+            var percentValue;
+
+            const data = cell.getRow().getData();
+            var value = data.text_attributes.Quality; // todo: make configurable
+
+            if(isNaN(value) || typeof cell.getValue() === "undefined"){
+                return;
+            }
+
+            //make sure value is in range
+            percentValue = parseFloat(value) <= max ? parseFloat(value) : max;
+            percentValue = parseFloat(percentValue) >= min ? parseFloat(percentValue) : min;
+
+            //workout percentage
+            percent = (max - min) / 100;
+            percentValue = Math.round((percentValue - min) / percent);
+
+            var unit = 100 / colors.length;
+            var index = Math.floor(percentValue / unit);
+
+            index = Math.min(index, colors.length - 1);
+            index = Math.max(index, 0);
+
+            let qualcolor = colors[index];
+            content.innerHTML = "<div id='{{ scanner.CELL_NAME_FIELD }}' style='position:absolute;left:10px;display:inline-block;'>" + data.text_attributes.{{ scanner.CELL_NAME_FIELD }} + "</div>&nbsp;<span id='quality_ind' class='' style='position:absolute;top:0px;left:0px;text-align:right;background:" + qualcolor + ";width:6px;height:24px;'>&nbsp;</span>";
+
+            return content
+        };
+    </script>
+    <script>
+        var trx = new Tabulator("#trx", {
+            ajaxURL:"{{ scanner.config.TEMPLATE_AJAX_URL  }}",      // request URI
+            ajaxConfig:"GET",                                       // ajax config options go here
+            headerVisible:true,
+            dataLoaderLoading:dataLoaderLoading,                    // change "Loading" message to "&nbsp;"
+            index:"data.id",                // use CELL_IDENT_FIELD as index [dynamic]
+            rowFormatter:function(row){
+                row.getElement().style = "height:24px";
+                if(row.getData().tracked == true){
+                    // row.getElement().style.backgroundColor = "#777777";
+                }
+            },
+
+            dependencies:{
+                datetime: luxon,
+            },
+
+            persistence:{
+                sort: true,                                         //persist column sorting
+                filter: true,                                       //persist filters
+            },
+
+            /*
+            const data = cell.getRow().getData()['text_attributes'];
+            console.log(data);
+
+
+            data.forEach(function(attribute)  {
+                const attr_key = attribute.getKey();
+                const attr_val = attribute.getRows();
+
+                console.log("attr_key" + attr_key);
+                console.log("attr_val" + attr_val);
+
+                //return "{title:" + attr_key +", field:" + attr_val + ", width:50}",
+            });
+            */
+
+            columns:[
+
+                {field:"tracked", width:102, formatter: function(cell, formatterParams) {
+                    var data = cell.getRow().getData();
+                    const trgt = 'trx';
+
+                    //  special processing to make string of hex look like a BSSID
+                    var uniqId = data.id.replace('-','').substring(0,12).match(/.{1,2}/g).join(':');
+
+                    var _color = colorUniqId(uniqId, ':');
+                    var p_signal_color = 'rgba(' + _color + ', 1.0)';
+                    var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
+
+                    if (data.tracked == true) {
+                        if (data.is_mute == false) {
+                            return "<button id='remove_button_"+ data.id + "' style='width:24px;' class='trk_btn rem_button' value='"+data.id+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.id + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
+                        } else {
+                            return "<button id='remove_button_"+ data.id + "' style='width:24px;' class='trk_btn rem_button' value='"+data.id+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.id + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
+                        }
+                    } else {
+                        return "<button id='add_button_" + data.id + "' style='width:96px;' class='trk_btn add_button button' value='"+data.id+"' data-action='ADD' data-target=" + trgt + ">ADD</button>";
+                    }
+                }},
+
+                {title:"TYPE", field:"text_attributes.TYPE", cellClick:function(e, cell){
+                    var data = cell.getRow().getData();
+                    const trgt = 'trx';
+
+                    function muteGroup(item, trgt) {
+                        var mutables = [];
+                        cellVal = data.text_attributes.TYPE;
+
+                        Object.entries(data.attributes).forEach(([key, value]) => {
+                            console.log(`${key} ${value}`);
+
+                            var column = cell.getColumn();
+                            var columnField = column.getField().replace('text_attributes.','');
+
+                            if (cellVal != null && key == columnField && value == cellVal){
+                                mutables.push(item);
+                            }
+
+                        });
+                        //  iterate  over all the data
+                        mutables.forEach(function(mutable){
+                            add(mutable, trgt);
+                            mute(mutable, trgt);
+                        }
+                    )};
+
+
+                    if (muteGroup(data.id, trgt)) {
+                        return "<div id='mute_button_" + data.id + "' style='background-color:#F00;' class='' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">" +  data.text_attributes.TYPE + "</div>";
+                    } else {
+                        return "<div id='mute_button_" + data.id + "' style='background-color:#FFF;' class='' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">" +  data.text_attributes.TYPE + "</div>";
+                    }
+                },  width:60},
+
+                {title:"TYPE", field:"text_attributes.TYPE", width:60},
+                /**/
+                {title:"TSYS_TYPE", field:"text_attributes.TSYS_TYPE", width:40},
+                {title:"TSYS_ID", field:"text_attributes.TSYS_ID", width:90},
+
+                {title:"SYSTEM", field:"text_attributes.SYSTEM", width:120},
+                {title:"SITE", field:"text_attributes.SITE", width:120},
+                {title:"{{ scanner.CELL_NAME_FIELD }}", field:"text_attributes.{{ scanner.CELL_NAME_FIELD }}", width:140},
+
+                {title:"TGID1", field:"text_attributes.TGID1", width:70},
+                {title:"TGID2", field:"text_attributes.TGID2", width:70},
+                {title:"RID1", field:"text_attributes.RID1", width:70},
+                {title:"RID2", field:"text_attributes.RID2", width:70},
+
+                {title:"data.id", field:"data.id", width:80},
+                {title:"FREQ2", field:"text_attributes.FREQ2", width:80}
+
+            ],
+
+        });
+
+    </script>
+</div>

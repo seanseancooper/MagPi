@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MagPi Tabulator [ {{ scanner.polling_count }} ]</title>
+    <link href="{{ url_for('trx_bp.static', filename='tabulator/css/tabulator_midnight.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('trx_bp.static', filename='css/trx_scan.css') }}">
+
+    <script src="{{ url_for('trx_bp.static', filename='js/luxon.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('trx_bp.static', filename='tabulator/js/tabulator.min.js') }}"></script>
+    <script src="{{ url_for('trx_bp.static', filename='js/peity-vanilla.js') }}"></script>
+
+    <script>
+        const VIEW_TIMEOUT = {{ scanner.config.get('VIEW_TIMEOUT') * 1000 }};
+
+        function setsHeaders(xhttp) {
+            xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
+            xhttp.setRequestHeader('Access-Control-Allow-Methods', 'POST');
+            xhttp.setRequestHeader('Content-Type', 'text/html');
+            xhttp.setRequestHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-*');
+        }
+
+        function add(uniqId, trgt){
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("POST", "{{ url_for('.index') }}add/" + uniqId, true);
+            setsHeaders(xhttp);
+            xhttp.setRequestHeader('TARGET', trgt);
+            xhttp.send();
+
+            xhttp.onload = function() {
+                const resp = xhttp.response;
+                var aButton = document.getElementById("add_button_" + uniqId);
+                if (resp == "OK"){
+                    aButton.classList.value = "adding_button";
+                    aButton.innerHTML = "------";
+                    setTimeout(function() {
+                        aButton.classList.value = "add_btn added_button";
+                        aButton.innerHTML = "ADDED";
+                    }, 250);
+                } else {
+                    aButton.classList.value = "adding_failed_button";
+                    aButton.innerHTML = "FAILED!";
+                };
+            };
+        }
+
+        function mute(uniqId, trgt){
+            var xhttp = new XMLHttpRequest();
+
+            xhttp.open("POST", "{{ url_for('.index') }}mute/" + uniqId, true);
+            setsHeaders(xhttp);
+            xhttp.setRequestHeader('TARGET', trgt);
+            xhttp.send();
+
+            xhttp.onload = function() {
+                const resp = xhttp.response;
+                var mButton = document.getElementById("mute_button_" + uniqId);
+
+                if (resp == "False"){
+                    mButton.classList.value = "muting_button";
+                    mButton.innerHTML = "------";
+                    setTimeout(function() {
+                        mButton.classList.value = "mute_btn unmute_button";
+                        mButton.innerHTML = "MUTE";
+                    }, 250);
+                }
+
+                if (resp == "True"){
+                    mButton.classList.value = "muting_button";
+                    mButton.innerHTML = "------";
+                    setTimeout(function() {
+                        mButton.classList.value = "mute_btn mute_button";
+                        mButton.innerHTML = "UNMUTE";
+                    }, 250);
+                };
+            };
+        }
+
+        function remove(uniqId, trgt){
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("POST", "{{ url_for('.index') }}remove/" + uniqId, true);
+            setsHeaders(xhttp);
+            xhttp.setRequestHeader('TARGET', trgt);
+            xhttp.send();
+
+            xhttp.onload = function() {
+                const resp = xhttp.response;
+                rButton = document.getElementById("remove_button_" + uniqId);
+                if (resp == "OK"){
+                    rButton.classList.value = "rem_button";
+                    rButton.style = "color:white;";
+                    rButton.innerHTML = "*";
+                    setTimeout(function() {
+                        mButton = document.getElementById("mute_button_" + uniqId);
+                        uButton = document.getElementById("unmute_button_" + uniqId);
+
+                        if (mButton) {
+                                mButton.style = "display:none;"
+                        };
+
+                        if (uButton) {
+                                uButton.style = "display:none;"
+                        };
+
+                        // note width increase
+                        rButton.classList.value = "rem_button removed_button button";
+                        rButton.innerHTML = "REMOVED";
+
+                    }, 250);
+                } else {
+                    rButton.classList.value = "remove_failed_button";
+                    rButton.innerHTML = "x";
+                };
+            };
+        }
+
+        function write_tracked(button, trgt){
+
+            var xhttp = new XMLHttpRequest();
+
+            xhttp.open('POST', "{{ url_for('trx_bp.trx_write') }}", true);
+            setsHeaders(xhttp);
+            xhttp.setRequestHeader('TARGET', trgt);
+            xhttp.send();
+
+            xhttp.onload = function() {
+                document.getElementById("write_button").innerHTML = (xhttp.response == "OK")? "DONE": "FAILED";
+            };
+        }
+
+        function loadTab(event, tabName){
+
+            var i, module_tab, tablinks;
+            module_tab = document.getElementsByClassName("module_tab");
+
+            for (i = 0; i < module_tab.length; i++) {
+                module_tab[i].style.display = "none";
+            }
+
+            // Get all elements with class="tablinks" and remove the class "active"
+            tab_button = document.getElementsByClassName("tab_button");
+            for (i = 0; i < tab_button.length; i++) {
+                tab_button[i].className = tab_button[i].className.replace(" active", "");
+            }
+
+            // Show the current tab, and add an "active" class to the button that opened the tab
+            document.getElementById(tabName).style.display = "block";
+            event.currentTarget.className += " active";
+
+        }
+
+        function reload(){
+            document.location.reload();
+        }
+
+        function replace_data(){
+            // use foreach...
+            trx.replaceData();
+        }
+
+        const dataLoaderLoading = "&nbsp;";
+
+        function colorUniqId(data, splt){
+            var parts = data.split(splt);
+            var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
+            var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
+            var B = (parseInt(parts[4], 16) + parseInt(parts[5], 16)) % 255;
+            return [R,G,B];
+        };
+
+        function averageColor([R,G,B]){
+            let avg = R+G+B/3;
+            return (avg > 128)? "00,00,00": "255,255,255";
+        };
+
+        /*
+        a draggable bar would be nice to have!
+        https://codepen.io/manishady/pen/xGYvEK
+        https://codepen.io/GreenSock/pen/eRBdzM
+        */
+
+        function make_deadline_bar() {
+
+            var iteration = 0;
+            let iter_timeout = 100;
+            var bar_div = document.createElement('div');
+            bar_div.id = 'bar_div';
+
+            function update_deadline_bar() {
+
+                setTimeout(function() {
+
+                    bar_div.className = 'bar';
+                    var percentage = (iteration * iter_timeout)/VIEW_TIMEOUT * 100;
+
+                    document.getElementById('bar_div').style = "background-color:rgba(0,255,0,0.50);transition: all " + 0.1 +"s;";
+                    document.getElementById('bar_div').style.width = 100 - percentage + '%';
+
+                    if (percentage >= 100){
+                        replace_data();
+                        iteration = 0;
+                    }
+
+                    update_deadline_bar();
+                    iteration++;
+
+                }, iter_timeout);
+            }
+            document.getElementById('meter').appendChild(bar_div);
+            update_deadline_bar();
+        }
+    </script>
+</head>
+<body>
+
+    <div id="tabs" style="height:30px">
+        <button id="scanner_tab_scanner" class="tab_button" onclick="loadTab(event, 'trx')">TRX-1</button>
+    </div>
+
+    <div id="scanner_filters" style="" class="scanner_filters">
+        <select id="filter-field">
+            <option></option>
+            <option value="is_mute">Muted</option>
+            <option value="tracked">Tracked</option>
+            <option value="created">Found</option>
+            <option value="updated">Last</option>
+
+            <option value="{{ scanner.CELL_IDENT_FIELD }}">{{ scanner.CELL_IDENT_FIELD }}</option>
+            <option value="{{ scanner.CELL_NAME_FIELD }}">{{ scanner.CELL_NAME_FIELD }}</option>
+            <option value="{{ scanner.CELL_STRENGTH_FIELD }}">{{ scanner.CELL_STRENGTH_FIELD }}</option>
+
+            <!-- these should iterate over *module* text_attributes -->
+            <option value="Channel">Channel</option>
+            <option value="Frequency">Frequency</option>
+            <option value="Quality">Quality</option>
+            <option value="Encryption">Encryption</option>
+            <option value="Vendor">Vendor</option>
+
+        </select>
+        <select id="filter-type">
+            <option value="=">=</option>
+            <option value="<"><</option>
+            <option value="<="><=</option>
+            <option value=">">></option>
+            <option value=">=">>=</option>
+            <option value="!=">!=</option>
+            <option value="like">like</option>
+        </select>
+        <input id="filter-value" type="text" size="16"  placeholder="value to filter">
+        <button id="filter-clear" class="clear_button">
+            <span id="clear_button_text">CLEAR</span>
+        </button>
+
+        <button id="all_button" class="all_button" value="" onClick="select_all(true);">
+            <span id="all_button_text">ALL</span>
+        </button>
+        <button id="none_button" class="none_button" value="" onClick="select_all(false);">
+            <span id="none_button_text">NONE</span>
+        </button>
+        <button id="write_button" class="write_button" value="" onClick="write_tracked();">
+            <span id="write_button_text">WRITE</span>
+        </button>
+        <button id="reload_button" class="reload_button" value="" onClick="reload();">
+            <span id="load_button_text">RELOAD</span>
+        </button>
+
+    </div>
+    <div id="bar_container" style="padding-top:2px;padding-bottom:3px;" class="bar_container">
+        <div id="meter" style=""><script>make_deadline_bar();</script></div>
+    </div>
+{% set tab = 'trx' %}
+{% set module = 'trx' %}
+{% include 'trx.js.j2' %}
+<script>
+    scanner_elements = [];
+
+    scanner_elements.push(document.getElementById('trx'));
+
+    scanner_elements.push(document.getElementById("all_button"));
+    scanner_elements.push(document.getElementById("none_button"));
+    scanner_elements.push(document.getElementById("write_button"));
+    scanner_elements.push(document.getElementById("reload_button"));
+
+    scanner_elements.forEach(function(element) {
+
+        element.addEventListener('click', function(event) {
+
+            if (event.target.classList.contains('trk_btn')) {
+                if (event.target.classList.contains('add_button')) {
+                    add(event.target.value, event.target.attributes['data-target'].value);
+                };
+                if (event.target.classList.contains('rem_button')) {
+                    remove(event.target.value, event.target.attributes['data-target'].value)
+                };
+            };
+
+            if (event.target.classList.contains('mute_btn')) {
+                mute(event.target.value, event.target.attributes['data-target'].value);
+            };
+
+            if (event.target.classList.contains('all_button')) {
+                alert('select all');
+            };
+
+            if (event.target.classList.contains('none_button')) {
+                alert('select none');
+            };
+
+            if (event.target.classList.contains('write_button')) {
+                write_tracked(this, event.target.attributes['data-target'].value); // 'wifi' the http header
+            };
+
+            if (event.target.classList.contains('reload_button')) {
+                reload();
+            };
+
+        });
+    });
+</script>
+</body>
+</html>
