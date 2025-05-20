@@ -216,7 +216,7 @@ class TRXRetriever(threading.Thread):
                 return [sgnl for sgnl in self.signal_cache if str(sgnl['id']) == f][0]
 
             sgnl = find(uniqId)
-            sgnl.tracked = True
+            sgnl['tracked'] = True
             self.tracked_signals.update({uniqId: sgnl})
 
             # SIGNAL: ADDED ITEM
