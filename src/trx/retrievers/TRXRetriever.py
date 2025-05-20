@@ -318,7 +318,7 @@ class TRXRetriever(threading.Thread):
                 if response:
                     print(f"[USB] Got: {response}")
                     self.out = {"RAW": response}
-                    self.make_signal_point()
+                    # self.make_signal_point()
 
                 self.updated = datetime.now()
                 self.elapsed = self.updated - self.created
