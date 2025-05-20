@@ -12,7 +12,7 @@ import usb.backend.libusb1
 
 from src.config import readConfig
 from src.map.gps import get_location
-from src.trx.lib.TRXWorker import TRXWorker
+from src.lib.Worker import Worker
 from src.trx.lib.TRXSignalPoint import TRXSignalPoint
 
 
@@ -99,8 +99,8 @@ class TRXRetriever(threading.Thread):
 
         self.mode = self.config['USB_SERIAL_MODE']
 
-        for freq in self.tracked_signals.keys():
-            worker = TRXWorker(freq)
+        for ident in self.tracked_signals.keys():
+            worker = Worker(ident)
             self.config_worker(worker)
             self.workers.append(worker)
 
@@ -111,20 +111,22 @@ class TRXRetriever(threading.Thread):
         self.stopbits = self.config['STOPBITS']
 
     def config_worker(self, worker):
-        worker.retriever = self
+        worker.tracker = self
         worker.config = self.config
         worker.created = datetime.now()
+        worker.id = worker.get_text_attribute['id']
+        worker.ident = worker.get_text_attribute['ident']
         worker.DEBUG = self.config.get('DEBUG', False)
         worker.cache_max = max(
             int(self.config.get('SIGNAL_CACHE_LOG_MAX', -5)),
             -self.config.get('SIGNAL_CACHE_MAX', 150)
         )
 
-    def get_worker(self, freq):
+    def get_worker(self, ident):
         for worker in self.workers:
-            if worker.freq == freq:
+            if worker.ident == ident:
                 return worker
-        new_worker = TRXWorker(freq)
+        new_worker = Worker(ident)
         self.config_worker(new_worker)
         self.workers.append(new_worker)
         new_worker.run()
@@ -133,18 +135,11 @@ class TRXRetriever(threading.Thread):
     def make_signal_point(self):
         get_location(self)
         sgnl = TRXSignalPoint(
-            self.worker_id, self.lon, self.lat, 0.0, self.out
+            self.worker_id, self.lon, self.lat, 0.0, text_data=self.out
         )
 
         while len(self.signal_cache) >= self.config.get('SIGNAL_CACHE_MAX', 150):
             self.signal_cache.pop(0)
-
-        try:
-            freq1 = float(self.out.get('FREQ1', 0))
-            freq2 = float(self.out.get('FREQ2', 0))
-            self.get_worker(max(freq1, freq2))
-        except (ValueError, TypeError):
-            pass
 
         self.signal_cache.append(sgnl)
 
@@ -158,6 +153,23 @@ class TRXRetriever(threading.Thread):
         return self.out or ''
 
     def get_parsed_cells(self, scanned):
+
+        # use TRXRetriever fields to store data.
+        # internally track broadcasts on frequencies
+
+        scanned.update({'type': 'trx'})
+        fix_time = self.config.get('FIX_TIME', False)
+
+        if fix_time:
+            now = datetime.now()
+            scanned.update({
+                'COMP_DATE': now.strftime(self.config['DATE_FORMAT']),
+                'COMP_TIME': now.strftime(self.config['TIME_FORMAT']),
+                'SCAN_DATE': now.strftime(self.config['DATE_FORMAT']),
+                'SCAN_TIME': now.strftime(self.config['TIME_FORMAT']),
+            })
+
+        # return what Scanner can use and expects to have.
         return [scanned]
 
     def mute(self, uniqId):
@@ -167,7 +179,6 @@ class TRXRetriever(threading.Thread):
             return [sgnl for sgnl in self.signal_cache if str(sgnl._id) == f][0]
 
         sgnl = find(uniqId)
-        # SIGNAL: MUTE/UNMUTE
         return mute(sgnl)
 
     def auto_unmute(self, sgnl):
@@ -175,7 +186,27 @@ class TRXRetriever(threading.Thread):
         if self.config['MUTE_TIME'] > 0:
             if datetime.now() - sgnl.updated > timedelta(seconds=self.config['MUTE_TIME']):
                 sgnl.is_mute = False
-                # SIGNAL: AUTO UNMUTE
+
+    #  refactored add, remove
+    # def add(self, uniqId, scanner):
+    #
+    #     scanner.module_tracker.tracked_signals.append(uniqId)
+    #
+    #     worker = [worker for worker in scanner.module_tracker.workers if worker.id == uniqId][0]
+    #     if worker:
+    #         worker.tracked = True
+    #     return True
+    #
+    # def remove(self, uniqId, scanner):
+    #     _copy = scanner.module_tracker.tracked_signals.copy()
+    #     scanner.module_tracker.tracked_signals.clear()
+    #
+    #     worker = [worker for worker in scanner.module_tracker.workers if worker.id == uniqId][0]
+    #     if worker:
+    #         worker.tracked = False
+    #
+    #     [self.add(remaining, scanner) for remaining in _copy if remaining != uniqId]
+    #     return True
 
     def add(self, uniqId):
 
@@ -212,35 +243,29 @@ class TRXRetriever(threading.Thread):
             lines = [line.strip().replace('"', '').replace('<', '').replace('  ', '')
                      for line in f if line.strip()]
         keys = lines[0].split(',')
-        fix_time = self.config.get('FIX_TIME', False)
 
         while True:
+            # simulate a random amount of radio silence ...
+            time.sleep(random.randint(1, self.config['TEST_FILE_TIME_MAX']))
+
             for line in lines[1:]:
                 vals = line.split(',')
                 self.out = {keys[i]: vals[i] for i in range(len(keys))}
 
-                if fix_time:
-                    now = datetime.now()
-                    self.out.update({
-                        'COMP_DATE': now.strftime(self.config['DATE_FORMAT']),
-                        'COMP_TIME': now.strftime(self.config['TIME_FORMAT']),
-                        'SCAN_DATE': now.strftime(self.config['DATE_FORMAT']),
-                        'SCAN_TIME': now.strftime(self.config['TIME_FORMAT']),
-                    })
+                from src.lib.utils import generate_uuid
+                self.out.update({'id': str(generate_uuid())})
+                self.out.update({'ident': self.out['id'].upper().replace('-', '')[0:12]})
 
-                # self.make_signal_point()
                 self.updated = datetime.now()
                 self.elapsed = self.updated - self.created
                 self.polling_count += 1
 
-                # for worker in self.workers:
-                #     self.config_worker(worker)
-                #     worker.run()
-
                 if self.DEBUG:
                     print(self.out)
 
-                time.sleep(random.randint(1, self.config['TEST_FILE_TIME_MAX']))
+            # simulate broadcasting for a random amount of time
+            time.sleep(random.randint(1, self.config['TEST_FILE_TIME_MAX']))
+            self.out = None # silence again ...
 
     def _run_serial_mode(self):
         SPACE = b'\x32'
