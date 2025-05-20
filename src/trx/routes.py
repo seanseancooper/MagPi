@@ -51,7 +51,7 @@ def mute(uniqId):
 
 @trx_bp.route('/remove/<uniqId>', methods=['GET', 'POST'], subdomain="trx")
 def remove(uniqId):
-    if scanner.module_retriever.remove(uniqId, scanner):
+    if scanner.module_retriever.remove(uniqId):
         return "OK", 200
     return "", 404
 
