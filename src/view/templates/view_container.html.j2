@@ -6,6 +6,8 @@
     <title>{{ container.title }}</title>
     <link href="{{ url_for('vc_bp.static', filename='tabulator/css/tabulator_midnight.min.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('vc_bp.static', filename='css/container.css') }}">
+    <link rel="stylesheet" href="{{ url_for('vc_bp.static', filename='css/cropper.css') }}">
+    <link rel="stylesheet" href="{{ url_for('vc_bp.static', filename='css/cam_controller.css') }}">
     <script type="text/javascript" src="{{ url_for('vc_bp.static', filename='js/luxon.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('vc_bp.static', filename='tabulator/js/tabulator.min.js') }}"></script>
     <script src="{{ url_for('vc_bp.static', filename='js/peity-vanilla.js') }}"></script>
@@ -99,7 +101,7 @@
     {% set module = containerTab.module %}
     {% if containerTab.timeout > 0 %}
     <div id="{{ containerTab.tab }}_container_filters" style="{{ 'display:none;' if loop.index0 > 0 }}" class="container_filters">
-{% include 'filter.html.js.j2' %}
+    {% include 'filter.html.js.j2' %}
     </div>
     {% endif %}
 {%- endfor -%}
@@ -107,11 +109,12 @@
 {% include 'buttons.js.j2' %}
 
     <script>
-        function reload(){
         {%- for containerTab in container.module_tabs: %}
-            {{ containerTab.tab }}.replaceData();
-        {%- endfor %}
+        function {{ containerTab.tab }}_reload(){
+              {{ containerTab.tab }}.replaceData();
         }
+
+        {%- endfor %}
     </script>
     <script>
         const dataLoaderLoading = "&nbsp;";
@@ -154,10 +157,12 @@
         {%- endfor %}
 
         {%- for containerTab in container.module_tabs: %}
+        {% if containerTab.timeout >  0 %}
         container_elements.push(document.getElementById("{{ containerTab.tab }}_all_button"));
         container_elements.push(document.getElementById("{{ containerTab.tab }}_none_button"));
         container_elements.push(document.getElementById("{{ containerTab.tab }}_write_button"));
         container_elements.push(document.getElementById("{{ containerTab.tab }}_reload_button"));
+        {% endif %}
         {%- endfor %}
 
         container_elements.forEach(function(element) {
@@ -188,9 +193,11 @@
                 if (event.target.classList.contains('write_button')) {
                     write_tracked(this, event.target.attributes['data-target'].value); // 'wifi' the http header
                 };
+
                 if (event.target.classList.contains('reload_button')) {
                     reload();
                 };
+
                 // # IdeA: perhaps this can the basis for supporting a module specific button fragment?
                 //  add an id for the button on the app side to identify it.
                 //  the value could go into data-value... as JSON
