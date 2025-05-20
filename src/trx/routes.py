@@ -39,7 +39,7 @@ def trx_tracked():
 
 @trx_bp.route('/add/<uniqId>', methods=['GET', 'POST'], subdomain="trx")
 def add(uniqId):
-    if scanner.module_retriever.add(uniqId, scanner):
+    if scanner.module_retriever.add(uniqId):
         return "OK", 200
     return "", 404
 
