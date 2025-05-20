@@ -99,11 +99,6 @@ class TRXRetriever(threading.Thread):
 
         self.mode = self.config['USB_SERIAL_MODE']
 
-        for ident in self.tracked_signals.keys():
-            worker = Worker(ident)
-            self.config_worker(worker)
-            self.workers.append(worker)
-
         self.device = self.config['DEVICE']
         self.rate = self.config['RATE']
         self.parity = self.config['PARITY']
