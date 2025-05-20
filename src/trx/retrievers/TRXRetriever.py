@@ -176,7 +176,7 @@ class TRXRetriever(threading.Thread):
         from src.lib.utils import mute
 
         def find(f):
-            return [sgnl for sgnl in self.signal_cache if str(sgnl._id) == f][0]
+            return [sgnl for sgnl in self.signal_cache if str(sgnl['id']) == f][0]
 
         sgnl = find(uniqId)
         return mute(sgnl)
