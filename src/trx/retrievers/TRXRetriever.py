@@ -157,8 +157,8 @@ class TRXRetriever(threading.Thread):
         if scanned not in self.signal_cache:
             self.signal_cache.append(scanned)
 
-        # return what Scanner can use and expects to have.
-        return [scanned]
+            # return what Scanner can use and expects to have.
+        return self.signal_cache
 
     def mute(self, uniqId):
         from src.lib.utils import mute
