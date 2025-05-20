@@ -293,7 +293,7 @@ class TRXRetriever(threading.Thread):
                         line = ser.readline().decode(errors='ignore').strip()
                         if line:
                             self.out = {'RAW': line}
-                            self.make_signal_point()
+                            # self.make_signal_point()
                             self.updated = datetime.now()
                             self.elapsed = self.updated - self.created
                             self.polling_count += 1
