@@ -213,7 +213,7 @@ class TRXRetriever(threading.Thread):
         try:
 
             def find(f):
-                return [sgnl for sgnl in self.signal_cache if str(sgnl._id) == f][0]
+                return [sgnl for sgnl in self.signal_cache if str(sgnl['id']) == f][0]
 
             sgnl = find(uniqId)
             sgnl.tracked = True
