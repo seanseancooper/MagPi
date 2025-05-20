@@ -22,7 +22,7 @@
 			"SCANNER": "Tabulator"
 		},
 		{
-			"SCAN_GHOSTS": false
+			"SCAN_GHOSTS": true
 		},
 		{
 			"MODULE_RETRIEVER": "src.wifi.retrievers.MacOSAirportWifiRetriever"
