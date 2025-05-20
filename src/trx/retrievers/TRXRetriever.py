@@ -154,6 +154,9 @@ class TRXRetriever(threading.Thread):
                 'SCAN_TIME': now.strftime(self.config['TIME_FORMAT']),
             })
 
+        if scanned not in self.signal_cache:
+            self.signal_cache.append(scanned)
+
         # return what Scanner can use and expects to have.
         return [scanned]
 
