@@ -198,7 +198,7 @@ class Worker:
                 # self.id = str(self.ident).replace(':', '').lower()
                 self.id = str(uuid.uuid1()).lower()
                 self.set_type(cell['type'])
-                self.set_text_attributes(cell)
+            self.set_text_attributes(cell)
             self.process_cell(cell)
             self.auto_unmute()
 
