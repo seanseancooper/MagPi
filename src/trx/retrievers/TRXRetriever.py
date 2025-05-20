@@ -187,27 +187,6 @@ class TRXRetriever(threading.Thread):
             if datetime.now() - sgnl.updated > timedelta(seconds=self.config['MUTE_TIME']):
                 sgnl.is_mute = False
 
-    #  refactored add, remove
-    # def add(self, uniqId, scanner):
-    #
-    #     scanner.module_tracker.tracked_signals.append(uniqId)
-    #
-    #     worker = [worker for worker in scanner.module_tracker.workers if worker.id == uniqId][0]
-    #     if worker:
-    #         worker.tracked = True
-    #     return True
-    #
-    # def remove(self, uniqId, scanner):
-    #     _copy = scanner.module_tracker.tracked_signals.copy()
-    #     scanner.module_tracker.tracked_signals.clear()
-    #
-    #     worker = [worker for worker in scanner.module_tracker.workers if worker.id == uniqId][0]
-    #     if worker:
-    #         worker.tracked = False
-    #
-    #     [self.add(remaining, scanner) for remaining in _copy if remaining != uniqId]
-    #     return True
-
     def add(self, uniqId):
 
         try:
