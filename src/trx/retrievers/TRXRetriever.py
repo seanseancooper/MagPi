@@ -248,20 +248,21 @@ class TRXRetriever(threading.Thread):
             # simulate a random amount of radio silence ...
             time.sleep(random.randint(1, self.config['TEST_FILE_TIME_MAX']))
 
-            for line in lines[1:]:
-                vals = line.split(',')
-                self.out = {keys[i]: vals[i] for i in range(len(keys))}
+            line = lines[random.randint(1,len(lines))]  # choose a random line
 
-                from src.lib.utils import generate_uuid
-                self.out.update({'id': str(generate_uuid())})
-                self.out.update({'ident': self.out['id'].upper().replace('-', '')[0:12]})
+            vals = line.split(',')
+            self.out = {keys[i]: vals[i] for i in range(len(keys))}
 
-                self.updated = datetime.now()
-                self.elapsed = self.updated - self.created
-                self.polling_count += 1
+            from src.lib.utils import generate_uuid
+            self.out.update({'id': str(generate_uuid())})
+            self.out.update({'ident': self.out['id'].upper().replace('-', '')[0:12]})
 
-                if self.DEBUG:
-                    print(self.out)
+            self.updated = datetime.now()
+            self.elapsed = self.updated - self.created
+            self.polling_count += 1
+
+            if self.DEBUG:
+                print(self.out)
 
             # simulate broadcasting for a random amount of time
             time.sleep(random.randint(1, self.config['TEST_FILE_TIME_MAX']))
@@ -351,7 +352,15 @@ if __name__ == '__main__':
     retriever.configure('trx.json')
     try:
         while True:
-            print(f'scanned: {retriever.scan()}')
+            scanned = retriever.scan()
+            if len(scanned) > 0:
+                # print(f'scanned: {scanned}')
+                # use *current retriever* method to parse what it returned.
+                # return objects [cells] that tracker can
+                parsed_cells = retriever.get_parsed_cells(scanned)
+                import json
+                print(f'parsed: {json.dumps(retriever.get_parsed_cells(retriever.scan()))}')
+
             time.sleep(1)
     except KeyboardInterrupt:
         retriever.stop()
