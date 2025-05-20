@@ -234,7 +234,6 @@ class TRXRetriever(threading.Thread):
         sgnl.tracked = False
 
         [self.add(remaining) for remaining in _copy if remaining != uniqId]
-        # SIGNAL: REMOVED ITEM
         return True
 
     def _run_test_mode(self):
