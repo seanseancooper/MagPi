@@ -168,7 +168,7 @@ class TRXRetriever(threading.Thread):
         cached.update({cache_key: cache_value})
 
     def mute(self, uniqId):
-        from src.lib.utils import mute
+        cache_id, sgnl = self.find(uniqId)
 
         def find(f):
             return [sgnl for sgnl in self.signal_cache if str(sgnl['id']) == f][0]
