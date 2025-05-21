@@ -34,30 +34,7 @@ class TRXSignalPoint(SignalPoint):
         self._audio_frequency_features = None
 
         if text_data is not None:
-            #   ALPHATAG: name of system broadcasting
-            #   COMP_DATE: ??
-            #   COMP_TIME: ??
-            #   FREQ1: responding frequency?
-            #   FREQ2: initial freq?
-            # INFO
-            #   OBJECT_ID: system object broadcasting
-            # OTHER_TEXT
-            #   RID1
-            #   RID2
-            #   SCAN_DATE: replaced date
-            #   SCAN_TIME: replaced time
-            #   SITE: broadcast site
-            # SQ_MODE
-            # SQ_VALUE
-            #   SYSTEM: Broadcaster
-            #   TGID1
-            #   TGID2
-            #   TSYS_ID
-            #   TSYS_TYPE: broadcast system TYPE
-            #   TYPE: broadcast type
-            def aggregate(k, v):
-                self._text_attributes[k] = v
-            [aggregate(k, str(v)) for k, v in text_data.items()]
+           self._text_attributes = [x for x in text_data][0]
 
         if self._signal_type == "object" and self._audio_data is None:
             self._sgnl = 0.0
