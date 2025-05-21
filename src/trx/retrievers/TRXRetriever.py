@@ -160,6 +160,13 @@ class TRXRetriever(threading.Thread):
             # return what Scanner can use and expects to have.
         return self.signal_cache
 
+    def find(self, uniqId):
+        return [(self.signal_cache.index(sgnl), sgnl) for sgnl in self.signal_cache if str(sgnl['id']) == uniqId][0]
+
+    def update_cache(self, cache_id, cache_key, cache_value):
+        cached = self.signal_cache[cache_id]
+        cached.update({cache_key: cache_value})
+
     def mute(self, uniqId):
         from src.lib.utils import mute
 
