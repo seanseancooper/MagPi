@@ -131,7 +131,7 @@
                 {field:"tracked", width:102, formatter: function(cell, formatterParams) {
                     var data = cell.getRow().getData();
                     const trgt = 'trx';
-
+                    //console.log(data);
                     //  special processing to make string of hex look like a BSSID
                     var uniqId = data.id.replace('-','').substring(0,12).match(/.{1,2}/g).join(':');
 
