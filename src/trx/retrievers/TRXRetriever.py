@@ -170,11 +170,11 @@ class TRXRetriever(threading.Thread):
     def mute(self, uniqId):
         cache_id, sgnl = self.find(uniqId)
 
-        def find(f):
-            return [sgnl for sgnl in self.signal_cache if str(sgnl['id']) == f][0]
-
-        sgnl = find(uniqId)
-        return mute(sgnl)
+        sgnl['is_mute'] = not sgnl['is_mute']
+        self.tracked_signals.update({uniqId: sgnl})
+        self.update_cache(cache_id, 'is_mute', sgnl['is_mute'])
+        print(f"muted {uniqId}")
+        return sgnl['is_mute']
 
     def auto_unmute(self, sgnl):
         ''' this is the polled function to UNMUTE signals AUTOMATICALLY after the MUTE_TIME. '''
