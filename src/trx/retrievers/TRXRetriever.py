@@ -11,10 +11,6 @@ import usb.util
 import usb.backend.libusb1
 
 from src.config import readConfig
-from src.map.gps import get_location
-from src.lib.Worker import Worker
-from src.trx.lib.TRXSignalPoint import TRXSignalPoint
-
 
 def find_device(vendor_id, product_id):
     if platform.system() == 'Windows':
@@ -143,6 +139,8 @@ class TRXRetriever(threading.Thread):
         # internally track broadcasts on frequencies
 
         scanned.update({'type': 'trx'})
+        scanned.update({'is_mute': False})
+        scanned.update({'tracked': False})
         fix_time = self.config.get('FIX_TIME', False)
 
         if fix_time:
@@ -183,32 +181,27 @@ class TRXRetriever(threading.Thread):
                 sgnl.is_mute = False
 
     def add(self, uniqId):
-
         try:
-
-            def find(f):
-                return [sgnl for sgnl in self.signal_cache if str(sgnl['id']) == f][0]
-
-            sgnl = find(uniqId)
+            cache_id, sgnl = self.find(uniqId)
             sgnl['tracked'] = True
             self.tracked_signals.update({uniqId: sgnl})
-
+            self.update_cache(cache_id, 'tracked', True)
+            print(f"added {uniqId}")
             return True
         except IndexError:
-
             return False  # not in tracked_signals
 
     def remove(self, uniqId):
         _copy = self.tracked_signals.copy()
         self.tracked_signals.clear()
 
-        def find(f):
-            return [sgnl for sgnl in self.signal_cache if str(sgnl['id']) == f][0]
-
-        sgnl = find(uniqId)
-        sgnl.tracked = False
+        cache_id, sgnl = self.find(uniqId)
+        sgnl['tracked'] = False
 
         [self.add(remaining) for remaining in _copy if remaining != uniqId]
+
+        self.update_cache(cache_id, 'tracked', False)
+        print(f"removed {uniqId}")
         return True
 
     def _run_test_mode(self):
