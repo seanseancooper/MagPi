@@ -161,7 +161,7 @@ class Scanner(threading.Thread):
             self.report()
             self.polling_count += 1
 
-            else:
+            if len(self.scanned) == 0:
                 self.report(True)
                 if self.config['SPEECH_ENABLED']:
                     speech_logger.info(f'looking for data {self.polling_count} ...')
