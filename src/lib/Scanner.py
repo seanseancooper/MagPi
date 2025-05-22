@@ -140,6 +140,21 @@ class Scanner(threading.Thread):
                 # pick apart, assign workers (~signalpoints), and track the cells.
                 self.parsed_signals = self.module_tracker.track(parsed_cells)
 
+            if self.config['SCAN_GHOSTS'] is True:
+                self.stats.update({
+                    'signals': len(self.parsed_signals),
+                    'workers': len(self.module_tracker.workers),
+                    'tracked': len(self.module_tracker.tracked_signals),
+                    'ghosts' : len(self.module_tracker.ghost_signals),
+                })
+            else:
+                self.stats.update({
+                    'signals': len(self.module_retriever.signal_cache),
+                    'workers': len(self.module_tracker.workers),
+                    'tracked': len(self.module_retriever.tracked_signals),
+                    'ghosts' : 0,
+                })
+
                 self.updated = datetime.now()
                 self.elapsed = self.updated - self.created
                 
