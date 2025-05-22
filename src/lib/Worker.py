@@ -71,7 +71,7 @@ class Worker:
         return sgnl
 
     def get_type(self):
-        return self.TYPE
+        return self.cell_type
 
     def set_type(self, TYPE):
         self.TYPE = TYPE
