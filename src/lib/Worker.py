@@ -134,7 +134,7 @@ class Worker:
         # TRXSignalPoint    (self, worker_id, lon, lat, sgnl, text_data={}, audio_data=None, signal_type="object", sr=48000)
         if self.cell_type == 'trx':
             kwargs["text_data"] = self._text_attributes,
-            kwargs["signal_type"] =  self.get_text_attribute('type'),
+            kwargs["signal_type"] =  'object',
             from src.trx.lib.TRXSignalPoint import TRXSignalPoint
             sgnlPt = TRXSignalPoint(worker_id=worker_id, lon=self.tracker.lon, lat=self.tracker.lat, sgnl=sgnl, **kwargs)
             sgnlPt.get() # stop & look
