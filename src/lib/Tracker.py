@@ -118,7 +118,7 @@ class Tracker(object):
                 except Exception:
                     pass
 
-        [_blacklist(sgnl) for sgnl in self.parsed_cells.copy()]  # remove BLACKLIST cells
+        [_blacklist(cell) for cell in self.parsed_cells.copy()]  # remove BLACKLIST cells
 
         # if self.sort_order:  # sort by CELL_SORT_FIELD for printing. See PRINT_CELLS
         #     self.parsed_cells.sort(key=lambda el: el[self.sort_order], reverse=self.reverse)
