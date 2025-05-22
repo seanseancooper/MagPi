@@ -21,7 +21,7 @@ class Worker:
     def __init__(self, ident):
         self.config = {}
         self.tracker = None
-        self.id = None                  # filled if match(), 'marks' SignalPoint type.
+        self.id = None                  # filled if match(), 'marks' SignalPoint cell_type.
         self.ident = ident              # used in object lookups and coloring UI, value of 'self.tracker.CELL_IDENT_FIELD'
 
         self.created = datetime.now()   # when signal was found
