@@ -113,7 +113,7 @@ class Worker:
         #     sgnlPt = SignalPoint(lon=self.tracker.lon, lat=self.tracker.lat, sgnl=sgnl)
 
         # ARXSignalPoint    (self, worker_id, lon, lat, sgnl)
-        if self.TYPE == 'arx':
+        if self.cell_type == 'arx':
             from src.arx.lib.ARXSignalPoint import ARXSignalPoint
             sgnlPt = ARXSignalPoint(worker_id=worker_id, lon=self.tracker.lon, lat=self.tracker.lat, sgnl=sgnl)
 
