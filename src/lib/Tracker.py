@@ -110,7 +110,7 @@ class Tracker(object):
         for cell in self.parsed_cells:  # list of dicts. TRX will not use this tracker!
             cell['cell_type'] = self.config.get('MODULE', 'generic')
 
-        def _blacklist(sgnl):
+        def _blacklist(cell):
             ''' removes items from *parsed_cells* so they are never evaluated in further processing. '''
             if sgnl[f'{self.CELL_IDENT_FIELD}'] in self.blacklist.keys():
                 try:
