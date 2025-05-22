@@ -112,7 +112,7 @@ class Tracker(object):
 
         def _blacklist(cell):
             ''' removes items from *parsed_cells* so they are never evaluated in further processing. '''
-            if sgnl[f'{self.CELL_IDENT_FIELD}'] in self.blacklist.keys():
+            if cell[f'{self.CELL_IDENT_FIELD}'] in self.blacklist.keys():
                 try:
                     self.parsed_cells.remove(cell)
                 except Exception:
