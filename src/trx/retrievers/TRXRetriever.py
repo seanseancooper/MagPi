@@ -141,7 +141,6 @@ class TRXRetriever(threading.Thread):
         scanned.update({'cell_type': 'trx'})        # doesn't use Tracker; it's internal.
         scanned.update({'is_mute': False})
         scanned.update({'tracked': False})
-        fix_time = self.config.get('FIX_TIME', False)
 
         if self.config['TEST_FILE']:
             now = datetime.now()
