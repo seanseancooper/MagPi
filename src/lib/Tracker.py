@@ -107,14 +107,8 @@ class Tracker(object):
     def process_cells(self):
         """ retrieve, classify, filter, sort and find missing signals in parsed_cells"""
 
-        for cell in self.parsed_cells:  # list of dicts
-            try:
-                if self.config['MODULE']:
-                    cell['type'] = self.config['MODULE']
-                else:
-                    cell['type'] = 'generic'
-            except KeyError:
-                pass
+        for cell in self.parsed_cells:  # list of dicts. TRX will not use this tracker!
+            cell['cell_type'] = self.config.get('MODULE', 'generic')
 
         def _blacklist(sgnl):
             ''' removes items from *parsed_cells* so they are never evaluated in further processing. '''
