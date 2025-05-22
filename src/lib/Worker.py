@@ -73,8 +73,8 @@ class Worker:
     def get_type(self):
         return self.cell_type
 
-    def set_type(self, TYPE):
-        self.TYPE = TYPE
+    def set_type(self, c_type):
+        self.cell_type = c_type
 
     def config_worker(self, tracker):
         """ worker append itself, pulls config when created. """
