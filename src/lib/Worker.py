@@ -51,7 +51,7 @@ class Worker:
             sgnl = defaultdict()
 
         sgnl['id'] = self.id
-        sgnl['type'] = self.TYPE
+        sgnl['cell_type'] = self.cell_type
         sgnl['ident'] = self.ident
 
         # this is formatting for luxon.js, but is not clean.
