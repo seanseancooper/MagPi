@@ -155,11 +155,11 @@ class Scanner(threading.Thread):
                     'ghosts' : 0,
                 })
 
-                self.updated = datetime.now()
-                self.elapsed = self.updated - self.created
-                
-                self.report()
-                self.polling_count += 1
+            self.updated = datetime.now()
+            self.elapsed = self.updated - self.created
+
+            self.report()
+            self.polling_count += 1
 
             else:
                 self.report(True)
