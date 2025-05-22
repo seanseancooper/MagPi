@@ -16,9 +16,6 @@
 			"TEST_FILE_TIME_MAX": 30
 		},
 		{
-			"FIX_TIME": true
-		},
-		{
 			"SERVER_NAME": "localhost:5009"
 		},
 		{
