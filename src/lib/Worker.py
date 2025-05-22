@@ -118,7 +118,7 @@ class Worker:
             sgnlPt = ARXSignalPoint(worker_id=worker_id, lon=self.tracker.lon, lat=self.tracker.lat, sgnl=sgnl)
 
         # WifiSignalPoint   (self, worker_id, lon, lat, sgnl, bssid=None)
-        if self.TYPE == 'wifi':
+        if self.cell_type == 'wifi':
             kwargs["bssid"] =  self.get_text_attribute(self.tracker.CELL_IDENT_FIELD)
             from src.wifi.lib.WifiSignalPoint import WifiSignalPoint
             sgnlPt = WifiSignalPoint(worker_id=worker_id, lon=self.tracker.lon, lat=self.tracker.lat, sgnl=sgnl, **kwargs)
