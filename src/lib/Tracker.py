@@ -127,8 +127,8 @@ class Tracker(object):
 
         # process cells to include 'worker' fields making them signals to fill parsed_signals
         self.parsed_signals.clear()
-        for sgnl in self.parsed_cells:
-            wrkr = self.get_worker(sgnl[f'{self.CELL_IDENT_FIELD}'])
+        for cell in self.parsed_cells:
+            wrkr = self.get_worker(cell[f'{self.CELL_IDENT_FIELD}'])
             self.parsed_signals.append(wrkr.get_sgnl())
 
     def update(self, ident, _signals):
