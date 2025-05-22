@@ -143,7 +143,7 @@ class TRXRetriever(threading.Thread):
         scanned.update({'tracked': False})
         fix_time = self.config.get('FIX_TIME', False)
 
-        if fix_time:
+        if self.config['TEST_FILE']:
             now = datetime.now()
             scanned.update({
                 'COMP_DATE': now.strftime(self.config['DATE_FORMAT']),
