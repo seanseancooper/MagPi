@@ -146,7 +146,7 @@ class Tracker(object):
         self.parsed_cells = parsed_cells
         get_location(self)
 
-        if len(self.parsed_cells) > 0:  # only here if true alreedy
-            self.process_cells()
-            self.process_signals()
-            return self.parsed_signals
+        # if len(self.parsed_cells) > 0:  # only here if true alreedy
+        self.process_cells()
+        self.process_signals()
+        return self.parsed_signals
