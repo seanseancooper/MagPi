@@ -40,7 +40,7 @@ class Worker:
         self._signal_cache_frequency_features = None
 
         self.DEBUG = False
-        self.TYPE = None
+        self.cell_type = None
 
     def get_sgnl(self, sgnl=None):
         """ update sgnl (a map) with the following fields in the
