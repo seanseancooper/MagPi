@@ -130,21 +130,6 @@ class Scanner(threading.Thread):
                 'lon'          : self.lon,
             }
 
-            if self.config['SCAN_GHOSTS'] is True:
-                self.stats.update({
-                    'signals'      : len(self.parsed_signals),
-                    'workers'      : len(self.module_tracker.workers),
-                    'tracked'      : len(self.module_tracker.tracked_signals),
-                    'ghosts'       : len(self.module_tracker.ghost_signals),
-                })
-            else:
-                self.stats.update({
-                    'signals'      : len(self.module_retriever.signal_cache),
-                    'workers'      : len(self.module_tracker.workers),
-                    'tracked'      : len(self.module_retriever.tracked_signals),
-                    'ghosts'       : 0,
-                })
-
             self.scanned = self.module_retriever.scan()
 
             if len(self.scanned) > 0:
