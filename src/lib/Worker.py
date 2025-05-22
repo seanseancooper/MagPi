@@ -194,10 +194,12 @@ class Worker:
         """ match id, derive the 'id' and set mute status """
         if self.ident.upper() == cell[f'{self.tracker.CELL_IDENT_FIELD}'].upper():
             if not self.id:
-                # self.id = str(self.ident).replace(':', '').lower()
-                self.id = str(uuid.uuid1()).lower()
-                self.set_type(cell['type'])
-            self.set_text_attributes(cell)
+                try:
+                    self.id = cell['id']                    # succeed on 'trx', fail on items w/o id
+                except KeyError:
+                    self.id = str(uuid.uuid1()).lower()     # sets id for new items
+                self.set_type(cell['cell_type'])
+                self.set_text_attributes(cell)
             self.process_cell(cell)
             self.auto_unmute()
 
