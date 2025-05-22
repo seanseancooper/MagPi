@@ -124,7 +124,7 @@ class Worker:
             sgnlPt = WifiSignalPoint(worker_id=worker_id, lon=self.tracker.lon, lat=self.tracker.lat, sgnl=sgnl, **kwargs)
 
         # SDRSignalPoint    (self, worker_id, lon, lat, sgnl, array_data=None, audio_data=None, sr=48000)
-        if self.TYPE == 'sdr':
+        if self.cell_type == 'sdr':
             kwargs["array_data"] =  self.get_text_attribute('array_data'),
             kwargs["audio_data"] =  self.get_text_attribute('audio_data'),
             kwargs["sr"] =  self.get_text_attribute('sr'),
