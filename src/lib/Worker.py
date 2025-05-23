@@ -234,6 +234,7 @@ class Worker:
         _copy = self.tracker.tracked_signals.copy()
         self.tracker.tracked_signals.clear()
         [self.add(remaining) for remaining in _copy if remaining != ident]
+        print(f"removed from cached  {ident}")
         return True
 
     def stop(self):
