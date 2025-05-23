@@ -131,6 +131,14 @@ class Tracker(object):
             wrkr = self.get_worker(cell[f'{self.CELL_IDENT_FIELD}'])
             self.parsed_signals.append(wrkr.get_sgnl())
 
+            if wrkr.cell_type == 'trx':
+                if cell['tracked'] is True and wrkr.ident not in self.tracked_signals:
+                    wrkr.add(wrkr.ident)  # add using worker method
+
+                if cell['tracked'] is False and wrkr.ident in self.tracked_signals:
+
+                    wrkr.remove(wrkr.ident)
+
     def update(self, ident, _signals):
         wrkr = self.get_worker(ident)                   # should be current fields of worker
         _signals.append(wrkr.get_sgnl())
