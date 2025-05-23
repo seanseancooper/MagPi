@@ -104,6 +104,7 @@ class Scanner(threading.Thread):
                 f"{self.stats['signals']} signals, "
                 f"{self.stats['workers']} workers, "
                 f"{self.stats['tracked']} tracked, "
+                f"{self.stats.get('cached', 0)} cached, "
                 f"{self.stats['ghosts']} ghosts")
 
             if self.polling_count > 0 and self.polling_count % 10 == 0 and self.config['SPEECH_ENABLED']:
