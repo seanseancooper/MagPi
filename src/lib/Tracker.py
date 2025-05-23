@@ -125,7 +125,8 @@ class Tracker(object):
 
         self.load_ghosts()
 
-        # process cells to include 'worker' fields making them signals to fill parsed_signals
+        # process cells to include 'worker' fields making them signals
+        # to fill parsed_signals. Last chance to modify or add
         self.parsed_signals.clear()
         for cell in self.parsed_cells:
             wrkr = self.get_worker(cell[f'{self.CELL_IDENT_FIELD}'])
