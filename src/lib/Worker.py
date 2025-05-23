@@ -223,6 +223,7 @@ class Worker:
                 self.tracker.tracked_signals.append(ident)
                 if worker not in self.tracker.workers:
                     self.tracker.workers.append(worker)
+                print(f"added to cached  {ident}")
                 return True
 
             return False
