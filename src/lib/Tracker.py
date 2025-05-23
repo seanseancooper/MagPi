@@ -136,7 +136,6 @@ class Tracker(object):
                     wrkr.add(wrkr.ident)  # add using worker method
 
                 if cell['tracked'] is False and wrkr.ident in self.tracked_signals:
-
                     wrkr.remove(wrkr.ident)
 
     def update(self, ident, _signals):
