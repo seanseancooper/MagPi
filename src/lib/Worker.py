@@ -34,6 +34,14 @@ class Worker:
         self.DEBUG = False
         self.cell_type = None
 
+    def config_worker(self, tracker):
+        """ worker append itself, pulls config when created. """
+        self.tracker = tracker
+        self.config = tracker.config
+        self.created = datetime.now()
+        self.cache_max = max(int(tracker.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -5)
+        self.DEBUG = tracker.config['DEBUG']
+
     def get_sgnl(self, sgnl=None):
         """ update sgnl (a map) with the following fields in the
         current worker (an object created from a 'cell') note
