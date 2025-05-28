@@ -128,15 +128,15 @@ class Tracker(object):
         # to fill parsed_signals. Last chance to modify or add
         self.parsed_signals.clear()
         for cell in self.parsed_cells:
-            wrkr = self.get_worker(cell[f'{self.CELL_IDENT_FIELD}'])
-            self.parsed_signals.append(wrkr.get_sgnl())
+            worker = self.get_worker(cell[f'{self.CELL_IDENT_FIELD}'])
+            self.parsed_signals.append(worker.to_map())
 
-            if wrkr.cell_type == 'trx':
-                if cell['tracked'] is True and wrkr.ident not in self.tracked_signals:
-                    wrkr.add(wrkr.ident)  # add using worker method
+            if worker.cell_type == 'trx':
+                if cell['tracked'] is True and worker.ident not in self.tracked_signals:
+                    worker.add(worker.ident)  # add using worker method
 
-                if cell['tracked'] is False and wrkr.ident in self.tracked_signals:
-                    wrkr.remove(wrkr.ident)
+                if cell['tracked'] is False and worker.ident in self.tracked_signals:
+                    worker.remove(worker.ident)
 
     def process_signals(self):
         """ workers match their cells, add attributes, and make signalpoint """

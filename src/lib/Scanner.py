@@ -74,11 +74,11 @@ class Scanner(threading.Thread):
         return self.parsed_signals or []
 
     def get_workers(self):
-        return [worker.get_sgnl() for worker in self.module_tracker.workers]
+        return [worker.to_map() for worker in self.module_tracker.workers]
 
     def update(self, ident, _signals):
-        wrkr = self.module_tracker.get_worker(ident)                   # should be current fields of worker
-        _signals.append(wrkr.get_sgnl())
+        worker = self.module_tracker.get_worker(ident)                   # should be current fields of worker
+        _signals.append(worker.to_map())
 
     def get_tracked_signals(self):
         """ update, transform and return a list of 'rehydrated' tracked signals """

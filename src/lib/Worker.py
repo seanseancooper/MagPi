@@ -42,34 +42,31 @@ class Worker:
         self.cache_max = max(int(tracker.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -5)
         self.DEBUG = tracker.config['DEBUG']
 
-    def get_sgnl(self, sgnl=None):
-        """ update sgnl (a map) with the following fields in the
-        current worker (an object created from a 'cell') note
-        this doesn't RETURN a signal type, it populates one """
+    def to_map(self):
+        """ return the Worker fields as a mapping """
 
-        if sgnl is None:
-            sgnl = defaultdict()
+        w = defaultdict()
 
-        sgnl['id'] = self.id
-        sgnl['cell_type'] = self.cell_type
-        sgnl['ident'] = self.ident
+        w['id'] = self.id
+        w['cell_type'] = self.cell_type
+        w['ident'] = self.ident
 
         # this is formatting for luxon.js, but is not clean.
-        sgnl['created'] = format_time(self.created, "%Y-%m-%d %H:%M:%S")
-        sgnl['updated'] = format_time(self.updated, "%Y-%m-%d %H:%M:%S")
-        sgnl['elapsed'] = format_delta(self.elapsed, self.config.get('TIME_FORMAT', "%H:%M:%S"))
+        w['created'] = format_time(self.created, "%Y-%m-%d %H:%M:%S")
+        w['updated'] = format_time(self.updated, "%Y-%m-%d %H:%M:%S")
+        w['elapsed'] = format_delta(self.elapsed, self.config.get('TIME_FORMAT', "%H:%M:%S"))
 
-        sgnl['is_mute'] = self.is_mute
-        sgnl['tracked'] = self.tracked
+        w['is_mute'] = self.is_mute
+        w['tracked'] = self.tracked
 
-        sgnl['signal_cache'] = [x.get() for x in self.tracker.signal_cache[self.ident] if x is not None]
-        sgnl['text_attributes'] = self.get_text_attributes()
+        w['signal_cache'] = [x.get() for x in self.tracker.signal_cache[self.ident] if x is not None]
+        w['text_attributes'] = self.get_text_attributes()
 
         # wifi: put 'cell' level data (text_attributes) into Worker object (read by UI)
-        if sgnl['cell_type'] == 'wifi':
-            sgnl.update(self.get_text_attributes())
+        if w['cell_type'] == 'wifi':
+            w.update(self.get_text_attributes())
 
-        return sgnl
+        return w
 
     def get_type(self):
         return self.cell_type
@@ -221,7 +218,7 @@ class Worker:
 
                 json_logger.info({sgnl['BSSID']: formatted})
 
-            append_to_outfile(self.get_sgnl())
+            append_to_outfile(self.to_map())
 
     def run(self):
         # this is long-standing ugly; I should not be brute-forcing matches
