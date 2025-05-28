@@ -152,14 +152,11 @@ class Worker:
                 if datetime.now() - self.updated > timedelta(seconds=self.config['MUTE_TIME']):
                     self.is_mute = False
 
-        """ update *dynamic* fields"""
-        self.updated = datetime.now()
-        self.elapsed = self.updated - self.created
-        self.tracked = self.ident in self.tracker.tracked_signals
-        self.make_signalpoint(self.id, self.ident, int(cell.get(self.tracker.CELL_STRENGTH_FIELD, -99)))
-        # self._signal_cache_frequency_features = self.extract_signal_cache_features(
-        #         [pt.getSgnl() for pt in self.tracker.signal_cache[self.id]]
-        # )
+            """ update *dynamic* fields"""
+            self.updated = datetime.now()
+            self.elapsed = self.updated - self.created
+            self.tracked = self.ident in self.tracker.tracked_signals
+            self.make_signalpoint(self.id, self.ident, int(cell.get(self.tracker.CELL_STRENGTH_FIELD, -99)))
 
         return cell
 
