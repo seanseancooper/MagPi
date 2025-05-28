@@ -131,7 +131,7 @@ class TRXRetriever(threading.Thread):
         return [sgnl for sgnl in self.tracked_signals]
 
     def scan(self):
-        return self.out or ''
+        return self.out
 
     def get_parsed_cells(self, scanned):
 
