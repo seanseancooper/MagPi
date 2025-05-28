@@ -202,7 +202,7 @@ class TRXRetriever(threading.Thread):
         [self.add(remaining) for remaining in _copy if remaining != uniqId]
 
         self.update_cache(cache_id, 'tracked', False)
-        print(f"removed {uniqId}")
+        trx_logger.debug(f"removed {uniqId}")
         return True
 
     def _run_test_mode(self):
