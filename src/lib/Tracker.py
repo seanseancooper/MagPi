@@ -138,10 +138,6 @@ class Tracker(object):
                 if cell['tracked'] is False and wrkr.ident in self.tracked_signals:
                     wrkr.remove(wrkr.ident)
 
-    def update(self, ident, _signals):
-        wrkr = self.get_worker(ident)                   # should be current fields of worker
-        _signals.append(wrkr.get_sgnl())
-
     def process_signals(self):
         """ workers match their cells, add attributes, and make signalpoint """
         # idea: Tracker as ZMQ Publisher and Worker as ZMQ Subscriber (Publisher-Subscriber)
