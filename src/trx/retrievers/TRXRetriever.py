@@ -180,6 +180,7 @@ class TRXRetriever(threading.Thread):
                 sgnl.is_mute = False
 
     def add(self, uniqId):
+        """ add an id to this retriever's collection of tracked ids"""
         try:
             cache_id, sgnl = self.find(uniqId)
             sgnl['tracked'] = True
