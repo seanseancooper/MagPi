@@ -155,8 +155,8 @@ class Scanner(threading.Thread):
                 self.stats.update({
                     'signals': len(self.module_retriever.signal_cache),
                     'workers': len(self.module_tracker.workers),
-                    'tracked': len(self.module_retriever.tracked_signals),
-                    'cached' : len(self.module_tracker.tracked_signals),
+                    'cached': len(self.module_retriever.tracked_signals),
+                    'tracked': len(self.module_tracker.tracked_signals),
                     'ghosts' : 0,
                 })
 
