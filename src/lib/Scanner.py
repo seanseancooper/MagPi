@@ -116,7 +116,8 @@ class Scanner(threading.Thread):
                         f'{len(self.module_tracker.parsed_cells)} signals, {len(self.module_tracker.tracked_signals)} tracked, {len(self.module_tracker.ghost_signals)} ghosts.')
 
         else:
-            print(f"looking for data [{self.polling_count}] {format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))}...")
+            if self.config['SCAN_GHOSTS'] is True:
+                print(f"looking for data [{self.polling_count}] {format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))}...")
 
     def run(self):
 
