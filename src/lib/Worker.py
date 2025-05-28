@@ -232,6 +232,10 @@ class Worker:
         print(f"removed from cached  {ident}")
         return True
 
+    def mute(self):
+        from src.lib.utils import mute
+        return mute(self)
+
     def stop(self):
 
         if self.tracked:
