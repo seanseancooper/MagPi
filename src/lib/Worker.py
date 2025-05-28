@@ -9,12 +9,6 @@ wifi_logger = logging.getLogger('wifi_logger')
 json_logger = logging.getLogger('json_logger')
 
 class Worker:
-    # 🧩 Modeling Components
-
-    # 1. Signal Sources as Agents
-    # Each emitter can be modeled as an agent with:
-    #     Repetition, pattern, schedule: Worker() could support 'period' data via EAV tables of events; need event 'types'? & tests
-    #     Signal fingerprint (modulation, bandwidth, power, etc.)
 
     def __init__(self, ident):
         self.config = {}
