@@ -65,8 +65,9 @@ class Worker:
         sgnl['signal_cache'] = [x.get() for x in self.tracker.signal_cache[self.ident] if x is not None]
         sgnl['text_attributes'] = self.get_text_attributes()
 
-        # put text attributes into worker representation
-        sgnl.update(self.get_text_attributes())
+        # wifi: put 'cell' level data (text_attributes) into Worker object (read by UI)
+        if sgnl['cell_type'] == 'wifi':
+            sgnl.update(self.get_text_attributes())
 
         return sgnl
 
