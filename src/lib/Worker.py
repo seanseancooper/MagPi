@@ -154,10 +154,7 @@ class Worker:
                 if datetime.now() - self.updated > timedelta(seconds=self.config['MUTE_TIME']):
                     self.is_mute = False
 
-        return cell if test(cell) else None
-
-    def update(self, sgnl):
-        """ updates *dynamic* fields"""
+        """ update *dynamic* fields"""
         self.updated = datetime.now()
         self.elapsed = self.updated - self.created
         self.tracked = self.ident in self.tracker.tracked_signals
