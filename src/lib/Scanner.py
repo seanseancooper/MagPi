@@ -101,7 +101,7 @@ class Scanner(threading.Thread):
     def report(self, flag=None):
 
         if not flag:
-            print(f"Scanner [{self.polling_count}] "
+            print(f"{self.config['MODULE']}Scanner [{self.polling_count}] "
                 f"{format_time(datetime.now(), self.config.get('TIME_FORMAT', '%H:%M:%S'))} "
                 f"{self.stats['elapsed']} "
                 f"[{self.stats['lat']}, {self.stats['lon']}] "
