@@ -95,6 +95,9 @@ class Worker:
             #     text_data.pop(k)
         [aggregate(k, v) for k, v in text_data.copy().items()]
 
+    def get_signal_cache_frequency_features(self):
+        return self._signal_cache_frequency_features
+
     def make_signalpoint(self, worker_id, ident, sgnl):
         kwargs = {}
         sgnlPt = None
