@@ -37,13 +37,14 @@ class RTLSDRReceiver:
     def set_gain(self, gain_value):
         self.sdr.gain = gain_value
 
-    def get_parsed_cells(self):
+    def get_parsed_cells(self, scanned):
         # needs be a list of signalpoint as a cell
-        return [self.signalpoint]
+        return [self.signalpoint.get()]
 
     def scan(self):
         self.get_data()
         print(f'scannin....{self.signalpoint}')
+        print(f'{self.signalpoint.get()}')
         return [self.signalpoint]
 
     def get_data(self, fft_size=512, num_rows=500):
