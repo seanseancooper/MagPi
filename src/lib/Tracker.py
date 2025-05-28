@@ -114,7 +114,7 @@ class Tracker(object):
                 except Exception:
                     pass
 
-        for cell in self.parsed_cells:  # list of dicts. TRX will not use this tracker!
+        for cell in self.parsed_cells:  # list of dicts.
             cell['cell_type'] = self.config.get('MODULE', 'generic')
 
         [_blacklist(cell) for cell in self.parsed_cells.copy()]  # remove BLACKLIST cells
@@ -124,8 +124,6 @@ class Tracker(object):
 
         self.load_ghosts()
 
-        # process cells to include 'worker' fields making them signals
-        # to fill parsed_signals. Last chance to modify or add
         self.parsed_signals.clear()
         for cell in self.parsed_cells:
             worker = self.get_worker(cell[f'{self.CELL_IDENT_FIELD}'])
