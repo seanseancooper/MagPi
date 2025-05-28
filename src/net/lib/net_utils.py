@@ -8,7 +8,7 @@ from src.arx.mq.ZeroMQARXPush import ZeroMQARXPush
 
 net_logger = logging.getLogger('net_logger')
 
-def get_retriever(name):
+def load_module(name):
     net_logger.info(f'attempting to load retriever {name}')
     try:
         components = name.split('.')

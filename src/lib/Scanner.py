@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from src.net.lib.net_utils import check_zmq_available
 from src.config import readConfig
-from src.net.lib.net_utils import get_retriever
+from src.net.lib.net_utils import load_module
 from src.lib.utils import format_time, format_delta
 from src.map.gps import get_location
 from src.wifi.lib.wifi_utils import write_to_scanlist
@@ -56,15 +56,15 @@ class Scanner(threading.Thread):
         _, ZMQ_OK = check_zmq_available()  # self.config['MODULE'].lower()
 
         if ZMQ_OK:
-            golden_retriever = get_retriever(self.config['MQ_MODULE_RETRIEVER'])
+            golden_retriever = load_module(self.config['MQ_MODULE_RETRIEVER'])
         else:
-            golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
+            golden_retriever = load_module(self.config['MODULE_RETRIEVER'])
 
         self.module_retriever = golden_retriever()
         self.module_retriever.configure(config_file)
 
         # I could import Tracker now...
-        module_tracker = get_retriever(self.config['MODULE_TRACKER'])
+        module_tracker = load_module(self.config['MODULE_TRACKER'])
         self.module_tracker = module_tracker()
         self.module_tracker.configure(config_file)
 

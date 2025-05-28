@@ -12,7 +12,7 @@ from gpsdclient import GPSDClient
 from src.config import readConfig
 from src.map.gps.lib.BlackViewGPSClient import BlackViewGPSClient
 from src.lib.utils import format_time
-from src.net.lib.net_utils import get_retriever
+from src.net.lib.net_utils import load_module
 
 gps_logger = logging.getLogger('gps_logger')
 retrievers = {}
@@ -163,7 +163,7 @@ class GPSRetriever(threading.Thread):
 
     def run(self):
 
-        self.retriever = get_retriever(self.config['GPS_MODULE_RETRIEVER'])
+        self.retriever = load_module(self.config['GPS_MODULE_RETRIEVER'])
 
         self.thread = threading.Thread(
                 target=self.retriever,

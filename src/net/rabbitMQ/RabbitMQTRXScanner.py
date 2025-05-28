@@ -2,7 +2,7 @@ import threading
 from datetime import datetime, timedelta
 from src.config import readConfig
 from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
-from src.net.lib.net_utils import get_retriever
+from src.net.lib.net_utils import load_module
 
 import logging
 
@@ -34,7 +34,7 @@ class RabbitMQTRXScanner(threading.Thread):
     def configure(self, config_file):
         readConfig(config_file, self.config)        # config from module, not net
 
-        golden_retriever = get_retriever(self.config['MQ_TRX_RETRIEVER'])
+        golden_retriever = load_module(self.config['MQ_TRX_RETRIEVER'])
         self.retriever = golden_retriever()
         self.retriever.configure(config_file)
 

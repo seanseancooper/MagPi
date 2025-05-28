@@ -1,7 +1,7 @@
 import asyncio
 import threading
 from datetime import datetime, timedelta
-from src.net.lib.net_utils import get_retriever
+from src.net.lib.net_utils import load_module
 from src.config import readConfig
 from src.net.zeroMQ.ZeroMQPull import ZeroMQPull
 from src.net.zeroMQ.ZeroMQPush import ZeroMQPush
@@ -77,7 +77,7 @@ class ZeroMQWifiScanner(threading.Thread):
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
-        module_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
+        module_retriever = load_module(self.config['MODULE_RETRIEVER'])
         self.wifi_retriever = module_retriever()
         self.wifi_retriever.configure(config_file)
 

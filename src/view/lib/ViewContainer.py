@@ -10,7 +10,7 @@ import requests
 from src.config import readConfig, CONFIG_PATH
 
 from src.lib.utils import format_delta
-from src.net.lib.net_utils import get_retriever, check_rmq_available, check_zmq_available, check_imq_available
+from src.net.lib.net_utils import load_module, check_rmq_available, check_zmq_available, check_imq_available
 import jinja2
 
 from src.view.aggregator.MQAggregator import MQAggregator
@@ -94,7 +94,7 @@ class ViewContainer(threading.Thread):
 
         # the check for MQ should be specific to the retriever type.
         if mq_retriever and ZMQ_OK:
-            retriever = get_retriever(mq_retriever)
+            retriever = load_module(mq_retriever)
             retriever = retriever()
             retriever.configure(f'{m}.json')
             self.mq_retrievers[m] = retriever

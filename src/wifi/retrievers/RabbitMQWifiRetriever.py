@@ -1,6 +1,6 @@
 import threading
 from datetime import datetime, timedelta
-from src.net.lib.net_utils import get_retriever, check_rmq_available
+from src.net.lib.net_utils import load_module, check_rmq_available
 from src.config import readConfig
 from src.net.rabbitMQ.RabbitMQAsyncConsumer import RabbitMQAsyncConsumer
 from src.net.rabbitMQ.RabbitMQProducer import RabbitMQProducer
@@ -85,7 +85,7 @@ class RabbitMQWifiScanner(threading.Thread):
         _ , RMQ_AVAIL = check_rmq_available(self.config['MODULE'])
 
         if RMQ_AVAIL:
-            golden_retriever = get_retriever(self.config['MODULE_RETRIEVER'])
+            golden_retriever = load_module(self.config['MODULE_RETRIEVER'])
             self.mq_wifi_retriever = golden_retriever()
             self.mq_wifi_retriever.configure(config_file) # passing 'net'
             self.producer = RabbitMQProducer(self.config['WIFI_QUEUE'])
