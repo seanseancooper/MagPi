@@ -163,31 +163,7 @@ class Worker:
         #         [pt.getSgnl() for pt in self.tracker.signal_cache[self.id]]
         # )
 
-    def get_signal_cache_frequency_features(self):
-        return self._signal_cache_frequency_features
-
-    def match(self, cell):
-        """ match id, derive the 'id' and set mute status """
-        if self.ident.upper() == cell[f'{self.tracker.CELL_IDENT_FIELD}'].upper():
-            if not self.id:
-                try:
-                    self.id = cell['id']                    # succeed on 'trx', fail on items w/o id
-                except KeyError:
-                    self.id = str(uuid.uuid1()).lower()     # sets id for new items
-                self.set_type(cell['cell_type'])
-                self.set_text_attributes(cell)
-            self.process_cell(cell)
-            self.auto_unmute()
-
-    def mute(self):
-        from src.lib.utils import mute
-        return mute(self)
-
-    def auto_unmute(self):
-        """ polled function to UNMUTE signals AUTOMATICALLY after the MUTE_TIME. """
-        if self.config['MUTE_TIME'] > 0:
-            if datetime.now() - self.updated > timedelta(seconds=self.config['MUTE_TIME']):
-                self.is_mute = False
+        return cell
 
     def add(self, ident):
 
