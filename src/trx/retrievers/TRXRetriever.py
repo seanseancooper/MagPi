@@ -192,6 +192,7 @@ class TRXRetriever(threading.Thread):
             return False  # not in tracked_signals
 
     def remove(self, uniqId):
+        """ remove an id from this retriever's collection of tracked ids"""
         _copy = self.tracked_signals.copy()
         self.tracked_signals.clear()
 
