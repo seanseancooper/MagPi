@@ -148,7 +148,6 @@ class Tracker(object):
 
         self.parsed_cells = parsed_cells
         get_location(self)
-
         self.process_cells()
         self.process_signals()
         return self.parsed_signals
