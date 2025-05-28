@@ -199,7 +199,6 @@ class Worker:
         if self.tracked:
 
             def append_to_outfile(sgnl):
-                """Append found cells to a rolling JSON list"""
 
                 formatted = {
                     "id"                : sgnl['id'],
