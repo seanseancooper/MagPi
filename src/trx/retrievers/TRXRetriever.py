@@ -154,7 +154,8 @@ class TRXRetriever(threading.Thread):
         if scanned not in self.signal_cache:
             self.signal_cache.append(scanned)
 
-        return self.signal_cache
+        parsed_cells = self.signal_cache
+        return parsed_cells
 
     def find(self, uniqId):
         return [(self.signal_cache.index(sgnl), sgnl) for sgnl in self.signal_cache if str(sgnl['id']) == uniqId][0]
