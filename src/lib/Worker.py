@@ -140,33 +140,15 @@ class Worker:
             self.tracker.signal_cache[ident].pop(0)
 
     def process_cell(self, cell):
-        """ update static fields, tests"""
-
-        self.update(cell)
-
-        def test(cell):
-            # TODO: use this as an entrypoint to a discrete test in a test
-            # framework that would return T or F.
-            # need to identify the test...
-            # provides [{testname: result}, {...}]
-            try:
-                tests = self.tracker.searchmap[self.ident]['tests']
-                # return all results or only ones that passed?
-                self.return_all = self.tracker.searchmap[self.ident]['RETURN_ALL']
-
-                [[self.results.append(eval(str(v.strip() + t_v.strip()))) for t_k, t_v in tests.items() if k == t_k] for k, v in cell.items()]
-
-                while len(self.results) > len(tests):
-                    self.results.pop(0)
-
-                self.test_results = zip(tests, self.results)
-
-                # if self.return_all:
-                #     return all(self.results)
-                # else:
-                #     return any(self.results)
-            except KeyError:
-                return True  # no test, np
+        """ set static fields """
+        if self.ident.upper() == cell[f'{self.tracker.CELL_IDENT_FIELD}'].upper():
+            if not self.id:
+                try:
+                    self.id = cell['id']                    # fail on items w/o id
+                except KeyError:
+                    self.id = str(uuid.uuid1()).lower()     # sets id for new items
+                self.set_type(cell['cell_type'])
+                self.set_text_attributes(cell)
 
             return True
 
