@@ -26,7 +26,7 @@ def trx_scan():
 
 @trx_bp.route("/scanned", methods=['GET'], subdomain="trx")
 def trx_scanned():
-    return jsonify([worker.get_sgnl() for worker in scanner.module_tracker.workers])
+    return jsonify([worker.to_map() for worker in scanner.module_tracker.workers])
 
 @trx_bp.route("/scanner", methods=['GET'], subdomain="trx")
 def trx_scanner():
