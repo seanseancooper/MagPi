@@ -85,7 +85,7 @@ class Scanner(threading.Thread):
     def get_ghost_signals(self):
         """ update, transform and return a list of 'rehydrated' ghost signals """
         _signals = []
-        [self.module_tracker.update(ident, _signals) for ident in self.module_tracker.ghost_signals]
+        [self.update(ident, _signals) for ident in self.module_tracker.ghost_signals]
         return _signals
 
     def stop(self):
