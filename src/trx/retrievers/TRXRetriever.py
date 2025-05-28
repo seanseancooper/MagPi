@@ -135,8 +135,8 @@ class TRXRetriever(threading.Thread):
 
     def get_parsed_cells(self, scanned):
 
-        # use TRXRetriever fields to store data.
-        # internally track broadcasts on frequencies
+        """ add metadata so 'scanned' can be tracked,
+            and add it to signal_cache to track it."""
 
         scanned.update({'cell_type': self.config['MODULE']})
         scanned.update({'is_mute': False})
