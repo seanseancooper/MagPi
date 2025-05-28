@@ -196,24 +196,25 @@ class Worker:
             def append_to_outfile(sgnl):
 
                 formatted = {
-                    "id"                : sgnl['id'],
-                    "type"              : sgnl['type'],
-                    "ident"             : sgnl['ident'],
+
+                    "id"                                : sgnl['id'],
+                    "type"                              : sgnl['type'],
+                    "ident"                             : sgnl['ident'],
                     f"{self.tracker.CELL_IDENT_FIELD}"  : sgnl[self.tracker.CELL_IDENT_FIELD],
                     f"{self.tracker.CELL_NAME_FIELD}"   : sgnl[self.tracker.CELL_NAME_FIELD],
 
-                    "created"           : sgnl['created'],
-                    "updated"           : sgnl['updated'],
-                    "elapsed"           : sgnl['elapsed'],
+                    "created"                           : sgnl['created'],
+                    "updated"                           : sgnl['updated'],
+                    "elapsed"                           : sgnl['elapsed'],
 
-                    "is_mute"           : sgnl['is_mute'],
-                    "tracked"           : sgnl['tracked'],
-                    "signal_cache"      : sgnl['signal_cache'],
-                    "text_attributes"   : sgnl['text_attributes'],
+                    "is_mute"                           : sgnl['is_mute'],
+                    "tracked"                           : sgnl['tracked'],
+                    "signal_cache"                      : sgnl['signal_cache'],
+                    "text_attributes"                   : sgnl['text_attributes'],
 
                 }
 
-                json_logger.info({sgnl['BSSID']: formatted})
+                json_logger.info({sgnl[f"{self.tracker.CELL_IDENT_FIELD}"]: formatted})
 
             append_to_outfile(self.to_map())
 
