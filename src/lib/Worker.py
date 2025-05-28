@@ -268,4 +268,5 @@ class Worker:
     def run(self):
         # this is long-standing ugly; I should not be brute-forcing matches
         # across parsed_cells to know what cell to operate on.
-        [self.match(cell) for cell in self.tracker.parsed_cells]
+        
+        [self.process_cell(cell) for cell in self.tracker.parsed_cells]
