@@ -186,7 +186,7 @@ class TRXRetriever(threading.Thread):
             sgnl['tracked'] = True
             self.tracked_signals.update({uniqId: sgnl})
             self.update_cache(cache_id, 'tracked', True)
-            print(f"added {uniqId}")
+            trx_logger.debug(f"added {uniqId}")
             return True
         except IndexError:
             return False  # not in tracked_signals
