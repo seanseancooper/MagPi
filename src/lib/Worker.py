@@ -198,6 +198,7 @@ class Worker:
 
         if self.tracked:
 
+            # move me
             def append_to_outfile(sgnl):
 
                 formatted = {
@@ -225,5 +226,5 @@ class Worker:
     def run(self):
         # this is long-standing ugly; I should not be brute-forcing matches
         # across parsed_cells to know what cell to operate on.
-        
+
         [self.process_cell(cell) for cell in self.tracker.parsed_cells]
