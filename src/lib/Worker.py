@@ -150,7 +150,9 @@ class Worker:
                 self.set_type(cell['cell_type'])
                 self.set_text_attributes(cell)
 
-            return True
+            if self.config['MUTE_TIME'] > 0:                # auto unmute??
+                if datetime.now() - self.updated > timedelta(seconds=self.config['MUTE_TIME']):
+                    self.is_mute = False
 
         return cell if test(cell) else None
 
