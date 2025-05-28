@@ -138,7 +138,7 @@ class TRXRetriever(threading.Thread):
         # use TRXRetriever fields to store data.
         # internally track broadcasts on frequencies
 
-        scanned.update({'cell_type': 'trx'})        # doesn't use Tracker; it's internal.
+        scanned.update({'cell_type': self.config['MODULE']})
         scanned.update({'is_mute': False})
         scanned.update({'tracked': False})
 
