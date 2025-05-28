@@ -107,6 +107,7 @@ class Scanner(threading.Thread):
                 f"[{self.stats['lat']}, {self.stats['lon']}] "
                 f"{self.stats['signals']} signals, "
                 f"{self.stats['workers']} workers, "
+                f"{self.stats.get('cached', 0)} cached, "
                 f"{self.stats['tracked']} tracked, "
                 f"{self.stats.get('cached', 0)} cached, "
                 f"{self.stats['ghosts']} ghosts")
