@@ -137,9 +137,8 @@ class Scanner(threading.Thread):
 
             self.scanned = self.module_retriever.scan()
 
-            if len(self.scanned) > 0:
-                # use *current retriever* method to parse what it returned.
-                # return objects [cells] that tracker can
+            if self.scanned:
+
                 parsed_cells = self.module_retriever.get_parsed_cells(self.scanned)
 
                 # pick apart, assign workers (~signalpoints), and track the cells.
