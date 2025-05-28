@@ -25,10 +25,10 @@
 			"MODULE_TRACKER": "src.lib.Tracker"
 		},
 		{
-			"MODULE_RETRIEVER": "src.sdr.receivers.SDRReceiver"
+			"MODULE_RETRIEVER": "src.sdr.receivers.RTLSDRReceiver"
 		},
 		{
-			"MQ_MODULE_RETRIEVER": "src.sdr.receivers.SDRReceiver"
+			"MQ_MODULE_RETRIEVER": "src.sdr.receivers.RTLSDRReceiver"
 		},
 		{
 			"TEMPLATE_AJAX_URL": "http://sdr.localhost:?/scan"
