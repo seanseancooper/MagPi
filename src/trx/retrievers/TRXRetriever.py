@@ -11,6 +11,10 @@ import usb.util
 import usb.backend.libusb1
 
 from src.config import readConfig
+import logging
+
+logger_root = logging.getLogger('root')
+trx_logger = logging.getLogger('trx_logger')
 
 def find_device(vendor_id, product_id):
     if platform.system() == 'Windows':
