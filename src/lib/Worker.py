@@ -76,14 +76,6 @@ class Worker:
     def set_type(self, c_type):
         self.cell_type = c_type
 
-    def config_worker(self, tracker):
-        """ worker append itself, pulls config when created. """
-        self.tracker = tracker
-        self.config = tracker.config
-        self.created = datetime.now()
-        self.cache_max = max(int(tracker.config.get('SIGNAL_CACHE_LOG_MAX', -5)), -5)
-        self.DEBUG = tracker.config['DEBUG']
-
     def get_text_attributes(self):
         return self._text_attributes
 
