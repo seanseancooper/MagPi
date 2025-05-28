@@ -135,8 +135,8 @@
                     var p_signal_color = 'rgba(' + _color + ', 1.0)';
                     var text_color = 'rgba(' + averageColor(_color) + ', 1.0)';
 
-                    if (data.tracked == "True") {
-                        if (data.is_mute == "False") {
+                    if (data.tracked == true) {
+                        if (data.is_mute == false) {
                             return "<button id='remove_button_"+ data.id + "' style='width:24px;' class='trk_btn rem_button' value='"+data.id+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.id + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn unmute_button' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">MUTE</button>";
                         } else {
                             return "<button id='remove_button_"+ data.id + "' style='width:24px;' class='trk_btn rem_button' value='"+data.id+"' data-action='REMOVE' data-target=" + trgt + ">x</button><button id='mute_button_" + data.id + "' style='color:" + text_color +"; background-color:" + p_signal_color +";' class='mute_btn   mute_button' value='" + data.id + "' data-action='MUTE' data-target=" + trgt + ">UNMUTE</button>";
