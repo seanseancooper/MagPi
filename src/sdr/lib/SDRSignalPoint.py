@@ -48,7 +48,7 @@ class SDRSignalPoint(SignalPoint):
 
         if array_data is not None:
             self._signal_type = 'array'
-            self._array_frequency_features = self.compute_array_frequency_features(array_data)
+            # self._array_frequency_features = self.compute_array_frequency_features(array_data)
 
     def get(self):
         data = {
@@ -57,15 +57,20 @@ class SDRSignalPoint(SignalPoint):
             "worker_id": self._worker_id,
             "lon": self._lon,
             "lat": self._lat,
-            "sgnl": self._sgnl,
+            "sgnl": 0.0  # calculate abs magnitude
         }
+
         if self._audio_data is not None:
             data["sr"] = self._sr
-            data["audio_data"] = self._audio_data.tolist()  # Assuming audio data is a numpy array
+            # data["audio_data"] = self._audio_data.tolist()  # Assuming audio data is a numpy array
         if self._array_data is not None:
-            data["array_data"] = self._array_data.tolist()  # Assuming array data is a numpy array
+            pass
+            # data["array_data"] = self._array_data.tolist()  # Assuming array data is a numpy array
         if self._audio_frequency_features is not None:
             data["frequency_features"] = self._audio_frequency_features
+
+        data.update(self._text_attributes)
+
         return data
 
     def get_signal_type(self):
