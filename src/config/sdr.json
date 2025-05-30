@@ -22,7 +22,7 @@
 			"SCANNER": "Tabulator"
 		},
 		{
-			"MODULE_TRACKER": "src.lib.Tracker"
+			"MODULE_TRACKER": "src.sdr.lib.SDRTracker"
 		},
 		{
 			"MODULE_RETRIEVER": "src.sdr.receivers.RTLSDRReceiver"
@@ -31,25 +31,43 @@
 			"MQ_MODULE_RETRIEVER": "src.sdr.receivers.RTLSDRReceiver"
 		},
 		{
-			"TEMPLATE_AJAX_URL": "http://sdr.localhost:?/scan"
+			"DEFAULT_SAMPLE_RATE": 2.048e6
+		},
+		{
+			"DEFAULT_CENTER_FREQ": 900e8
+		},
+		{
+			"DEFAULT_FREQ_CORRECTION": 1
+		},
+		{
+			"DEFAULT_GAIN": "auto"
+		},
+		{
+			"MQ_MODULE_RETRIEVER": "src.sdr.receivers.RTLSDRReceiver"
+		},
+		{
+			"TEMPLATE_AJAX_URL": "http://sdr.localhost:5008/scan"
 		},
 		{
 			"SIGNALPOINT_TYPE": "src.sdr.lib.SDRSignalPoint"
 		},
 		{
-			"CELL_IDENT_FIELD": "CELL_IDENT_FIELD"
+			"CELL_IDENT_FIELD": "peak_freq"
 		},
 		{
-			"CELL_NAME_FIELD": "CELL_NAME_FIELD"
+			"CELL_NAME_FIELD": "center_freq"
 		},
 		{
-			"CELL_STRENGTH_FIELD": "CELL_STRENGTH_FIELD"
+			"CELL_STRENGTH_FIELD": "sgnl"
 		},
 		{
-			"CELL_SORT_FIELD": "CELL_SORT_FIELD"
+			"CELL_SORT_FIELD": "sgnl"
 		},
 		{
 			"PRINT_CELLS": false
+		},
+		{
+			"SCAN_GHOSTS": true
 		},
 		{
 			"SORT_CELLS": true
