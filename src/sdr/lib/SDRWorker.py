@@ -147,7 +147,7 @@ class SDRWorker(threading.Thread):
             if worker:
                 worker.tracked = True
                 self.tracker.tracked_signals.append(ident)
-                if worker not in self.tracker.workers:
+                if worker not in self.tracker.workers:  # why would it not be?
                     self.tracker.workers.append(worker)
                 print(f"added to cached  {ident}")
                 return True

@@ -1,7 +1,9 @@
+import threading
+
 import numpy as np
 import matplotlib.pyplot as plt
 
-class SDRAnalyzer:
+class SDRAnalyzer(threading.Thread):
 
     #  Fast Fourier Transform (FFT): FFT converts a time-series signal into a set of frequency components.
     #     We use it to extract dominant frequencies, spectral power, and energy concentration.
@@ -24,7 +26,8 @@ class SDRAnalyzer:
     #     Mutual Information | sklearn.metrics.mutual_info_score
 
 
-    def __init__(self, data, sr=2.048e6, center_freq=100e6, fft_size=512, num_rows=500):
+    def __init__(self, data, sr=2.048e6, center_freq=100e6, fft_size=4096, num_rows=500):
+        super().__init__()
         self._data = data
         self._sr = sr
         self.center_freq = center_freq
@@ -33,6 +36,9 @@ class SDRAnalyzer:
 
     def set_data(self, data):
         self._data = data
+
+    def read_file(self, f):
+        self._data = np.fromfile(f, np.complex64)  # Read in file
 
     def get_data(self):
         return self._data
@@ -69,7 +75,7 @@ class SDRAnalyzer:
 if __name__ == '__main__':
 
     a = SDRAnalyzer([])
-    a.set_data([]) # Pass signal data to the method
+    a.read_file('/Users/scooper/PycharmProjects/MagPi/_out/bandwidth_block.raw')
 
     a.generate_spectrogram(a.get_data())
     a.plot_psd(a.get_data())

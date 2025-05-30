@@ -4,7 +4,7 @@ from collections import defaultdict
 from src.config import readConfig
 from src.map.gps import get_location
 
-from src.sdr.lib.SDRWorker import SDRWorker # specialize the worke
+from src.sdr.lib.SDRWorker import SDRWorker # specialize the worker
 
 import logging
 
@@ -82,7 +82,7 @@ class SDRTracker(object):
                 return worker
         except IndexError:
             worker = SDRWorker(ident)
-            worker.config_worker(self)
+            worker.config_worker(self)      # perhaps move this to it's own method?
             self.workers.append(worker)
             worker.run()
         finally:
