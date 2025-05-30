@@ -144,7 +144,7 @@ class Worker:
                 try:
                     self.id = cell['id']                    # fail on items w/o id
                 except KeyError:
-                    self.id = str(uuid.uuid1()).lower()     # sets id for new items
+                    self.id = str(generate_uuid()).lower()  # sets id for new items
                 self.set_type(cell['cell_type'])
                 self.set_text_attributes(cell)
 
