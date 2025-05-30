@@ -138,8 +138,6 @@ class Tracker(object):
 
     def process_signals(self):
         """ workers match their cells, add attributes, and make signalpoint """
-        # idea: Tracker as ZMQ Publisher and Worker as ZMQ Subscriber (Publisher-Subscriber)
-        # idea: 'Tracker' as ZMQ Ventilator and 'Scanner' as ZMQ Sink with Workers as ZMQ Worker (Parallel Pipeline)
         [worker.run() for worker in self.workers]
 
     def track(self, parsed_cells):
