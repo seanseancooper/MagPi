@@ -5,6 +5,7 @@ from datetime import datetime
 from rtlsdr import RtlSdr
 from scipy.signal import find_peaks, periodogram
 from matplotlib.mlab import psd
+import matplotlib.pyplot as plt
 import numpy as np
 
 from src.config import readConfig
@@ -20,7 +21,8 @@ def file_writing_thread(*, q, **blockfile_args):
             data = q.get()
             if data is None:
                 break
-            f.write(data)
+            data = data.astype(np.complex64)
+            data.tofile(f)
 
 class RTLSDRReceiver(threading.Thread):
 
@@ -46,6 +48,8 @@ class RTLSDRReceiver(threading.Thread):
         self.seen_frequencies = set()
         self.freq_match_tolerance = 2000  # 2 kHz
 
+        self.filter_peaks = True
+
         self._OUTFILE = None
 
     def configure(self, config_file):
@@ -57,6 +61,8 @@ class RTLSDRReceiver(threading.Thread):
         self.sdr.center_freq = self.config['DEFAULT_CENTER_FREQ']
         self.sdr.freq_correction = self.config['DEFAULT_FREQ_CORRECTION']
         self.sdr.gain = self.config['DEFAULT_GAIN']
+
+        self._OUTFILE = self.config['OUT_FILE']
 
     def get_sample_rate(self):
         return self.sdr.sample_rate
@@ -87,6 +93,18 @@ class RTLSDRReceiver(threading.Thread):
 
     def get_psd_for_block(self):
         psd_scan, f = psd(self.block, NFFT=self.nfft_size)
+
+        # | Shape in PSD                          | Likely Modulation                                                |
+        # | ------------------------------------- | ---------------------------------------------------------------- |
+        # | Sharp narrow peak                     | **CW (continuous wave)**, **narrowband FM**, unmodulated carrier |
+        # | Broader peak with flat top            | **AM**, **DSB-SC** (Double Sideband Suppressed Carrier)          |
+        # | Symmetric sidebands                   | **AM**, **QAM**, **PSK**                                         |
+        # | Wide spread spectrum                  | **FHSS**, **DSSS**, **OFDM**                                     |
+        # | Irregular/hopping structure           | **Frequency hopping**                                            |
+        # | Multiple equidistant peaks            | **FSK** (Frequency Shift Keying)                                 |
+        # | Constant width, varying height        | Possibly **FSK** or **burst signals**                            |
+        # | Peaks that fade or repeat in patterns | **TDMA**, **bursty data**                                        |
+
         return psd_scan, f
 
     def get_peaks(self):
@@ -95,52 +113,66 @@ class RTLSDRReceiver(threading.Thread):
         mean = np.mean(psd_scan)
         std = np.std(psd_scan)
 
+        # | Feature              | Indicator of Signal | Indicator of Noise          |
+        # | -------------------- | ------------------- | --------------------------- |
+        # | Height               | High above mean     | Barely above noise floor    |
+        # | Prominence           | High                | Low / embedded in clutter   |
+        # | Width                | Moderate            | Too narrow or too wide      |
+        # | Shape                | Smooth/consistent   | Jagged or asymmetrical      |
+        # | Temporal Consistency | Stable over time    | Appears/disappears randomly |
+
         peak_options = {
-            'height'    : mean + 2 * std,
-            'prominence': 0.1 * np.max(psd_scan),
-            'width'     : (3, 30),  # Bin range; depends on your resolution
-            'rel_height': 0.5
+            'height'    : mean + 2 * std,           # Filters out background noise and low-level fluctuations.
+            'prominence': 0.1 * np.max(psd_scan),   # Rejects peaks that don't stand out from surrounding spectrum.
+            'width'     : (3, 30),                  # Rejects sharp spikes (impulsive noise) and overly broad hills (clutter or poor resolution). Bin range; depends on your resolution
+            'rel_height': 0.5                       # Ensures peak width is measured at a consistent threshold (half-max)
         }
 
         peaks, properties = find_peaks(psd_scan, **peak_options)
 
-        # Optional: filter by further criteria post-hoc
-        filtered_peaks = []
-        for i, peak in enumerate(peaks):
-            w = properties['widths'][i] if 'widths' in properties else None
-            p = properties['prominences'][i] if 'prominences' in properties else None
-            if w and p and w > 5 and p > 0.1:
-                filtered_peaks.append(peak)
+        if self.filter_peaks: # filter by further criteria post-hoc
+            filtered_peaks = []
+            for i, peak in enumerate(peaks):
+                w = properties['widths'][i] if 'widths' in properties else None
+                p = properties['prominences'][i] if 'prominences' in properties else None
+                if w and p and w > 5 and p > 0.1:
+                    filtered_peaks.append(peak)
+                # filtered_peaks.append(peak)
+            return np.array(filtered_peaks), properties
 
-        return np.array(filtered_peaks), properties
+        # Post-process peaks
+        # valid_peaks = []
+        # for i, peak in enumerate(peaks):
+        #     if properties['widths'][i] > 4 and properties['prominences'][i] > 0.08 * max:
+        #         valid_peaks.append(peak)
+
+        return peaks, properties
 
     def get_peak_freq(self, peak):
         psd_scan, f = self.get_psd_for_block()
         return f[peak]  + self.config['DEFAULT_CENTER_FREQ']
 
     def get_peak_db(self, peak):
-        psd_scan, f = self.get_psd_for_block()
-        return 10 * np.log10(psd_scan[peak])
+        psd_scan, _ = self.get_psd_for_block()
+
+        power = psd_scan[peak]
+        if power <= 0:
+            return -np.inf  # or a defined noise floor
+        return 10 * np.log10(power)
 
     def get_channel(self, f):
         
         if f is None:
             print('Please enter a frequency between 88.1 and 107.9 MHz.')
 
-        number2 = round(np.floor(f * 10) - np.floor(f) * 10.) / 10.0
-
-        # Math.round is used to eliminate the small error caused by rounding in the computer:
-        # e.g. 0.2 is not the same as 0.20000000000284
+        number = round(np.floor(f * 10) - np.floor(f) * 10.) / 10.0
 
         if (f * 10) == 879:
-            return 200
-        # elif ( compareNumber( f, 88.1) == '-' or  compareNumber( f, 107.9) == '+'):
-        #     print('Enter a frequency between 88.1 and 107.9 MHz.\nDecimal point must be odd, for example, 89.7.\n\n\nThis range corresponds to FM channels 201 to 300.')
-        elif number2 == .2 or number2 == .4 or number2 == .6 or number2 == .8 or number2 == .0:
+            return 200  # channel for base of FM freq.
+        elif number == .2 or number == .4 or number == .6 or number == .8 or number == .0:
             print('Frequency value must end in an odd decimal\n')
         else:
             return round((f - 87.9)/.2 + 200.)
-
 
     def get_parsed_cells(self, scanned):
 
@@ -161,6 +193,7 @@ class RTLSDRReceiver(threading.Thread):
                 'freq_corr'  : self.config['DEFAULT_FREQ_CORRECTION'],
                 'gain'       : self.config['DEFAULT_GAIN'],
             }
+
             peak_freq = self.get_peak_freq(peak)
             # print(self.get_channel(peak_freq))
             cell = {
@@ -170,7 +203,7 @@ class RTLSDRReceiver(threading.Thread):
                 "worker_id"      : '',
                 "lon"            : 0.0,
                 "lat"            : 0.0,
-                "sgnl"           : self.get_peak_db(peak),  # calculate abs magnitude
+                "sgnl"           : self.get_peak_db(peak),
                 "text_attributes": text_attributes,
                 "audio_data"     : None,
                 'cell_type'      : 'sdr',
@@ -178,11 +211,11 @@ class RTLSDRReceiver(threading.Thread):
                 'tracked'        : False,
             }
 
-            # # Skip if frequency is already tracked (within tolerance)
-            # if any(abs(peak_freq - f) < self.freq_match_tolerance for f in self.seen_frequencies):
-            #     continue
-            #
-            # self.seen_frequencies.add(peak_freq)
+            # Skip if frequency is already tracked (within tolerance)
+            if any(abs(peak_freq - f) < self.freq_match_tolerance for f in self.seen_frequencies):
+                continue
+
+            self.seen_frequencies.add(peak_freq)
 
             self.parsed_cells.append(cell)
 
@@ -192,14 +225,16 @@ class RTLSDRReceiver(threading.Thread):
 
     def run(self):
 
+        self._OUTFILE = self.config['OUTFILE_PATH'] + '/' + self.config['OUT_FILE'] + '.raw'
+
         self.thread = threading.Thread(
                 target=file_writing_thread,
                 kwargs=dict(
                         file=self._OUTFILE,
-                        mode='w',
+                        mode='w+',
                         q=self.iqq,
                 ),
-                daemon=False,  # Important: non-daemon to finalize files correctly
+                daemon=True,  # Important: non-daemon to finalize files correctly
         )
         self.thread.start()
 
