@@ -17,7 +17,7 @@ def load_module(name):
             mod = getattr(mod, comp)
         return mod
     except AttributeError as a:
-        net_logger.fatal(f'Failed to load retriever {name} {a}')
+        print(f'Failed to load retriever {name} {a}')
         exit(1)
 
 def check_rmq_available(module):
