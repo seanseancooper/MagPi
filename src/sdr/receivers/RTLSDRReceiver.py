@@ -1,3 +1,5 @@
+from __future__ import division
+
 import queue
 import threading
 from datetime import datetime
@@ -5,11 +7,13 @@ from datetime import datetime
 from rtlsdr import RtlSdr
 from scipy.signal import find_peaks, periodogram
 from matplotlib.mlab import psd
-import matplotlib.pyplot as plt
 import numpy as np
+
 
 from src.config import readConfig
 from src.lib.utils import format_time, generate_uuid
+from src.sdr.lib import SDRAnalyzer
+
 
 def file_writing_thread(*, q, **blockfile_args):
     """
@@ -23,6 +27,11 @@ def file_writing_thread(*, q, **blockfile_args):
                 break
             data = data.astype(np.complex64)
             data.tofile(f)
+
+NFFT = 1024 * 4
+NUM_SAMPLES_PER_SCAN = NFFT * 16
+NUM_BUFFERED_SWEEPS = 100
+NUM_SCANS_PER_SWEEP = 1
 
 class RTLSDRReceiver(threading.Thread):
 
@@ -47,10 +56,11 @@ class RTLSDRReceiver(threading.Thread):
 
         self.seen_frequencies = set()
         self.freq_match_tolerance = 2000  # 2 kHz
+        self.filter_peaks = False
 
-        self.filter_peaks = True
+        self.image_buffer = -100*np.ones((NUM_BUFFERED_SWEEPS, NUM_SCANS_PER_SWEEP*NFFT))
 
-        self._OUTFILE = None
+        self.outfile = None
 
     def configure(self, config_file):
 
@@ -62,7 +72,7 @@ class RTLSDRReceiver(threading.Thread):
         self.sdr.freq_correction = self.config['DEFAULT_FREQ_CORRECTION']
         self.sdr.gain = self.config['DEFAULT_GAIN']
 
-        self._OUTFILE = self.config['OUT_FILE']
+        self.outfile = self.config['OUT_FILE']
 
     def get_sample_rate(self):
         return self.sdr.sample_rate
@@ -137,14 +147,7 @@ class RTLSDRReceiver(threading.Thread):
                 p = properties['prominences'][i] if 'prominences' in properties else None
                 if w and p and w > 5 and p > 0.1:
                     filtered_peaks.append(peak)
-                # filtered_peaks.append(peak)
             return np.array(filtered_peaks), properties
-
-        # Post-process peaks
-        # valid_peaks = []
-        # for i, peak in enumerate(peaks):
-        #     if properties['widths'][i] > 4 and properties['prominences'][i] > 0.08 * max:
-        #         valid_peaks.append(peak)
 
         return peaks, properties
 
@@ -157,22 +160,8 @@ class RTLSDRReceiver(threading.Thread):
 
         power = psd_scan[peak]
         if power <= 0:
-            return -np.inf  # or a defined noise floor
+            return -np.inf
         return 10 * np.log10(power)
-
-    def get_channel(self, f):
-        
-        if f is None:
-            print('Please enter a frequency between 88.1 and 107.9 MHz.')
-
-        number = round(np.floor(f * 10) - np.floor(f) * 10.) / 10.0
-
-        if (f * 10) == 879:
-            return 200  # channel for base of FM freq.
-        elif number == .2 or number == .4 or number == .6 or number == .8 or number == .0:
-            print('Frequency value must end in an odd decimal\n')
-        else:
-            return round((f - 87.9)/.2 + 200.)
 
     def get_parsed_cells(self, scanned):
 
@@ -212,10 +201,10 @@ class RTLSDRReceiver(threading.Thread):
             }
 
             # Skip if frequency is already tracked (within tolerance)
-            if any(abs(peak_freq - f) < self.freq_match_tolerance for f in self.seen_frequencies):
-                continue
-
-            self.seen_frequencies.add(peak_freq)
+            # if any(abs(peak_freq - f) < self.freq_match_tolerance for f in self.seen_frequencies):
+            #     continue
+            #
+            # self.seen_frequencies.add(peak_freq)
 
             self.parsed_cells.append(cell)
 
@@ -225,13 +214,20 @@ class RTLSDRReceiver(threading.Thread):
 
     def run(self):
 
-        self._OUTFILE = self.config['OUTFILE_PATH'] + '/' + self.config['OUT_FILE'] + '.raw'
+        name = (self.config['OUT_FILE'] +
+                format_time(datetime.now(), "%Y%m%d_%H%M%S") + '_' +
+                str(self.sdr.center_freq) + '_' +
+                str(self.sdr.sample_rate) +
+                self.config['OUT_FILE_EXT']
+                )
+
+        self.outfile = self.config['OUTFILE_PATH'] + '/' + name
 
         self.thread = threading.Thread(
                 target=file_writing_thread,
                 kwargs=dict(
-                        file=self._OUTFILE,
-                        mode='w+',
+                        file=self.outfile,
+                        mode='w',
                         q=self.iqq,
                 ),
                 daemon=True,  # Important: non-daemon to finalize files correctly
@@ -266,16 +262,14 @@ class RTLSDRReceiver(threading.Thread):
         print(self.sdr.valid_gains_db)
 
 if __name__ == '__main__':
-    sdr_analyzer = RTLSDRReceiver()
-    sdr_analyzer.configure('sdr.json')
-    sdr_analyzer.set_gain(49.6)
+    sdr = RTLSDRReceiver()
+
+    sdr.configure('sdr.json')
+    sdr.set_gain(49.6)
 
     fft_size=512
     num_rows=500
 
-    sdr_analyzer.print_device_info()
-
-    data = sdr_analyzer.scan()
-    print(data)
+    data = sdr.scan()
 
 

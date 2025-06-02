@@ -161,10 +161,13 @@
 			"SIGNAL_CACHE_LOG_MAX": -5
 		},
 		{
-			"OUTFILE_PATH": "../../_out"
+			"OUTFILE_PATH": "."
 		},
 		{
-			"OUT_FILE": "sdr_found"
+			"OUT_FILE": "rtlsdr_"
+		},
+		{
+			"OUT_FILE_EXT": ".iq"
 		}
 	]
 }
