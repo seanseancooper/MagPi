@@ -218,7 +218,7 @@ class RTLSDRReceiver(threading.Thread):
                         mode='w',
                         q=self.iqq,
                 ),
-                daemon=True,  # Important: non-daemon to finalize files correctly
+                daemon=True,
         )
 
         self.thread.start()
