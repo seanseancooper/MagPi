@@ -92,8 +92,8 @@ class SDRAnalyzer:
         self.image.set_data(self.image_buffer)
 
         # Remove previous highlight lines
-        for line in getattr(self, 'highlight_lines', []):
-            line.remove()
+        # for line in getattr(self, 'highlight_lines', []):
+        #     line.remove()
 
         # Detect peaks and draw vertical lines
         self.highlight_lines = []
