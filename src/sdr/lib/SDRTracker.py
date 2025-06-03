@@ -110,7 +110,7 @@ class SDRTracker(object):
             """ removes items from *parsed_cells* so they are never evaluated in further processing. """
             if c[f'{self.CELL_IDENT_FIELD}'] in self.blacklist.keys():
                 try:
-                    self.parsed_cells.remove(cell)
+                    self.parsed_cells.remove(c)
                 except Exception:
                     pass
 
