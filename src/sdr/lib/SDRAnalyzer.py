@@ -96,8 +96,8 @@ class SDRAnalyzer:
         #     line.remove()
 
         # Detect peaks and draw vertical lines
-        self.highlight_lines = []
-        peaks = self.detect_peak_bins(row)
+        # self.highlight_lines = []
+        # peaks = self.detect_peak_bins(row)
 
         # peak_freq = self.get_peak_freq(peak)
         # # Skip if frequency is already tracked (within tolerance)
