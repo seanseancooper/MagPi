@@ -29,17 +29,6 @@ class SDRSignalPoint(SignalPoint):
         self.tracked = False
         self.is_mute = False
 
-        # this needs to goto a worker proocess
-        self._ctrl_record = False
-        self._ctrl_analyze = False
-        self._ctrl_demux = False
-        self._ctrl_decode = False
-        self._ctrl_filter = False
-        self._ctrl_block = False
-        self._ctrl_label = False
-        self._ctrl_test = False
-        self._control_fields = [f for f in dir(self) if f.startswith("_ctrl_")]
-
         self._text_attributes = {}
 
         if audio_data is not None and sr is not None:
@@ -106,14 +95,6 @@ class SDRSignalPoint(SignalPoint):
 
     def get_attribute(self, attr_key):
         return self._text_attributes[attr_key]
-
-    def set_control_field(self, attr_field, attr_field_value):
-        if attr_field in self._control_fields:
-            self.__setattr__(attr_field, attr_field_value)
-
-    def get_control_field(self, attr_field):
-        if attr_field in self._control_fields:
-            return self.__getattribute__(attr_field)
 
     def get_sampling_rate(self):
         """Get the sampling rate."""

@@ -35,6 +35,16 @@ class SDRWorker(threading.Thread):
         self.DEBUG = False
         self.cell_type = None
 
+        self._ctrl_record = False
+        self._ctrl_analyze = False
+        self._ctrl_demux = False
+        self._ctrl_decode = False
+        self._ctrl_filter = False
+        self._ctrl_block = False
+        self._ctrl_label = False
+        self._ctrl_test = False
+        self._control_fields = [f for f in dir(self) if f.startswith("_ctrl_")]
+
     def config_worker(self, tracker):
         """ worker append itself, pulls config when created. """
         self.tracker = tracker
@@ -93,6 +103,14 @@ class SDRWorker(threading.Thread):
             # if k not in [self.tracker.CELL_IDENT_FIELD, self.tracker.CELL_NAME_FIELD, self.tracker.CELL_STRENGTH_FIELD]:
             #     text_data.pop(k)
         [aggregate(k, v) for k, v in text_data.copy().items()]
+
+    def set_control_field(self, attr_field, attr_field_value):
+        if attr_field in self._control_fields:
+            self.__setattr__(attr_field, attr_field_value)
+
+    def get_control_field(self, attr_field):
+        if attr_field in self._control_fields:
+            return self.__getattribute__(attr_field)
 
     def get_signal_cache_frequency_features(self):
         return self._signal_cache_frequency_features
