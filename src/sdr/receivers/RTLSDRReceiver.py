@@ -190,10 +190,10 @@ class RTLSDRReceiver(threading.Thread):
             }
 
             # Skip if frequency is already tracked (within tolerance)
-            if any(abs(peak_freq - f) < self.freq_match_tolerance for f in self.seen_frequencies):
-                continue
-
-            self.seen_frequencies.add(peak_freq)
+            # if any(abs(peak_freq - f) < self.freq_match_tolerance for f in self.seen_frequencies):
+            #     continue
+            #
+            # self.seen_frequencies.add(peak_freq)
             self.parsed_cells.append(cell)
 
         [print(cell) for cell in self.parsed_cells]
