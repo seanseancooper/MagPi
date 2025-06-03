@@ -5,7 +5,7 @@ from matplotlib.animation import FuncAnimation
 import matplotlib.colors as mcolors
 from matplotlib import cm
 from matplotlib.colors import ListedColormap
-
+from scipy.signal import find_peaks
 
 class IQFileReader:
     def __init__(self, filename, block_size=4096):
@@ -52,12 +52,40 @@ class SDRAnalyzer:
         self.ax.set_ylabel("Time")
         self.anim = FuncAnimation(self.fig, self.update, interval=100, blit=False)
 
+        self.seen_frequencies = set()
+        self.filter_peaks = False
+
     def create_custom_colormap(self):
         base = cm.get_cmap('viridis', 256)
         colors = base(np.linspace(0, 1, 256))
         red = np.array([1, 0, 0, 1])  # RGBA for red
         extended = np.vstack([colors, red])
         return ListedColormap(extended)
+
+    def detect_peak_bins(self, magnitude_db):
+
+        mean = np.mean(magnitude_db)
+        std = np.std(magnitude_db)
+
+        peak_options = {
+            'height'    : mean + 2 * std,               # Filters out background noise and low-level fluctuations.
+            'prominence': 0.1 * np.max(magnitude_db),   # Rejects peaks that don't stand out from surrounding spectrum.
+            'width'     : (3, 30),                      # Rejects sharp spikes (impulsive noise) and overly broad hills (clutter or poor resolution). Bin range; depends on your resolution
+            'rel_height': 0.5                           # Ensures peak width is measured at a consistent threshold (half-max)
+        }
+
+        peaks, properties = find_peaks(magnitude_db, **peak_options)
+
+        if self.filter_peaks: # filter by further criteria post-hoc
+            filtered_peaks = []
+            for i, peak in enumerate(peaks):
+                w = properties['widths'][i] if 'widths' in properties else None
+                p = properties['prominences'][i] if 'prominences' in properties else None
+                if w and p and w > 20 and p > 1:
+                    filtered_peaks.append(peak)
+            return np.array(filtered_peaks)
+
+        return peaks
 
     def compute_extent(self):
         freq_min = (self.center_freq - self.sample_rate / 2) / 1e6
@@ -71,27 +99,38 @@ class SDRAnalyzer:
 
     def update(self, frame):
         data = self.reader.read_block()
+        if data is None:
+            return [self.image]
+
         row = self.generate_spectrogram_row(data)
 
-        # Detect strong signals (simple threshold)
-        peak_threshold = -30  # dB
-        peak_indices = np.where(row > peak_threshold)[0]
-
-        # Roll buffer and insert new row
+        # Update image buffer
         self.image_buffer = np.roll(self.image_buffer, -1, axis=0)
         self.image_buffer[-1, :] = row
+        self.image.set_data(self.image_buffer)
 
-        # Optional: Apply a marker value (e.g., 999) for peaks
-        # You can store that in a parallel mask or directly modify the buffer
-        self.peak_mask = np.zeros_like(self.image_buffer, dtype=bool)
-        self.peak_mask[-1, peak_indices] = True
+        # Remove previous highlight lines
+        for line in getattr(self, 'highlight_lines', []):
+            line.remove()
 
-        # Combine image and peak mask for display using color-mapped values
-        display_image = self.image_buffer.copy()
-        display_image[self.peak_mask] = 999  # Special value for "red"
+        # Detect peaks and draw vertical lines
+        self.highlight_lines = []
+        peaks = self.detect_peak_bins(row)
 
-        self.image.set_data(display_image)
-        return [self.image]
+        # peak_freq = self.get_peak_freq(peak)
+        # # Skip if frequency is already tracked (within tolerance)
+        # if any(abs(peak_freq - f) < 2000 for f in self.seen_frequencies):
+        #     continue
+        #
+        # self.seen_frequencies.add(peak_freq)
+
+        freq_min, freq_max, _, _ = self.compute_extent()
+        for bin_idx in peaks:
+            freq = freq_min + (freq_max - freq_min) * bin_idx / self.fft_size
+            line = self.ax.axvline(freq, color='red', linestyle='-', linewidth=0.8)
+            self.highlight_lines.append(line)
+
+        return [self.image] + self.highlight_lines
 
     def run(self):
         plt.show()
