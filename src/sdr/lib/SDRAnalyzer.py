@@ -41,8 +41,8 @@ class SDRAnalyzer:
                 self.image_buffer,
                 aspect='auto',
                 interpolation='nearest',
-                vmin=-100,
-                vmax=30,
+                vmin=-30,
+                vmax=40,
                 cmap=self.cmap,
                 extent=self.compute_extent(),
                 origin='lower'
