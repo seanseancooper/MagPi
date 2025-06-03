@@ -232,7 +232,7 @@ class RTLSDRReceiver(threading.Thread):
             if not self.thread:
                 self.run()
 
-            s = self.read_samples(nfft_size)  # get rid of initial empty samples
+            s = self.read_samples(nfft_size)    # get rid of initial empty samples
             if s.any():
                 return s                 # no contract
             return None
