@@ -57,6 +57,10 @@ class SDRTracker(object):
         self.CELL_STRENGTH_FIELD = None
         self.SCAN_GHOSTS = True
 
+        # from src.sdr.lib.SDRAnalyzer import SDRAnalyzer
+        # self.analyzer = SDRAnalyzer()
+        # self.analyzer.run()
+
     def configure(self, config_file):
         readConfig(config_file, self.config)
 
