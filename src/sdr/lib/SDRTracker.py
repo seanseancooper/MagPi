@@ -106,9 +106,9 @@ class SDRTracker(object):
 
     def process_cells(self):
         """ retrieve, classify, filter, sort and find missing signals in parsed_cells"""
-        def _blacklist(cell):
-            ''' removes items from *parsed_cells* so they are never evaluated in further processing. '''
-            if cell[f'{self.CELL_IDENT_FIELD}'] in self.blacklist.keys():
+        def _blacklist(c):
+            """ removes items from *parsed_cells* so they are never evaluated in further processing. """
+            if c[f'{self.CELL_IDENT_FIELD}'] in self.blacklist.keys():
                 try:
                     self.parsed_cells.remove(cell)
                 except Exception:
