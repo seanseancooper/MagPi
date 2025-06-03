@@ -5,14 +5,13 @@ import threading
 from datetime import datetime
 
 from rtlsdr import RtlSdr
-from scipy.signal import find_peaks, periodogram
+from scipy.signal import find_peaks
 from matplotlib.mlab import psd
 import numpy as np
 
 
 from src.config import readConfig
 from src.lib.utils import format_time, generate_uuid
-from src.sdr.lib import SDRAnalyzer
 
 
 def file_writing_thread(*, q, **blockfile_args):
@@ -28,10 +27,6 @@ def file_writing_thread(*, q, **blockfile_args):
             data = data.astype(np.complex64)
             data.tofile(f)
 
-NFFT = 1024 * 4
-NUM_SAMPLES_PER_SCAN = NFFT * 16
-NUM_BUFFERED_SWEEPS = 100
-NUM_SCANS_PER_SWEEP = 1
 
 class RTLSDRReceiver(threading.Thread):
 
@@ -58,8 +53,6 @@ class RTLSDRReceiver(threading.Thread):
         self.freq_match_tolerance = 2000  # 2 kHz
         self.filter_peaks = False
 
-        self.image_buffer = -100*np.ones((NUM_BUFFERED_SWEEPS, NUM_SCANS_PER_SWEEP*NFFT))
-
         self.outfile = None
 
     def configure(self, config_file):
@@ -71,8 +64,6 @@ class RTLSDRReceiver(threading.Thread):
         self.sdr.center_freq = self.config['DEFAULT_CENTER_FREQ']
         self.sdr.freq_correction = self.config['DEFAULT_FREQ_CORRECTION']
         self.sdr.gain = self.config['DEFAULT_GAIN']
-
-        self.outfile = self.config['OUT_FILE']
 
     def get_sample_rate(self):
         return self.sdr.sample_rate
@@ -102,8 +93,6 @@ class RTLSDRReceiver(threading.Thread):
         return self.block # yield?
 
     def get_psd_for_block(self):
-        psd_scan, f = psd(self.block, NFFT=self.nfft_size)
-
         # | Shape in PSD                          | Likely Modulation                                                |
         # | ------------------------------------- | ---------------------------------------------------------------- |
         # | Sharp narrow peak                     | **CW (continuous wave)**, **narrowband FM**, unmodulated carrier |
@@ -115,7 +104,7 @@ class RTLSDRReceiver(threading.Thread):
         # | Constant width, varying height        | Possibly **FSK** or **burst signals**                            |
         # | Peaks that fade or repeat in patterns | **TDMA**, **bursty data**                                        |
 
-        return psd_scan, f
+        return psd(self.block, NFFT=self.nfft_size)
 
     def get_peaks(self):
         psd_scan, f = self.get_psd_for_block()
@@ -201,11 +190,10 @@ class RTLSDRReceiver(threading.Thread):
             }
 
             # Skip if frequency is already tracked (within tolerance)
-            # if any(abs(peak_freq - f) < self.freq_match_tolerance for f in self.seen_frequencies):
-            #     continue
-            #
-            # self.seen_frequencies.add(peak_freq)
+            if any(abs(peak_freq - f) < self.freq_match_tolerance for f in self.seen_frequencies):
+                continue
 
+            self.seen_frequencies.add(peak_freq)
             self.parsed_cells.append(cell)
 
         [print(cell) for cell in self.parsed_cells]
@@ -232,18 +220,19 @@ class RTLSDRReceiver(threading.Thread):
                 ),
                 daemon=True,  # Important: non-daemon to finalize files correctly
         )
+
         self.thread.start()
 
     def scan(self):
 
-        def get_data(NFFT):
+        def get_data(nfft_size):
             if not self.sdr.device_opened:
                 self.sdr.open()
 
             if not self.thread:
                 self.run()
 
-            s = self.read_samples(NFFT)  # get rid of initial empty samples
+            s = self.read_samples(nfft_size)  # get rid of initial empty samples
             if s.any():
                 return s                 # no contract
             return None
