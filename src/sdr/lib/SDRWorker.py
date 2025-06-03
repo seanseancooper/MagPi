@@ -5,8 +5,7 @@ from src.lib.utils import format_time, format_delta, generate_uuid
 
 import logging
 
-wifi_logger = logging.getLogger('wifi_logger')
-json_logger = logging.getLogger('json_logger')
+sdr_logger = logging.getLogger('sdr_logger')
 
 
 class SDRWorker(threading.Thread):
@@ -100,16 +99,15 @@ class SDRWorker(threading.Thread):
 
     def make_signalpoint(self, worker_id, ident, sgnl):
         kwargs = {}
-        sgnlPt = None
 
         # SDRSignalPoint    (self, worker_id, lon, lat, sgnl, array_data=None, audio_data=None, sr=48000)
         kwargs["array_data"] =  self.get_text_attribute('array_data'),
         kwargs["audio_data"] =  self.get_text_attribute('audio_data'),
         kwargs["sr"] =  self.get_text_attribute('sr'),
-        from src.sdr.lib.SDRSignalPoint import SDRSignalPoint
-        sgnlPt = SDRSignalPoint(worker_id=worker_id, lon=self.tracker.lon, lat=self.tracker.lat, sgnl=sgnl, **kwargs)
 
         # use SignalFrame, TimeFrequencyFrame here
+        from src.sdr.lib.SDRSignalPoint import SDRSignalPoint
+        sgnlPt = SDRSignalPoint(worker_id=worker_id, lon=self.tracker.lon, lat=self.tracker.lat, sgnl=sgnl, **kwargs)
 
         self.tracker.signal_cache[ident].append(sgnlPt)
 
@@ -170,32 +168,32 @@ class SDRWorker(threading.Thread):
     def stop(self):
 
         if self.tracked:
-
+            pass
             # move me
-            def append_to_outfile(sgnl):
-
-                formatted = {
-
-                    "id"                                : sgnl['id'],
-                    "type"                              : sgnl['type'],
-                    "ident"                             : sgnl['ident'],
-                    f"{self.tracker.CELL_IDENT_FIELD}"  : sgnl[self.tracker.CELL_IDENT_FIELD],
-                    f"{self.tracker.CELL_NAME_FIELD}"   : sgnl[self.tracker.CELL_NAME_FIELD],
-
-                    "created"                           : sgnl['created'],
-                    "updated"                           : sgnl['updated'],
-                    "elapsed"                           : sgnl['elapsed'],
-
-                    "is_mute"                           : sgnl['is_mute'],
-                    "tracked"                           : sgnl['tracked'],
-                    "signal_cache"                      : sgnl['signal_cache'],
-                    "text_attributes"                   : sgnl['text_attributes'],
-
-                }
-
-                json_logger.info({sgnl[f"{self.tracker.CELL_IDENT_FIELD}"]: formatted})
-
-            append_to_outfile(self.to_map())
+            # def append_to_outfile(sgnl):
+            #
+            #     formatted = {
+            #
+            #         "id"                                : sgnl['id'],
+            #         "type"                              : sgnl['type'],
+            #         "ident"                             : sgnl['ident'],
+            #         f"{self.tracker.CELL_IDENT_FIELD}"  : sgnl[self.tracker.CELL_IDENT_FIELD],
+            #         f"{self.tracker.CELL_NAME_FIELD}"   : sgnl[self.tracker.CELL_NAME_FIELD],
+            #
+            #         "created"                           : sgnl['created'],
+            #         "updated"                           : sgnl['updated'],
+            #         "elapsed"                           : sgnl['elapsed'],
+            #
+            #         "is_mute"                           : sgnl['is_mute'],
+            #         "tracked"                           : sgnl['tracked'],
+            #         "signal_cache"                      : sgnl['signal_cache'],
+            #         "text_attributes"                   : sgnl['text_attributes'],
+            #
+            #     }
+            #
+            #     json_logger.info({sgnl[f"{self.tracker.CELL_IDENT_FIELD}"]: formatted})
+            #
+            # append_to_outfile(self.to_map())
 
     def run(self):
         # this is long-standing ugly; I should not be brute-forcing matches

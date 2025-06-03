@@ -129,12 +129,12 @@ class SDRTracker(object):
             worker = self.get_worker(cell[f'{self.CELL_IDENT_FIELD}'])
             self.parsed_signals.append(worker.to_map())
 
-            if worker.cell_type == 'trx':
-                if cell['tracked'] is True and worker.sdr_ident not in self.tracked_signals:
-                    worker.add(worker.sdr_ident)  # add using worker method
-
-                if cell['tracked'] is False and worker.sdr_ident in self.tracked_signals:
-                    worker.remove(worker.sdr_ident)
+            # if worker.cell_type == 'sdr':
+            #     if cell['tracked'] is True and worker.sdr_ident not in self.tracked_signals:
+            #         worker.add(worker.sdr_ident)  # add using worker method
+            #
+            #     if cell['tracked'] is False and worker.sdr_ident in self.tracked_signals:
+            #         worker.remove(worker.sdr_ident)
 
     def process_signals(self):
         """ workers match their cells, add attributes, and make signalpoint """
