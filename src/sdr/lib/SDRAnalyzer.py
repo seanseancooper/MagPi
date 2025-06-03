@@ -112,7 +112,8 @@ class SDRAnalyzer:
         #     line = self.ax.axvline(freq, color='red', linestyle='-', linewidth=0.8)
         #     self.highlight_lines.append(line)
 
-        return [self.image] + self.highlight_lines
+        # return [self.image] + self.highlight_lines
+        return [self.image]
 
     def run(self):
         plt.show()
