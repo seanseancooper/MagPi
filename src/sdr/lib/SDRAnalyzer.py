@@ -106,11 +106,11 @@ class SDRAnalyzer:
         #
         # self.seen_frequencies.add(peak_freq)
 
-        freq_min, freq_max, _, _ = self.compute_extent()
-        for bin_idx in peaks:
-            freq = freq_min + (freq_max - freq_min) * bin_idx / self.fft_size
-            line = self.ax.axvline(freq, color='red', linestyle='-', linewidth=0.8)
-            self.highlight_lines.append(line)
+        # freq_min, freq_max, _, _ = self.compute_extent()
+        # for bin_idx in peaks:
+        #     freq = freq_min + (freq_max - freq_min) * bin_idx / self.fft_size
+        #     line = self.ax.axvline(freq, color='red', linestyle='-', linewidth=0.8)
+        #     self.highlight_lines.append(line)
 
         return [self.image] + self.highlight_lines
 
