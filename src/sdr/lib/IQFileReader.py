@@ -10,7 +10,7 @@ class IQFileReader:
         import glob
         iq_files = glob.glob('../' + '*.iq')
         if not iq_files:
-            raise FileNotFoundError("No .iq file found in the current directory.")
+            raise FileNotFoundError("No .iq file found in the parent directory.")
         f = sorted(iq_files)[-1]
         print(f'Reading: {f}')
 
