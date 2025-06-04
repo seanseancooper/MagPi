@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+      const socket = io();
+
+      socket.on('connect', () => {
+        console.log("Socket connected");
+      });
+
+      // Example of emitting extract_signal
+      function extractSignal() {
+        socket.emit('extract_signal', {
+          center_freq: 100e6,
+          bandwidth: 200e3,
+          start_time: 1.0,
+          end_time: 2.0
+        });
+      }
+
+      socket.on('signal_extracted', (data) => {
+        console.log("Received extracted signal info:", data);
+      });
+    </script>
+</head>
+<body>
+    <h1>Live SDR Spectrogram</h1>
+
+    <button onclick="extractSignal()">Extract Signal</button>
+
+    <img src="{{ url_for('spectrogram_stream') }}" />
+</body>
+</html>
