@@ -12,8 +12,10 @@ class IQFileReader:
         if not iq_files:
             raise FileNotFoundError("No .iq file found in the current directory.")
         f = sorted(iq_files)[-1]
-        print(f'reading: {f}')
-        self.file = open(f, 'r')
+        print(f'Reading: {f}')
+
+        self.file = open(f, 'rb')  # read as bytes
+        self.path = f
 
     def read_block(self):
         while True:
