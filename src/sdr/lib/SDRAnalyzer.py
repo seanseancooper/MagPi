@@ -8,7 +8,8 @@ from src.sdr.lib.IQFileReader import IQFileReader
 
 
 class SDRAnalyzer:
-    def __init__(self, filename):
+
+    def __init__(self):
         self.fft_size = 4096
         self.num_rows = 100
         self.sample_rate = 2.048e6
