@@ -7,7 +7,6 @@ class IQFileReader:
 
         self.block_size = block_size
 
-        import glob
         iq_files = glob.glob('../' + '*.iq')
         if not iq_files:
             raise FileNotFoundError("No .iq file found in the parent directory.")
