@@ -6,7 +6,14 @@ class IQFileReader:
     def __init__(self, block_size=4096):
 
         self.block_size = block_size
-        self.file = open(filename, "rb")
+
+        import glob
+        iq_files = glob.glob('../' + '*.iq')
+        if not iq_files:
+            raise FileNotFoundError("No .iq file found in the current directory.")
+        f = sorted(iq_files)[-1]
+        print(f'reading: {f}')
+        self.file = open(f, 'r')
 
     def read_block(self):
         while True:
