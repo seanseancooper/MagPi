@@ -66,6 +66,11 @@ class SDRAnalyzer:
                 self.image_buffer[-1, :] = row
             time.sleep(0.1)
 
+    def compute_extent(self):
+        freq_min = (self.center_freq - self.sample_rate / 2) / 1e6
+        freq_max = (self.center_freq + self.sample_rate / 2) / 1e6
+        return [freq_min, freq_max, self.num_rows, 0]
+
     def render_spectrogram_png(self):
         with self.lock:
             fig, ax = plt.subplots()
