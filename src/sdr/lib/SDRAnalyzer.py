@@ -122,10 +122,5 @@ class SDRAnalyzer:
 
 
 if __name__ == '__main__':
-    import glob
-
-    iq_files = glob.glob('.' + './*.iq')
-    if not iq_files:
-        raise FileNotFoundError("No .iq file found in the current directory.")
-    analyzer = SDRAnalyzer(iq_files[-1])
+    analyzer = SDRAnalyzer()
     analyzer.run()
