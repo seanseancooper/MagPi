@@ -191,14 +191,20 @@
 
 ## sdr
 > SDRSignalPoint(self, worker_id, lon, lat, sgnl, array_data=None, audio_data=None, sr=48000)
-> - DATA: RabbitMQ for object data, ZeroMQ arrays
->- **IDEA:** A thing that looks at a block of spectrum, finds the peaks in the EM
+
+> SignalFrame(timestamp: float, duration: float, carrier_freq: float, bandwidth: float, data: np.ndarray, domain: str = "time", metadata: Optional[Dict[str, Any]] = None)
+
+> TimeFrequencyFrame(start_time: float, duration: float, freq_min: float, freq_max: float, tf_matrix: np.ndarray, metadata: Optional[Dict[str, Any]] = None)
+
+> - DATA: RabbitMQ for object data, ZeroMQ for arrays
+>- **DONE:** A thing that looks at a block of spectrum, finds the peaks in the EM
 and tunes an SDRWorker() receiver to the peak frequency, recording it as a SSET SignalFrame().
->>- Receiver modifications: assignable frequency, bandwidth
->>- [IP] Scanner modifications: integration
+>>- **DONE:** Receiver modifications: assignable frequency, bandwidth
+>>- **DONE:** Scanner modifications: integration
 >>- SignalPoint processing zeroMQ
 >>- ARXAudioEncoder via MQ! not a local method. offline processing...
 >>- Elasticsearch mappings
+
 >### SDRSignalAnalyzer
 >```
 >Category            | Feature Examples
