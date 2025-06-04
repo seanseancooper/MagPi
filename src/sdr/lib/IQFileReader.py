@@ -2,8 +2,9 @@ import numpy as np
 import time
 
 class IQFileReader:
-    def __init__(self, filename, block_size=4096):
-        self.filename = filename
+
+    def __init__(self, block_size=4096):
+
         self.block_size = block_size
         self.file = open(filename, "rb")
 
