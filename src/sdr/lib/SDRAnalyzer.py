@@ -14,7 +14,7 @@ class SDRAnalyzer:
         self.sample_rate = 2.048e6
         self.center_freq = 100e6
 
-        self.reader = IQFileReader(filename, block_size=self.fft_size)
+        self.reader = IQFileReader(block_size=self.fft_size)
         self.image_buffer = -100 * np.ones((self.num_rows, self.fft_size))  # dB scale
 
         self.fig, self.ax = plt.subplots()
