@@ -184,7 +184,7 @@ class SDRWorker(threading.Thread):
             self.updated = datetime.now()
             self.elapsed = self.updated - self.created
             self.tracked = self.sdr_ident in self.tracker.tracked_signals
-            self.make_signalpoint(self.id, self.sdr_ident, int(cell.get(self.tracker.CELL_STRENGTH_FIELD, -99)))
+            self.make_signalpoint(self.id, self.sdr_ident, int(cell.get(self.tracker.CELL_STRENGTH_FIELD, -99))) # "sgnl"
 
         return cell
 
