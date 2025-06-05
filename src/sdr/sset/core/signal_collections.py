@@ -30,6 +30,10 @@ class SignalCollection(Generic[T]):
         """Apply mutation function to each element."""
         return SignalCollection([func(item) for item in self.items])
 
+    # verify this; I want this to behave as a List.
+    def append(self, item):
+        self.items.append(item)
+
     def __getitem__(self, index):
         return self.items[index]
 
