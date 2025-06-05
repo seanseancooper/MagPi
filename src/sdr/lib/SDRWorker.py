@@ -182,6 +182,54 @@ class SDRWorker(threading.Thread):
     def mute(self):
         from src.lib.utils import mute
         return mute(self)
+    
+    def ctrl_record(self):
+        print(f'{__name__} executed')
+        pass
+    
+    def ctrl_play(self):
+        print(f'{__name__} executed')
+        pass
+
+    def ctrl_mute(self):
+        print(f'{__name__} executed')
+        pass
+
+    def ctrl_solo(self):
+        print(f'{__name__} executed')
+        pass
+
+    def ctrl_analyze(self):
+        print(f'{__name__} executed')
+        pass
+
+    def ctrl_demux(self):
+        print(f'{__name__} executed')
+        pass
+
+    def ctrl_decode(self):
+        print(f'{__name__} executed')
+        pass
+
+    def ctrl_encode(self):
+        print(f'{__name__} executed')
+        pass
+
+    def ctrl_filter(self):
+        print(f'{__name__} executed')
+        pass
+
+    def ctrl_block(self):
+        print(f'{__name__} executed')
+        pass
+
+    def ctrl_label(self):
+        print(f'{__name__} executed')
+        pass
+
+    def ctrl_test(self):
+        print(f'{__name__} executed')
+        pass
 
     def stop(self):
 
