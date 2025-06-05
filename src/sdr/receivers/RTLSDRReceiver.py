@@ -173,7 +173,7 @@ class RTLSDRReceiver(threading.Thread):
             }
 
             peak_freq = self.get_peak_freq(peak)
-            # print(self.get_channel(peak_freq))
+
             cell = {
                 'peak_freq'      : peak_freq,
                 "created"        : format_time(datetime.now(), "%Y-%m-%d %H:%M:%S.%f"),
