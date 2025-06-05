@@ -21,7 +21,7 @@ class SDRWorker(threading.Thread):
         self.config = {}
         self.tracker = None
         self.id = None                  # filled if match(), 'marks' SignalPoint cell_type.
-        self.sdr_ident = ident          # used in object lookups and coloring UI, value of 'self.tracker.CELL_IDENT_FIELD'
+        self.sdr_ident = ident          # used in object lookups and coloring UI, value of 'self.tracker.CELL_IDENT_FIELD' "peak_freq"
 
         self.created = datetime.now()   # when signal was found
         self.updated = datetime.now()   # when signal was last reported
@@ -87,8 +87,8 @@ class SDRWorker(threading.Thread):
         w['signal_cache'] = [x.get() for x in self.tracker.signal_cache[self.sdr_ident] if x is not None]
         w['text_attributes'] = self.get_text_attributes()
 
-        # wifi: put 'cell' level data (text_attributes) into Worker object (read by UI)
-        if w['cell_type'] == 'wifi':
+        # put 'cell' level data (text_attributes) into Worker object (read by UI)
+        if w['cell_type'] == 'sdr':
             w.update(self.get_text_attributes())
 
         return w
@@ -127,11 +127,11 @@ class SDRWorker(threading.Thread):
     def get_signal_cache_frequency_features(self):
         return self._signal_cache_frequency_features
 
-    def make_signalpoint(self, worker_id, ident, sgnl):
+    def make_signalpoint(self, worker_id, ident, sgnl):             # verify ident as sDR
         kwargs = {}
 
         # SDRSignalPoint    (self, worker_id, lon, lat, sgnl, array_data=None, audio_data=None, sr=48000)
-        kwargs["array_data"] =  self.get_text_attribute('array_data'),
+        kwargs["array_data"] =  self.get_text_attribute('array_data'),      # is this being cnflated with text_attributes
         kwargs["audio_data"] =  self.get_text_attribute('audio_data'),
         kwargs["sr"] =  self.get_text_attribute('sr'),
 
@@ -169,7 +169,7 @@ class SDRWorker(threading.Thread):
         if self.sdr_ident == cell[f'{self.tracker.CELL_IDENT_FIELD}']:      # "peak_freq"
             if not self.id:
                 try:
-                    self.id = cell['id']                    # fail on items w/o id
+                    self.id = cell['id']                        # fail on items w/o id
                 except KeyError:
                     self.id = str(generate_uuid()).lower()      # sets id for new items
                 self.set_type(cell['cell_type'])                # is hint standard? hardcode?
@@ -185,7 +185,7 @@ class SDRWorker(threading.Thread):
             self.tracked = self.sdr_ident in self.tracker.tracked_signals
             self.make_signalpoint(self.id, self.sdr_ident, int(cell.get(self.tracker.CELL_STRENGTH_FIELD, -99))) # "sgnl"
 
-        return cell
+        # return cell # is this still needed??
 
     def add(self, ident):
 
