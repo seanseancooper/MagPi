@@ -290,7 +290,7 @@ class SDRWorker(threading.Thread):
             #
             #     }
             #
-            #     json_logger.info({sgnl[f"{self.tracker.CELL_IDENT_FIELD}"]: formatted})
+            #     json_logger.info({sgnl[f"{self.tracker.CELL_IDENT_FIELD}"]: formatted}) # "peak_freq"
             #
             # append_to_outfile(self.to_map())
 
