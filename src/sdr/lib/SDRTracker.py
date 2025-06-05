@@ -52,9 +52,9 @@ class SDRTracker(object):
         self._OUTFILE = None
         self.DEBUG = False
 
-        self.CELL_IDENT_FIELD = None
-        self.CELL_NAME_FIELD = None
-        self.CELL_STRENGTH_FIELD = None
+        self.CELL_IDENT_FIELD = None                # "peak_freq"
+        self.CELL_NAME_FIELD = None                 # "center_freq"
+        self.CELL_STRENGTH_FIELD = None             # "sgnl"
         self.SCAN_GHOSTS = True
 
         # from src.sdr.lib.SDRAnalyzer import SDRAnalyzer
