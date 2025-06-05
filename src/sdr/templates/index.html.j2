@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/socket.io.js') }}"></script>
+
     <script>
       const socket = io();
 
@@ -23,12 +24,162 @@
         console.log("Received extracted signal info:", data);
       });
     </script>
+
+    <script src="{{ url_for('static', filename='js/Cango-29v04.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/CangoAxes-10v06.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Spectrogram-2v01.js') }}"></script>
+
+  <script>
+
+    "use strict";
+
+    function FreqDataGenerator(minFreq, maxFreq, sweepTime, fs, fftlength)
+    {
+      // generate linear sweep frequency signal
+      const f0bin = fftlength/2;
+      const df = fs/fftlength;
+      const dt = 1/fs;
+      const lineTime = 1000*fftlength*dt;   // times in msec
+      const minFrqBin = f0bin+minFreq/df;
+      const maxFrqBin = f0bin+maxFreq/df;
+      const sigdf = lineTime*(maxFreq - minFreq)/sweepTime;
+      const sigBinInc = sigdf/df;
+      const sigAmp = 220;
+      const bkgAmp = 150;
+
+      this.rawLineTime = lineTime;
+      this.sampleFreq = fs;
+      this.fft_length = fftlength;
+
+      this.sigBin = minFrqBin;   // use a property as a static var to save the last freq
+
+      this.nextSigFrq = ()=>{
+        this.sigBin += sigBinInc;
+        if (this.sigBin > maxFrqBin)
+        {
+          this.sigBin = minFrqBin;
+        }
+        return Math.round(this.sigBin);
+      };
+
+      this.getLine = (buf)=>{
+        for (let i=f0bin; i<fftlength; i++)  // just simulate positive frequencies
+        {
+          buf[i] = bkgAmp*Math.random();
+        }
+        let j = this.nextSigFrq();
+        buf[j-1] = sigAmp*0.8;
+        buf[j] = sigAmp;
+        buf[j+1] = sigAmp*0.8;
+      };
+    }
+
+    function getDynamicDataBuffer(dataGen)
+    {
+
+      const bufferAry = [];
+      let sigTime = 0;
+      const sigStartTime = Date.now();
+
+      function genDynamicData()
+      {
+        let sigDiff;
+
+        dataGen.getLine(bufferAry[1]);
+
+        // swap the buffers
+        let tmpBuf = bufferAry[0];
+        bufferAry[0] = bufferAry[1];
+        bufferAry[1] = tmpBuf;
+
+        sigTime += dataGen.rawLineTime;
+        sigDiff = (Date.now() - sigStartTime) - sigTime;
+
+        if (playing)
+        {
+          setTimeout(genDynamicData, dataGen.rawLineTime - sigDiff);
+        }
+      }
+
+      bufferAry[0] = new Float32Array(dataGen.fft_length);  // values should be 0..255
+      bufferAry[1] = new Float32Array(dataGen.fft_length);  // ensure length is set before returning pointer
+      // fill nextBuf then swap nextBuf and data
+
+      genDynamicData();
+
+      return {buffer: bufferAry[0]};  // value of the pointer will change
+    }
+
+    function drawSpectrograms()
+    {
+
+      // input signal properties
+      const fft_length = 4096;
+      const sampling_rate = 65535;
+
+      const center_freq = 1000000;
+      const bandwidth = 1000;
+
+      const min_freq = center_freq - bandwidth/2;
+      const max_freq = center_freq + bandwidth/2;
+
+      const sweepDur = 2000; // msec
+
+      // spectrogram size
+      const fft_bins = 512;
+      const spectrogram_rows = 120;
+
+      // display axes
+      const maxFreq = fft_bins*sampling_rate/fft_length;  // Hz
+      const maxTime = 50; // msec
+
+      const dataGenerator = new FreqDataGenerator(min_freq, max_freq, sweepDur, sampling_rate, fft_length);
+      const dataObj = getDynamicDataBuffer(dataGenerator);
+
+      const wf = new Waterfall(dataObj, fft_bins, spectrogram_rows, "DOWN",
+                            { startbin: fft_length/2,
+                              lineRate: 40});
+      wf.start();
+
+      const yMax1 = 200*sampling_rate/fft_length;  // Hz
+      const xMax1 = 50; // msec
+
+      const cgo = new Cango("cvs");
+
+      cgo.gridboxPadding(18, 2, 2, 16);
+      cgo.setWorldCoordsRHC(0, -maxTime, maxFreq, maxTime);
+      cgo.drawAxes(0, maxFreq, -maxTime, 0, {
+        yOrigin: 0,
+        yUnits:"msec",
+        xUnits:"Hz",
+        fontSize: 9,
+        tickDirection:"out"});
+
+      const wfImg = new Img(wf.offScreenCvs, {imgWidth:maxFreq, imgHeight:maxTime});
+
+      function draw_waveforms()
+      {
+        cgo.render(wfImg);
+        window.requestAnimationFrame(draw_waveforms);   // new data line every 50 msec, independent of wf line rate
+      }
+
+      draw_waveforms();
+    }
+
+    let playing = true;
+    window.addEventListener("load", function(){
+      drawSpectrograms();
+    });
+  </script>
+
 </head>
 <body>
-    <h1>Live SDR Spectrogram</h1>
-
     <button onclick="extractSignal()">Extract Signal</button>
-
     <img src="{{ url_for('spectrogram_stream') }}" />
+
+    <div class="figHolder" style="">
+      <canvas id="cvs" width="1280" height="200"></canvas>
+    </div>
+
 </body>
 </html>
