@@ -42,6 +42,7 @@ class SDRWorker(threading.Thread):
         self._ctrl_analyze = False
         self._ctrl_demux = False
         self._ctrl_decode = False
+        self._ctrl_encode = False
         self._ctrl_filter = False
         self._ctrl_block = False
         self._ctrl_label = False
