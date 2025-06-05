@@ -45,6 +45,9 @@ class SDRWorker(threading.Thread):
         self._ctrl_test = False
         self._control_fields = [f for f in dir(self) if f.startswith("_ctrl_")]
 
+        self.signal_frame_list = SignalFrameList([])
+        self.tff_frame_list = TimeFrequencyFrameList([])
+
     def config_worker(self, tracker):
         """ worker append itself, pulls config when created. """
         self.tracker = tracker
