@@ -22,7 +22,7 @@ class SDRWorker(threading.Thread):
         self.config = {}
         self.tracker = None
         self.id = None                  # filled if match(), 'marks' SignalPoint cell_type.
-        self.sdr_ident = ident              # used in object lookups and coloring UI, value of 'self.tracker.CELL_IDENT_FIELD'
+        self.sdr_ident = ident          # used in object lookups and coloring UI, value of 'self.tracker.CELL_IDENT_FIELD'
 
         self.created = datetime.now()   # when signal was found
         self.updated = datetime.now()   # when signal was last reported
