@@ -129,6 +129,27 @@ class SDRWorker(threading.Thread):
 
         self.tracker.signal_cache[ident].append(sgnlPt)
 
+        # use sset SignalFrame, TimeFrequencyFrame for processing
+        start_time = timestamp = time.monotonic()
+        duration = 0
+        carrier_freq = self.get_text_attribute('frequency')
+        bandwidth = self.get_text_attribute('bandwidth')
+
+        freq_min = carrier_freq - bandwidth/2
+        freq_max = carrier_freq + bandwidth/2
+
+        tf_matrix = data = np.zeros((4096,))
+
+        domain = 'frequency'
+        metadata = self.get_text_attributes()
+
+        sgnlFrm = SignalFrame(timestamp, duration, carrier_freq, bandwidth, data, domain, metadata)
+        tfFrm = TimeFrequencyFrame(start_time, duration, freq_min, freq_max, tf_matrix, metadata)
+
+        # add sgnlFrm & tfFrm to sset.collections
+        self.signal_frame_list.append(sgnlFrm)
+        self.tff_frame_list.append(tfFrm)
+
         while len(self.tracker.signal_cache[ident]) >= self.tracker.signal_cache_max:
             self.tracker.signal_cache[ident].pop(0)
 
