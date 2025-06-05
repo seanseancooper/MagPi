@@ -267,31 +267,7 @@ class SDRWorker(threading.Thread):
 
         if self.tracked:
             pass
-            # move me
-            # def append_to_outfile(sgnl):
-            #
-            #     formatted = {
-            #
-            #         "id"                                : sgnl['id'],
-            #         "type"                              : sgnl['type'],
-            #         "ident"                             : sgnl['ident'],
-            #         f"{self.tracker.CELL_IDENT_FIELD}"  : sgnl[self.tracker.CELL_IDENT_FIELD], # "peak_freq"
-            #         f"{self.tracker.CELL_NAME_FIELD}"   : sgnl[self.tracker.CELL_NAME_FIELD],  # "center_freq"
-            #
-            #         "created"                           : sgnl['created'],
-            #         "updated"                           : sgnl['updated'],
-            #         "elapsed"                           : sgnl['elapsed'],
-            #
-            #         "is_mute"                           : sgnl['is_mute'],
-            #         "tracked"                           : sgnl['tracked'],
-            #         "signal_cache"                      : sgnl['signal_cache'],
-            #         "text_attributes"                   : sgnl['text_attributes'],
-            #
-            #     }
-            #
-            #     json_logger.info({sgnl[f"{self.tracker.CELL_IDENT_FIELD}"]: formatted}) # "peak_freq"
-            #
-            # append_to_outfile(self.to_map())
+            # do something else....
 
     def run(self):
         # this is long-standing ugly; I should not be brute-forcing matches
