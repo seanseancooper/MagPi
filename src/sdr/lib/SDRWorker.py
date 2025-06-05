@@ -123,7 +123,7 @@ class SDRWorker(threading.Thread):
         kwargs["audio_data"] =  self.get_text_attribute('audio_data'),
         kwargs["sr"] =  self.get_text_attribute('sr'),
 
-        # use SignalFrame, TimeFrequencyFrame here
+        # use SDRSignalPoint for tracking/displays
         from src.sdr.lib.SDRSignalPoint import SDRSignalPoint
         sgnlPt = SDRSignalPoint(worker_id=worker_id, lon=self.tracker.lon, lat=self.tracker.lat, sgnl=sgnl, **kwargs)
         self.tracker.signal_cache[ident].append(sgnlPt)
