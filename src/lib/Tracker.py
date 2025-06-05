@@ -48,7 +48,6 @@ class Tracker(object):
         self.lat = 0.0                              # this lat; used in SignalPoint creation
         self.lon = 0.0                              # this lon; used in SignalPoint creation
 
-        self._OUTFILE = None
         self.DEBUG = False
 
         self.CELL_IDENT_FIELD = None
