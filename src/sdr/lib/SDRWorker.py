@@ -276,8 +276,8 @@ class SDRWorker(threading.Thread):
             #         "id"                                : sgnl['id'],
             #         "type"                              : sgnl['type'],
             #         "ident"                             : sgnl['ident'],
-            #         f"{self.tracker.CELL_IDENT_FIELD}"  : sgnl[self.tracker.CELL_IDENT_FIELD],
-            #         f"{self.tracker.CELL_NAME_FIELD}"   : sgnl[self.tracker.CELL_NAME_FIELD],
+            #         f"{self.tracker.CELL_IDENT_FIELD}"  : sgnl[self.tracker.CELL_IDENT_FIELD], # "peak_freq"
+            #         f"{self.tracker.CELL_NAME_FIELD}"   : sgnl[self.tracker.CELL_NAME_FIELD],  # "center_freq"
             #
             #         "created"                           : sgnl['created'],
             #         "updated"                           : sgnl['updated'],
