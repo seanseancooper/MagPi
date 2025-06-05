@@ -166,10 +166,10 @@ class RTLSDRReceiver(threading.Thread):
         for peak in peaks:
 
             text_attributes = {
-                'sample_rate': self.config['DEFAULT_SAMPLE_RATE'],
-                'center_freq': self.config['DEFAULT_CENTER_FREQ'],
-                'freq_corr'  : self.config['DEFAULT_FREQ_CORRECTION'],
-                'gain'       : self.config['DEFAULT_GAIN'],
+                'sample_rate': self.sdr.sample_rate,
+                'center_freq': self.sdr.center_freq,
+                'freq_corr'  : self.sdr.freq_correction,
+                'gain'       : self.sdr.gain,
             }
 
             peak_freq = self.get_peak_freq(peak)
@@ -194,7 +194,7 @@ class RTLSDRReceiver(threading.Thread):
             #     continue
             #
             # self.seen_frequencies.add(peak_freq)
-            
+
             self.parsed_cells.append(cell)
 
         [print(cell) for cell in self.parsed_cells]
