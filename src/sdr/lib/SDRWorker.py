@@ -47,6 +47,7 @@ class SDRWorker(threading.Thread):
         self._ctrl_block = False
         self._ctrl_label = False
         self._ctrl_test = False
+
         self._control_fields = [f for f in dir(self) if f.startswith("_ctrl_")]
 
         self.signal_frame_list = SignalFrameList([])
