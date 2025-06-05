@@ -9,10 +9,6 @@ from src.sdr.sset.core.signal_model import SignalFrame
 from src.sdr.sset.core.time_frequency_frame import TimeFrequencyFrame
 
 from src.lib.utils import format_time, format_delta, generate_uuid
-import logging
-
-from src.sdr.sset.core.signal_model import SignalFrame
-from src.sdr.sset.core.time_frequency_frame import TimeFrequencyFrame
 from src.sdr.sset.core.signal_collections import TimeFrequencyFrameList, SignalFrameList
 import logging
 
