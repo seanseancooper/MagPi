@@ -82,7 +82,7 @@ class Tracker(object):
                 return worker
         except IndexError:
             worker = Worker(ident)
-            worker.config_worker(self)
+            worker.config_worker(self)          # perhaps move this to it's own method?
             self.workers.append(worker)
             worker.run()
         finally:
