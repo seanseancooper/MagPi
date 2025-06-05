@@ -126,7 +126,6 @@ class SDRWorker(threading.Thread):
         # use SignalFrame, TimeFrequencyFrame here
         from src.sdr.lib.SDRSignalPoint import SDRSignalPoint
         sgnlPt = SDRSignalPoint(worker_id=worker_id, lon=self.tracker.lon, lat=self.tracker.lat, sgnl=sgnl, **kwargs)
-
         self.tracker.signal_cache[ident].append(sgnlPt)
 
         # use sset SignalFrame, TimeFrequencyFrame for processing
