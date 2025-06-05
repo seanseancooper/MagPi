@@ -37,10 +37,10 @@
 			"DEFAULT_CENTER_FREQ": 100e6
 		},
 		{
-			"DEFAULT_FREQ_CORRECTION": 1
+			"DEFAULT_FREQ_CORRECTION": 60
 		},
 		{
-			"DEFAULT_GAIN": "auto"
+			"DEFAULT_GAIN": 49.6
 		},
 		{
 			"MQ_MODULE_RETRIEVER": "src.sdr.receivers.RTLSDRReceiver"
@@ -79,7 +79,7 @@
 			"INTERFACE": "?"
 		},
 		{
-			"SCAN_TIMEOUT": 1
+			"SCAN_TIMEOUT": 0.1
 		},
 		{
 			"VIEW_TIMEOUT": 30
