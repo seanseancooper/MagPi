@@ -194,6 +194,7 @@ class RTLSDRReceiver(threading.Thread):
             #     continue
             #
             # self.seen_frequencies.add(peak_freq)
+            
             self.parsed_cells.append(cell)
 
         [print(cell) for cell in self.parsed_cells]
