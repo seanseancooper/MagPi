@@ -36,6 +36,9 @@ class SDRWorker(threading.Thread):
         self.cell_type = None
 
         self._ctrl_record = False
+        self._ctrl_play = False
+        self._ctrl_mute = False
+        self._ctrl_solo = False
         self._ctrl_analyze = False
         self._ctrl_demux = False
         self._ctrl_decode = False
