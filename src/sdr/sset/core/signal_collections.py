@@ -14,6 +14,7 @@ T = TypeVar("T")
 
 
 class SignalCollection(Generic[T]):
+
     def __init__(self, items: List[T]):
         self.items = items
 
