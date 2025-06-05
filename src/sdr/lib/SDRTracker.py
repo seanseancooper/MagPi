@@ -34,7 +34,6 @@ class SDRTracker(object):
         self.parsed_signals = [defaultdict()]                # product of scanning
         self.polling_count = 0
 
-        ''' all items represented as a list of dictionaries.  '''
         self.workers = []                           # list of workers assigned to monitor a discrete signal.
         self.tracked_signals = []                   # parsed_cells currently being tracked.
         self.ghost_signals = []                     # signals no longer received, but tracked -- 'ghost' signals
