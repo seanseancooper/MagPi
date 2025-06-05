@@ -172,9 +172,9 @@ class SDRWorker(threading.Thread):
                 try:
                     self.id = cell['id']                    # fail on items w/o id
                 except KeyError:
-                    self.id = str(generate_uuid()).lower()     # sets id for new items
-                self.set_type(cell['cell_type'])
-                self.set_text_attributes(cell)
+                    self.id = str(generate_uuid()).lower()      # sets id for new items
+                self.set_type(cell['cell_type'])                # is hint standard? hardcode?
+                self.set_text_attributes(cell)                  # may not need to do this
 
             if self.config['MUTE_TIME'] > 0:                # auto unmute??
                 if datetime.now() - self.updated > timedelta(seconds=self.config['MUTE_TIME']):
