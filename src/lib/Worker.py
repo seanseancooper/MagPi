@@ -157,7 +157,7 @@ class Worker:
             self.tracked = self.ident in self.tracker.tracked_signals
             self.make_signalpoint(self.id, self.ident, int(cell.get(self.tracker.CELL_STRENGTH_FIELD, -99)))
 
-        return cell
+        return cell # look @ SDR; I don't think this is needed
 
     def add(self, ident):
 
