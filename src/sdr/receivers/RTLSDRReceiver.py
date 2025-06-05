@@ -206,7 +206,7 @@ class RTLSDRReceiver(threading.Thread):
         name = (self.config['OUT_FILE'] +
                 format_time(datetime.now(), "%Y%m%d_%H%M%S") + '_' +
                 str(self.sdr.center_freq) + '_' +
-                str(self.sdr.sample_rate) +
+                str(int(self.sdr.sample_rate)) +
                 self.config['OUT_FILE_EXT']
                 )
 
