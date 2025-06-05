@@ -167,7 +167,7 @@ class SDRWorker(threading.Thread):
 
     def process_cell(self, cell):
         """ set static fields """
-        if self.sdr_ident == cell[f'{self.tracker.CELL_IDENT_FIELD}']:
+        if self.sdr_ident == cell[f'{self.tracker.CELL_IDENT_FIELD}']:      # "peak_freq"
             if not self.id:
                 try:
                     self.id = cell['id']                    # fail on items w/o id
