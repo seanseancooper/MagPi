@@ -41,9 +41,9 @@ class SDRTracker(object):
         self.signal_cache = defaultdict(list)       # a mapping of lists of SignalPoint for all signals received.
         self.signal_cache_max = 160                 # max size of these lists of SignalPoint. overridden via config
 
-        self.blacklist = {}                     # ignored signals
-        self.sort_order = None                  # sort order for printed output; consider not support printing.
-        self.reverse = False                    # reverse the sort...
+        self.blacklist = {}                         # ignored signals
+        self.sort_order = None                      # sort order for printed output; consider not support printing.
+        self.reverse = False                        # reverse the sort...
         self.tz = None
 
         self.lat = 0.0  # this lat; used in SignalPoint creation
