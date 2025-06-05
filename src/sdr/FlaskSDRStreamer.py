@@ -1,5 +1,5 @@
-import time
 import threading
+
 import matplotlib
 matplotlib.use('Agg')
 
@@ -13,19 +13,24 @@ socketio = SocketIO(app, cors_allowed_origins="*")  # <- ensure this matches you
 
 class FlaskSDRStreamer:
 
-    def __init__(self, host='0.0.0.0', port=5000):
+    def __init__(self):
+
         global app
         self.app = app
 
         self.host = host
         self.port = port
+        self.config = {}
+        self.configure('sdr.json')
         self.analyzer = SDRAnalyzer()
         self.setup_routes()
-        self.config = {}
         self.debug = False
 
     def configure(self, config_file):
         readConfig(config_file, self.config)
+        host, port = self.config['SERVER_NAME'].split(':')
+        self.host = host
+        self.port = int(port) + 10
 
     def setup_routes(self):
         @self.app.route('/')
@@ -37,10 +42,10 @@ class FlaskSDRStreamer:
             def generate():
                 while True:
                     try:
-                        buf = self.analyzer.render_spectrogram_png()
+                        buf = self.analyzer.render_spectrogram_jpg()
                         yield (
                             b"--pngboundary\r\n"
-                            b"Content-Type: image/png\r\n"
+                            b"Content-Type: image/jpeg\r\n"
                             b"Content-Length: " + f"{len(buf.getvalue())}".encode() + b"\r\n\r\n" +
                             buf.getvalue() + b"\r\n"
                         )
@@ -74,7 +79,7 @@ class FlaskSDRStreamer:
             while True:
                 try:
                     self.analyzer.update_loop()
-                    time.sleep(0.1)
+                    # time.sleep(0.01)
                 except Exception as e:
                     print(f"Update loop error: {e}")
                     break
@@ -86,6 +91,5 @@ class FlaskSDRStreamer:
 
 if __name__ == '__main__':
     app = FlaskSDRStreamer()
-    app.configure('sdr.json')
     print('FlaskSDRStreamer')
     app.run()

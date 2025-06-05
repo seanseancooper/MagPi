@@ -5,6 +5,8 @@ import numpy as np
 from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
 from src.sdr.lib.IQFileReader import IQFileReader
+import cv2 as cv
+from src.lib.instrumentation import timer
 
 class SDRAnalyzer:
 
@@ -16,6 +18,7 @@ class SDRAnalyzer:
 
         self.filter_peaks = False
         self.peaks = []
+        self.row = None
 
         self.reader = IQFileReader(block_size=self.fft_size)
         self.image_buffer = -100 * np.ones((self.num_rows, self.fft_size))
@@ -51,6 +54,7 @@ class SDRAnalyzer:
 
         return peaks
 
+    # @timer
     def generate_spectrogram_row(self, data):
         fft = np.fft.fftshift(np.fft.fft(data, n=self.fft_size))
         magnitude_db = 10 * np.log10(np.abs(fft)**2 + 1e-12)
@@ -59,40 +63,80 @@ class SDRAnalyzer:
     def update_loop(self):
         while self.streaming:
             data = self.reader.read_block()
-            row = self.generate_spectrogram_row(data)
-            self.peaks = self.detect_peak_bins(row)
+            self.row = self.generate_spectrogram_row(data)
+            self.peaks = self.detect_peak_bins(self.row)
             with self.lock:
                 self.image_buffer = np.roll(self.image_buffer, -1, axis=0)
-                self.image_buffer[-1, :] = row
-            time.sleep(0.1)
+                from sklearn.preprocessing import normalize
+
+                self.image_buffer[-1, :] = self.row
+            # time.sleep(0.01)
 
     def compute_extent(self):
         freq_min = (self.center_freq - self.sample_rate / 2) / 1e6
         freq_max = (self.center_freq + self.sample_rate / 2) / 1e6
         return [freq_min, freq_max, self.num_rows, 0]
 
+    # @timer
     def render_spectrogram_png(self):
+
         with self.lock:
-            fig, ax = plt.subplots()
-            extent = self.compute_extent()
+            fig, ax2 = plt.subplots()
+            # fig.subplots_adjust(hspace=0)
+            freq_min, freq_max, num_rows, row_start = self.compute_extent()
 
-            freq_min, freq_max, _, _ = self.compute_extent()
-            for bin_idx in self.peaks:
+            # ax1.plot(self.row)
+            # ax1.tick_params(labelbottom=False)
+            # ax1.set_units()
 
-                # Skip if frequency is already tracked (within tolerance)
-                # if any(abs(peak_freq - f) < 2000 for f in self.seen_frequencies):
-                #     continue
-                #
-                # self.seen_frequencies.add(peak_freq)
+            # for bin_idx in self.peaks:
+            #
+            #     # Skip if frequency is already tracked (within tolerance)
+            #     # if any(abs(peak_freq - f) < 2000 for f in self.seen_frequencies):
+            #     #     continue
+            #     #
+            #     # self.seen_frequencies.add(peak_freq)
+            #
+            #     freq = freq_min + (freq_max - freq_min) * bin_idx / self.fft_size
+            #     ax2.axvline(freq, color='red', linestyle='-', linewidth=0.8, label=freq)
 
-                freq = freq_min + (freq_max - freq_min) * bin_idx / self.fft_size
-                line = ax.axvline(freq, color='red', linestyle='-', linewidth=0.8)
+            ax2.imshow(self.image_buffer,
+                      aspect='auto',
+                      origin='lower',
+                      extent=[freq_min, freq_max, num_rows, row_start],
+                      cmap='viridis',
+                      vmin=-100,
+                      vmax=100
+            )
 
-            ax.imshow(self.image_buffer, aspect='auto', origin='lower', extent=extent, cmap='viridis', vmin=-30, vmax=30)
-            ax.set_xlabel("Frequency (MHz)")
-            ax.set_ylabel("Time")
+            ax2.set_xlabel("Frequency (MHz)")
+
             buf = io.BytesIO()
             plt.savefig(buf, format='png')
+            plt.close(fig)
+            buf.seek(0)
+            return buf
+
+    # @timer
+    def render_spectrogram_jpg(self):
+
+        with self.lock:
+            fig, ax2 = plt.subplots(figsize = (16, 2))
+            freq_min, freq_max, num_rows, row_start = self.compute_extent()
+
+            ax2.imshow(self.image_buffer,
+                      aspect='auto',
+                      origin='lower',
+                      extent=[freq_min, freq_max, num_rows, row_start],
+                      cmap='viridis',
+                      vmin=-10,
+                      vmax=40
+            )
+
+            ax2.set_xlabel("Frequency (MHz)")
+
+            buf = io.BytesIO()
+            plt.savefig(buf, format='jpg')
             plt.close(fig)
             buf.seek(0)
             return buf
