@@ -31,7 +31,7 @@ class SDRWorker(threading.Thread):
         self.is_mute = False            # is muted
         self.tracked = False            # is in scanner.tracked_signals
 
-        self._text_attributes = {}       # mapping of worker attributes
+        self._text_attributes = {}      # mapping of worker attributes
 
         self.results = []               # a list of test results (this should be local to method)
         self.return_all = False         # return all/any
