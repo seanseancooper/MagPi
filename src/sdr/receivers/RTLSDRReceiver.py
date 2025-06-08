@@ -166,23 +166,31 @@ class RTLSDRReceiver(threading.Thread):
         for peak in peaks:
 
             text_attributes = {
-                'sample_rate': self.sdr.sample_rate,
-                'center_freq': self.sdr.center_freq,
-                'freq_corr'  : self.sdr.freq_correction,
-                'gain'       : self.sdr.gain,
+                # 'sample_rate' : self.sdr.sample_rate,
+                # 'center_freq' : self.sdr.center_freq,            # CELL_NAME_FIELD
+                # 'freq_corr'   : self.sdr.freq_correction,
+                # 'gain'        : self.sdr.gain,
             }
 
             peak_freq = self.get_peak_freq(peak)
 
+            worker_id = ''
+
             cell = {
-                'peak_freq'      : peak_freq,
+                'peak_freq'      : peak_freq,                                           # CELL_IDENT_FIELD
                 "created"        : format_time(datetime.now(), "%Y-%m-%d %H:%M:%S.%f"),
                 "id"             : str(generate_uuid()),
-                "worker_id"      : '',
+                "worker_id"      : worker_id,
                 "lon"            : 0.0,
                 "lat"            : 0.0,
-                "sgnl"           : self.get_peak_db(peak),
-                "text_attributes": text_attributes,
+                "sgnl"           : self.get_peak_db(peak),                              # CELL_STRENGTH_FIELD
+
+                # "text_attributes": text_attributes, # this is being done 2x?
+                'sample_rate'   : self.sdr.sample_rate,
+                'center_freq'   : self.sdr.center_freq,                                    # CELL_NAME_FIELD
+                'freq_corr'     : self.sdr.freq_correction,
+                'gain'          : self.sdr.gain,
+
                 "audio_data"     : None,
                 'cell_type'      : 'sdr',
                 'is_mute'        : False,

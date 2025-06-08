@@ -1,6 +1,8 @@
 import threading
-
+import time
 import matplotlib
+import numpy as np
+
 matplotlib.use('Agg')
 
 from flask import Flask, Response, render_template
@@ -18,8 +20,8 @@ class FlaskSDRStreamer:
         global app
         self.app = app
 
-        self.host = host
-        self.port = port
+        self.host = None
+        self.port = None
         self.config = {}
         self.configure('sdr.json')
         self.analyzer = SDRAnalyzer()
@@ -74,19 +76,30 @@ class FlaskSDRStreamer:
                 'sample_rate': self.analyzer.sample_rate
             })
 
-    def start_streaming_loop(self):
-        def update_loop():
-            while True:
-                try:
-                    self.analyzer.update_loop()
-                    # time.sleep(0.01)
-                except Exception as e:
-                    print(f"Update loop error: {e}")
-                    break
-        threading.Thread(target=update_loop, daemon=True).start()
+        @socketio.on('read_block')
+        def read_block():
+            data = self.analyzer.reader.read_block()
+            block = self.analyzer.generate_spectrogram_row(data)
+
+            if block is not None:
+                emit('block_data', block.astype(np.float32).tobytes())
+                # emit('block_data', block.tobytes())
+            else:
+                emit('block_data', [])  # or handle error case
+
+    # def start_streaming_loop(self):
+    #     def update_loop():
+    #         while True:
+    #             try:
+    #                 self.analyzer.update_loop()
+    #                 # time.sleep(0.01)
+    #             except Exception as e:
+    #                 print(f"Update loop error: {e}")
+    #                 break
+    #     threading.Thread(target=update_loop, daemon=True).start()
 
     def run(self):
-        self.start_streaming_loop()
+        # self.start_streaming_loop()
         socketio.run(self.app, host=self.host, port=self.port, allow_unsafe_werkzeug=True)
 
 if __name__ == '__main__':

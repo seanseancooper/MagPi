@@ -11,12 +11,12 @@ from src.lib.instrumentation import timer
 class SDRAnalyzer:
 
     def __init__(self):
-        self.fft_size = 4096
+        self.fft_size = 2048
         self.num_rows = 100
         self.sample_rate = 2.048e6
         self.center_freq = 100e6
 
-        self.filter_peaks = False
+        self.filter_peaks = True
         self.peaks = []
         self.row = None
 
@@ -25,9 +25,9 @@ class SDRAnalyzer:
         self.lock = threading.Lock()
 
         self.streaming = True
-        self.thread = threading.Thread(target=self.update_loop)
-        self.thread.daemon = True
-        self.thread.start()
+        # self.thread = threading.Thread(target=self.update_loop)
+        # self.thread.daemon = True
+        # self.thread.start()
 
     def detect_peak_bins(self, magnitude_db):
 
@@ -60,17 +60,17 @@ class SDRAnalyzer:
         magnitude_db = 10 * np.log10(np.abs(fft)**2 + 1e-12)
         return magnitude_db
 
-    def update_loop(self):
-        while self.streaming:
-            data = self.reader.read_block()
-            self.row = self.generate_spectrogram_row(data)
-            self.peaks = self.detect_peak_bins(self.row)
-            with self.lock:
-                self.image_buffer = np.roll(self.image_buffer, -1, axis=0)
-                from sklearn.preprocessing import normalize
-
-                self.image_buffer[-1, :] = self.row
-            # time.sleep(0.01)
+    # def update_loop(self):
+    #     while self.streaming:
+    #         data = self.reader.read_block()
+    #         self.row = self.generate_spectrogram_row(data)
+    #         self.peaks = self.detect_peak_bins(self.row)
+    #         with self.lock:
+    #             self.image_buffer = np.roll(self.image_buffer, -1, axis=0)
+    #             from sklearn.preprocessing import normalize
+    #
+    #             self.image_buffer[-1, :] = self.row
+    #         # time.sleep(0.01)
 
     def compute_extent(self):
         freq_min = (self.center_freq - self.sample_rate / 2) / 1e6
