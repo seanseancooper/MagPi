@@ -11,7 +11,7 @@ from src.lib.instrumentation import timer
 class SDRAnalyzer:
 
     def __init__(self):
-        self.fft_size = 2048
+        self.fft_size = 4096
         self.num_rows = 100
         self.sample_rate = 2.048e6
         self.center_freq = 100e6
