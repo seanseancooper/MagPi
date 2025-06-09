@@ -1,11 +1,6 @@
-import threading
-import time
-import matplotlib
 import numpy as np
 
-matplotlib.use('Agg')
-
-from flask import Flask, Response, render_template
+from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 from src.sdr.lib import SDRAnalyzer
 from src.config import readConfig
@@ -25,6 +20,7 @@ class FlaskSDRStreamer:
         self.config = {}
         self.configure('sdr.json')
         self.analyzer = SDRAnalyzer()
+        self.analyzer.configure('sdr.json')
         self.setup_routes()
         self.debug = False
 
@@ -38,29 +34,6 @@ class FlaskSDRStreamer:
         @self.app.route('/')
         def index():
             return render_template('index.html.j2')
-
-        @self.app.route('/spectrogram_stream')
-        def spectrogram_stream():
-            def generate():
-                while True:
-                    try:
-                        buf = self.analyzer.render_spectrogram_jpg()
-                        yield (
-                            b"--pngboundary\r\n"
-                            b"Content-Type: image/jpeg\r\n"
-                            b"Content-Length: " + f"{len(buf.getvalue())}".encode() + b"\r\n\r\n" +
-                            buf.getvalue() + b"\r\n"
-                        )
-                        time.sleep(0.01)  # adjust to control frame rate
-                    except Exception as e:
-                        print(f"Stream error: {e}")
-                        break
-
-            headers = {
-                'Cache-Control': 'no-store, no-cache, must-revalidate, pre-check=0, post-check=0, max-age=0',
-                'Pragma': 'no-cache'
-            }
-            return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=pngboundary', headers=headers)
 
         @socketio.on('extract_signal')
         def handle_extract(data):
@@ -83,23 +56,10 @@ class FlaskSDRStreamer:
 
             if block is not None:
                 emit('block_data', block.astype(np.float32).tobytes())
-                # emit('block_data', block.tobytes())
             else:
                 emit('block_data', [])  # or handle error case
 
-    # def start_streaming_loop(self):
-    #     def update_loop():
-    #         while True:
-    #             try:
-    #                 self.analyzer.update_loop()
-    #                 # time.sleep(0.01)
-    #             except Exception as e:
-    #                 print(f"Update loop error: {e}")
-    #                 break
-    #     threading.Thread(target=update_loop, daemon=True).start()
-
     def run(self):
-        # self.start_streaming_loop()
         socketio.run(self.app, host=self.host, port=self.port, allow_unsafe_werkzeug=True)
 
 if __name__ == '__main__':
