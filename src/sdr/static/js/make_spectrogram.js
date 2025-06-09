@@ -1,6 +1,6 @@
 
 const socket = io();
-const fft_size = 8192;
+const fft_size = 4096;
 
 socket.on('connect', () => {
     console.log("Socket connected");
