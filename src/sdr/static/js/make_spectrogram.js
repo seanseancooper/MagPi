@@ -1,13 +1,13 @@
 
 const socket = io();
-const fft_length = 4096;
+const fft_size = 4096;
 
 socket.on('connect', () => {
     console.log("Socket connected");
 });
 
 // Shared buffer to hold latest block data
-let latestBlockData = new Uint8Array(fft_length);           // Initialized with dummy data
+let latestBlockData = new Uint8Array(fft_size);           // Initialized with dummy data
 let blockReady = false;
 
 // Emit read_block
@@ -39,21 +39,21 @@ function processBlockData(block) {
     }
 
     const floatBlock = new Float32Array(block); // 4096 float magnitudes in dB
-    const magnitudes = new Uint8Array(fft_length);
-    normalizeToUint8(floatBlock, magnitudes, -100, 100);  // display anything from -90 dB to 0 dB
+    const magnitudes = new Uint8Array(fft_size);
+    normalizeToUint8(floatBlock, magnitudes, -10, 50);  // display anything from -90 dB to 0 dB
 
     return magnitudes;
 }
 
 // Data generator using most recent processed buffer
-function FreqDataGenerator(sampling_rate, fft_length) {
+function FreqDataGenerator(sampling_rate, fft_size) {
 
-    this.rawLineTime = 1000 * fft_length / sampling_rate;
+    this.rawLineTime = 1000 * fft_size / sampling_rate;
     this.sampleFreq = sampling_rate;
-    this.fft_length = fft_length;
+    this.fft_size = fft_size;
 
     // double buffering
-    let currentBuffer = new Uint8Array(this.fft_length);
+    let currentBuffer = new Uint8Array(this.fft_size);
 
     this.getLine = () => {
         if (blockReady) {
@@ -72,8 +72,8 @@ function getDynamicDataBuffer(dataGen) {
     let sigTime = 0;
     const sigStartTime = Date.now();
 
-    bufferAry[0] = new Uint8Array(dataGen.fft_length);
-    bufferAry[1] = new Uint8Array(dataGen.fft_length);
+    bufferAry[0] = new Uint8Array(dataGen.fft_size);
+    bufferAry[1] = new Uint8Array(dataGen.fft_size);
 
     function genDynamicData() {
         let sigDiff;
@@ -106,18 +106,17 @@ function drawSpectrograms() {
     const sampling_rate = 2.048e6;      // get this from config
 
     const center_freq = 100e6;           // get this from sdr
-    const bandwidth = 100;             // from sdr
+    const bandwidth = 100e5;             // from sdr
 
-    const min_freq = center_freq - (bandwidth / 2);
-    const max_freq = center_freq + (bandwidth / 2);
+    const min_freq = (center_freq - sampling_rate / 2) / 1e6;
+    const max_freq = (center_freq + sampling_rate / 2) / 1e6;
 
-    const fft_bins = 2048;              // get this from config
-    const spectrogram_rows = 500;       // this one
+    const spectrogram_rows = 250;                   // num rows visible
 
     const maxFreq = max_freq + center_freq;
-    const maxTime = 20;
+    const maxTime = 20;                             // time length of displayed spectrogram
 
-    const dataGenerator = new FreqDataGenerator(sampling_rate, fft_length);
+    const dataGenerator = new FreqDataGenerator(sampling_rate, fft_size);
     const dataObj = getDynamicDataBuffer(dataGenerator);
 
     // Matlab Jet ref: stackoverflow.com grayscale-to-red-green-blue-matlab-jet-color-scale
@@ -194,16 +193,16 @@ function drawSpectrograms() {
     cgo.setWorldCoordsRHC(0, -maxTime, maxFreq, maxTime)
 
     // new BoxAxes(xmin, xmax, ymin, ymax [, options])
-    const baxes = new BoxAxes(min_freq, max_freq, -Infinity, 0, {
+//    const baxes = new BoxAxes(min_freq, max_freq, -Infinity, 0, {
 //        xUnits:"Hz",
 //        yUnits:"sec",
 //        xTickInterval:"auto",
 //        yTickInterval:"auto",
-        strokeColor: "#000000",
-        fillColor: '#000000'
-    });
+//        strokeColor: "#000000",
+//        fillColor: '#000000'
+//    });
 
-    cgo.render(baxes);
+//    cgo.render(baxes);
 
 //    xax = new Xaxis(min_freq, max_freq, []);
 //        yOrigin: 0,
@@ -214,9 +213,9 @@ function drawSpectrograms() {
 //    });
     //cgo.render(xax);
 
-    console.log('center_freq: ' + center_freq + ' bandwidth: ' + bandwidth + ' min_freq:' + min_freq + ' max_freq' + max_freq);
+    console.log('center_freq: ' + center_freq + ' bandwidth: ' + bandwidth + ' min_freq: ' + min_freq + ' max_freq: ' + max_freq);
 
-    const wf = new Waterfall(dataObj, fft_bins, spectrogram_rows, "DOWN");
+    const wf = new Waterfall(dataObj, fft_size, spectrogram_rows, "DOWN");
     wf.start();
 
     function draw_waveforms()
