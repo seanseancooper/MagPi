@@ -40,7 +40,7 @@
 			"DEFAULT_FREQ_CORRECTION": 60
 		},
 		{
-			"DEFAULT_GAIN": 49.6
+			"DEFAULT_GAIN": 0.0
 		},
 		{
 			"MQ_MODULE_RETRIEVER": "src.sdr.receivers.RTLSDRReceiver"
