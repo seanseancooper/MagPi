@@ -25,9 +25,14 @@ class SDRAnalyzer:
         self.lock = threading.Lock()
 
         self.streaming = True
-        # self.thread = threading.Thread(target=self.update_loop)
-        # self.thread.daemon = True
-        # self.thread.start()
+
+    def configure(self, config_file):
+
+        readConfig(config_file, self.config)
+
+        self.sample_rate = self.config['DEFAULT_SAMPLE_RATE']
+        self.center_freq = self.config['DEFAULT_CENTER_FREQ']
+        self.fft_size = self.config['FFT_SIZE']
 
     def detect_peak_bins(self, magnitude_db):
 
