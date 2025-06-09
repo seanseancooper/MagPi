@@ -190,6 +190,7 @@ function drawSpectrograms() {
 
     const cgo = new Cango("cvs");
     cgo.gridboxPadding(4, 4, 4, 4);
+    // (Xorigin, Yorigin, Xspan, Yspan)
     cgo.setWorldCoordsRHC(0, -maxTime, maxFreq, maxTime)
 
     // new BoxAxes(xmin, xmax, ymin, ymax [, options])
