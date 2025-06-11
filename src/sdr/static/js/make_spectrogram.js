@@ -179,7 +179,7 @@ function processBlockData(block) {
       }
     }
 
-    const floatBlock = new Float32Array(block); // 4096 float magnitudes in dB
+    const floatBlock = new Float32Array(block);
     const magnitudes = new Uint8Array(fft_size);
     normalizeToUint8(floatBlock, magnitudes, -5, 30);  // display anything from -90 dB to 0 dB
 
