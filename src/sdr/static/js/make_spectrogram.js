@@ -9,6 +9,8 @@ let blockReady = false;
 let latestPeakData = new Uint8Array(1024);                  // Hold latest peak data
 let peakReady = false;
 
+let highlights = [];
+
 socket.on('connect', () => {
     console.log("Socket connected");
 });
