@@ -14,7 +14,7 @@ class SDRAnalyzer:
         self.center_freq = 100e6
         self.config = {}
 
-        self.filter_peaks = True
+        self.filter_peaks = False
         self.peaks = []
         self.row = None
 
@@ -44,22 +44,23 @@ class SDRAnalyzer:
             'rel_height': 0.5                           # Ensures peak width is measured at a consistent threshold (half-max)
         }
 
-        peaks, properties = find_peaks(magnitude_db, **peak_options)
+        self.peaks, properties = find_peaks(magnitude_db, **peak_options)
 
         if self.filter_peaks: # filter by further criteria post-hoc
             filtered_peaks = []
-            for i, peak in enumerate(peaks):
+            for i, peak in enumerate(self.peaks):
                 w = properties['widths'][i] if 'widths' in properties else None
                 p = properties['prominences'][i] if 'prominences' in properties else None
                 if w and p and w > 20 and p > 1:
                     filtered_peaks.append(peak)
-            return np.array(filtered_peaks)
+            self.peaks = np.array(filtered_peaks)
 
-        return peaks
+        return self.peaks
 
     def generate_spectrogram_row(self, data):
         fft = np.fft.fftshift(np.fft.fft(data, n=self.fft_size))
         magnitude_db = 10 * np.log10(np.abs(fft)**2 + 1e-12)
+        self.detect_peak_bins(magnitude_db)
         return magnitude_db
 
     def compute_extent(self):
