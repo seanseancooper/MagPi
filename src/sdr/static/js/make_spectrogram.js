@@ -207,9 +207,7 @@ function getDynamicDataBuffer(dataGen) {
     return { buffer: bufferAry[0] };
 }
 
-function drawIndicator(sampling_rate) {
-
-    const center_freq = 100e6;   // Hz (can be made dynamic)
+function draw_indicia(sampling_rate) {
 
     const cvs_xaxis = document.getElementById("cvs_xaxis");
     const xaxis_ctx = cvs_xaxis.getContext("2d");
