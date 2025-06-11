@@ -59,6 +59,18 @@ class FlaskSDRStreamer:
             else:
                 emit('block_data', [])  # or handle error case
 
+        @socketio.on('get_peaks')
+        def get_peaks():
+
+            block = self.analyzer.reader.read_block()
+            mags = self.analyzer.generate_spectrogram_row(block)
+            peaks, properties = self.analyzer.detect_peak_bins(mags) # numpy array of peaks
+
+            if peaks is not None:
+                emit('peak_data', peaks.tolist())
+            else:
+                emit('peak_data', [])
+
     def run(self):
         socketio.run(self.app, host=self.host, port=self.port, allow_unsafe_werkzeug=True)
 
