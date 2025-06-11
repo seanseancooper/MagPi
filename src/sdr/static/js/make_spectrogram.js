@@ -227,6 +227,13 @@ function draw_indicia(sampling_rate) {
         { freq: max_freq_hz, label: "", color: "white" }
     ];
 
+    const min_indicia = [];
+    let step = Math.floor(cvs_xaxis.width/10);
+
+    for (let i = 0; i < 10; i++) {
+        min_indicia.push({ freq: step*i, label: "", color: "white" });
+    }
+
     const labels = [
         { freq: min_freq_hz+6e4, label: (min_freq_hz / 1e6).toFixed(2) + " MHz", color: "white" },
         { freq: center_freq, label: (center_freq / 1e6).toFixed(2) + " MHz", color: "white" },
