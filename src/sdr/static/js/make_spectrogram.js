@@ -1,5 +1,7 @@
 const socket = io();
 const fft_size = 4096;
+const center_freq = 100e6;              // Hz (can be made dynamic)
+const sampling_rate = 2.048e6;          // get this from config?? sdr??
 const bgcolor = "#000099";
 
 let latestBlockData = new Uint8Array(fft_size);             // Shared buffer to hold latest block data
