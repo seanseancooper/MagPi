@@ -363,7 +363,7 @@ function draw_spec() {
     cgo.gridboxPadding(0);
     cgo.setWorldCoordsSVG(0, 0, cvs_spec.width, cvs_spec.height/10);
 
-    draw_indicia(sampling_rate);
+    draw_indicia();
 
     const wf = new Waterfall(dataObj, fft_size, cvs_spec.height, "DOWN");
     wf.start();
