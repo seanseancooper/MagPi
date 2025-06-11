@@ -137,6 +137,37 @@ function setupInfoLayerHandlers(highlightLayer, highlightData, infoLayerId = 'in
     });
 }
 
+function peaks2x(latestPeakData, fft_size, canvasWidth) {
+
+    let x_peaks = [];
+
+    for (let i = 0; i < latestPeakData.length; i++) {
+        function binToX(binIndex) {
+            return Math.floor((binIndex / fft_size) * canvasWidth);
+        }
+        x_peaks.push(binToX(latestPeakData[i]));
+    }
+
+    return x_peaks;
+}
+
+function draw_highlights(highlights) {
+
+    const highlightLayer = new HighlightLayer("cvs_hl");
+
+    for (let { x, y, label, color } of highlights) {
+        highlightLayer.addHighlight(x, y, 1.0, 'rgba(255,0,0,ALPHA)');
+
+        const highlightData = {
+            min_sel: x,
+            max_sel: y,
+            canvas: highlightLayer.canvas
+        };
+
+        setupInfoLayerHandlers(highlightLayer.canvas, highlightData);
+    }
+}
+
 // Convert interleaved complex Float32Array to Uint8Array (magnitude, 0..255)
 function processBlockData(block) {
 
