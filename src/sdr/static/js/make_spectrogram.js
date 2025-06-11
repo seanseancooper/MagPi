@@ -258,6 +258,17 @@ function draw_indicia(sampling_rate) {
         xaxis_ctx.stroke();
     }
 
+    for (let { freq, label, color } of min_indicia) {
+
+        // Vertical line
+        xaxis_ctx.beginPath();
+        xaxis_ctx.moveTo(freq, 25);
+        xaxis_ctx.lineTo(freq, cvs_xaxis.height);
+        xaxis_ctx.strokeStyle = color;
+        xaxis_ctx.lineWidth = 2;
+        xaxis_ctx.stroke();
+    }
+
     // Draw labels
     for (let { freq, label, color } of labels) {
         const x = freqToX(freq);
