@@ -281,34 +281,7 @@ function draw_indicia(sampling_rate) {
     }
 }
 
-function draw_peaks() {
-
-    const highlightLayer = new HighlightLayer("cvs_hl");
-
-    function binToX(binIndex, fftSize, canvasWidth) {
-        return Math.floor((binIndex / fftSize) * canvasWidth);
-    }
-
-    // iterate over latest peaks and lay lines.
-    for (let i = 0; i < latestPeakData.length; i++) {
-        console.log(latestPeakData[i]);
-        let x = binToX(latestPeakData[i], fft_size, highlightLayer.canvas.width);
-        highlightLayer.addHighlight(x-1, x+1, 1.0, 'rgba(255,0,0,ALPHA)');
-
-//        const highlightData = {
-//            min_sel: x-1,
-//            max_sel: x+1,
-//            canvas: highlightLayer.canvas
-//        };
-//
-//        setupInfoLayerHandlers(highlightLayer.canvas, highlightData);
-    }
-
-}
-
-function drawSpectrograms() {
-
-    const sampling_rate = 2.048e6;         // get this from config?? sdr??
+function draw_spec() {
 
     const dataGenerator = new FreqDataGenerator(sampling_rate, fft_size);
     const dataObj = getDynamicDataBuffer(dataGenerator);
