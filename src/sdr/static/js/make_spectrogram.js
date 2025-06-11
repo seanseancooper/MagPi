@@ -1,24 +1,20 @@
-
 const socket = io();
 const fft_size = 4096;
+const bgcolor = "#000099";
+
+let latestBlockData = new Uint8Array(fft_size);             // Shared buffer to hold latest block data
+let blockReady = false;
+let latestPeakData = new Uint8Array(1024);              // Hold latest peak data
+let peakReady = false;
 
 socket.on('connect', () => {
     console.log("Socket connected");
 });
 
-// Shared buffer to hold latest block data
-let latestBlockData = new Uint8Array(fft_size);           // Initialized with dummy data
-let blockReady = false;
-
-// Emit read_block
-function requestBlock() {
-    socket.emit('read_block');
-}
-
-// When server sends new block
 socket.on('block_data', (data) => {
-        if (data) {                                         // 4096 complex numbers = 8192 float32 values
+    if (data) {                                             // 4096 complex numbers = 8192 float32 values
         const floatArray = new Float32Array(data);
+        requestPeaks();                                     // trigger peaks for block
         latestBlockData = processBlockData(floatArray);     // convert to 0..255
         blockReady = true;
     } else {
@@ -26,6 +22,116 @@ socket.on('block_data', (data) => {
     }
 });
 
+socket.on('peak_data', (peaks) => {
+    if (peaks) {
+        latestPeakData = peaks;
+    }
+});
+
+// Emit read_block
+function requestBlock() {
+    socket.emit('read_block');
+}
+
+function requestPeaks() {
+    socket.emit('get_peaks');
+}
+
+class Highlight {
+
+  constructor(min_sel, max_sel, alpha = 0.2, color = 'rgba(255,255,0,ALPHA)') {
+    this._min_sel = min_sel;
+    this._max_sel = max_sel;
+    this.alpha = alpha;
+    this.color = color;
+  }
+
+  get min_sel() {
+    return this._min_sel;
+  }
+
+  set min_sel(value) {
+    this._min_sel = value;
+  }
+
+  get max_sel() {
+    return this._max_sel;
+  }
+
+  set max_sel(value) {
+    this._max_sel = value;
+  }
+
+  draw(ctx, canvasHeight) {
+    const width = this._max_sel - this._min_sel;
+    ctx.globalAlpha = this.alpha;
+    ctx.fillStyle = this.color.replace('ALPHA', this.alpha.toFixed(2));
+    ctx.fillRect(this._min_sel, 0, width, canvasHeight);
+    ctx.globalAlpha = 1.0; // reset
+  }
+}
+
+class HighlightLayer {
+
+  constructor(canvasId) {
+    this.canvas = document.getElementById(canvasId);
+    this.ctx = this.canvas.getContext("2d");
+    this.highlights = [];
+  }
+
+  addHighlight(min_sel, max_sel, alpha = 0.2, color = 'rgba(255,255,0,ALPHA)') {
+    const hl = new Highlight(min_sel, max_sel, alpha, color);
+    this.highlights.push(hl);
+    this.render();
+    return hl;
+  }
+
+  clearHighlights() {
+    this.highlights = [];
+    this.render();
+  }
+
+  render() {
+    const { ctx, canvas } = this;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const hl of this.highlights) {
+      hl.draw(ctx, canvas.height);
+    }
+  }
+}
+
+function setupInfoLayerHandlers(highlightLayer, highlightData, infoLayerId = 'infoLayer') {
+
+    const container = document.getElementById('cvs_hl');
+    const infoLayer = document.getElementById(infoLayerId);
+    const infoMin = document.getElementById('info-min');
+    const infoMax = document.getElementById('info-max');
+
+    if (!container || !infoLayer || !infoMin || !infoMax) {
+        console.warn('Required DOM elements for info layer not found.');
+        return;
+    }
+
+    let activeHighlight = null;
+
+    container.addEventListener('click', (event) => {
+        const rect = highlightLayer.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+
+        const clickedHighlight = highlightData;
+        if (x >= clickedHighlight.min_sel && x <= clickedHighlight.max_sel) {
+            infoLayer.style.display = 'block';
+            infoLayer.style.left = `${event.pageX + 10}px`;
+            infoLayer.style.top = `${event.pageY + 10}px`;
+            infoMin.textContent = `Min: ${clickedHighlight.min_sel}`;
+            infoMax.textContent = `Max: ${clickedHighlight.max_sel}`;
+            activeHighlight = clickedHighlight;
+        } else {
+            infoLayer.style.display = 'none';
+            activeHighlight = null;
+        }
+    });
+}
 
 // Convert interleaved complex Float32Array to Uint8Array (magnitude, 0..255)
 function processBlockData(block) {
@@ -40,7 +146,7 @@ function processBlockData(block) {
 
     const floatBlock = new Float32Array(block); // 4096 float magnitudes in dB
     const magnitudes = new Uint8Array(fft_size);
-    normalizeToUint8(floatBlock, magnitudes, -10, 50);  // display anything from -90 dB to 0 dB
+    normalizeToUint8(floatBlock, magnitudes, -5, 30);  // display anything from -90 dB to 0 dB
 
     return magnitudes;
 }
@@ -58,6 +164,7 @@ function FreqDataGenerator(sampling_rate, fft_size) {
     this.getLine = () => {
         if (blockReady) {
             currentBuffer.set(latestBlockData);  // copy into buffer
+            draw_peaks();
             blockReady = false;
             requestBlock();  // ask for next block right after processing
         }
@@ -91,7 +198,6 @@ function getDynamicDataBuffer(dataGen) {
 
         if (playing) {
             setTimeout(genDynamicData, dataGen.rawLineTime - sigDiff);
-            // console.log('sigDiff: ' + sigDiff);
         }
     }
 
@@ -101,20 +207,92 @@ function getDynamicDataBuffer(dataGen) {
     return { buffer: bufferAry[0] };
 }
 
+function drawIndicator(sampling_rate) {
+
+    const center_freq = 100e6;   // Hz (can be made dynamic)
+
+    const cvs_xaxis = document.getElementById("cvs_xaxis");
+    const xaxis_ctx = cvs_xaxis.getContext("2d");
+
+    // Clear and prep canvas
+    xaxis_ctx.clearRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
+    xaxis_ctx.fillStyle = bgcolor;
+    xaxis_ctx.fillRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
+
+    // Frequencies
+    const min_freq_hz = center_freq - sampling_rate / 2;
+    const max_freq_hz = center_freq + sampling_rate / 2;
+
+    const indicia = [
+        { freq: min_freq_hz, label: "", color: "white" },
+        { freq: center_freq, label: "", color: "white" },
+        { freq: max_freq_hz, label: "", color: "white" }
+    ];
+
+    const labels = [
+        { freq: min_freq_hz+6e4, label: (min_freq_hz / 1e6).toFixed(2) + " MHz", color: "white" },
+        { freq: center_freq, label: (center_freq / 1e6).toFixed(2) + " MHz", color: "white" },
+        { freq: max_freq_hz-7e4, label: (max_freq_hz / 1e6).toFixed(2) + " MHz", color: "white" }
+    ];
+
+    function freqToX(freq) {
+        const rel = (freq - min_freq_hz) / (max_freq_hz - min_freq_hz);
+        return Math.floor(rel * cvs_xaxis.width);
+    }
+
+    // Draw vertical lines
+    for (let { freq, label, color } of indicia) {
+        const x = freqToX(freq);
+
+        // Vertical line
+        xaxis_ctx.beginPath();
+        xaxis_ctx.moveTo(x, 20);
+        xaxis_ctx.lineTo(x, cvs_xaxis.height);
+        xaxis_ctx.strokeStyle = color;
+        xaxis_ctx.lineWidth = 5;
+        xaxis_ctx.stroke();
+    }
+
+    // Draw labels
+    for (let { freq, label, color } of labels) {
+        const x = freqToX(freq);
+
+        // Label text
+        xaxis_ctx.fillStyle = color;
+        xaxis_ctx.font = "11px sans-serif";
+        xaxis_ctx.textAlign = "center";
+        xaxis_ctx.fillText(label, x, cvs_xaxis.height - 18);
+    }
+}
+
+function draw_peaks() {
+
+    const highlightLayer = new HighlightLayer("cvs_hl");
+
+    function binToX(binIndex, fftSize, canvasWidth) {
+        return Math.floor((binIndex / fftSize) * canvasWidth);
+    }
+
+    // iterate over latest peaks and lay lines.
+    for (let i = 0; i < latestPeakData.length; i++) {
+        console.log(latestPeakData[i]);
+        let x = binToX(latestPeakData[i], fft_size, highlightLayer.canvas.width);
+        highlightLayer.addHighlight(x-1, x+1, 1.0, 'rgba(255,0,0,ALPHA)');
+
+//        const highlightData = {
+//            min_sel: x-1,
+//            max_sel: x+1,
+//            canvas: highlightLayer.canvas
+//        };
+//
+//        setupInfoLayerHandlers(highlightLayer.canvas, highlightData);
+    }
+
+}
+
 function drawSpectrograms() {
 
-    const sampling_rate = 2.048e6;      // get this from config
-
-    const center_freq = 100e6;           // get this from sdr
-    const bandwidth = 100e5;             // from sdr
-
-    const min_freq = (center_freq - sampling_rate / 2) / 1e6;
-    const max_freq = (center_freq + sampling_rate / 2) / 1e6;
-
-    const spectrogram_rows = 250;                   // num rows visible
-
-    const maxFreq = max_freq + center_freq;
-    const maxTime = 20;                             // time length of displayed spectrogram
+    const sampling_rate = 2.048e6;         // get this from config?? sdr??
 
     const dataGenerator = new FreqDataGenerator(sampling_rate, fft_size);
     const dataObj = getDynamicDataBuffer(dataGenerator);
@@ -188,50 +366,30 @@ function drawSpectrograms() {
                 [  0,   0,   0,   0]
                 ];
 
-    const cgo = new Cango("cvs");
-    cgo.gridboxPadding(4, 4, 4, 4);
-    // (Xorigin, Yorigin, Xspan, Yspan)
-    cgo.setWorldCoordsRHC(0, -maxTime, maxFreq, maxTime)
+    const cvs_spec = document.getElementById('cvs_spec');
+    const cvs_spec_ctx = cvs_spec.getContext("2d");
 
-    // new BoxAxes(xmin, xmax, ymin, ymax [, options])
-//    const baxes = new BoxAxes(min_freq, max_freq, -Infinity, 0, {
-//        xUnits:"Hz",
-//        yUnits:"sec",
-//        xTickInterval:"auto",
-//        yTickInterval:"auto",
-//        strokeColor: "#000000",
-//        fillColor: '#000000'
-//    });
+    const cgo = new Cango("cvs_spec");
+    cgo.clearCanvas(bgcolor);
+    cgo.gridboxPadding(0);
+    cgo.setWorldCoordsSVG(0, 0, cvs_spec.width, cvs_spec.height/10);
 
-//    cgo.render(baxes);
+    drawIndicator(sampling_rate);
 
-//    xax = new Xaxis(min_freq, max_freq, []);
-//        yOrigin: 0,
-//        xUnits:"Hz",
-//        xTickInterval:"auto",
-//        strokeColor: "#000000",
-//        fillColor: '#000000'
-//    });
-    //cgo.render(xax);
-
-    console.log('center_freq: ' + center_freq + ' bandwidth: ' + bandwidth + ' min_freq: ' + min_freq + ' max_freq: ' + max_freq);
-
-    const wf = new Waterfall(dataObj, fft_size, spectrogram_rows, "DOWN");
+    const wf = new Waterfall(dataObj, fft_size, cvs_spec.height, "DOWN");
     wf.start();
 
     function draw_waveforms()
     {
 
-        const canvas = document.getElementById('cvs');
-        const ctx = canvas.getContext("2d");
-        const imgObj = ctx.getImageData(0,0, canvas.width, canvas.height);
+        const imgObj = cvs_spec_ctx.getImageData(0,0, cvs_spec.width, cvs_spec.height);
         const pxPerLine = imgObj.width;
         var dataLine = [];
 
         dataLine =  dataObj.buffer;
 
         // Loop through each row of the canvas
-        for (let row = 0; row < canvas.height; row++) {
+        for (let row = 0; row < cvs_spec.height; row++) {
             for (let px = 0; px < pxPerLine; px++) {
 
                 //Calculate index in the image data buffer
@@ -249,7 +407,7 @@ function drawSpectrograms() {
             }
         }
 
-        let wfImg = new Img(wf.offScreenCvs, { imgWidth: maxFreq, imgHeight: maxTime });
+        let wfImg = new Img(wf.offScreenCvs, { imgWidth: cvs_spec.width, imgHeight: cvs_spec.height/10 });
         cgo.render(wfImg);
 
         window.requestAnimationFrame(draw_waveforms);
@@ -262,4 +420,3 @@ let playing = true;
 window.addEventListener("load", function () {
     drawSpectrograms();
 });
-
