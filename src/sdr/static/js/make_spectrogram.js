@@ -407,5 +407,5 @@ function draw_spec() {
 let playing = true;
 
 window.addEventListener("load", function () {
-    drawSpectrograms();
+    draw_spec();
 });
