@@ -207,7 +207,7 @@ function getDynamicDataBuffer(dataGen) {
     return { buffer: bufferAry[0] };
 }
 
-function draw_indicia(sampling_rate) {
+function draw_indicia() {
 
     const cvs_xaxis = document.getElementById("cvs_xaxis");
     const xaxis_ctx = cvs_xaxis.getContext("2d");
