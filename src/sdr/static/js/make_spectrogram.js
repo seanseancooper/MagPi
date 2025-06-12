@@ -494,10 +494,6 @@ function draw_spec() {
             }
         }
 
-        highlights = [];
-        draw_highlights(highlights);  // mark something.
-
-
         let wfImg = new Img(wf.offScreenCvs, { imgWidth: cvs_spec.width, imgHeight: cvs_spec.height/10 });
         cgo.render(wfImg);
 
