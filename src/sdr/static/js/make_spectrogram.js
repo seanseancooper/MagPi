@@ -285,9 +285,10 @@ function draw_indicia() {
         { freq: max_freq_hz, label: "", color: "white" }
     ];
 
-    function freqToX(freq) {
-        const rel = (freq - min_freq_hz) / (max_freq_hz - min_freq_hz);
-        return Math.floor(rel * cvs_xaxis.width);
+    const min_indicia = [];
+    let step = Math.floor(cvs_xaxis.width/10);
+    for (let i = 0; i < 10; i++) {
+        min_indicia.push({ freq: step*i, label: "", color: "white" });
     }
 
     // Draw vertical lines
