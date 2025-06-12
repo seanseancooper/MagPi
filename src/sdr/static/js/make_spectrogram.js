@@ -211,7 +211,6 @@ function draw_highlights(cvs_hl, dragHl, highlights) {
     });
 }
 
-// Convert interleaved complex Float32Array to Uint8Array (magnitude, 0..255)
 function processBlockData(block) {
     function normalizeToUint8(block, outArray, minDb = -100, maxDb = 0) {
       const range = maxDb - minDb;
