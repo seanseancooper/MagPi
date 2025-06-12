@@ -216,6 +216,26 @@ and tunes an SDRWorker() receiver to the peak frequency, recording it as a SSET 
 >Geolocation         | Direction of arrival (DoA), location estimates, altitude
 >Behavior-based      | Emission pattern, silence periods, handoff behavior
 >```
+>
+>
+| **Interaction**                     | **Trigger**                              | **Effect**                                                                | **Notes**                                               |
+| ----------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Click on a **highlighted area**     | User clicks inside a defined highlight   | Shows the `info` layer with `min_sel` and `max_sel`; enables buttons      | Current behavior; allows further interaction via popup  |
+| Click outside any highlight         | User clicks non-highlighted canvas area  | Hides the `info` layer                                                    | Ensures only one highlight is interacted with at a time |
+
+
+| **Interaction**                     | **Trigger**                              | **Effect**                                                                | **Notes**                                               |
+| ----------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Click one of the 5 buttons in popup | User clicks a button in the info layer   | Triggers feature action (e.g., lock, delete, analyze, tune, rename)       | You’ll define button behavior later                     |
+| Auto-highlight strongest peak       | On new spectrogram line update           | Automatically highlights the bin with highest magnitude                   | Good for real-time monitoring or scanning               |
+| Filter peaks by threshold           | After receiving peaks from server/client | Highlights only peaks above magnitude threshold                           | Could be user-configurable or static                    |
+| Filter peaks by frequency range     | User specifies or selects a freq range   | Highlights peaks within that frequency window                             | Useful for band-limited analysis                        |
+| Click a signal (peak area) directly | Click event lands near a peak bin        | Creates highlight and shows `info` popup                                  | Can match nearest bin or use a proximity window         |
+| Use a dedicated “Add Signal” button | Button in UI (outside canvas)            | Enables click-to-highlight mode; next canvas click creates a highlight    | More deliberate user-controlled interaction             |
+| Drag to highlight a frequency range | User drags across canvas                 | Creates highlight using mouse start/end x positions → mapped to freq bins | Enables custom/manual region selection                  |
+| Hover over a peak                   | Mouse hovers on a highlight              | Optional: display quick tooltip with frequency & magnitude                | Could enhance interactivity subtly                      |
+
+>
 >These features are often extracted using tools like Fourier Transforms, wavelet analysis, or cyclostationary analysis.
 >## BLU [NOT STARTED]
 >>- Likely to use SDR for this and not have a module.
