@@ -10,6 +10,10 @@ let latestPeakData = new Uint8Array(1024);                  // Hold latest peak 
 let peakReady = false;
 const signalMetadataMap = new Map();                        // key: highlight ID or position, value: metadata
 
+const highlights = [
+  { min_sel: 200, max_sel: 700, alpha: 0.3, color: "cyan" }
+];
+
 socket.on('connect', () => {
     console.log("Socket connected");
 });
