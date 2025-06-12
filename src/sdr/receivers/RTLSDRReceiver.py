@@ -103,8 +103,8 @@ class RTLSDRReceiver(threading.Thread):
         # | Multiple equidistant peaks            | **FSK** (Frequency Shift Keying)                                 |
         # | Constant width, varying height        | Possibly **FSK** or **burst signals**                            |
         # | Peaks that fade or repeat in patterns | **TDMA**, **bursty data**                                        |
-
-        return psd(self.block, NFFT=self.nfft_size)
+        frequencies, psd = welch(self.block, fs=self.sdr.sample_rate, nperseg=self.nfft_size)
+        return psd, frequencies
 
     def get_peaks(self):
         psd_scan, f = self.get_psd_for_block()
