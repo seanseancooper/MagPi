@@ -455,6 +455,8 @@ function draw_spec() {
 
     const cvs_spec = document.getElementById('cvs_spec');
     const cvs_spec_ctx = cvs_spec.getContext("2d");
+    const cvs_hl = new HighlightLayer("cvs_hl");
+    const dragHl = new DragManager(cvs_hl.canvas);
 
     const cgo = new Cango("cvs_spec");
     cgo.clearCanvas(bgcolor);
