@@ -441,14 +441,6 @@ function draw_spec() {
         }
 
         highlights = [];
-
-        let alpha = 0.5;
-        let color = "rgba(255,255,0,ALPHA)";
-
-        highlights.push({x: 100, y: 200, alpha, color});
-        highlights.push({x: 300, y: 700, alpha, color});
-        highlights.push({x: 950, y: 1000, alpha, color});
-
         draw_highlights(highlights);  // mark something.
 
 
