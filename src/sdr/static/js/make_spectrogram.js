@@ -126,91 +126,34 @@ class Highlight {
     this._max_sel = value;
   }
 
-  draw(ctx, canvasHeight) {
-    const width = this._max_sel - this._min_sel;
+  render(ctx) {
+    ctx.save();
     ctx.globalAlpha = this.alpha;
-    ctx.fillStyle = this.color.replace('ALPHA', this.alpha.toFixed(2));
-    ctx.fillRect(this._min_sel, 0, width, canvasHeight);
-    ctx.globalAlpha = 1.0; // reset
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this._min_sel, 0, this._max_sel - this._min_sel, ctx.canvas.height);
+    ctx.restore();
   }
 }
 
 class HighlightLayer {
 
-  constructor(canvasId) {
-    this.canvas = document.getElementById(canvasId);
-    this.ctx = this.canvas.getContext("2d");
-    this.highlights = [];
-  }
-
-  addHighlight(min_sel, max_sel, alpha = 0.2, color = 'rgba(255,255,0,ALPHA)') {
-    const hl = new Highlight(min_sel, max_sel, alpha, color);
-    this.highlights.push(hl);
-    this.render();
-    return hl;
-  }
-
-  clearHighlights() {
-    this.highlights = [];
-    this.render();
-  }
-
-  render() {
-    const { ctx, canvas } = this;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (const hl of this.highlights) {
-      hl.draw(ctx, canvas.height);
+    constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext("2d");
+        this.highlights = [];
     }
-  }
+
+    addHighlight(min_sel, max_sel, alpha, color) {
+        this.highlights.push(new Highlight(min_sel, max_sel, alpha, color));
+    }
+
+    render() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.highlights.forEach(h => h.render(this.ctx));
+    }
 }
 
-class DragManager {
-  constructor(canvas) {
-    this.canvas = canvas;
-    this.ctx = canvas.getContext("2d");
-    this.draggables = [];
-    this.active = null;
-    this.lastX = 0;
-
-    canvas.addEventListener("mousedown", e => this._onMouseDown(e));
-    window.addEventListener("mousemove", e => this._onMouseMove(e));
-    window.addEventListener("mouseup", e => this._onMouseUp(e));
-  }
-
-  addDraggable({ hitTest, onDrag, onDragEnd = () => {} }) {
-    this.draggables.push({ hitTest, onDrag, onDragEnd });
-  }
-
-  _onMouseDown(e) {
-    const rect = this.canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    this.lastX = x;
-    for (const d of this.draggables) {
-      if (d.hitTest(x)) {
-        this.active = d;
-        break;
-      }
-    }
-  }
-
-  _onMouseMove(e) {
-    if (!this.active) return;
-    const rect = this.canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const dx = x - this.lastX;
-    this.active.onDrag(dx);
-    this.lastX = x;
-  }
-
-  _onMouseUp(e) {
-    if (this.active) {
-      this.active.onDragEnd();
-      this.active = null;
-    }
-  }
-}
-
-function setupInfoLayerHandlers(canvas, highlightData, infoLayerId = 'infoLayer') {
+function setupInfoLayerHandlers(canvas, highlight, infoLayerId = 'infoLayer') {
 
     const container = document.getElementById('cvs_hl');
     const infoLayer = document.getElementById(infoLayerId);
@@ -225,17 +168,11 @@ function setupInfoLayerHandlers(canvas, highlightData, infoLayerId = 'infoLayer'
     let activeHighlight = null;
 
     container.addEventListener('click', (event) => {
-        const rect = highlightLayer.getBoundingClientRect();
-        const x = event.clientX - rect.left;
+        const x = event.clientX - canvas.getBoundingClientRect().left;
 
-        const clickedHighlight = highlightData;
-        if (x >= clickedHighlight.min_sel && x <= clickedHighlight.max_sel) {
+        if (x >= highlight.min_sel && x <= highlight.max_sel) {
             infoLayer.style.display = 'block';
-            infoLayer.style.left = `${event.pageX + 10}px`;
-            infoLayer.style.top = `${event.pageY + 10}px`;
-            infoMin.textContent = `Min: ${clickedHighlight.min_sel}`;
-            infoMax.textContent = `Max: ${clickedHighlight.max_sel}`;
-            activeHighlight = clickedHighlight;
+            activeHighlight = highlight;
         } else {
             infoLayer.style.display = 'none';
             activeHighlight = null;
@@ -243,35 +180,32 @@ function setupInfoLayerHandlers(canvas, highlightData, infoLayerId = 'infoLayer'
     });
 }
 
-function peaks2x(latestPeakData, fft_size, canvasWidth) {
+function draw_highlights(cvs_hl, dragHl, highlights) {
 
-    let x_peaks = [];
+    const cvs_hl_cnvs = cvs_hl.canvas;
 
-    for (let i = 0; i < latestPeakData.length; i++) {
-        function binToX(binIndex) {
-            return Math.floor((binIndex / fft_size) * canvasWidth);
-        }
-        x_peaks.push(binToX(latestPeakData[i]));
-    }
+    highlights.forEach(h => {
+        cvs_hl.addHighlight(h.min_sel, h.max_sel, h.alpha, h.color);
+        const [hlInstance] = cvs_hl.highlights.slice(-1);
 
-    return x_peaks;
-}
+        dragHl.addDraggable({
+            hitTest: x => Math.abs(x - hlInstance.min_sel) < 6,
+            onDrag: dx => {
+              hlInstance.min_sel = Math.max(0, hlInstance.min_sel + dx);
+              cvs_hl.render();
+            }
+        });
 
-function draw_highlights(highlights) {
+        dragHl.addDraggable({
+            hitTest: x => Math.abs(x - hlInstance.max_sel) < 6,
+            onDrag: dx => {
+              hlInstance.max_sel = Math.max(hlInstance.min_sel + 1, hlInstance.max_sel + dx);
+              cvs_hl.render();
+            }
+        });
 
-    const highlightLayer = new HighlightLayer("cvs_hl");
-
-    for (let { x, y, label, color } of highlights) {
-        highlightLayer.addHighlight(x, y, 1.0, 'rgba(255,0,0,ALPHA)');
-
-        const highlightData = {
-            min_sel: x,
-            max_sel: y,
-            canvas: highlightLayer.canvas
-        };
-
-        setupInfoLayerHandlers(highlightLayer.canvas, highlightData);
-    }
+        setupInfoLayerHandlers(cvs_hl_cnvs, hlInstance);
+    });
 }
 
 // Convert interleaved complex Float32Array to Uint8Array (magnitude, 0..255)
