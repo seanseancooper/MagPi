@@ -103,7 +103,7 @@ class DragManager {
 
 class Highlight {
 
-  constructor(min_sel, max_sel, alpha = 0.2, color = 'rgba(255,255,0,ALPHA)') {
+  constructor(min_sel, max_sel, alpha, color) {
     this._min_sel = min_sel;
     this._max_sel = max_sel;
     this.alpha = alpha;
