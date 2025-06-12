@@ -13,19 +13,57 @@
 
     <!-- Info Layer Container -->
     <div id="infoLayer" class="info-layer">
-      <div class="info-content">
-        <h3>Info:</h3>
-        <p id="info-min">Min: </p>
-        <p id="info-max">Max: </p>
-        <div class="info-buttons">
-          <button>Action 1</button>
-          <button>Action 2</button>
-          <button>Action 3</button>
-          <button>Action 4</button>
-          <button onclick="extractSignal()">Extract Signal</button>
+        <div class="info-content">
+            <p id="info-min">Min: </p>
+            <p id="info-max">Max: </p>
+            <div class="info-header">Signal Controls</div>
+            <div id="info_panel">
+                <div><strong>Label:</strong> <span id="info_label"></span></div>
+                <div><strong>Freq:</strong> <span id="info_freq"></span></div>
+                <div><strong>BW:</strong> <span id="info_bw"></span></div>
+                <div><strong>Mod:</strong> <span id="info_mod"></span></div>
+                <div><strong>SNR:</strong> <span id="info_snr"></span></div>
+            </div>
+            <div class="info-buttons">
+                <button onclick="emitControlCommand('ctrl_record')">Record</button>
+                <button onclick="emitControlCommand('ctrl_play')">Play</button>
+                <button onclick="emitControlCommand('ctrl_solo')">Solo</button>
+                <button onclick="emitControlCommand('ctrl_mute')">Mute</button>
+                <button onclick="emitControlCommand('ctrl_analyze')">Analyze</button>
+                <button onclick="emitControlCommand('ctrl_demux')">Demux</button>
+                <button onclick="emitControlCommand('ctrl_decode')">Decode</button>
+                <button onclick="emitControlCommand('ctrl_encode')">Encode</button>
+                <button onclick="emitControlCommand('ctrl_filter')">Filter</button>
+                <button onclick="emitControlCommand('ctrl_block')">Block</button>
+                <button onclick="emitControlCommand('ctrl_label')">Label</button>
+                <button onclick="emitControlCommand('ctrl_test')">Test</button>
+            </div>
         </div>
-      </div>
     </div>
+
+    <script>
+        function emitControlCommand(commandName) {
+            const selectedSignalId = getSelectedSignalId(); // Replace with actual logic to identify selected signal
+                socket.emit('control_command', {
+                    command: commandName,
+                    signal_id: selectedSignalId
+                });
+        }
+
+        function getSelectedSignalId() {
+            // Placeholder logic: retrieve currently selected signal ID from UI state
+            return window.selectedSignalId || 'default_signal';
+        }
+
+        function updateInfoDisplay(metadata) {
+            document.getElementById("info_label").textContent = metadata.label || "Unknown";
+            document.getElementById("info_freq").textContent = `${(metadata.center_freq / 1e6).toFixed(3)} MHz`;
+            document.getElementById("info_bw").textContent = `${(metadata.bandwidth / 1e3).toFixed(1)} kHz`;
+            document.getElementById("info_mod").textContent = metadata.modulation || "—";
+            document.getElementById("info_snr").textContent = `${metadata.snr.toFixed(1)} dB`;
+        }
+    </script>
+
 
     <div class="" style="position: relative; width: 1024px; height: 250px;">
         <canvas id="cvs_spec" style="position: absolute; top: 30; left: 0; z-index: 1;" width="1024" height="250"></canvas>
