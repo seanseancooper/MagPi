@@ -46,6 +46,10 @@ function requestPeaks() {
     socket.emit('get_peaks');
 }
 
+function requestMetadata() {
+    socket.emit('meta_data');
+}
+
 class Highlight {
 
   constructor(min_sel, max_sel, alpha = 0.2, color = 'rgba(255,255,0,ALPHA)') {
