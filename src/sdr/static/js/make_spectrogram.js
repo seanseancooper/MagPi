@@ -271,11 +271,13 @@ function draw_indicia() {
         { freq: max_freq_hz, label: "", color: "white" }
     ];
 
-    const min_indicia = [];
-    let step = Math.floor(cvs_xaxis.width/10);
-
-    for (let i = 0; i < 10; i++) {
-        min_indicia.push({ freq: step*i, label: "", color: "white" });
+    // Draw frequency labels (simple example)
+    xaxis_ctx.fillStyle = "white";
+    xaxis_ctx.font = "12px sans-serif";
+    for (let i = 0; i < 5; i++) {
+        let freq = center_freq + (i - 2) * sampling_rate / 4;
+        let x = centerX + (i - 2) * cvs_xaxis.width / 4;
+        xaxis_ctx.fillText((freq / 1e6).toFixed(1) + " MHz", x - 20, 12);
     }
 
     const labels = [
