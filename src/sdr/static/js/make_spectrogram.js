@@ -255,7 +255,7 @@ function FreqDataGenerator(sampling_rate, fft_size) {
         if (blockReady) {
             currentBuffer.set(latestBlockData);     // copy into buffer
             blockReady = false;
-            requestBlock();  // ask for next block right after processing
+            requestBlock();                         // ask for next block right after processing
         }
         return { buffer: currentBuffer };  // always return latest
     };
