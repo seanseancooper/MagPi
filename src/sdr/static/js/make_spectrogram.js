@@ -330,11 +330,10 @@ function draw_indicia() {
     const min_freq_hz = center_freq - sampling_rate / 2;
     const max_freq_hz = center_freq + sampling_rate / 2;
 
-    const indicia = [
-        { freq: min_freq_hz, label: "", color: "white" },
-        { freq: center_freq, label: "", color: "white" },
-        { freq: max_freq_hz, label: "", color: "white" }
-    ];
+    function freqToX(freq) {
+      const df = sampling_rate / fft_size;
+      return (freq - (center_freq - sampling_rate / 2)) / df;
+    }
 
     // Draw frequency labels (simple example)
     xaxis_ctx.fillStyle = "white";
