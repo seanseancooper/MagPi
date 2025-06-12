@@ -464,6 +464,7 @@ function draw_spec() {
     cgo.setWorldCoordsSVG(0, 0, cvs_spec.width, cvs_spec.height/10);
 
     draw_indicia();
+    draw_highlights(cvs_hl, dragHl, highlights);  // mark something.
 
     const wf = new Waterfall(dataObj, fft_size, cvs_spec.height, "DOWN");
     wf.start();
