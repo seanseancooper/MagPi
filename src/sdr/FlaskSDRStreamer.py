@@ -63,6 +63,22 @@ class FlaskSDRStreamer:
         def get_peaks():
             emit('peak_data', self.analyzer.peaks.tolist())
 
+        @socketio.on('meta_data')
+        def get_meta_data():
+
+            meta_data = {
+                "id"         : 42,
+                "start_time" : "2025-06-01T14:00:00Z",
+                "end_time"   : "2025-06-01T14:00:05Z",
+                "center_freq": 98.5e6,
+                "bandwidth"  : 200e3,
+                "modulation" : "FM",
+                "snr"        : 27.4,
+                "label"      : "Weather Broadcast",
+            }
+
+            emit('meta_data', meta_data)
+
     def run(self):
         socketio.run(self.app, host=self.host, port=self.port, allow_unsafe_werkzeug=True)
 
