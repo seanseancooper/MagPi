@@ -5,6 +5,7 @@
 
 from matplotlib import pyplot as plt
 from scipy.signal import hilbert, chirp
+import numpy as np
 
 
 class BitStreamExtractor:
@@ -27,147 +28,64 @@ class BitStreamExtractor:
         return signal_type
 
     def extract_AM_signal(self, am_signal, options=None):
+        if options is None:
+            options = {}
 
-        # Broadcast transmissions: still widely used for broadcasting on the long, medium and short wave bands.
-        # Air band radio: VHF transmissions for many airborne applications still use AM.
-        # Single sideband: Amplitude modulation in the form of single sideband is still used for HF radio links.
-        # Quadrature amplitude modulation:  Wi-Fi to cellular telecommunications formed by having two carriers 90° out of phase.
-
-        # One of the aspects associated with amplitude modulation is sidebands are generated.
-        # These govern the bandwidth of the signal.
-
-        # It is found that if a carrier is modulated with a single tone, e.g. 1 kHz, then two sidebands will appear,
-        # one either side of the main carrier spaced by 1 kHz away from it.
-
-        # Similarly if modulation with a variety of frequencies, e.g. speech or music is used, then the sidebands
-        # will spread out either side of the carrier, extended out by an amount equal to the top frequencies used
-
-        # duration, fs = 1, 400  # 1 s signal with sampling frequency of 400 Hz
-        # t = np.arange(int(fs * duration)) / fs  # timestamps of samples
-        # am_signal = chirp(t, 20.0, t[-1], 100.0)
-        # f = 2.0
-        # am_signal *= (1.0 + 0.5 * np.sin(f * np.pi * 3.0 * t))
-
-        # The modulation index (%): level of modulation used, and the maximum modulation can be w/o distortion.
-
-        r"""FFT-based computation of the analytic signal.
-
-        The analytic signal is calculated by filtering out the negative frequencies and
-        doubling the amplitudes of the positive frequencies in the FFT domain.
-        The imaginary part of the result is the hilbert transform of the real-valued input
-        signal.
-
-        The transformation is done along the last axis by default.
-
-        Parameters
-        ----------
-        x : array_like
-            Signal data.  Must be real.
-        N : int, optional
-            Number of Fourier components.  Default: ``x.shape[axis]``
-        axis : int, optional
-            Axis along which to do the transformation.  Default: -1.
-
-        Returns
-        -------
-        xa : ndarray
-            Analytic signal of `x`, of each 1-D array along `axis`
-        """
         N = options.get('N', None)
-        axis = options.get('axis', None)
+        axis = options.get('axis', -1)
 
-        processed = hilbert(am_signal, N=N, axis=axis)  # what I want
-        # amplitude_envelope = np.abs(processed)
-        # instantaneous_phase = np.unwrap(np.angle(processed))
-        # instantaneous_frequency = np.diff(instantaneous_phase) / (2.0 * np.pi) * sr
+        analytic_signal = hilbert(am_signal, N=N, axis=axis)
+        amplitude_envelope = np.abs(analytic_signal)
 
-        # return extracted AM baseband signal.
-        return processed
+        return amplitude_envelope
 
-    def extract_FM_signal(self, fm_signal, options):
+    def extract_FM_signal(self, fm_signal, options=None):
+        if options is None:
+            options = {}
 
-        n = fm_signal.size
-        timestep = 0.1                  # with sr should be able to calculate this?
+        analytic = hilbert(fm_signal)
+        instantaneous_phase = np.unwrap(np.angle(analytic))
+        instantaneous_frequency = np.diff(instantaneous_phase) * (self.sr / (2.0 * np.pi))
 
-        d = options.get('d', None)
-        device = options.get('device', None)
-        """
-        Return the Discrete Fourier Transform sample frequencies.
+        return instantaneous_frequency
 
-        The returned float array `f` contains the frequency bin centers in cycles
-        per unit of the sample spacing (with zero at the start).  For instance, if
-        the sample spacing is in seconds, then the frequency unit is cycles/second.
+    def extract_ASK_signal(self, ask_signal, options=None):
+        if options is None:
+            options = {}
 
-        Given a window length `n` and a sample spacing `d`::
+        analytic_signal = hilbert(ask_signal)
+        amplitude_envelope = np.abs(analytic_signal)
 
-          f = [0, 1, ...,   n/2-1,     -n/2, ..., -1] / (d*n)   if n is even
-          f = [0, 1, ..., (n-1)/2, -(n-1)/2, ..., -1] / (d*n)   if n is odd
+        return amplitude_envelope
 
-        Parameters
-        ----------
-        n : int
-            Window length.
-        d : scalar, optional
-            Sample spacing (inverse of the sampling rate). Defaults to 1.
-        device : str, optional
-            The device on which to place the created array. Default: ``None``.
-            For Array-API interoperability only, so must be ``"cpu"`` if passed.
+    def extract_FSK_signal(self, fsk_signal, options=None):
+        if options is None:
+            options = {}
 
-            .. versionadded:: 2.0.0
+        analytic = hilbert(fsk_signal)
+        instantaneous_phase = np.unwrap(np.angle(analytic))
+        instantaneous_frequency = np.diff(instantaneous_phase) * (self.sr / (2.0 * np.pi))
 
-        Returns
-        -------
-        f : ndarray
-            Array of length `n` containing the sample frequencies.
+        return instantaneous_frequency
 
-        Examples
-        --------
-        >>> import numpy as np
-        >>> signal = np.array([-2, 8, 6, 4, 1, 0, 3, 5], dtype=float)
-        >>> fourier = np.fft.fft(signal)
-        >>> n = signal.size
-        >>> timestep = 0.1
-        >>> freq = np.fft.fftfreq(n, d=timestep)
-        >>> freq
-        array([ 0.  ,  1.25,  2.5 , ..., -3.75, -2.5 , -1.25])
+    def extract_PSK_signal(self, psk_signal, options=None):
+        if options is None:
+            options = {}
 
-        """
-        NFFT = 1024*4
-        # use matplotlib to estimate and plot the PSD
-        processed, f = plt.psd(fm_signal, NFFT=NFFT)
+        analytic = hilbert(psk_signal)
+        instantaneous_phase = np.unwrap(np.angle(analytic))
 
-        # processed = np.fft.fftfreq(n, d=timestep, device=device)
-        return processed
+        return instantaneous_phase
 
-    def extract_ASK_signal(self, ask_signal, options):  # Amplitude Shift Keying (ASK)
-        # The common operating mode of Ethernet uses a 4-level amplitude modulation (2 bits per symbol) with 8 ns symbols.
+    def extract_QAM_signal(self, qam_signal, options=None):
+        if options is None:
+            options = {}
 
+        analytic = hilbert(qam_signal)
+        amplitude = np.abs(analytic)
+        phase = np.unwrap(np.angle(analytic))
 
-        processed = None
-        option = options['option']
-        yield processed
-
-    def extract_FSK_signal(self, fsk_signal, options):  # Frequency Shift Keying (FSK)
-        processed = None
-        option = options['option']
-        yield processed
-
-    def extract_PSK_signal(self, psk_signal, options):  # Phase Shift Keying (PSK)
-        # The simplest form is Binary PSK, a.k.a. BPSK, two levels of phase.
-        # The simplest form is Quadrature Phase Shift Keying (QPSK), two levels of phase.
-        processed = None
-        option = options['option']
-        yield processed
-
-    def extract_QAM_signal(self, psk_signal, options):  # combine ASK and PSK? Quadrature Amplitude Modulation (QAM)
-        # 16 QAM
-        # 32 QAM
-        # 64 QAM
-        # 256 QAM
-
-        processed = None
-        option = options['option']
-        yield processed
+        return amplitude, phase
 
     def process_signal(self, signal, type, proc_options):
 
@@ -181,14 +99,12 @@ class BitStreamExtractor:
                 "AM" : self.extract_AM_signal,
                 "FM" : self.extract_FM_signal,
                 "ASK": self.extract_ASK_signal,
-                "FSK": self.extract_ASK_signal,
+                "FSK": self.extract_FSK_signal,
                 "PSK": self.extract_PSK_signal,
+                "QAM": self.extract_QAM_signal,
             }
 
             ext_method = MODULATION_TYPES[type]
             ext_signal = ext_method(signal, extract_options)
 
         return ext_signal
-
-
-
