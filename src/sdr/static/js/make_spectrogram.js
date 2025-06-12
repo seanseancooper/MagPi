@@ -113,7 +113,53 @@ class HighlightLayer {
   }
 }
 
-function setupInfoLayerHandlers(highlightLayer, highlightData, infoLayerId = 'infoLayer') {
+class DragManager {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.draggables = [];
+    this.active = null;
+    this.lastX = 0;
+
+    canvas.addEventListener("mousedown", e => this._onMouseDown(e));
+    window.addEventListener("mousemove", e => this._onMouseMove(e));
+    window.addEventListener("mouseup", e => this._onMouseUp(e));
+  }
+
+  addDraggable({ hitTest, onDrag, onDragEnd = () => {} }) {
+    this.draggables.push({ hitTest, onDrag, onDragEnd });
+  }
+
+  _onMouseDown(e) {
+    const rect = this.canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    this.lastX = x;
+    for (const d of this.draggables) {
+      if (d.hitTest(x)) {
+        this.active = d;
+        break;
+      }
+    }
+  }
+
+  _onMouseMove(e) {
+    if (!this.active) return;
+    const rect = this.canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const dx = x - this.lastX;
+    this.active.onDrag(dx);
+    this.lastX = x;
+  }
+
+  _onMouseUp(e) {
+    if (this.active) {
+      this.active.onDragEnd();
+      this.active = null;
+    }
+  }
+}
+
+function setupInfoLayerHandlers(canvas, highlightData, infoLayerId = 'infoLayer') {
 
     const container = document.getElementById('cvs_hl');
     const infoLayer = document.getElementById(infoLayerId);
