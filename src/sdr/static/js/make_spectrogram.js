@@ -496,6 +496,7 @@ function draw_spec() {
 
         let wfImg = new Img(wf.offScreenCvs, { imgWidth: cvs_spec.width, imgHeight: cvs_spec.height/10 });
         cgo.render(wfImg);
+        cvs_hl.render();
 
         window.requestAnimationFrame(draw_waveforms);
     }
