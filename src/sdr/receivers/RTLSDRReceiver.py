@@ -5,7 +5,7 @@ import threading
 from datetime import datetime
 
 from rtlsdr import RtlSdr
-from scipy.signal import find_peaks
+from scipy.signal import find_peaks, welch
 from matplotlib.mlab import psd
 import numpy as np
 
