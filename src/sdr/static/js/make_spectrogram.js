@@ -10,6 +10,9 @@ let latestPeakData = new Uint8Array(1024);                  // Hold latest peak 
 let peakReady = false;
 const signalMetadataMap = new Map();                        // key: highlight ID or position, value: metadata
 
+// Convert interleaved complex Float32Array to Uint8Array (magnitude, 0..255)
+let normBounds = { minDb: -5, maxDb: 30 };
+
 const highlights = [
   { min_sel: 200, max_sel: 700, alpha: 0.3, color: "cyan" }
 ];
