@@ -8,8 +8,7 @@ let latestBlockData = new Uint8Array(fft_size);             // Shared buffer to 
 let blockReady = false;
 let latestPeakData = new Uint8Array(1024);                  // Hold latest peak data
 let peakReady = false;
-
-let highlights = [];
+const signalMetadataMap = new Map();                        // key: highlight ID or position, value: metadata
 
 socket.on('connect', () => {
     console.log("Socket connected");
