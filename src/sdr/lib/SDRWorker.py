@@ -140,26 +140,47 @@ class SDRWorker(threading.Thread):
         sgnlPt = SDRSignalPoint(worker_id=worker_id, lon=self.tracker.lon, lat=self.tracker.lat, sgnl=sgnl, **kwargs)
         self.tracker.signal_cache[ident].append(sgnlPt)
 
-        # use sset SignalFrame, TimeFrequencyFrame for processing
-        # start_time = timestamp = time.monotonic()
-        # duration = 0
-        # carrier_freq = self.get_text_attribute('frequency')
-        # bandwidth = self.get_text_attribute('bandwidth')
-        #
-        # freq_min = carrier_freq - bandwidth/2
-        # freq_max = carrier_freq + bandwidth/2
-        #
-        # tf_matrix = data = np.zeros((4096,))
-        #
-        # domain = 'frequency'
-        # metadata = self.get_text_attributes()
-        #
-        # sgnlFrm = SignalFrame(timestamp, duration, carrier_freq, bandwidth, data, domain, metadata)
-        # tfFrm = TimeFrequencyFrame(start_time, duration, freq_min, freq_max, tf_matrix, metadata)
-        #
-        # # add sgnlFrm & tfFrm to sset.collections
-        # self.signal_frame_list.append(sgnlFrm)
-        # self.tff_frame_list.append(tfFrm)
+        while len(self.tracker.signal_cache[ident]) >= self.tracker.signal_cache_max:
+            self.tracker.signal_cache[ident].pop(0)
+
+    def make_signalframe(self, worker_id, ident, sgnl):
+        import time
+        import numpy as np
+        from src.sdr.lib.SignalFrame import SignalFrame
+        from src.sdr.lib.TimeFrequencyFrame import TimeFrequencyFrame
+
+        # Setup frame timing and frequency info
+        start_time = timestamp = time.monotonic()
+        duration = self.get_text_attribute('duration') or 0.0
+        carrier_freq = self.get_text_attribute('frequency') or 0.0
+        bandwidth = self.get_text_attribute('bandwidth') or 0.0
+
+        freq_min = carrier_freq - bandwidth / 2.0
+        freq_max = carrier_freq + bandwidth / 2.0
+
+        # Placeholder tf_matrix data
+        tf_matrix = np.zeros((4096,), dtype=np.float32)
+
+        # General signal metadata
+        domain = 'frequency'
+        metadata = self.get_text_attributes()
+        metadata.update({
+            'worker_id': worker_id,
+            'ident': ident,
+            'lon': self.tracker.lon,
+            'lat': self.tracker.lat,
+            'sgnl': sgnl
+        })
+
+        # Construct and store frames
+        sgnlFrm = SignalFrame(timestamp, duration, carrier_freq, bandwidth, tf_matrix, domain, metadata)
+        tfFrm = TimeFrequencyFrame(start_time, duration, freq_min, freq_max, tf_matrix, metadata)
+
+        self.signal_frame_list.append(sgnlFrm)
+        self.tff_frame_list.append(tfFrm)
+
+        # Maintain signal cache??
+        # self.tracker.signal_cache[ident].append(tfFrm)
 
         while len(self.tracker.signal_cache[ident]) >= self.tracker.signal_cache_max:
             self.tracker.signal_cache[ident].pop(0)
