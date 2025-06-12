@@ -256,6 +256,17 @@ function draw_indicia() {
     const cvs_xaxis = document.getElementById("cvs_xaxis");
     const xaxis_ctx = cvs_xaxis.getContext("2d");
 
+    // Instantiate DragManager for frequency axis
+    const dragAxis = new DragManager(cvs_xaxis);
+    dragAxis.addDraggable({
+      hitTest: x => Math.abs(x - cvs_xaxis.width / 2) < 6,
+      onDrag: dx => {
+        const deltaFreq = dx * (sampling_rate / fft_size * (fft_size / cvs_xaxis.width));
+        center_freq += deltaFreq;
+        draw_indicia();
+      }
+    });
+
     // Clear and prep canvas
     xaxis_ctx.clearRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
     xaxis_ctx.fillStyle = bgcolor;
