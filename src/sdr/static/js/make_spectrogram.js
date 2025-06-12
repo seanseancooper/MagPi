@@ -312,17 +312,6 @@ function draw_indicia() {
         xaxis_ctx.lineWidth = 2;
         xaxis_ctx.stroke();
     }
-
-    // Draw labels
-    for (let { freq, label, color } of labels) {
-        const x = freqToX(freq);
-
-        // Label text
-        xaxis_ctx.fillStyle = color;
-        xaxis_ctx.font = "11px sans-serif";
-        xaxis_ctx.textAlign = "center";
-        xaxis_ctx.fillText(label, x, cvs_xaxis.height - 18);
-    }
 }
 
 function draw_spec() {
