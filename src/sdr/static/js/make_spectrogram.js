@@ -280,10 +280,9 @@ function draw_indicia() {
         xaxis_ctx.fillText((freq / 1e6).toFixed(1) + " MHz", x - 20, 12);
     }
 
-    const labels = [
-        { freq: min_freq_hz+6e4, label: (min_freq_hz / 1e6).toFixed(2) + " MHz", color: "white" },
-        { freq: center_freq, label: (center_freq / 1e6).toFixed(2) + " MHz", color: "white" },
-        { freq: max_freq_hz-7e4, label: (max_freq_hz / 1e6).toFixed(2) + " MHz", color: "white" }
+    const indicia = [
+        { freq: min_freq_hz, label: "", color: "white" },
+        { freq: max_freq_hz, label: "", color: "white" }
     ];
 
     function freqToX(freq) {
