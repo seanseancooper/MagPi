@@ -1,6 +1,6 @@
 const socket = io();
 const fft_size = 4096;
-const center_freq = 100e6;              // Hz (can be made dynamic)
+let center_freq = 100e6;                // Get this from sdr
 const sampling_rate = 2.048e6;          // get this from config?? sdr??
 const bgcolor = "#000099";
 
