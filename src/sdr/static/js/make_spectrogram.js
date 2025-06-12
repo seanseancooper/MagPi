@@ -261,6 +261,14 @@ function draw_indicia() {
     xaxis_ctx.fillStyle = bgcolor;
     xaxis_ctx.fillRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
 
+    // Draw center line
+    const centerX = cvs_xaxis.width / 2;
+    xaxis_ctx.strokeStyle = "red";
+    xaxis_ctx.beginPath();
+    xaxis_ctx.moveTo(centerX, 0);
+    xaxis_ctx.lineTo(centerX, cvs_xaxis.height);
+    xaxis_ctx.stroke();
+
     // Frequencies
     const min_freq_hz = center_freq - sampling_rate / 2;
     const max_freq_hz = center_freq + sampling_rate / 2;
