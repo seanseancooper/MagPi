@@ -253,8 +253,7 @@ function FreqDataGenerator(sampling_rate, fft_size) {
 
     this.getLine = () => {
         if (blockReady) {
-            currentBuffer.set(latestBlockData);  // copy into buffer
-            draw_peaks();
+            currentBuffer.set(latestBlockData);     // copy into buffer
             blockReady = false;
             requestBlock();  // ask for next block right after processing
         }
