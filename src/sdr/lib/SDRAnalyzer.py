@@ -31,6 +31,7 @@ class SDRAnalyzer:
         self.sample_rate = self.config['DEFAULT_SAMPLE_RATE']
         self.center_freq = self.config['DEFAULT_CENTER_FREQ']
         self.fft_size = self.config['FFT_SIZE']
+        self.num_rows = self.config['FFT_ROWS']
 
     def detect_peak_bins(self, magnitude_db):
 
