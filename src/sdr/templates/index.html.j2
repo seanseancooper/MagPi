@@ -41,6 +41,13 @@
         </div>
     </div>
 
+    <div class="" style="">
+        <label for="rangeMin">Min dB:</label>
+        <input type="range" id="rangeMin" min="-100" max="100" step="1" value="-5">
+        <label for="rangeMax">Max dB:</label>
+        <input type="range" id="rangeMax" min="-100" max="100" step="1" value="30">
+    </div>
+
     <script>
         function emitControlCommand(commandName) {
             const selectedSignalId = getSelectedSignalId(); // Replace with actual logic to identify selected signal
