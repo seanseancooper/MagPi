@@ -267,8 +267,8 @@ function getDynamicDataBuffer(dataGen) {
         setTimeout(genDynamicData, dataGen.rawLineTime);
     }
 
-    requestBlock();        // Start first fetch
-    genDynamicData();      // Kick off polling loop
+    requestBlock();
+    genDynamicData();
 
     return { buffer: bufferAry[0] };
 }
