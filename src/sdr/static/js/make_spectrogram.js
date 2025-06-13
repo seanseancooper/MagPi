@@ -248,13 +248,7 @@ function FreqDataGenerator(sampling_rate, fft_size) {
 
 // Start dynamic polling of new lines
 function getDynamicDataBuffer(dataGen) {
-
-    const bufferAry = [];
-    let sigTime = 0;
-    const sigStartTime = Date.now();
-
-    bufferAry[0] = new Uint8Array(dataGen.fft_size);
-    bufferAry[1] = new Uint8Array(dataGen.fft_size);
+    const sharedBuffer = new Uint8Array(dataGen.fft_size);
 
     function genDynamicData() {
         let sigDiff;
