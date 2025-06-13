@@ -457,7 +457,7 @@ function draw_spec() {
     }
 
     // Example usage
-    const colMap = interpolateColormap(Jet, 4096);
+    const colMap = interpolateColormap(Jet, 1024);
 
     const cvs_spec = document.getElementById('cvs_spec');
     const cvs_spec_ctx = cvs_spec.getContext("2d");
