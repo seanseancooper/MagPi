@@ -58,7 +58,7 @@ class SDRAnalyzer:
 
         return self.peaks
 
-    def generate_spectrogram_row(self, data):
+    def get_magnitudes(self, data):
         fft = np.fft.fftshift(np.fft.fft(data, n=self.fft_size))
         magnitude_db = 10 * np.log10(np.abs(fft)**2 + 1e-12)
         self.detect_peak_bins(magnitude_db)
