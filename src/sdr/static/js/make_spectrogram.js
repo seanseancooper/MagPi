@@ -264,10 +264,7 @@ function getDynamicDataBuffer(dataGen) {
             sharedBuffer.set(result.buffer);
         }
 
-        sigTime += dataGen.rawLineTime;
-        sigDiff = (Date.now() - sigStartTime) - sigTime;
-
-        setTimeout(genDynamicData, dataGen.rawLineTime - sigDiff);
+        setTimeout(genDynamicData, dataGen.rawLineTime);
     }
 
     requestBlock();        // Start first fetch
