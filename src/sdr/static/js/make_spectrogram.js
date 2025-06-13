@@ -427,35 +427,6 @@ function draw_spec() {
                 [  0,   0,   0,   0]
                 ];
 
-    function interpolateColormap(colMap, targetSize = 1024) {
-        const interpolated = [];
-        const originalSize = colMap.length;
-
-        for (let i = 0; i < targetSize; i++) {
-            const t = (i / (targetSize - 1)) * (originalSize - 1);
-            const lowerIdx = Math.floor(t);
-            const upperIdx = Math.min(Math.ceil(t), originalSize - 1);
-            const mix = t - lowerIdx;
-
-            const lower = colMap[lowerIdx];
-            const upper = colMap[upperIdx];
-
-            const rgba = [
-                Math.round(lower[0] * (1 - mix) + upper[0] * mix),
-                Math.round(lower[1] * (1 - mix) + upper[1] * mix),
-                Math.round(lower[2] * (1 - mix) + upper[2] * mix),
-                Math.round(lower[3] * (1 - mix) + upper[3] * mix)
-            ];
-
-            interpolated.push(rgba);
-        }
-
-        return interpolated;
-    }
-
-    // Example usage
-    const colMap = interpolateColormap(Jet, 1024);
-
     const cvs_spec = document.getElementById('cvs_spec');
     const cvs_spec_ctx = cvs_spec.getContext("2d");
     const cvs_hl = new HighlightLayer("cvs_hl");
