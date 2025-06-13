@@ -470,7 +470,7 @@ function draw_spec() {
             }
         }
 
-        let wfImg = new Img(wf.offScreenCvs, { imgWidth: cvs_spec.width, imgHeight: cvs_spec.height/10 });
+        let wfImg = new Img(wf.offScreenCvs, { imgWidth: cvs_spec.width, imgHeight: cvs_spec.height });
         cgo.render(wfImg);
         cvs_hl.render();
 
