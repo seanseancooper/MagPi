@@ -33,7 +33,7 @@ class FlaskSDRStreamer:
     def setup_routes(self):
         @self.app.route('/')
         def index():
-            return render_template('index.html.j2')
+            return render_template('index.html.j2', analyzer=self.analyzer)
 
         @socketio.on('extract_signal')
         def handle_extract(data):
