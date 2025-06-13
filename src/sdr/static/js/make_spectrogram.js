@@ -270,9 +270,7 @@ function getDynamicDataBuffer(dataGen) {
         sigTime += dataGen.rawLineTime;
         sigDiff = (Date.now() - sigStartTime) - sigTime;
 
-        if (playing) {
-            setTimeout(genDynamicData, dataGen.rawLineTime - sigDiff);
-        }
+        setTimeout(genDynamicData, dataGen.rawLineTime - sigDiff);
     }
 
     requestBlock();        // Start first fetch
