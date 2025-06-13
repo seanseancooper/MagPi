@@ -69,6 +69,29 @@
             document.getElementById("info_mod").textContent = metadata.modulation || "—";
             document.getElementById("info_snr").textContent = `${metadata.snr.toFixed(1)} dB`;
         }
+
+        const rangeMin = document.getElementById("rangeMin");
+        const rangeMax = document.getElementById("rangeMax");
+
+        function updateSliderBounds() {
+            let minVal = parseInt(rangeMin.value);
+            let maxVal = parseInt(rangeMax.value);
+
+            if (minVal > maxVal) {
+                minVal = maxVal;
+                rangeMin.value = minVal;
+            }
+
+            normBounds.minDb = minVal;
+            normBounds.maxDb = maxVal;
+
+            document.getElementById("info-min").textContent = `Min: ${minVal} dB`;
+            document.getElementById("info-max").textContent = `Max: ${maxVal} dB`;
+
+        }
+
+        rangeMin.addEventListener('input', updateSliderBounds);
+        rangeMax.addEventListener('input', updateSliderBounds);
     </script>
 
 
