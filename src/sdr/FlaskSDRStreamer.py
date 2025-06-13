@@ -52,7 +52,7 @@ class FlaskSDRStreamer:
         @socketio.on('read_block')
         def read_block():
             data = self.analyzer.reader.read_block()
-            block = self.analyzer.generate_spectrogram_row(data)
+            block = self.analyzer.get_magnitudes(data)
 
             if block is not None:
                 emit('block_data', block.astype(np.float32).tobytes())
