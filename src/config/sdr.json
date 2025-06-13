@@ -49,6 +49,9 @@
 			"FFT_SIZE": 4096
 		},
 		{
+			"FFT_ROWS": 500
+		},
+		{
 			"MQ_MODULE_RETRIEVER": "src.sdr.receivers.RTLSDRReceiver"
 		},
 		{
