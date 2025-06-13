@@ -491,8 +491,6 @@ function draw_spec() {
     draw_waveforms();
 }
 
-let playing = true;
-
 window.addEventListener("load", function () {
     draw_spec();
 });
