@@ -270,7 +270,7 @@ function getDynamicDataBuffer(dataGen) {
     requestBlock();
     genDynamicData();
 
-    return { buffer: bufferAry[0] };
+    return { buffer: sharedBuffer };
 }
 
 function draw_indicia() {
