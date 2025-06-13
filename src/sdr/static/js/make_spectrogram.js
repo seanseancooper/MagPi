@@ -246,7 +246,6 @@ function FreqDataGenerator(sampling_rate, fft_size) {
     };
 }
 
-// Start dynamic polling of new lines
 function getDynamicDataBuffer(dataGen) {
     const sharedBuffer = new Uint8Array(dataGen.fft_size);
 
