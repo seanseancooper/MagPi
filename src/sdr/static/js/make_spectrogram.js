@@ -214,6 +214,7 @@ function draw_highlights(cvs_hl, dragHl, highlights) {
 function processBlockData(block) {
     function normalizeToUint8(block, outArray, minDb = -100, maxDb = 0) {
         const range = maxDb - minDb;
+
         for (let i = 0; i < block.length; i++) {
             let scaled = ((block[i] - minDb) / range) * 255;
             outArray[i] = Math.max(0, Math.min(255, Math.floor(scaled)));
