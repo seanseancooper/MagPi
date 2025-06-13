@@ -439,7 +439,7 @@ function draw_spec() {
     draw_indicia();
     draw_highlights(cvs_hl, dragHl, highlights);  // mark something.
 
-    const wf = new Waterfall(dataObj, fft_size, cvs_spec.height, "DOWN", {lineRate: 50});
+    const wf = new Waterfall(dataObj, fft_size, cvs_spec.height, "DOWN", {lineRate: lineRate});
     wf.start();
 
     function draw_waveforms()
