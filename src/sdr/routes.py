@@ -89,13 +89,5 @@ def sdr_stop():
     return scanner.stop()
 
 
-@sdr_bp.route('/write', methods=['POST'], subdomain='sdr')
-def sdr_write():
-    from src.lib.utils import write_to_scanlist
-    if write_to_scanlist(scanner.config, scanner.get_tracked_signals()):
-        if scanner.config['SPEECH_ENABLED']:
-            speech_logger.info(f'logged {len(scanner.get_tracked_signals())} items')
-        return "OK", 200
-    return "", 500
 
 
