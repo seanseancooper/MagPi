@@ -466,7 +466,6 @@ function draw_spec() {
 
     const cgo = new Cango("cvs_spec");
     cgo.clearCanvas(bgcolor);
-    cgo.gridboxPadding(0);
     cgo.setWorldCoordsSVG(0, 0, cvs_spec.width, cvs_spec.height/10);
 
     draw_indicia();
