@@ -250,10 +250,7 @@ function getDynamicDataBuffer(dataGen) {
     const sharedBuffer = new Uint8Array(dataGen.fft_size);
 
     function genDynamicData() {
-        let sigDiff;
-
-        const result = dataGen.getLine();  // returns { buffer }
-        bufferAry[1].set(result.buffer);
+        const result = dataGen.getLine();
 
         if (
             result &&
