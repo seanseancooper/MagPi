@@ -358,9 +358,6 @@ function draw_indicia() {
 
 function draw_spec() {
 
-    const dataGenerator = new FreqDataGenerator(sampling_rate, fft_size);
-    const dataObj = getDynamicDataBuffer(dataGenerator);
-
     // Matlab Jet ref: stackoverflow.com grayscale-to-red-green-blue-matlab-jet-color-scale
     const colMap = [
                 [  0,   0, 128, 255], [  0,   0, 131, 255], [  0,   0, 135, 255], [  0,   0, 139, 255],
