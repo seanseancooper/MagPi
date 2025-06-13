@@ -256,10 +256,13 @@ function getDynamicDataBuffer(dataGen) {
         const result = dataGen.getLine();  // returns { buffer }
         bufferAry[1].set(result.buffer);
 
-        // swap
-        const tmp = bufferAry[0];
-        bufferAry[0] = bufferAry[1];
-        bufferAry[1] = tmp;
+        if (
+            result &&
+            result.buffer instanceof Uint8Array &&
+            result.buffer.length === dataGen.fft_size
+        ) {
+            sharedBuffer.set(result.buffer);
+        }
 
         sigTime += dataGen.rawLineTime;
         sigDiff = (Date.now() - sigStartTime) - sigTime;
