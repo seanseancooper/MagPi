@@ -21,8 +21,6 @@ class SDRAnalyzer:
         self.filter_peaks = False
         self.lock = threading.Lock()
 
-        self.streaming = True
-
     def configure(self, config_file):
 
         readConfig(config_file, self.config)
