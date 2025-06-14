@@ -93,17 +93,13 @@ class RTLSDRReceiver(threading.Thread):
         return self.block # yield?
 
     def get_psd_for_block(self):
-        # | Shape in PSD                          | Likely Modulation                                                |
-        # | ------------------------------------- | ---------------------------------------------------------------- |
-        # | Sharp narrow peak                     | **CW (continuous wave)**, **narrowband FM**, unmodulated carrier |
-        # | Broader peak with flat top            | **AM**, **DSB-SC** (Double Sideband Suppressed Carrier)          |
-        # | Symmetric sidebands                   | **AM**, **QAM**, **PSK**                                         |
-        # | Wide spread spectrum                  | **FHSS**, **DSSS**, **OFDM**                                     |
-        # | Irregular/hopping structure           | **Frequency hopping**                                            |
-        # | Multiple equidistant peaks            | **FSK** (Frequency Shift Keying)                                 |
-        # | Constant width, varying height        | Possibly **FSK** or **burst signals**                            |
-        # | Peaks that fade or repeat in patterns | **TDMA**, **bursty data**                                        |
-        frequencies, psd = welch(self.block, fs=self.sdr.sample_rate, nperseg=self.nfft_size)
+
+        from matplotlib.mlab import psd
+        psd, frequencies = psd(self.block, NFFT=self.fft_size)
+
+        # from scipy.signal import welch
+        # frequencies, psd = welch(self.block, fs=self.sdr.sample_rate, nperseg=self.fft_size)
+
         return psd, frequencies
 
     def get_peaks(self):
