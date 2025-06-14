@@ -10,6 +10,7 @@ import numpy as np
 
 from src.config import readConfig
 from src.lib.utils import format_time, generate_uuid
+from src.sdr.lib import SDRAnalyzer
 
 
 def file_writing_thread(*, q, **blockfile_args):
@@ -52,6 +53,8 @@ class RTLSDRReceiver(threading.Thread):
         self.filter_peaks = False           # 'Scanner' peaks are filtered
         self.parsed_cells = None            # what 'Scanner' needs for tracking
 
+        self.analyzer = SDRAnalyzer()
+        self.analyzer.configure('sdr.json')
 
     def configure(self, config_file):
 
