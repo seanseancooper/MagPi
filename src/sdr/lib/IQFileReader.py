@@ -10,7 +10,7 @@ class IQFileReader:
         self.block_size = block_size
         self.outfile_path = outfile_path
 
-        iq_files = glob.glob('../' + '*.iq')
+        iq_files = glob.glob(self.outfile_path + '/*.iq')
         if not iq_files:
             raise FileNotFoundError("No .iq file found in the parent directory.")
         f = sorted(iq_files)[-1]
