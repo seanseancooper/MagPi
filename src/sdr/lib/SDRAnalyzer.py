@@ -16,10 +16,7 @@ class SDRAnalyzer:
         self.sample_rate = None
         self.center_freq = None
         self.fft_size = 4096
-        self.num_rows = 100
-        self.sample_rate = 2.048e6
-        self.center_freq = 100e6
-        self.config = {}
+        self.fft_rows = None
 
         self.filter_peaks = False
         self.peaks = []
