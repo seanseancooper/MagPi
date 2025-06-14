@@ -225,7 +225,7 @@ class RTLSDRReceiver(threading.Thread):
                 kwargs=dict(
                         file=self.iq_outfile,
                         mode='w',
-                        q=self.iqq,
+                        q=self.iq_queue,
                 ),
                 daemon=True,
         )
