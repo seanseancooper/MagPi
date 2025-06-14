@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, jsonify
+from flask import Blueprint, jsonify, render_template
 import logging
 
 from src.lib.Scanner import Scanner
