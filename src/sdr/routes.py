@@ -24,7 +24,6 @@ def index():
 def sdr_scan():
     return jsonify(scanner.get_parsed_signals())
 
-
 @sdr_bp.route('/scan/<ident>', methods=['GET'], subdomain='sdr')
 def sdr_scan_ident(ident):
     worker = scanner.module_tracker.get_worker(ident)
