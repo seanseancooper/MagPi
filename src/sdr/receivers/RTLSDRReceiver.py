@@ -223,7 +223,7 @@ class RTLSDRReceiver(threading.Thread):
         self.thread = threading.Thread(
                 target=file_writing_thread,
                 kwargs=dict(
-                        file=self.outfile,
+                        file=self.iq_outfile,
                         mode='w',
                         q=self.iqq,
                 ),
