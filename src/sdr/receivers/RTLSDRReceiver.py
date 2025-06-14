@@ -250,7 +250,7 @@ class RTLSDRReceiver(threading.Thread):
 
         return [scanned]  # contract is list of T
 
-    def read_samples(self, num_samples=4096):
+    def read_samples(self, num_samples):
         """Read samples from the SDR."""
         return self.sdr.read_samples(num_samples)
 
