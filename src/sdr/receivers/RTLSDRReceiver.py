@@ -93,7 +93,7 @@ class RTLSDRReceiver(threading.Thread):
 
     def get_block(self, scanned):
         self.set_block(scanned)
-        return self.block # yield?
+        return self.block
 
     def get_psd_for_block(self):
 
