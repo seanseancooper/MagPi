@@ -86,7 +86,7 @@ class RTLSDRReceiver(threading.Thread):
         if type(scanned) is np.array:
             self.block = scanned
 
-        self.iqq.put(self.block.copy())
+        self.iq_queue.put(self.block.copy())
 
     def get_block(self, scanned):
         self.set_block(scanned)
