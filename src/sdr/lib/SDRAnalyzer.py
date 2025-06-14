@@ -19,11 +19,6 @@ class SDRAnalyzer:
         self.fft_rows = None
 
         self.filter_peaks = False
-        self.peaks = []
-        self.row = None
-
-        self.reader = IQFileReader(block_size=self.fft_size)
-        self.image_buffer = -100 * np.ones((self.num_rows, self.fft_size))
         self.lock = threading.Lock()
 
         self.streaming = True
