@@ -8,7 +8,6 @@ from rtlsdr import RtlSdr
 from scipy.signal import find_peaks
 import numpy as np
 
-
 from src.config import readConfig
 from src.lib.utils import format_time, generate_uuid
 
