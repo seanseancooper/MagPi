@@ -28,6 +28,10 @@ class FlaskSDRStreamer:
         readConfig(config_file, self.config)
         host, port = self.config['SERVER_NAME'].split(':')
         self.host = host
+        """ the pattern is that capital services add 10 to their ports
+            this is a new convention thatI'm playing with; there are other
+            ways to do this, but what does it buy me to inject this type of
+            business logic here. """
         self.port = int(port) + 10
 
     def setup_routes(self):
