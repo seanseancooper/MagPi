@@ -68,7 +68,7 @@ class SDRAnalyzer:
         return magnitude_db
 
     def compute_extent(self):
-        freq_min = (self.center_freq - self.sample_rate / 2) / 1e6
+        freq_min = (self.center_freq - self.sample_rate / 2) / 1e6  # verify this
         freq_max = (self.center_freq + self.sample_rate / 2) / 1e6
         return [freq_min, freq_max, self.fft_rows, 0]
 
