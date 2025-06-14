@@ -218,7 +218,7 @@ class RTLSDRReceiver(threading.Thread):
                 self.config['OUT_FILE_EXT']
                 )
 
-        self.outfile = self.config['OUTFILE_PATH'] + '/' + name
+        self.iq_outfile = self.config['OUTFILE_PATH'] + '/' + name
 
         self.thread = threading.Thread(
                 target=file_writing_thread,
