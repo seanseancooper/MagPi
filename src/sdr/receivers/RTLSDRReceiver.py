@@ -162,8 +162,6 @@ class RTLSDRReceiver(threading.Thread):
 
         peaks, peak_properties = self.get_peaks()
         # print(peaks)
-
-        self.parsed_cells = []
         for peak in peaks:
 
             text_attributes = {
