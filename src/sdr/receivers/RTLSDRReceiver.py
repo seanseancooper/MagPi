@@ -243,7 +243,7 @@ class RTLSDRReceiver(threading.Thread):
 
             s = self.read_samples(size)
             if s.any():
-                return s                        # no contract
+                return s
             return None
 
         scanned = get_data(self.fft_size)
