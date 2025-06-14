@@ -42,12 +42,11 @@ class RTLSDRReceiver(threading.Thread):
         self.sdr = None
         self.thread = None
         self.config = {}
-        self.data = None
-        self.signalpoint = None
-        self.parsed_cells = None
-        self.nfft_size = 4096
-        self.block = None
-        self.iqq = queue.Queue()      # Unbounded queue for I/Q data
+
+        self.fft_size = 4096                # a default
+        self.block = None                   # data read from hardware and analyzed.
+        self.iq_queue = queue.Queue()       # Unbounded queue for I/Q data
+        self.iq_outfile = None              # a file for IQFileReader
 
         self.seen_frequencies = set()
         self.freq_match_tolerance = 2000  # 2 kHz
