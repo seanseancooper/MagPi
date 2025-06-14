@@ -76,7 +76,7 @@ class SDRAnalyzer:
     def compute_extent(self):
         freq_min = (self.center_freq - self.sample_rate / 2) / 1e6
         freq_max = (self.center_freq + self.sample_rate / 2) / 1e6
-        return [freq_min, freq_max, self.num_rows, 0]
+        return [freq_min, freq_max, self.fft_rows, 0]
 
     def extract_signal(self, center_freq, bandwidth, start_time, end_time):
         offset = center_freq - self.center_freq
