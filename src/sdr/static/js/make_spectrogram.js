@@ -214,7 +214,8 @@ function draw_highlights(cvs_hl, dragHl, highlights) {
 }
 
 function processBlockData(block) {
-    function normalizeToUint8(block, outArray, minDb = -100, maxDb = 0) {
+
+    function normalizeToUint8(block, outArray, minDb = -100, maxDb = 100) {
         const range = maxDb - minDb;
 
         for (let i = 0; i < block.length; i++) {
