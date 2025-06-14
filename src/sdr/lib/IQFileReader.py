@@ -8,6 +8,7 @@ class IQFileReader:
     def __init__(self, outfile_path, block_size):
 
         self.block_size = block_size
+        self.outfile_path = outfile_path
 
         iq_files = glob.glob('../' + '*.iq')
         if not iq_files:
