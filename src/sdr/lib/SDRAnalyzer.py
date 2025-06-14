@@ -29,6 +29,7 @@ class SDRAnalyzer:
         self.center_freq = self.config['DEFAULT_CENTER_FREQ']
         self.fft_size = self.config['FFT_SIZE']
         self.fft_rows = self.config['FFT_ROWS']
+        outfile_path = self.config['OUTFILE_PATH']
 
         self.filter_peaks = False
 
