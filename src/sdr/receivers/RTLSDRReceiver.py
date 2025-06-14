@@ -158,6 +158,7 @@ class RTLSDRReceiver(threading.Thread):
         if not scanned:
             return []
 
+        self.parsed_cells = []
         self.get_block(scanned)
 
         peaks, peak_properties = self.get_peaks()
