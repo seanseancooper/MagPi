@@ -35,7 +35,12 @@ class SDRAnalyzer:
         self.sample_rate = self.config['DEFAULT_SAMPLE_RATE']
         self.center_freq = self.config['DEFAULT_CENTER_FREQ']
         self.fft_size = self.config['FFT_SIZE']
-        self.num_rows = self.config['FFT_ROWS']
+        self.fft_rows = self.config['FFT_ROWS']
+
+        self.filter_peaks = False
+
+        self.reader = IQFileReader(block_size=self.fft_size)
+        self.image_buffer = -100 * np.ones((self.fft_rows, self.fft_size))
 
     def detect_peak_bins(self, magnitude_db):
 
