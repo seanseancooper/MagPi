@@ -50,7 +50,6 @@ class RTLSDRReceiver(threading.Thread):
 
         self.seen_frequencies = set()
         self.freq_match_tolerance = 2000  # 2 kHz
-        self.filter_peaks = False
 
         self.filter_peaks = False           # 'Scanner' peaks are filtered
         self.parsed_cells = None            # what 'Scanner' needs for tracking
