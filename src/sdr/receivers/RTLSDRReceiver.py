@@ -234,7 +234,7 @@ class RTLSDRReceiver(threading.Thread):
 
     def scan(self):
 
-        def get_data(nfft_size):
+        def get_data(size):
             if not self.sdr.device_opened:
                 self.sdr.open()
 
