@@ -71,6 +71,9 @@ class RTLSDRReceiver(threading.Thread):
     def get_center_freq(self):
         return self.sdr.center_freq
 
+    def set_center_freq(self, freq):
+        self.sdr.center_freq  = freq
+
     def get_freq_correction(self):
         return self.sdr.freq_correction
 
