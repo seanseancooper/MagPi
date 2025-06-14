@@ -41,7 +41,7 @@ class FlaskSDRStreamer:
 
         @socketio.on('extract_signal')
         def handle_extract(data):
-            center_freq = data['center_freq']
+            center_freq = self.analyzer.center_freq
             bandwidth = data['bandwidth']
             start_time = data['start_time']
             end_time = data['end_time']
