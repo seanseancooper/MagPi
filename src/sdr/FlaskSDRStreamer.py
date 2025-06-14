@@ -70,7 +70,7 @@ class FlaskSDRStreamer:
         @socketio.on('meta_data')
         def get_meta_data():
 
-            meta_data = {
+            meta_data = { # fake data!!!
                 "id"         : 42,
                 "start_time" : "2025-06-01T14:00:00Z",
                 "end_time"   : "2025-06-01T14:00:05Z",
