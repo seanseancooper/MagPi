@@ -16,7 +16,7 @@ sdr_bp = Blueprint(
 speech_logger = logging.getLogger('speech_logger')
 
 
-@sdr_bp.route('/', subdomain="sdr")
+@sdr_bp.route('/', methods=['GET'], subdomain='sdr')
 def index():
     return redirect("/scan", code=302)
 
