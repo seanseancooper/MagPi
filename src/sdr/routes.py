@@ -32,13 +32,6 @@ def sdr_scan_ident(ident):
         return jsonify(worker.get())
     return "", 404
 
-
-@sdr_bp.route('/scanner', methods=['GET'], subdomain='sdr')
-def sdr_scanner():
-    """ scanner UI pre viewcontainer. deprecated. """
-    return render_template("scanner.html.j2", scanner=scanner)
-
-
 @sdr_bp.route('/tracked', methods=['GET', 'POST'], subdomain='sdr')
 def sdr_tracked():
     return jsonify(scanner.get_tracked_signals())
