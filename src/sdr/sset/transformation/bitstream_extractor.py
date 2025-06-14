@@ -12,6 +12,16 @@ class BitStreamExtractor:
     """ Taking an AM/FM/PSK signal and extract the baseband signal. """
     # bitstream_extractor.py: Layered decoding of known protocols.
     # Demodulation: Taking an AM/FM/PSK signal and extracting the baseband data.
+    # | Shape in PSD                          | Likely Modulation                                                |
+    # | ------------------------------------- | ---------------------------------------------------------------- |
+    # | Sharp narrow peak                     | **CW (continuous wave)**, **narrowband FM**, unmodulated carrier |
+    # | Broader peak with flat top            | **AM**, **DSB-SC** (Double Sideband Suppressed Carrier)          |
+    # | Symmetric sidebands                   | **AM**, **QAM**, **PSK**                                         |
+    # | Wide spread spectrum                  | **FHSS**, **DSSS**, **OFDM**                                     |
+    # | Irregular/hopping structure           | **Frequency hopping**                                            |
+    # | Multiple equidistant peaks            | **FSK** (Frequency Shift Keying)                                 |
+    # | Constant width, varying height        | Possibly **FSK** or **burst signals**                            |
+    # | Peaks that fade or repeat in patterns | **TDMA**, **bursty data**                                        |
 
     def __init__(self, signal, proc_options, sr=48000):
         self.signal = signal
