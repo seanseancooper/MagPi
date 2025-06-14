@@ -5,7 +5,7 @@ import time
 
 class IQFileReader:
 
-    def __init__(self, block_size):
+    def __init__(self, outfile_path, block_size):
 
         self.block_size = block_size
 
