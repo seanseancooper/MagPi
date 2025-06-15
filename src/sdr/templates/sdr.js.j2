@@ -1,15 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <script src="{{ url_for('static', filename='js/socket.io.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/Cango-29v04.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/CangoAxes-10v06.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/Spectrogram-2v01.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/make_spectrogram.js') }}"></script>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/info.css') }}">
-</head>
-<body>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sdr_info.css') }}">
 
     <!-- Info Layer Container -->
     <div id="infoLayer" class="info-layer">
@@ -94,12 +85,9 @@
     </script>
 
     <div class="" style="position: relative; width: 1024px; height: 250px;">
-        <canvas id="cvs_spec" style="position: absolute; top: 30; left: 0; z-index: 1;" width="1024" height="{{ analyzer.config['FFT_ROWS'] }}"></canvas>
-        <canvas id="cvs_hl"  style="position: absolute; top: 50; left: 0; z-index: 2;" width="1024" height="{{ analyzer.config['FFT_ROWS'] }}"></canvas>
-        <canvas id="cvs_xaxis" style="position: absolute; top: 0; left: 0; z-index: 3;"  width="1024" height=30"></canvas>
+        <canvas id="cvs_spec" style="position: absolute; top: 30; left: 0; z-index: 1;" width="1024" height="256"></canvas>
+        <canvas id="cvs_hl"  style="position: absolute; top: 50; left: 0; z-index: 2;" width="1024" height="256"></canvas>
+        <canvas id="cvs_xaxis" style="position: absolute; top: 0; left: 0; z-index: 3; visibility: hidden;"  width="1024" height=30"></canvas>
     </div>
 
     <script src="{{ url_for('static', filename='js/make_layers.js') }}"></script>
-
-</body>
-</html>
