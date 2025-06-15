@@ -98,16 +98,6 @@ class RTLSDRReceiver(threading.Thread):
         self.set_block(scanned)
         return self.block
 
-    def get_psd_for_block(self):
-
-        from matplotlib.mlab import psd
-        psd, frequencies = psd(self.block, NFFT=self.fft_size)
-
-        # from scipy.signal import welch
-        # frequencies, psd = welch(self.block, fs=self.sdr.sample_rate, nperseg=self.fft_size)
-
-        return psd, frequencies
-
     def get_peaks(self):
         psd_scan, f = self.get_psd_for_block()
 
@@ -141,6 +131,16 @@ class RTLSDRReceiver(threading.Thread):
             return np.array(filtered_peaks), properties
 
         return peaks, properties
+
+    def get_psd_for_block(self):
+
+        from matplotlib.mlab import psd
+        psd, frequencies = psd(self.block, NFFT=self.fft_size)
+
+        # from scipy.signal import welch
+        # frequencies, psd = welch(self.block, fs=self.sdr.sample_rate, nperseg=self.fft_size)
+
+        return psd, frequencies
 
     def get_peak_freq(self, peak):
         psd_scan, f = self.get_psd_for_block()
