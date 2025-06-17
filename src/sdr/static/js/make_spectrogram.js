@@ -250,28 +250,28 @@ function FreqDataGenerator(sampling_rate, fft_size) {
 }
 
 // Data generator using most recent processed buffer
-//function getDynamicDataBuffer(dataGen) {
-//    const sharedBuffer = new Uint8Array(dataGen.fft_size);
-//
-//    function genDynamicData() {
-//        const result = dataGen.getLine();
-//
-//        if (
-//            result &&
-//            result.buffer instanceof Uint8Array &&
-//            result.buffer.length === dataGen.fft_size
-//        ) {
-//            sharedBuffer.set(result.buffer);
-//        }
-//
-//        setTimeout(genDynamicData, dataGen.rawLineTime);
-//    }
-//
-//    requestBlock();
-//    genDynamicData();
-//
-//    return { buffer: sharedBuffer };
-//}
+function getDynamicDataBuffer(dataGen) {
+    const sharedBuffer = new Uint8Array(dataGen.fft_size);
+
+    function genDynamicData() {
+        const result = dataGen.getLine();
+
+        if (
+            result &&
+            result.buffer instanceof Uint8Array &&
+            result.buffer.length === dataGen.fft_size
+        ) {
+            sharedBuffer.set(result.buffer);
+        }
+
+        setTimeout(genDynamicData, dataGen.rawLineTime);
+    }
+
+    requestBlock();
+    genDynamicData();
+
+    return { buffer: sharedBuffer };
+}
 
 // Start dynamic polling of new lines
 function getDynamicDataBuffer(dataGen) {
