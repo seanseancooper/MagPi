@@ -113,62 +113,6 @@ class RTLSDRReceiver(threading.Thread):
         self.set_block(scanned)
         return self.block
 
-    def get_peaks(self):
-        psd_scan, f = self.get_psd_for_block()
-
-        mean = np.mean(psd_scan)
-        std = np.std(psd_scan)
-
-        # | Feature              | Indicator of Signal | Indicator of Noise          |
-        # | -------------------- | ------------------- | --------------------------- |
-        # | Height               | High above mean     | Barely above noise floor    |
-        # | Prominence           | High                | Low / embedded in clutter   |
-        # | Width                | Moderate            | Too narrow or too wide      |
-        # | Shape                | Smooth/consistent   | Jagged or asymmetrical      |
-        # | Temporal Consistency | Stable over time    | Appears/disappears randomly |
-
-        peak_options = {
-            'height'    : mean + 2 * std,           # Filters out background noise and low-level fluctuations.
-            'prominence': 0.1 * np.max(psd_scan),   # Rejects peaks that don't stand out from surrounding spectrum.
-            'width'     : (3, 30),                  # Rejects sharp spikes (impulsive noise) and overly broad hills (clutter or poor resolution). Bin range; depends on your resolution
-            'rel_height': 0.5                       # Ensures peak width is measured at a consistent threshold (half-max)
-        }
-
-        peaks, properties = find_peaks(psd_scan, **peak_options)
-
-        if self.filter_peaks: # filter by further criteria post-hoc
-            filtered_peaks = []
-            for i, peak in enumerate(peaks):
-                w = properties['widths'][i] if 'widths' in properties else None
-                p = properties['prominences'][i] if 'prominences' in properties else None
-                if w and p and w > 5 and p > 0.1:
-                    filtered_peaks.append(peak)
-            return np.array(filtered_peaks), properties
-
-        return peaks, properties
-
-    def get_psd_for_block(self):
-
-        from matplotlib.mlab import psd
-        psd, frequencies = psd(self.block, NFFT=self.fft_size)
-
-        # from scipy.signal import welch
-        # frequencies, psd = welch(self.block, fs=self.sdr.sample_rate, nperseg=self.fft_size)
-
-        return psd, frequencies
-
-    def get_peak_freq(self, peak):
-        psd_scan, f = self.get_psd_for_block()
-        return f[peak]  + self.config['DEFAULT_CENTER_FREQ']
-
-    def get_peak_db(self, peak):
-        psd_scan, _ = self.get_psd_for_block()
-
-        power = psd_scan[peak]
-        if power <= 0:
-            return -np.inf
-        return 10 * np.log10(power)
-
     def get_parsed_cells(self, scanned):
 
         if not scanned:
