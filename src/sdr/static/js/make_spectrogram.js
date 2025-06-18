@@ -341,8 +341,8 @@ function getDynamicDataBuffer(dataGen) {
 	let sigTime = 0;
 	const sigStartTime = Date.now();
 
-	bufferAry[0] = new Uint8Array(dataGen.fft_size);
-	bufferAry[1] = new Uint8Array(dataGen.fft_size);
+	bufferAry[0] = new Uint8Array(dataGen.nfft);
+	bufferAry[1] = new Uint8Array(dataGen.nfft);
 
 	function genDynamicData() {
 		let sigDiff;
