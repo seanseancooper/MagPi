@@ -429,7 +429,12 @@ function draw_spec() {
     const cvs_spec_ctx = cvs_spec.getContext("2d", {willReadFrequently: true});
     const cvs_xaxis_ctx = cvs_xaxis.getContext("2d", {willReadFrequently: true});
 
-    const wf = new Waterfall(dataObj, fft_size, cvs_spec.height, "DOWN", {lineRate: lineRate});
+	// Frequencies
+	const centerX = cvs_xaxis.width / 2;
+	const min_freq_hz = center_freq - sampling_rate / 2;
+	const max_freq_hz = center_freq + sampling_rate / 2;
+
+    const wf = new Waterfall(dataObj, nfft, cvs_spec.height, "DOWN", {lineRate: lineRate});
     wf.start();
 
 	cgo.clearCanvas(bgcolor);
