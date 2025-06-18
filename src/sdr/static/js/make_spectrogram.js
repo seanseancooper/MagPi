@@ -367,7 +367,7 @@ function getDynamicDataBuffer(dataGen) {
 function draw_indicia() {
 
 	const cvs_xaxis = document.getElementById("cvs_xaxis");
-	const xaxis_ctx = cvs_xaxis.getContext("2d", {willReadFrequently: true});
+	const cvs_xaxis_ctx = cvs_xaxis.getContext("2d", {willReadFrequently: true});
 
 	// Instantiate DragManager for frequency axis
 	const dragAxis = new DragManager(cvs_xaxis);
@@ -381,17 +381,17 @@ function draw_indicia() {
 	});
 
 	// Clear and prep canvas
-	xaxis_ctx.clearRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
-	xaxis_ctx.fillStyle = bgcolor;
-	xaxis_ctx.fillRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
+	cvs_xaxis_ctx.clearRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
+	cvs_xaxis_ctx.fillStyle = bgcolor;
+	cvs_xaxis_ctx.fillRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
 
 	// Draw center line
 	const centerX = cvs_xaxis.width / 2;
-	xaxis_ctx.beginPath();
-	xaxis_ctx.strokeStyle = "red";
-	xaxis_ctx.moveTo(centerX, 0);
-	xaxis_ctx.lineTo(centerX, cvs_xaxis.height);
-	xaxis_ctx.stroke();
+	cvs_xaxis_ctx.beginPath();
+	cvs_xaxis_ctx.strokeStyle = "red";
+	cvs_xaxis_ctx.moveTo(centerX, 0);
+	cvs_xaxis_ctx.lineTo(centerX, cvs_xaxis.height);
+	cvs_xaxis_ctx.stroke();
 
 	// Frequencies
 	const min_freq_hz = center_freq - sampling_rate / 2;
@@ -403,12 +403,12 @@ function draw_indicia() {
 	}
 
 	// Draw frequency labels (simple example)
-	xaxis_ctx.fillStyle = "white";
-	xaxis_ctx.font = "12px sans-serif";
+	cvs_xaxis_ctx.fillStyle = "white";
+	cvs_xaxis_ctx.font = "12px sans-serif";
 	for (let i = 0; i < 5; i++) {
 		let freq = center_freq + (i - 2) * sampling_rate / 4;
 		let x = centerX + (i - 2) * cvs_xaxis.width / 4;
-		xaxis_ctx.fillText((freq / 1e6).toFixed(1) + " MHz", x - 20, 12);
+		cvs_xaxis_ctx.fillText((freq / 1e6).toFixed(1) + " MHz", x - 20, 12);
 	}
 
 	const indicia = [
@@ -427,23 +427,23 @@ function draw_indicia() {
 		const x = freqToX(freq);
 
 		// Vertical line
-		xaxis_ctx.beginPath();
-		xaxis_ctx.moveTo(x, 20);
-		xaxis_ctx.lineTo(x, cvs_xaxis.height);
-		xaxis_ctx.strokeStyle = color;
-		xaxis_ctx.lineWidth = 5;
-		xaxis_ctx.stroke();
+		cvs_xaxis_ctx.beginPath();
+		cvs_xaxis_ctx.moveTo(x, 20);
+		cvs_xaxis_ctx.lineTo(x, cvs_xaxis.height);
+		cvs_xaxis_ctx.strokeStyle = color;
+		cvs_xaxis_ctx.lineWidth = 5;
+		cvs_xaxis_ctx.stroke();
 	}
 
 	for (let { freq, label, color } of min_indicia) {
 
 		// Vertical line
-		xaxis_ctx.beginPath();
-		xaxis_ctx.moveTo(freq, 25);
-		xaxis_ctx.lineTo(freq, cvs_xaxis.height);
-		xaxis_ctx.strokeStyle = color;
-		xaxis_ctx.lineWidth = 2;
-		xaxis_ctx.stroke();
+		cvs_xaxis_ctx.beginPath();
+		cvs_xaxis_ctx.moveTo(freq, 25);
+		cvs_xaxis_ctx.lineTo(freq, cvs_xaxis.height);
+		cvs_xaxis_ctx.strokeStyle = color;
+		cvs_xaxis_ctx.lineWidth = 2;
+		cvs_xaxis_ctx.stroke();
 	}
 }
 
