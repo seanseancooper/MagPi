@@ -188,9 +188,9 @@ socket.on('connect', () => {
 	console.log("Socket connected");
 });
 
-socket.on('block_data', (data) => {
-	if (data) {                                             // 4096 complex numbers = 8192 float32 values
-		const floatArray = new Float32Array(data);
+socket.on('block_data', (block) => {
+	if (block) {                                            // 16384 complex32 numbers
+		const floatArray = new Float32Array(block);         // 4096 float32 values
 		//requestPeaks();                                   // MOVE/OMIT trigger peaks for block
 		uint8magnitudes = processFloat32Data(floatArray);   // convert 4096 float32 to 4096 0..255
 		blockReady = true;
