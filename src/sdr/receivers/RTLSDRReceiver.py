@@ -186,7 +186,7 @@ class RTLSDRReceiver(threading.Thread):
                 # 'gain'        : self.sdr.gain,
             }
 
-            peak_freq = self.get_peak_freq(peak)
+            peak_freq = get_peak_freq(self.block, self.nfft, self.config, peak)
 
             worker_id = ''
 
