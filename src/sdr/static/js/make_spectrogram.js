@@ -384,7 +384,7 @@ function calc_params(){
         // Ensure samples per frame is enough to compute at least one FFT
         if (samplesPerFrame < fftSize) {
             throw new Error(
-                `Frame rate ${frameRate} too high for fft_size ${fftSize} at sample rate ${sampleRate}`
+                `Frame rate ${frameRate} too high for nfft ${fftSize} at sample rate ${sampleRate}`
             );
         }
 
