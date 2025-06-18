@@ -125,7 +125,7 @@ class SDRAnalyzer:
         return self.peaks
 
     def get_magnitudes(self, data):
-        fft = np.fft.fftshift(np.fft.fft(data, n=self.fft_size))
+        fft = np.fft.fftshift(np.fft.fft(data, n=self.nfft))
         magnitude_db = 10 * np.log10(np.abs(fft)**2 + 1e-12)        # verify this
         self.detect_peak_bins(magnitude_db)
         return magnitude_db
