@@ -274,7 +274,7 @@ function processBlockData(block) {
 	return magnitudes;
 }
 
-function FreqDataGenerator(sampling_rate, fft_size) {
+function FreqDataGenerator(sampling_rate, nfft) {
 
 	this.rawLineTime = 1000 * fft_size / sampling_rate;
 	this.sampleFreq = sampling_rate;
