@@ -268,9 +268,8 @@ function processBlockData(block) {
 		}
 	}
 
-	const floatBlock = new Float32Array(block);
-	const magnitudes = new Uint8Array(fft_size);
-	normalizeToUint8(floatBlock, magnitudes, normBounds.minDb, normBounds.maxDb);
+	const magnitudes = new Uint8Array(nfft);
+	normalizeToUint8(floatData, magnitudes, normBounds.minDb, normBounds.maxDb);
 
 	return magnitudes;
 }
