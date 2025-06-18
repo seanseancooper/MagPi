@@ -175,7 +175,7 @@ class RTLSDRReceiver(threading.Thread):
         self.parsed_cells = []
         self.get_block(scanned)
 
-        peaks, peak_properties = self.get_peaks()
+        peaks, peak_properties = get_peaks(self.block, self.nfft, self.filter_peaks)
         # print(peaks)
         for peak in peaks:
 
