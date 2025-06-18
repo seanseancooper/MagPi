@@ -206,7 +206,7 @@ class RTLSDRReceiver(threading.Thread):
                 return s
             return None
 
-        scanned = get_data(self.fft_size)
+        scanned = get_data(self.samp_scan)
 
         return [scanned]  # contract is list of T
 
