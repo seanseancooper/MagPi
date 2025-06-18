@@ -364,89 +364,6 @@ function getDynamicDataBuffer(dataGen) {
 	return { buffer: bufferAry[0] };
 }
 
-function draw_indicia() {
-
-	const cvs_xaxis = document.getElementById("cvs_xaxis");
-	const cvs_xaxis_ctx = cvs_xaxis.getContext("2d", {willReadFrequently: true});
-
-	// Instantiate DragManager for frequency axis
-	const dragAxis = new DragManager(cvs_xaxis);
-	dragAxis.addDraggable({
-        hitTest: x => Math.abs(x - cvs_xaxis.width / 2) < 6,
-        onDrag: dx => {
-            const deltaFreq = dx * (sampling_rate / fft_size * (fft_size / cvs_xaxis.width));
-            center_freq += deltaFreq;
-            draw_indicia();
-        }
-	});
-
-	// Clear and prep canvas
-	cvs_xaxis_ctx.clearRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
-	cvs_xaxis_ctx.fillStyle = bgcolor;
-	cvs_xaxis_ctx.fillRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
-
-	// Draw center line
-	const centerX = cvs_xaxis.width / 2;
-	cvs_xaxis_ctx.beginPath();
-	cvs_xaxis_ctx.strokeStyle = "red";
-	cvs_xaxis_ctx.moveTo(centerX, 0);
-	cvs_xaxis_ctx.lineTo(centerX, cvs_xaxis.height);
-	cvs_xaxis_ctx.stroke();
-
-	// Frequencies
-	const min_freq_hz = center_freq - sampling_rate / 2;
-	const max_freq_hz = center_freq + sampling_rate / 2;
-
-	function freqToX(freq) {
-	    const df = sampling_rate / fft_size;
-	    return (freq - (center_freq - sampling_rate / 2)) / df;
-	}
-
-	// Draw frequency labels (simple example)
-	cvs_xaxis_ctx.fillStyle = "white";
-	cvs_xaxis_ctx.font = "12px sans-serif";
-	for (let i = 0; i < 5; i++) {
-		let freq = center_freq + (i - 2) * sampling_rate / 4;
-		let x = centerX + (i - 2) * cvs_xaxis.width / 4;
-		cvs_xaxis_ctx.fillText((freq / 1e6).toFixed(1) + " MHz", x - 20, 12);
-	}
-
-	const indicia = [
-		{ freq: min_freq_hz, label: "", color: "white" },
-		{ freq: max_freq_hz, label: "", color: "white" }
-	];
-
-	const min_indicia = [];
-	let step = Math.floor(cvs_xaxis.width/10);
-	for (let i = 0; i < 10; i++) {
-		min_indicia.push({ freq: step*i, label: "", color: "white" });
-	}
-
-	// Draw vertical lines
-	for (let { freq, label, color } of indicia) {
-		const x = freqToX(freq);
-
-		// Vertical line
-		cvs_xaxis_ctx.beginPath();
-		cvs_xaxis_ctx.moveTo(x, 20);
-		cvs_xaxis_ctx.lineTo(x, cvs_xaxis.height);
-		cvs_xaxis_ctx.strokeStyle = color;
-		cvs_xaxis_ctx.lineWidth = 5;
-		cvs_xaxis_ctx.stroke();
-	}
-
-	for (let { freq, label, color } of min_indicia) {
-
-		// Vertical line
-		cvs_xaxis_ctx.beginPath();
-		cvs_xaxis_ctx.moveTo(freq, 25);
-		cvs_xaxis_ctx.lineTo(freq, cvs_xaxis.height);
-		cvs_xaxis_ctx.strokeStyle = color;
-		cvs_xaxis_ctx.lineWidth = 2;
-		cvs_xaxis_ctx.stroke();
-	}
-}
-
 function draw_spec() {
 
 	// Matlab Jet ref: stackoverflow.com grayscale-to-red-green-blue-matlab-jet-color-scale
@@ -527,7 +444,86 @@ function draw_spec() {
 	cgo.clearCanvas(bgcolor);
 	cgo.setWorldCoordsSVG(0, 0, cvs_spec.width, cvs_spec.height/2);
 
-	draw_indicia();
+	const cvs_xaxis = document.getElementById("cvs_xaxis");
+	const cvs_xaxis_ctx = cvs_xaxis.getContext("2d", {willReadFrequently: true});
+
+	// Instantiate DragManager for frequency axis
+	const dragAxis = new DragManager(cvs_xaxis);
+	dragAxis.addDraggable({
+        hitTest: x => Math.abs(x - cvs_xaxis.width / 2) < 6,
+        onDrag: dx => {
+            const deltaFreq = dx * (sampling_rate / fft_size * (fft_size / cvs_xaxis.width));
+            center_freq += deltaFreq;
+            // draw_indicia();
+        }
+	});
+
+	// Clear and prep canvas
+	cvs_xaxis_ctx.clearRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
+	cvs_xaxis_ctx.fillStyle = bgcolor;
+	cvs_xaxis_ctx.fillRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
+
+	// Draw center line
+	const centerX = cvs_xaxis.width / 2;
+	cvs_xaxis_ctx.beginPath();
+	cvs_xaxis_ctx.strokeStyle = "red";
+	cvs_xaxis_ctx.moveTo(centerX, 0);
+	cvs_xaxis_ctx.lineTo(centerX, cvs_xaxis.height);
+	cvs_xaxis_ctx.stroke();
+
+	// Frequencies
+	const min_freq_hz = center_freq - sampling_rate / 2;
+	const max_freq_hz = center_freq + sampling_rate / 2;
+
+	function freqToX(freq) {
+	    const df = sampling_rate / fft_size;
+	    return (freq - (center_freq - sampling_rate / 2)) / df;
+	}
+
+	// Draw frequency labels (simple example)
+	cvs_xaxis_ctx.fillStyle = "white";
+	cvs_xaxis_ctx.font = "12px sans-serif";
+	for (let i = 0; i < 5; i++) {
+		let freq = center_freq + (i - 2) * sampling_rate / 4;
+		let x = centerX + (i - 2) * cvs_xaxis.width / 4;
+		cvs_xaxis_ctx.fillText((freq / 1e6).toFixed(1) + " MHz", x - 20, 12);
+	}
+
+	const indicia = [
+		{ freq: min_freq_hz, label: "", color: "white" },
+		{ freq: max_freq_hz, label: "", color: "white" }
+	];
+
+	const min_indicia = [];
+	let step = Math.floor(cvs_xaxis.width/10);
+	for (let i = 0; i < 10; i++) {
+		min_indicia.push({ freq: step*i, label: "", color: "white" });
+	}
+
+	// Draw vertical lines
+	for (let { freq, label, color } of indicia) {
+		const x = freqToX(freq);
+
+		// Vertical line
+		cvs_xaxis_ctx.beginPath();
+		cvs_xaxis_ctx.moveTo(x, 20);
+		cvs_xaxis_ctx.lineTo(x, cvs_xaxis.height);
+		cvs_xaxis_ctx.strokeStyle = color;
+		cvs_xaxis_ctx.lineWidth = 5;
+		cvs_xaxis_ctx.stroke();
+	}
+
+	for (let { freq, label, color } of min_indicia) {
+
+		// Vertical line
+		cvs_xaxis_ctx.beginPath();
+		cvs_xaxis_ctx.moveTo(freq, 25);
+		cvs_xaxis_ctx.lineTo(freq, cvs_xaxis.height);
+		cvs_xaxis_ctx.strokeStyle = color;
+		cvs_xaxis_ctx.lineWidth = 2;
+		cvs_xaxis_ctx.stroke();
+	}
+
 	draw_highlights(cvs_hl, dragHl, highlights);  // mark something.
 
 	const wf = new Waterfall(dataObj, fft_size, cvs_spec.height, "DOWN", {lineRate: lineRate});
