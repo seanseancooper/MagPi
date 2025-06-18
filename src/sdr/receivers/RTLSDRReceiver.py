@@ -80,7 +80,8 @@ class RTLSDRReceiver(threading.Thread):
         self.sdr.freq_correction = self.config['DEFAULT_FREQ_CORRECTION']
         self.sdr.gain = self.config['DEFAULT_GAIN']
 
-        self.fft_size = self.config['FFT_SIZE']
+        self.nfft = self.config['NFFT']
+        self.samp_scan = self.nfft * 16
 
     def get_sample_rate(self):
         return self.sdr.sample_rate
