@@ -31,6 +31,9 @@
 			"MQ_MODULE_RETRIEVER": "src.sdr.receivers.RTLSDRReceiver"
 		},
 		{
+			"DEFAULT_SDR": "00000001"
+		},
+		{
 			"DEFAULT_SAMPLE_RATE": 2.048e6
 		},
 		{
