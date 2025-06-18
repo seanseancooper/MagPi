@@ -10,7 +10,7 @@ import numpy as np
 
 from src.config import readConfig
 from src.lib.utils import format_time, generate_uuid
-# from src.sdr.lib import SDRAnalyzer
+from src.sdr.lib.SDRAnalyzer import get_peaks, get_peak_freq, get_peak_db
 
 
 def file_writing_thread(*, q, **blockfile_args):
