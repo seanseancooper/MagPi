@@ -261,7 +261,7 @@ function setupInfoLayerHandlers(canvas, highlight, infoLayerId = 'infoLayer') {
 
 function processFloat32Data(floatData) {
 
-	function normalizeToUint8(block, outArray, minDb = -100, maxDb = 100) {
+	function normalizeToUint8(floatData, outArray, minDb = -100, maxDb = 100) {
 		const range = maxDb - minDb;
 
 		for (let i = 0; i < block.length; i++) {
