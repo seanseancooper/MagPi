@@ -438,7 +438,8 @@ function draw_spec() {
     wf.start();
 
 	cgo.clearCanvas(bgcolor);
-	cgo.setWorldCoordsSVG(0, 0, cvs_spec.width, cvs_spec.height/2);
+	cgo.setWorldCoordsSVG(0, 0, cvs_spec.width/4, cvs_spec.height);
+	//cgo.setWorldCoordsRHC(0, 0, cvs_spec.width, cvs_spec.height/2);
 
 	dragAxis.addDraggable({
         hitTest: x => Math.abs(x - cvs_xaxis.width / 2) < 6,
