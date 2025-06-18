@@ -219,7 +219,7 @@ class RTLSDRReceiver(threading.Thread):
 
             self.parsed_cells.append(cell)
 
-        [print(cell) for cell in self.parsed_cells]
+        # [print(cell) for cell in self.parsed_cells]
 
         return self.parsed_cells
 
