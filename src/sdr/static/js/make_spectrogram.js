@@ -443,7 +443,7 @@ function draw_spec() {
 	dragAxis.addDraggable({
         hitTest: x => Math.abs(x - cvs_xaxis.width / 2) < 6,
         onDrag: dx => {
-            const deltaFreq = dx * (sampling_rate / fft_size * (fft_size / cvs_xaxis.width));
+            const deltaFreq = dx * (sampling_rate / nfft * (nfft / cvs_xaxis.width));
             center_freq += deltaFreq;
         }
 	});
