@@ -304,7 +304,7 @@ function displayElapsedTime(generatorInstance, elementId) {
 function CountingFreqDataGenerator(sampling_rate, nfft) {
 	this.rawLineTime = 1000 * nfft / sampling_rate; // ms per FFT block
 	this.sampleFreq = sampling_rate;
-	this.fft_size = fft_size;
+	this.nfft = nfft;
 
 	let currentBuffer = new Uint8Array(this.fft_size);
 
