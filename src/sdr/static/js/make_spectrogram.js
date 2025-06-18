@@ -416,7 +416,7 @@ function calc_params(){
 
 function draw_spec() {
 
-    const countingDataGenerator = new CountingFreqDataGenerator(sampling_rate, fft_size);
+    const countingDataGenerator = new CountingFreqDataGenerator(sampling_rate, nfft);
     const dataObj = getDynamicDataBuffer(countingDataGenerator);
     displayElapsedTime(countingDataGenerator, 'elapsedTimeDisplay');
 
