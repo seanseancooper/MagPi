@@ -18,6 +18,88 @@ let highlights = [
 
 const dataGenerator = new FreqDataGenerator(sampling_rate, fft_size);
 const dataObj = getDynamicDataBuffer(dataGenerator);
+
+
+function displayElapsedTime(generatorInstance, elementId) {
+	setInterval(() => {
+		const elapsedMs = generatorInstance.getElapsedTime();
+		const seconds = (elapsedMs / 1000).toFixed(2);
+		document.getElementById(elementId).textContent = `Elapsed Time: ${seconds} sec`;
+	}, 500); // update every 0.5 seconds
+}
+
+function CountingFreqDataGenerator(sampling_rate, fft_size) {
+	this.rawLineTime = 1000 * fft_size / sampling_rate; // ms per FFT block
+	this.sampleFreq = sampling_rate;
+	this.fft_size = fft_size;
+
+	let currentBuffer = new Uint8Array(this.fft_size);
+
+	// Time tracking
+	let blockCount = 0;
+	let startTime = null;
+
+	// External access to time
+	this.getElapsedTime = () => {
+		return blockCount * this.rawLineTime; // in ms
+	};
+
+	this.getLine = () => {
+		if (blockReady) {
+			if (startTime === null) {
+				startTime = performance.now();
+			}
+			currentBuffer.set(latestBlockData);
+			blockCount++;
+			blockReady = false;
+			requestBlock();
+		}
+		return { buffer: currentBuffer };
+	};
+}
+
+function calculateFftParametersForFrameRate({ sampleRate, fftSize, frameRate }) {
+    // Sanity check
+    if (frameRate <= 0) {
+        throw new Error("Frame rate must be positive");
+    }
+
+    // Time between frames in seconds
+    const timeBetweenFrames = 1.0 / frameRate;
+
+    // Total samples that need to be processed per frame
+    const samplesPerFrame = Math.floor(timeBetweenFrames * sampleRate);
+
+    // Ensure samples per frame is enough to compute at least one FFT
+    if (samplesPerFrame < fftSize) {
+        throw new Error(
+            `Frame rate ${frameRate} too high for fft_size ${fftSize} at sample rate ${sampleRate}`
+        );
+    }
+
+    // Maximize the number of FFTs we can fit within the frame
+    const numFftsPerFrame = Math.max(1, Math.floor(samplesPerFrame / fftSize));
+
+    // Calculate fft_step based on spacing FFTs evenly
+    const fftStep = Math.floor(samplesPerFrame / numFftsPerFrame);
+
+    return {
+        frameRate: frameRate,
+        fftSize: fftSize,
+        fftStep: fftStep,
+        samplesPerFrame: samplesPerFrame,
+        numFftsPerFrame: numFftsPerFrame,
+        timeBetweenFramesSec: timeBetweenFrames,
+    };
+}
+
+const config = {
+    sampleRate: 2.048e6,
+    fftSize: 16384,
+    frameRate: 50
+};
+
+
 socket.on('connect', () => {
 	console.log("Socket connected");
 });
