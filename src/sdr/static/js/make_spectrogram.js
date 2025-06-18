@@ -103,7 +103,7 @@ const lineRate = 50;
 const sampling_rate = 2.048e6;                              // get this from config?? sdr??
 
 const signalMetadataMap = new Map();                        // key: highlight ID or position, value: metadata
-let latestBlockData = new Uint8Array(fft_size);             // Shared buffer to hold latest block data
+let uint8magnitudes = new Uint8Array(nfft);                 // Shared buffer to hold latest block data
 let blockReady = false;
 let latestPeakData = new Uint8Array(1024);                  // Hold latest peak data
 
