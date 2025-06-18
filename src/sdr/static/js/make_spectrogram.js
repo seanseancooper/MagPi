@@ -264,8 +264,8 @@ function processFloat32Data(floatData) {
 	function normalizeToUint8(floatData, outArray, minDb = -100, maxDb = 100) {
 		const range = maxDb - minDb;
 
-		for (let i = 0; i < block.length; i++) {
-			let scaled = ((block[i] - minDb) / range) * 255;
+		for (let i = 0; i < floatData.length; i++) {
+			let scaled = ((floatData[i] - minDb) / range) * 255;
 			outArray[i] = Math.max(0, Math.min(255, Math.floor(scaled)));
 		}
 	}
