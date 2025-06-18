@@ -25,7 +25,7 @@ socket.on('connect', () => {
 socket.on('block_data', (data) => {
 	if (data) {                                             // 4096 complex numbers = 8192 float32 values
 		const floatArray = new Float32Array(data);
-		requestPeaks();                                     // trigger peaks for block
+		//requestPeaks();                                   // MOVE/OMIT trigger peaks for block
 		latestBlockData = processBlockData(floatArray);     // convert to 0..255
 		blockReady = true;
 	} else {
