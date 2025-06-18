@@ -110,12 +110,6 @@ let latestPeakData = new Uint8Array(1024);                  // Hold latest peak 
 let center_freq = 97e6;                                     // Get this from sdr
 let bgcolor = "#000099";
 
-const config = {
-    sampleRate: sampling_rate,
-    fftSize: fft_size,
-    frameRate: lineRate
-};
-
 let normBounds = { minDb: -100, maxDb: 100 };
 let highlights = [
   { min_sel: 200, max_sel: 700, alpha: 0.3, color: "red" }
@@ -262,33 +256,6 @@ function setupInfoLayerHandlers(canvas, highlight, infoLayerId = 'infoLayer') {
 	});
 }
 
-function draw_highlights(cvs_hl, hl_drag, highlights) {
-
-	const cvs_hl_cnvs = cvs_hl.canvas;
-
-	highlights.forEach(h => {
-		cvs_hl.addHighlight(h.min_sel, h.max_sel, h.alpha, h.color);
-		const [hlInstance] = cvs_hl.highlights.slice(-1);
-
-		hl_drag.addDraggable({
-			hitTest: x => Math.abs(x - hlInstance.min_sel) < 6,
-			onDrag: dx => {
-			  hlInstance.min_sel = Math.max(0, hlInstance.min_sel + dx);
-			  cvs_hl.render();
-			}
-		});
-
-		hl_drag.addDraggable({
-			hitTest: x => Math.abs(x - hlInstance.max_sel) < 6,
-			onDrag: dx => {
-			  hlInstance.max_sel = Math.max(hlInstance.min_sel + 1, hlInstance.max_sel + dx);
-			  cvs_hl.render();
-			}
-		});
-
-		setupInfoLayerHandlers(cvs_hl_cnvs, hlInstance);
-	});
-}
 
 function processBlockData(block) {
 
@@ -398,9 +365,55 @@ function getDynamicDataBuffer(dataGen) {
 	return { buffer: bufferAry[0] };
 }
 
+function calc_params(){
+
+    function calculateFftParametersForFrameRate({ sampleRate, fftSize, frameRate }) {
+        // Sanity check
+        if (frameRate <= 0) {
+            throw new Error("Frame rate must be positive");
+        }
+
+        // Time between frames in seconds
+        const timeBetweenFrames = 1.0 / frameRate;
+
+        // Total samples that need to be processed per frame
+        const samplesPerFrame = Math.floor(timeBetweenFrames * sampleRate);
+
+        // Ensure samples per frame is enough to compute at least one FFT
+        if (samplesPerFrame < fftSize) {
+            throw new Error(
+                `Frame rate ${frameRate} too high for fft_size ${fftSize} at sample rate ${sampleRate}`
+            );
+        }
+
+        // Maximize the number of FFTs we can fit within the frame
+        const numFftsPerFrame = Math.max(1, Math.floor(samplesPerFrame / fftSize));
+
+        // Calculate fft_step based on spacing FFTs evenly
+        const fftStep = Math.floor(samplesPerFrame / numFftsPerFrame);
+
+        return {
+            frameRate: frameRate,
+            fftSize: fftSize,
+            fftStep: fftStep,
+            samplesPerFrame: samplesPerFrame,
+            numFftsPerFrame: numFftsPerFrame,
+            timeBetweenFramesSec: timeBetweenFrames,
+        };
+    }
+
+    const config = {
+        sampleRate: sampling_rate,
+        fftSize: fft_size,
+        frameRate: lineRate
+    };
+
+    const fftParams = calculateFftParametersForFrameRate(config);
+    console.log(fftParams);
+}
+
 function draw_spec() {
 
-    //const dataGenerator = new FreqDataGenerator(sampling_rate, fft_size);
     const countingDataGenerator = new CountingFreqDataGenerator(sampling_rate, fft_size);
     const dataObj = getDynamicDataBuffer(countingDataGenerator);
     displayElapsedTime(countingDataGenerator, 'elapsedTimeDisplay');
@@ -485,45 +498,28 @@ function draw_spec() {
 		cvs_xaxis_ctx.stroke();
 	}
 
-	draw_highlights(cvs_hl, hl_drag, highlights);  // mark something.
-    // TEST METHODS
-    function calculateFftParametersForFrameRate({ sampleRate, fftSize, frameRate }) {
-        // Sanity check
-        if (frameRate <= 0) {
-            throw new Error("Frame rate must be positive");
-        }
+    highlights.forEach(h => {
+        cvs_hl.addHighlight(h.min_sel, h.max_sel, h.alpha, h.color);
+        const [hlInstance] = cvs_hl.highlights.slice(-1);
 
-        // Time between frames in seconds
-        const timeBetweenFrames = 1.0 / frameRate;
+        hl_drag.addDraggable({
+            hitTest: x => Math.abs(x - hlInstance.min_sel) < 6,
+            onDrag: dx => {
+              hlInstance.min_sel = Math.max(0, hlInstance.min_sel + dx);
+              cvs_hl.render();
+            }
+        });
 
-        // Total samples that need to be processed per frame
-        const samplesPerFrame = Math.floor(timeBetweenFrames * sampleRate);
+        hl_drag.addDraggable({
+            hitTest: x => Math.abs(x - hlInstance.max_sel) < 6,
+            onDrag: dx => {
+              hlInstance.max_sel = Math.max(hlInstance.min_sel + 1, hlInstance.max_sel + dx);
+              cvs_hl.render();
+            }
+        });
 
-        // Ensure samples per frame is enough to compute at least one FFT
-        if (samplesPerFrame < fftSize) {
-            throw new Error(
-                `Frame rate ${frameRate} too high for fft_size ${fftSize} at sample rate ${sampleRate}`
-            );
-        }
-
-        // Maximize the number of FFTs we can fit within the frame
-        const numFftsPerFrame = Math.max(1, Math.floor(samplesPerFrame / fftSize));
-
-        // Calculate fft_step based on spacing FFTs evenly
-        const fftStep = Math.floor(samplesPerFrame / numFftsPerFrame);
-
-        return {
-            frameRate: frameRate,
-            fftSize: fftSize,
-            fftStep: fftStep,
-            samplesPerFrame: samplesPerFrame,
-            numFftsPerFrame: numFftsPerFrame,
-            timeBetweenFramesSec: timeBetweenFrames,
-        };
-    }
-
-    const fftParams = calculateFftParametersForFrameRate(config);
-    console.log(fftParams);
+        setupInfoLayerHandlers(cvs_hl.canvas, hlInstance);
+    });
 
 	function draw_waveforms()
 	{
