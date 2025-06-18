@@ -442,7 +442,7 @@ function draw_spec() {
 	//cgo.setWorldCoordsRHC(0, 0, cvs_spec.width, cvs_spec.height/2);
 
 	dragAxis.addDraggable({
-        hitTest: x => Math.abs(x - cvs_xaxis.width / 2) < 6,
+        hitTest: x => Math.abs(x - centerX) < 6,
         onDrag: dx => {
             const deltaFreq = dx * (sampling_rate / nfft * (nfft / cvs_xaxis.width));
             center_freq += deltaFreq;
