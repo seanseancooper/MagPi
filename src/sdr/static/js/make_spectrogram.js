@@ -391,7 +391,7 @@ function getDynamicDataBuffer(dataGen) {
 function draw_indicia() {
 
 	const cvs_xaxis = document.getElementById("cvs_xaxis");
-	const xaxis_ctx = cvs_xaxis.getContext("2d");
+	const xaxis_ctx = cvs_xaxis.getContext("2d", {willReadFrequently: true});
 
 	// Instantiate DragManager for frequency axis
 	const dragAxis = new DragManager(cvs_xaxis);
