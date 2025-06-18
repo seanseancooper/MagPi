@@ -96,8 +96,8 @@ class SDRAnalyzer:
 
         self.filter_peaks = False
 
-        self.reader = IQFileReader(outfile_path, block_size=self.fft_size)
-        self.image_buffer = -100 * np.ones((self.fft_rows, self.fft_size))
+        self.reader = IQFileReader(outfile_path, block_size=self.samp_scan)
+        self.image_buffer = -100 * np.ones((self.fft_rows, self.scans_sweep*self.nfft))
 
     def detect_peak_bins(self, magnitude_db):
 
