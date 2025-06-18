@@ -324,7 +324,7 @@ function CountingFreqDataGenerator(sampling_rate, nfft) {
 			if (startTime === null) {
 				startTime = performance.now();
 			}
-			currentBuffer.set(latestBlockData);
+			currentBuffer.set(uint8magnitudes);     // 4096 magnitudes into buffer
 			blockCount++;
 			blockReady = false;
 			requestBlock();
