@@ -225,7 +225,7 @@ function requestMetadata() {
 }
 
 function freqToX(freq) {
-    const df = sampling_rate / fft_size;
+    const df = sampling_rate / nfft;
     return (freq - (center_freq - sampling_rate / 2)) / df;
 }
 
