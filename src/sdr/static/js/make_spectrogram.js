@@ -285,7 +285,7 @@ function FreqDataGenerator(sampling_rate, nfft) {
 
 	this.getLine = () => {
 		if (blockReady) {
-			currentBuffer.set(latestBlockData);     // copy into buffer
+			currentBuffer.set(uint8magnitudes);     // 4096 magnitudes into buffer
 			blockReady = false;
 			requestBlock();                         // ask for next block right after processing
 		}
