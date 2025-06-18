@@ -413,7 +413,6 @@ function draw_indicia() {
 	const centerX = cvs_xaxis.width / 2;
 	xaxis_ctx.beginPath();
 	xaxis_ctx.strokeStyle = "red";
-	xaxis_ctx.beginPath();
 	xaxis_ctx.moveTo(centerX, 0);
 	xaxis_ctx.lineTo(centerX, cvs_xaxis.height);
 	xaxis_ctx.stroke();
