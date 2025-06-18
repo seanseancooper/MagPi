@@ -1,6 +1,6 @@
 const socket = io();
 const fft_size = 16384;
-const lineRate = 1;                                         // this cannot be correct.
+const lineRate = 50;
 const sampling_rate = 2.048e6;                              // get this from config?? sdr??
 
 const signalMetadataMap = new Map();                        // key: highlight ID or position, value: metadata
