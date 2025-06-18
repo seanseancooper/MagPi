@@ -241,6 +241,20 @@ and tunes an SDRWorker() receiver to the peak frequency, recording it as a SSET 
 >>- Likely to use SDR for this and not have a module.
 >>- **IDEA:** features unique to 'Bluetooth' signals (special identifiers)
 
+```
+Nooelec NESDR SMArt
+SKU 	100701
+UPC 	0616469145864
+Country of Manufacture 	United States
+USB Interface IC 	RTL2832U
+Tuner IC 	R820T2
+Frequency Range (approximate) 	0.1MHz - 1750MHz
+TCXO clock 	Yes
+Antenna Connector Type 	SMA Female
+Antenna Included? 	No
+Remote Included? 	No
+Additional Accessories 	No
+```
 
 ## trx
 TRXSignalPoint(self, worker_id, lon, lat, sgnl, text_data={}, audio_data=None, signal_type="object", sr=48000)
