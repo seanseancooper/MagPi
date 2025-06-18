@@ -98,8 +98,9 @@ class HighlightLayer {
 }
 
 const socket = io();
-const fft_size = 16384;
-const lineRate = 50;
+const nfft = 4096;                                          // size of PSD. aka NFFT
+const samp_scan = nfft*16;                                  // number of samples per scan
+const lineRate = 10;
 const sampling_rate = 2.048e6;                              // get this from config?? sdr??
 
 const signalMetadataMap = new Map();                        // key: highlight ID or position, value: metadata
