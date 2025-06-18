@@ -75,7 +75,9 @@ class SDRAnalyzer:
 
         self.sample_rate = None
         self.center_freq = None
-        self.fft_size = 4096
+        self.nfft = None
+        self.samp_scan = None
+        self.scans_sweep = 1
         self.fft_rows = None
 
         self.filter_peaks = False
