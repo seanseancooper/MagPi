@@ -278,7 +278,7 @@ function FreqDataGenerator(sampling_rate, nfft) {
 
 	this.rawLineTime = 1000 * nfft / sampling_rate;
 	this.sampleFreq = sampling_rate;
-	this.fft_size = fft_size;
+	this.nfft = nfft;
 
 	// double buffering
 	let currentBuffer = new Uint8Array(this.fft_size);
