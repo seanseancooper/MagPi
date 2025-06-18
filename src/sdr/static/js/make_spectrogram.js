@@ -301,8 +301,8 @@ function displayElapsedTime(generatorInstance, elementId) {
 	}, 500);
 }
 
-function CountingFreqDataGenerator(sampling_rate, fft_size) {
-	this.rawLineTime = 1000 * fft_size / sampling_rate; // ms per FFT block
+function CountingFreqDataGenerator(sampling_rate, nfft) {
+	this.rawLineTime = 1000 * nfft / sampling_rate; // ms per FFT block
 	this.sampleFreq = sampling_rate;
 	this.fft_size = fft_size;
 
