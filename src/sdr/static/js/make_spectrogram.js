@@ -328,7 +328,7 @@ function CountingFreqDataGenerator(sampling_rate, nfft) {
 			blockCount++;
 			console.log(blockCount);
 			blockReady = false;
-			requestBlock();
+			requestBlock();                         // ask for next block right after processing
 		}
 		return { buffer: currentBuffer };
 	};
