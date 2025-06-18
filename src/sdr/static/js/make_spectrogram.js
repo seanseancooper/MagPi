@@ -405,9 +405,9 @@ function calc_params(){
     }
 
     const config = {
-        sampleRate: sampling_rate,
-        fftSize: fft_size,
-        frameRate: lineRate
+        sampling_rate: sampling_rate,
+        nfft: nfft,
+        lineRate: lineRate
     };
 
     const fftParams = calculateFftParametersForFrameRate(config);
