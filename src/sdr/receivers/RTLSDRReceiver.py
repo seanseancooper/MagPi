@@ -5,7 +5,6 @@ import threading
 from datetime import datetime
 
 from rtlsdr import RtlSdr
-from scipy.signal import find_peaks
 import numpy as np
 
 from src.config import readConfig
