@@ -216,7 +216,7 @@ class RTLSDRReceiver(threading.Thread):
 
     def print_device_info(self):
         """Print the length of samples and valid gains for the SDR."""
-        print(len(self.read_samples(self.fft_size)))
+        print(len(self.read_samples(self.samp_scan)))
         print(self.sdr.valid_gains_db)
 
 if __name__ == '__main__':
