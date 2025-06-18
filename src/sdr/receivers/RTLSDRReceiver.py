@@ -60,6 +60,19 @@ class RTLSDRReceiver(threading.Thread):
 
         readConfig(config_file, self.config)
 
+        # serial_numbers = RtlSdr.get_device_serial_addresses()
+        # device_index = RtlSdr.get_device_index_by_serial(self.config.get('DEFAULT_SDR', '00000000'))
+        # self.sdr = RtlSdr(device_index)
+
+        # Get a list of detected device serial numbers (str)
+        # serial_numbers = self.sdr.get_device_serial_addresses()
+
+        # Find the device index for a given serial number
+        # device_index = self.sdr.get_device_index_by_serial('00000001')
+        # sdr = RtlSdr(device_index)
+
+        # sdr = RtlSdr(serial_number='00000001') # pass the serial number directly
+
         self.sdr = RtlSdr()
         self.sdr.sample_rate = self.config['DEFAULT_SAMPLE_RATE']
         self.sdr.center_freq = self.config['DEFAULT_CENTER_FREQ']
