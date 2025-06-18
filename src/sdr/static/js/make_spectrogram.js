@@ -569,6 +569,9 @@ function draw_spec() {
 	draw_waveforms();
 }
 
+const fftParams = calculateFftParametersForFrameRate(config);
+console.log('framerate calculator: ' + fftParams);
+
 window.addEventListener("load", function () {
 	draw_spec();
 });
