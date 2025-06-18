@@ -185,6 +185,7 @@ const colMap = [
         [  0,   0,   0,   0]
         ];
 
+let blockCount = 0;
 socket.on('connect', () => {
 	console.log("Socket connected");
 });
