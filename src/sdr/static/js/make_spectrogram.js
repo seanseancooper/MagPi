@@ -306,7 +306,7 @@ function CountingFreqDataGenerator(sampling_rate, nfft) {
 	this.sampleFreq = sampling_rate;
 	this.nfft = nfft;
 
-	let currentBuffer = new Uint8Array(this.fft_size);
+	let currentBuffer = new Uint8Array(this.nfft);
 
 	// Time tracking
 	let blockCount = 0;
