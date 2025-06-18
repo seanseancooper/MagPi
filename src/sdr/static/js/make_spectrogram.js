@@ -12,7 +12,7 @@ let center_freq = 97e6;                                     // Get this from sdr
 let bgcolor = "#000099";
 let normBounds = { minDb: -100, maxDb: 100 };
 let highlights = [
-  { min_sel: 200, max_sel: 700, alpha: 0.3, color: "cyan" }
+  { min_sel: 200, max_sel: 700, alpha: 0.3, color: "red" }
 ];
 
 
