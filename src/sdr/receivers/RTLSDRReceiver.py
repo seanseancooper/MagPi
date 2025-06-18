@@ -197,7 +197,7 @@ class RTLSDRReceiver(threading.Thread):
                 "worker_id"      : worker_id,
                 "lon"            : 0.0,
                 "lat"            : 0.0,
-                "sgnl"           : self.get_peak_db(peak),                              # CELL_STRENGTH_FIELD
+                "sgnl"           : get_peak_db(self.block, self.nfft, peak),                              # CELL_STRENGTH_FIELD
 
                 # "text_attributes": text_attributes, # this is being done 2x?
                 'sample_rate'   : self.sdr.sample_rate,
