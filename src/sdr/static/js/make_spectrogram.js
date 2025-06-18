@@ -453,11 +453,6 @@ function draw_spec() {
 	cvs_xaxis_ctx.fillStyle = bgcolor;
 	cvs_xaxis_ctx.fillRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
 
-	// Frequencies
-	const centerX = cvs_xaxis.width / 2;
-	const min_freq_hz = center_freq - sampling_rate / 2;
-	const max_freq_hz = center_freq + sampling_rate / 2;
-
 	// Draw...
 	cvs_xaxis_ctx.beginPath();
 
