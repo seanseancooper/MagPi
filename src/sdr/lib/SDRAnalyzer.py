@@ -89,7 +89,8 @@ class SDRAnalyzer:
 
         self.sample_rate = self.config['DEFAULT_SAMPLE_RATE']
         self.center_freq = self.config['DEFAULT_CENTER_FREQ']
-        self.fft_size = self.config['FFT_SIZE']
+        self.nfft = self.config['NFFT']
+        self.samp_scan = self.nfft*16
         self.fft_rows = self.config['FFT_ROWS']
         outfile_path = self.config['OUTFILE_PATH']
 
