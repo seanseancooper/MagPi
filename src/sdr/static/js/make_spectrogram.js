@@ -298,7 +298,7 @@ function displayElapsedTime(generatorInstance, elementId) {
 		const elapsedMs = generatorInstance.getElapsedTime();
 		const seconds = (elapsedMs / 1000).toFixed(2);
 		document.getElementById(elementId).textContent = `Elapsed Time: ${seconds} sec`;
-	}, 500); // update every 0.5 seconds
+	}, 500);
 }
 
 function CountingFreqDataGenerator(sampling_rate, fft_size) {
