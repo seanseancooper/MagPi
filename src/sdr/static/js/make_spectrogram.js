@@ -112,7 +112,7 @@ let bgcolor = "#000099";
 
 let normBounds = { minDb: -100, maxDb: 100 };
 let highlights = [
-  { min_sel: 200, max_sel: 700, alpha: 0.3, color: "red" }
+  //{ min_sel: 200, max_sel: 700, alpha: 0.3, color: "red" }
 ];
 
 // Matlab Jet ref: stackoverflow.com grayscale-to-red-green-blue-matlab-jet-color-scale
