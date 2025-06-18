@@ -192,7 +192,7 @@ socket.on('block_data', (data) => {
 	if (data) {                                             // 4096 complex numbers = 8192 float32 values
 		const floatArray = new Float32Array(data);
 		//requestPeaks();                                   // MOVE/OMIT trigger peaks for block
-		latestBlockData = processBlockData(floatArray);     // convert to 0..255
+		uint8magnitudes = processFloat32Data(floatArray);   // convert 4096 float32 to 4096 0..255
 		blockReady = true;
 	} else {
 		console.warn("Invalid block_data received");
