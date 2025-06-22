@@ -1,95 +1,267 @@
 
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/sdr_info.css') }}">
+    <main>
+        <!-- Spectrogram Display 0 -->
+        <div class="spectrogram-display">
+            <div class="sdr-info">SDR 0: 100 Mhz, bandwidth: 1000 k</div>
+            <div class="inline-display" style="position: absolute; left:30px; top:50px;">
 
-    <!-- Info Layer Container -->
-    <div id="infoLayer" class="info-layer">
-        <div class="info-content">
-            <p id="info-min">Min: </p>
-            <p id="info-max">Max: </p>
-            <div class="info-header">Signal Controls</div>
-            <div id="info_panel">
-                <div><strong>Label:</strong> <span id="info_label"></span></div>
-                <div><strong>Freq:</strong> <span id="info_freq"></span></div>
-                <div><strong>BW:</strong> <span id="info_bw"></span></div>
-                <div><strong>Mod:</strong> <span id="info_mod"></span></div>
-                <div><strong>SNR:</strong> <span id="info_snr"></span></div>
+                <div class="spectrogram" style="color: #444; position: absolute; width: 1024px; height: 256px;">
+                    <canvas id="cvs_xaxis_0" style="background: rgba(0,0,0, 0.2); display: block; width: 1024px; height: 20px; position: absolute; top: 0; left: 0; z-index: 2;" width="1024px" height="20px"></canvas>
+                    <canvas id="cvs_hl_0" style="display: block; width: 1024px; height: 256px; position: relative; top: -20; left: 0; z-index: 1;" width="1024px" height="256px"></canvas>
+                    <canvas id="grid" style="position: absolute; top: 0; left: 0; z-index: 1;" width="1024px" height="256px"></canvas>
+                    <canvas id="cvs_spec_0" style="display: block; width: 1024px; height: 256px; position: absolute; top: 0; left: 0; z-index: 0;" width="1024px" height="256px"></canvas>
+                    <input class="ud_input" id="cvs_spec_0_timeslider" style="height: 256px; z-index: 5" type="range" orient="vertical" min="0" max="100" value="" />
+                </div>
+                <input id="grid_slider_input" class="grid_slider" style="position: relative; left: 860px; top: 270px;" type="range" min="1" max="128" step="2" value="9" data-action="" data-target="sdr" onChange="handleGridSlider(this);"/>
             </div>
-            <div class="info-buttons">
-                <button onclick="emitControlCommand('ctrl_record')">Record</button>
-                <button onclick="emitControlCommand('ctrl_play')">Play</button>
-                <button onclick="emitControlCommand('ctrl_solo')">Solo</button>
-                <button onclick="emitControlCommand('ctrl_mute')">Mute</button>
-                <button onclick="emitControlCommand('ctrl_analyze')">Analyze</button>
-                <button onclick="emitControlCommand('ctrl_demux')">Demux</button>
-                <button onclick="emitControlCommand('ctrl_decode')">Decode</button>
-                <button onclick="emitControlCommand('ctrl_encode')">Encode</button>
-                <button onclick="emitControlCommand('ctrl_filter')">Filter</button>
-                <button onclick="emitControlCommand('ctrl_block')">Block</button>
-                <button onclick="emitControlCommand('ctrl_label')">Label</button>
-                <button onclick="emitControlCommand('ctrl_test')">Test</button>
+
+            <div class="inline-display" style="float: right; position: absolute; left:775px; top:20px;">
+                <button class="ctrl-button" id="ctrl_live"><div id="ctrl_live_status">Online</div></button>
+                <select id="fileSelector_0" style="width: 200px;">
+                    <option value="rtlsdr_20250616_142944_97000000_2048000.iq">-- Choose File --</option>
+                    <option selected>airport_north_sector_001.iq</option>
+                    <option>drone_detect_2025_06_01.iq</option>
+                    <option>rtlsdr_20250616_142944_97000000_2048000.iq</option>
+                </select>
+            </div>
+
+            <div class="inline-display" style="position: absolute; left:30px; top:303px">
+                <div class="range-controls">
+                    <input class="lr_input" type="range" id="rangeMin_0" min="-100" max="100" step="1" value="-5">
+                    <input class="lr_input" type="range" id="rangeMax_0" min="-100" max="100" step="1" value="30">
+                </div>
+                <div class="peak_checkboxes" style="position: relative; left:320px; top:0px;">
+                    <label><input type="checkbox" id="trackPeaks"> Track Peaks</label>
+                    <label><input type="checkbox" id="holdPeaks"> Hold Peaks</label>
+                </div>
+                <div class="peak_values" style="position: relative; left: 330px; top:2px;">
+                    <label>Freq: 121.50 MHz</label>
+                    <label>Peak dB: -32.1 dB</label>
+                </div>
+
+                <div class="time_display" style="position: absolute; left: 4px; top: -14px; z-index:2;">
+                    <span id="timeDisplay_0_0" class="">00:00:00</span> |
+                    <span id="elapsedTimeDisplay" class="">00:00:00</span>
+                </div>
+
+            </div>
+
+            <div class="inline-display" style="position: absolute; left:30px; top:340px;">
+                <div class="ctrl-buttons" style="">
+                        <button class="ctrl-button" id="ctrl_record">Record</button>
+                        <button class="ctrl-button" id="ctrl_play">Play</button>
+                        <button class="ctrl-button" id="ctrl_solo">Solo</button>
+                        <button class="ctrl-button" id="ctrl_mute">Mute</button>
+                        <button class="ctrl-button" id=""></button>
+                        <button class="ctrl-button" id="ctrl_analyze">Analyze</button>
+                        <button class="ctrl-button" id="ctrl_demux">Demux</button>
+                        <button class="ctrl-button" id="ctrl_decode">Decode</button>
+                        <button class="ctrl-button" id="ctrl_encode">Encode</button>
+                        <button class="ctrl-button" id="ctrl_filter">Filter</button>
+                        <button class="ctrl-button" id="ctrl_block">Block</button>
+                        <button class="ctrl-button" id="ctrl_label">Label</button>
+                        <button class="ctrl-button" id="ctrl_alert">Alert</button>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="" style="">
-        <label for="rangeMin">Min dB:</label>
-        <input type="range" id="rangeMin" min="-100" max="100" step="1" value="-5">
-        <label for="rangeMax">Max dB:</label>
-        <input type="range" id="rangeMax" min="-100" max="100" step="1" value="30">
-    </div>
+    </main>
 
     <script>
-        function emitControlCommand(commandName) {
-            const selectedSignalId = getSelectedSignalId(); // Replace with actual logic to identify selected signal
-                socket.emit('control_command', {
-                    command: commandName,
-                    signal_id: selectedSignalId
-                });
+        const cvs_xaxis = document.getElementById("cvs_xaxis_0");
+        const cvs_hl = document.getElementById("cvs_hl_0");
+
+        const fft_size = 1024;
+        const sampling_rate = 2.4e6; // 2.4 MHz
+        let center_freq = 100e6; // 100 MHz
+
+        function freqToX(freq) {
+            const df = sampling_rate / fft_size;
+            return (freq - (center_freq - sampling_rate / 2)) / df;
         }
 
-        function getSelectedSignalId() {
-            return window.selectedSignalId || 'default_signal';
-        }
+		function draw_indicia() {
+            const ctx = cvs_xaxis.getContext("2d");
+            ctx.clearRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
 
-        function updateInfoDisplay(metadata) {
-            document.getElementById("info_label").textContent = metadata.label || "Unknown";
-            document.getElementById("info_freq").textContent = `${(metadata.center_freq / 1e6).toFixed(3)} MHz`;
-            document.getElementById("info_bw").textContent = `${(metadata.bandwidth / 1e3).toFixed(1)} kHz`;
-            document.getElementById("info_mod").textContent = metadata.modulation || "—";
-            document.getElementById("info_snr").textContent = `${metadata.snr.toFixed(1)} dB`;
-        }
+            // Draw center line
 
-        const rangeMin = document.getElementById("rangeMin");
-        const rangeMax = document.getElementById("rangeMax");
+            const centerX = cvs_xaxis.width / 2;
+            // ctx.globalAlpha  = 1.0;
 
-        function updateSliderBounds() {
-            let minVal = parseInt(rangeMin.value);
-            let maxVal = parseInt(rangeMax.value);
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 10;
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, cvs_xaxis.height);
 
-            if (minVal > maxVal) {
-                minVal = maxVal;
-                rangeMin.value = minVal;
+            ctx.stroke();
+
+            // Draw frequency labels (simple example)
+            ctx.fillStyle = "white";
+            ctx.font = "12px sans-serif";
+
+            for (let i = 0; i < 5; i++) {
+                let freq = center_freq + (i - 2) * sampling_rate / 4;
+                let x = centerX + (i - 2) * cvs_xaxis.width / 4;
+                ctx.fillText((freq / 1e6).toFixed(1) + " MHz", x - 20, 12);
+            }
+		}
+
+        class Highlight {
+
+            constructor(min_sel, max_sel, alpha, color) {
+                this.min_sel = min_sel;
+                this.max_sel = max_sel;
+                this.alpha = alpha;
+                this.color = color;
             }
 
-            normBounds.minDb = minVal;
-            normBounds.maxDb = maxVal;
-
-            document.getElementById("info-min").textContent = `Min: ${minVal} dB`;
-            document.getElementById("info-max").textContent = `Max: ${maxVal} dB`;
+            render(ctx) {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.min_sel, 0, this.max_sel - this.min_sel, ctx.canvas.height);
+                ctx.restore();
+            }
 
         }
 
-        rangeMin.addEventListener('input', updateSliderBounds);
-        rangeMax.addEventListener('input', updateSliderBounds);
+        class HighlightLayer {
+
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext("2d");
+                this.highlights = [];
+            }
+
+            addHighlight(min_sel, max_sel, alpha, color) {
+                this.highlights.push(new Highlight(min_sel, max_sel, alpha, color));
+            }
+
+            addHighlightLine(min_sel, max_sel, alpha, color) {
+                this.highlights.push(new Highlight(min_sel, min_sel+1, alpha, color));
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.highlights.forEach(h => h.render(this.ctx));
+            }
+        }
+
+        class DragManager {
+
+          constructor(canvas) {
+            this.canvas = canvas;
+            this.ctx = canvas.getContext("2d");
+            this.draggables = [];
+            this.active = null;
+            this.lastX = 0;
+
+            canvas.addEventListener("mousedown", e => this._onMouseDown(e));
+            window.addEventListener("mousemove", e => this._onMouseMove(e));
+            window.addEventListener("mouseup", e => this._onMouseUp(e));
+          }
+
+          addDraggable({ hitTest, onDrag, onDragEnd = () => {} }) {
+            this.draggables.push({ hitTest, onDrag, onDragEnd });
+          }
+
+          _onMouseDown(e) {
+            const rect = this.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            this.lastX = x;
+            for (const d of this.draggables) {
+              if (d.hitTest(x)) {
+                this.active = d;
+                break;
+              }
+            }
+          }
+
+          _onMouseMove(e) {
+            if (!this.active) return;
+            const rect = this.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const dx = x - this.lastX;
+            this.active.onDrag(dx);
+            this.lastX = x;
+          }
+
+          _onMouseUp(e) {
+            if (this.active) {
+              this.active.onDragEnd();
+              this.active = null;
+            }
+          }
+        }
+
+        // Instantiate DragManager for frequency axis
+        const dragAxis = new DragManager(cvs_xaxis);
+        dragAxis.addDraggable({
+          hitTest: x => Math.abs(x - cvs_xaxis.width / 2) < 6,
+          onDrag: dx => {
+            const deltaFreq = dx * (sampling_rate / fft_size * (fft_size / cvs_xaxis.width));
+            center_freq += deltaFreq;
+            draw_indicia();
+          }
+        });
+
+        draw_indicia();
+
+        // Highlights Setup
+        const hlLayer = new HighlightLayer("cvs_hl_0");
+        const dragHl = new DragManager(hlLayer.canvas);
+
+        const highlights = [
+          { min_sel: 462, max_sel: 565, alpha: 0.4, color: "green" } // 1k bandwidth
+        ];
+
+        highlights.forEach(h => {
+          hlLayer.addHighlight(h.min_sel, h.max_sel, h.alpha, h.color);
+          const [hlInstance] = hlLayer.highlights.slice(-1);
+
+          dragHl.addDraggable({
+            hitTest: x => Math.abs(x - hlInstance.min_sel) < 6,
+            onDrag: dx => {
+              hlInstance.min_sel = Math.max(0, hlInstance.min_sel + dx);
+              hlLayer.render();
+            }
+          });
+
+          dragHl.addDraggable({
+            hitTest: x => Math.abs(x - hlInstance.max_sel) < 6,
+            onDrag: dx => {
+              hlInstance.max_sel = Math.min(cvs_hl.width, hlInstance.max_sel + dx);
+              hlLayer.render();
+            }
+          });
+        });
+
+        /*
+        const ctx_hl = cvs_hl.getContext("2d");
+        ctx_hl.clearRect(0, 0, cvs_hl.width, cvs_hl.height);
+        const centerX2 = cvs_hl.width / 2;
+        ctx_hl.strokeStyle = "white";
+        ctx_hl.lineWidth = 1;
+        ctx_hl.beginPath();
+        ctx_hl.moveTo(centerX2, 0);
+        ctx_hl.lineTo(centerX2, cvs_hl.height);
+        ctx_hl.stroke();
+        */
+
+        hlLayer.render();
+
+        /*
+
+        const canvas = document.getElementById("cvs_spec_0");
+        const ctx = cvs_spec_0.getContext("2d");
+        const img = document.getElementById("test_image");
+
+        img.onload = function() {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        };
+        */
+
     </script>
-
-    <div class="" style="position: relative; width: 1024px; height: 250px;">
-        <canvas id="cvs_spec" style="position: absolute; top: 30; left: 0; z-index: 1;" width="1024" height="256"></canvas>
-        <canvas id="cvs_hl"  style="position: absolute; top: 50; left: 0; z-index: 2;" width="1024" height="256"></canvas>
-        <canvas id="cvs_xaxis" style="position: absolute; top: 0; left: 0; z-index: 3; visibility: hidden;"  width="1024" height=30"></canvas>
-    </div>
-
-    <h1><div id="elapsedTimeDisplay">Elapsed Time: 0.00 sec</div></h1>
-
     <script src="{{ url_for('static', filename='js/make_layers.js') }}"></script>

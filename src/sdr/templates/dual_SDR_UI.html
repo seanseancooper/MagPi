@@ -4,7 +4,141 @@
     <meta charset="UTF-8" />
     <title>SDR</title>
 
+    <script src="{{ url_for('static', filename='js/socket.io.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Cango-29v04.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/CangoAxes-10v06.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Spectrogram-2v01.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/make_spectrogram.js') }}"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sdr_info.css') }}">
+
     <script>
+
+        function setsHeaders(xhttp) {
+            xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
+            xhttp.setRequestHeader('Access-Control-Allow-Methods', 'POST');
+            xhttp.setRequestHeader('Content-Type', 'text/html');
+            xhttp.setRequestHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-*');
+        }
+
+        function add(uniqId, trgt){
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("POST", "{{ url_for('.index') }}add/" + uniqId, true);
+            setsHeaders(xhttp);
+            xhttp.setRequestHeader('TARGET', trgt);
+            xhttp.send();
+
+            xhttp.onload = function() {
+                const resp = xhttp.response;
+                var aButton = document.getElementById("add_button_" + uniqId);
+                if (resp == "OK"){
+                    aButton.classList.value = "adding_button";
+                    aButton.innerHTML = "------";
+                    setTimeout(function() {
+                        aButton.classList.value = "add_btn added_button";
+                        aButton.innerHTML = "ADDED";
+                    }, 250);
+                } else {
+                    aButton.classList.value = "adding_failed_button";
+                    aButton.innerHTML = "FAILED!";
+                };
+            };
+        }
+
+        function mute(uniqId, trgt){
+            var xhttp = new XMLHttpRequest();
+
+            xhttp.open("POST", "{{ url_for('.index') }}mute/" + uniqId, true);
+            setsHeaders(xhttp);
+            xhttp.setRequestHeader('TARGET', trgt);
+            xhttp.send();
+
+            xhttp.onload = function() {
+                const resp = xhttp.response;
+                var mButton = document.getElementById("mute_button_" + uniqId);
+
+                if (resp == "False"){
+                    mButton.classList.value = "muting_button";
+                    mButton.innerHTML = "------";
+                    setTimeout(function() {
+                        mButton.classList.value = "mute_btn unmute_button";
+                        mButton.innerHTML = "MUTE";
+                    }, 250);
+                }
+
+                if (resp == "True"){
+                    mButton.classList.value = "muting_button";
+                    mButton.innerHTML = "------";
+                    setTimeout(function() {
+                        mButton.classList.value = "mute_btn mute_button";
+                        mButton.innerHTML = "UNMUTE";
+                    }, 250);
+                };
+            };
+        }
+
+        function remove(uniqId, trgt){
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("POST", "{{ url_for('.index') }}remove/" + uniqId, true);
+            setsHeaders(xhttp);
+            xhttp.setRequestHeader('TARGET', trgt);
+            xhttp.send();
+
+            xhttp.onload = function() {
+                const resp = xhttp.response;
+                rButton = document.getElementById("remove_button_" + uniqId);
+                if (resp == "OK"){
+                    rButton.classList.value = "rem_button";
+                    rButton.style = "color:white;";
+                    rButton.innerHTML = "*";
+                    setTimeout(function() {
+                        mButton = document.getElementById("mute_button_" + uniqId);
+                        uButton = document.getElementById("unmute_button_" + uniqId);
+
+                        if (mButton) {
+                                mButton.style = "display:none;"
+                        };
+
+                        if (uButton) {
+                                uButton.style = "display:none;"
+                        };
+
+                        // note width increase
+                        rButton.classList.value = "rem_button removed_button button";
+                        rButton.innerHTML = "REMOVED";
+
+                    }, 250);
+                } else {
+                    rButton.classList.value = "remove_failed_button";
+                    rButton.innerHTML = "x";
+                };
+            };
+        }
+
+        function reload(){
+            document.location.reload();
+        }
+
+        function replace_data(){
+            // use foreach...
+            scanner.replaceData();
+        }
+
+        const dataLoaderLoading = "&nbsp;";
+
+        function colorUniqId(data, splt){
+            var parts = data.split(splt);
+            var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
+            var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
+            var B = (parseInt(parts[4], 16) + parseInt(parts[5], 16)) % 255;
+            return [R,G,B];
+        };
+
+        function averageColor([R,G,B]){
+            let avg = R+G+B/3;
+            return (avg > 128)? "00,00,00": "255,255,255";
+        };
+
         function handleGridSlider(slider) {
             const grid = document.getElementById("grid");
 
@@ -101,230 +235,51 @@
             });
         });
 
+        function emitControlCommand(commandName) {
+            const selectedSignalId = getSelectedSignalId(); // Replace with actual logic to identify selected signal
+                socket.emit('control_command', {
+                    command: commandName,
+                    signal_id: selectedSignalId
+                });
+        }
+
+        function getSelectedSignalId() {
+            return window.selectedSignalId || 'default_signal';
+        }
+
+        function updateInfoDisplay(metadata) {
+            document.getElementById("info_label").textContent = metadata.label || "Unknown";
+            document.getElementById("info_freq").textContent = `${(metadata.center_freq / 1e6).toFixed(3)} MHz`;
+            document.getElementById("info_bw").textContent = `${(metadata.bandwidth / 1e3).toFixed(1)} kHz`;
+            document.getElementById("info_mod").textContent = metadata.modulation || "—";
+            document.getElementById("info_snr").textContent = `${metadata.snr.toFixed(1)} dB`;
+        }
+
+        const rangeMin = document.getElementById("rangeMin");
+        const rangeMax = document.getElementById("rangeMax");
+
+        function updateSliderBounds() {
+            let minVal = parseInt(rangeMin.value);
+            let maxVal = parseInt(rangeMax.value);
+
+            if (minVal > maxVal) {
+                minVal = maxVal;
+                rangeMin.value = minVal;
+            }
+
+            normBounds.minDb = minVal;
+            normBounds.maxDb = maxVal;
+
+            document.getElementById("info-min").textContent = `Min: ${minVal} dB`;
+            document.getElementById("info-max").textContent = `Max: ${maxVal} dB`;
+
+        }
+
+        rangeMin.addEventListener('input', updateSliderBounds);
+        rangeMax.addEventListener('input', updateSliderBounds);
 
     </script>
 
-    <style>
-        body {
-            display: flex;
-            font-family: Helvetica, Arial, sans-serif;
-            font-size: 1em;
-            background-color:#333;
-            color: #ffffff;
-        }
-
-        .sdr-info {
-            font-family: Helvetica, Arial, sans-serif;
-            font-size: 1em;
-            font-weight: bold;
-        }
-
-        select {
-            font-size: 0.8em;
-            background-color: #000;
-            color: #0F0;
-            border:0px;
-            outline:0px;
-        }
-
-        option{
-            color: yellow;
-        }
-
-        label {
-            font-size: 0.9em;
-        }
-
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 1em;
-            padding: 1em;
-        }
-
-        .spectrogram-display {
-            border: 1px solid #FFF;
-            width: 1030px;
-            height: 390px;
-            padding: 0.5em;
-            background: #000;
-        }
-
-        .display-controls {
-            float: left;
-        }
-
-        .inline-display {
-            display: flex;
-            margin-top: 0.5em;
-            margin-right: 0.5em;
-        }
-
-        .spectrogram {
-            border: 1px solid #CCC;
-        }
-
-        .grid {
-            //user-select: none;
-            //-webkit-user-select: none;
-            //-moz-user-select: none;
-            position:absolute;
-            left:0px;
-            top:0px;
-            display:none;
-        }
-
-        .ctrl-buttons {
-            display:grid;
-            width: 1028px;
-            border: 1px solid #666;
-            //padding: 4px;
-            grid-template-columns: repeat(15, 1fr);
-        }
-
-        .ctrl-button {
-            height: 28px;
-            width: 79px;
-            padding: 4px;
-            background: #333;
-            border: 1px solid #666;
-            color: #0F0;
-            //margin: 1px;
-            font-size: .8em;
-        }
-
-        button {
-            padding: 0.4em;
-            background: #333;
-            border: 1px solid #666;
-            color: #0F0;
-            font-size: 0.9em;
-        }
-
-        button:hover {
-            background: #005;
-        }
-
-        .peak_checkboxes {
-            color: #FFF;
-            margin-top: 10px;
-            float:left;
-            vertical-align: bottom;
-        }
-
-        .peak_values {
-            color: #FFF;
-            margin-top: 10px;
-            float:left;
-            vertical-align: bottom;
-        }
-
-        .range-controls {
-            float:left;
-            vertical-align: bottom;
-        }
-
-        input[type="range"] {
-          -webkit-appearance: none;
-          appearance: none;
-          height: 4px;
-          position: absolute;
-          background-color: #0F0;
-          pointer-events: none;
-        }
-
-        /******** Chrome, Safari, Opera and Edge Chromium styles ********/
-        /* slider track */
-        input[type="range"]::-webkit-slider-runnable-track {
-            background-color: #00FF00;
-            border-radius: 2px;
-            width: 2px;
-            height: 2px;
-        }
-
-        /* slider thumb */
-        input[type="range"]::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          margin-top: -6px; /* Centers thumb on the track */
-          border-radius: 2px;
-          height: 14px;
-          width: 5px;
-          pointer-events: all;
-          background-color: #0f0;
-          cursor: pointer;
-        }
-
-        input[type="range"]:focus::-webkit-slider-thumb {
-          outline: 3px solid #00ff00;
-          outline-offset: 0.125rem;
-        }
-
-        /*********** Firefox styles ***********/
-        /* slider track */
-        input[type="range"]::-moz-range-track {
-          background-color: #00FF00;
-          border-radius: 1px;
-          height: 2px;
-        }
-
-        /* slider thumb */
-        input[type="range"]::-moz-range-thumb {
-            border: none; /*Removes extra border that FF applies*/
-            background-color: #00ff00;
-            border-radius: 2px;
-            height: 14px;
-            width: 5px;
-            pointer-events: all;
-            box-shadow: 0 0 0 1px #C6C6C6;
-            cursor: pointer;
-        }
-
-        input[type="range"]:focus::-moz-range-thumb{
-          outline: 3px solid #00ff00;
-          outline-offset: 0.125rem;
-        }
-
-        .lr_input[type=range] {
-            width: 300px;
-            margin-top: 1.35em;
-            margin-left: 0.0em;
-        }
-
-        .ud_input[type=range][orient=vertical] {
-            //-webkit-appearance: none;
-            writing-mode: vertical-lr;
-            width: 4px;
-            left: 1020px;
-            top: -2px;
-        }
-
-        .ud_input[type="range"]::-moz-range-thumb {
-            border: none; /*Removes extra border that FF applies*/
-            background-color: #0000ff;
-            border-radius: 2px;
-            height: 5px;
-            width: 24px;
-            pointer-events: all;
-            box-shadow: 0 0 0 1px #C6C6C6;
-            cursor: pointer;
-        }
-
-        /* slider thumb */
-        .ud_input[type="range"]::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          margin-left: -15px; /* Offsets thumb on the track */
-          //border-radius: 2px;
-          height: 5px;
-          width: 24px;
-          pointer-events: all;
-          background-color: #00f;
-          cursor: pointer;
-        }
-
-    </style>
 </head>
 <body>
 
@@ -590,6 +545,7 @@
         };
 
     </script>
+    <script src="{{ url_for('static', filename='js/make_layers.js') }}"></script>
 
 </body>
 </html>
