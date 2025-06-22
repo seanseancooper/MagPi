@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spectrogram Signal Interface</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: #eee;
+      margin: 0;
+      padding: 1em;
+      display: flex;
+      flex-direction: row;
+      gap: 1em;
+    }
+
+    main {
+      flex-grow: 1;
+    }
+
+    aside {
+      width: 340px;
+      background: #1a1a1a;
+      padding: 1em;
+      border-left: 1px solid #444;
+    }
+
+    h2 {
+      font-size: 1.1em;
+      border-bottom: 1px solid #444;
+      margin-top: 1em;
+      padding-bottom: 0.3em;
+    }
+
+    .section {
+      margin-bottom: 1.5em;
+    }
+
+    canvas {
+      width: 100%;
+      height: 512px;
+      background: #000;
+      border: 1px solid #444;
+    }
+
+    .inline-controls {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5em;
+    }
+
+    .inline-controls button {
+      flex-grow: 1;
+    }
+
+    .info-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5em;
+      margin-top: 0.5em;
+    }
+
+    .info-buttons button {
+      background: #333;
+      border: 1px solid #666;
+      color: #eee;
+      padding: 0.5em;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+
+    .info-buttons button:hover {
+      background: #007acc;
+      border-color: #00aaff;
+    }
+  </style>
+</head>
+<body>
+
+<main>
+  <h1>Spectrogram Intelligence Interface</h1>
+
+  <!-- Spectrogram Canvas -->
+  <canvas id="spectrogramDisplay"></canvas>
+
+  <!-- Scrub Timeline -->
+  <div class="section">
+    <h2>Playback</h2>
+    <div class="inline-controls">
+      <button>⏮ Prev</button>
+      <button>⏯ Play/Pause</button>
+      <button>⏭ Next</button>
+    </div>
+    <label for="scrubSlider">Scrub Timeline</label>
+    <input type="range" id="scrubSlider" min="0" max="100" value="0">
+    <small>Time: <span id="timeDisplay">00:00:00</span></small>
+  </div>
+</main>
+
+<aside>
+  <!-- File Selection -->
+  <div class="section">
+    <h2>Data Source</h2>
+    <label for="fileSelector">Recording</label>
+    <select id="fileSelector">
+      <option value="">-- Select File --</option>
+      <option>sector_4_surveillance.iq</option>
+      <option>urban_drone_incident.iq</option>
+    </select>
+    <label><input type="checkbox" id="liveToggle"> Enable Live SDR</label>
+  </div>
+
+  <!-- Info Layer & Signal Actions -->
+  <div class="section">
+    <h2>Info Layer Controls</h2>
+    <div class="info-buttons">
+      <button onclick="emitControlCommand('ctrl_record')">Record</button>
+      <button onclick="emitControlCommand('ctrl_play')">Play</button>
+      <button onclick="emitControlCommand('ctrl_solo')">Solo</button>
+      <button onclick="emitControlCommand('ctrl_mute')">Mute</button>
+      <button onclick="emitControlCommand('ctrl_analyze')">Analyze</button>
+      <button onclick="emitControlCommand('ctrl_demux')">Demux</button>
+      <button onclick="emitControlCommand('ctrl_decode')">Decode</button>
+      <button onclick="emitControlCommand('ctrl_encode')">Encode</button>
+      <button onclick="emitControlCommand('ctrl_filter')">Filter</button>
+      <button onclick="emitControlCommand('ctrl_block')">Block</button>
+      <button onclick="emitControlCommand('ctrl_label')">Label</button>
+      <button onclick="emitControlCommand('ctrl_test')">Test</button>
+    </div>
+  </div>
+
+  <!-- Signal Intelligence & Metadata -->
+  <div class="section">
+    <h2>Signal Intelligence</h2>
+    <label><input type="checkbox" id="autoAnalyze"> Auto LLM Analysis</label>
+    <label><input type="checkbox" id="trackPeaks"> Track Signal Peaks</label>
+    <label><input type="checkbox" id="alertDrone"> Alert on Drone Signals</label>
+  </div>
+
+  <!-- Signal Status Display -->
+  <div class="section">
+    <h2>Status</h2>
+    <p><strong>Freq:</strong> 2450.1 MHz</p>
+    <p><strong>Power:</strong> -28 dB</p>
+    <p><strong>Type:</strong> Suspected Drone Uplink</p>
+    <p><strong>LLM:</strong> DJI telemetry match 87%</p>
+  </div>
+</aside>
+
+</body>
+</html>

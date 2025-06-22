@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spectrogram Signal Operations UI</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: #eee;
+      margin: 0;
+      padding: 1em;
+      display: flex;
+      flex-direction: row;
+      gap: 1em;
+    }
+
+    main {
+      flex-grow: 1;
+    }
+
+    aside {
+      width: 300px;
+      background: #1a1a1a;
+      padding: 1em;
+      border-left: 1px solid #444;
+    }
+
+    h2 {
+      font-size: 1.1em;
+      border-bottom: 1px solid #444;
+      margin-top: 1em;
+      padding-bottom: 0.3em;
+    }
+
+    .section {
+      margin-bottom: 1.5em;
+    }
+
+    label {
+      display: block;
+      margin: 0.5em 0 0.2em;
+    }
+
+    input[type="range"],
+    input[type="file"],
+    select,
+    button {
+      width: 100%;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 512px;
+      background: #000;
+      border: 1px solid #444;
+      margin-bottom: 1em;
+    }
+
+    .inline-controls {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5em;
+    }
+
+    .inline-controls button {
+      flex-grow: 1;
+    }
+  </style>
+</head>
+<body>
+
+<main>
+  <h1>Signal Analysis & Review Interface</h1>
+
+  <!-- Primary Spectrogram Display -->
+  <canvas id="spectrogramDisplay"></canvas>
+
+  <!-- Playback & Navigation -->
+  <div class="section">
+    <h2>Playback Control</h2>
+    <div class="inline-controls">
+      <button>⏮ Prev</button>
+      <button>⏯ Play / Pause</button>
+      <button>⏭ Next</button>
+    </div>
+    <label for="scrubSlider">Scrub Timeline</label>
+    <input type="range" id="scrubSlider" min="0" max="100" value="0">
+    <small>Timecode: <span id="timeDisplay">00:00:00</span></small>
+  </div>
+
+  <!-- Offscreen canvas (used internally) -->
+  <canvas id="offscreenBuffer" style="display:none;"></canvas>
+</main>
+
+<aside>
+  <!-- File & Source Management -->
+  <div class="section">
+    <h2>Data Source</h2>
+    <label for="fileSelector">Select Recording</label>
+    <select id="fileSelector">
+      <option value="">-- Choose File --</option>
+      <option>airport_north_sector_001.iq</option>
+      <option>drone_detect_2025_06_01.iq</option>
+      <option>training_sweep_wifi_band.iq</option>
+    </select>
+
+    <label for="liveToggle">Live Monitoring</label>
+    <input type="checkbox" id="liveToggle"> Enable
+  </div>
+
+  <!-- Frequency Actions -->
+  <div class="section">
+    <h2>Frequency Actions</h2>
+    <label for="targetFreq">Target Frequency (MHz)</label>
+    <input type="text" id="targetFreq" placeholder="e.g. 2450.000">
+
+    <label for="actionType">Action</label>
+    <select id="actionType">
+      <option value="highlight">Highlight</option>
+      <option value="jam">Jam Signal</option>
+      <option value="relay">Relay Signal</option>
+      <option value="respond">Respond (LLM)</option>
+    </select>
+
+    <button>Execute Action</button>
+  </div>
+
+  <!-- Alerts and Analysis -->
+  <div class="section">
+    <h2>Signal Intelligence</h2>
+    <label><input type="checkbox" id="autoAnalyze"> Enable Auto Analysis (LLM)</label>
+    <label><input type="checkbox" id="trackPeaks"> Track Peaks</label>
+    <label><input type="checkbox" id="alertDrone"> Alert on Drone Signature</label>
+  </div>
+
+  <!-- Metadata Info Panel -->
+  <div class="section">
+    <h2>Info Panel</h2>
+    <p><strong>Current Signal:</strong> 2450.110 MHz</p>
+    <p><strong>Peak dB:</strong> -32.1 dB</p>
+    <p><strong>Classification:</strong> Potential Drone Uplink</p>
+    <p><strong>LLM Analysis:</strong> Suspicious pattern matching known DJI telemetry.</p>
+  </div>
+</aside>
+
+</body>
+</html>

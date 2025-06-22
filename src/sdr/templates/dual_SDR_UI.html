@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>SDR</title>
+
+    <script>
+        function handleGridSlider(slider) {
+            const grid = document.getElementById("grid");
+
+            document.querySelector('#sdr_slider_krnl_input')
+                .addEventListener('input', evt => {
+
+                const slider_output = document.getElementById(slider.id.replace('_input', '_output'));
+                grid.style.setProperty('display','block');
+                const ctx = grid.getContext("2d");
+                const range = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step))
+                const slider_range = 127;
+
+                function draw_line(ctx, fx, fy, tx, ty){
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = "white";
+
+                    ctx.beginPath();
+                    ctx.moveTo(fx, fy);
+                    ctx.lineTo(tx, ty);
+                    ctx.stroke();
+                };
+
+                function updateSlider() {
+                    const component = slider.id.replace('_input', '');
+                    //const text = document.getElementById('cam_slider_krnl_output');
+
+                    let stepSz = slider.value;
+                    //text.innerHTML = slider.value;
+
+                    let hw = grid.width/2;
+                    let hh = grid.height/2;
+                    let hs = stepSz/2;
+                    let hsl = slider_range/2
+
+                    var pos_heights = range(0, grid.height, hs);
+                    var pos_widths = range(0, grid.width, hs);
+
+                    ctx.clearRect(0, 0, grid.width, grid.height);
+                    ctx.save();
+
+                    ctx.translate(hw, hh);
+                    ctx.fillRect(-4, -4, 8, 8);
+
+                    for(i=0; i<2; i++){
+
+                        for (y=0; y < pos_heights.length; y++) {
+                            draw_line(ctx, -grid.width, pos_heights[y], grid.width, pos_heights[y]);
+                        };
+
+                        for (x=0; x < pos_widths.length; x++) {
+                            draw_line(ctx, pos_widths[x], -grid.width,  pos_widths[x], grid.width);
+                        }
+                        ctx.rotate(180 * Math.PI / 180);
+                    }
+                    // Restore the transform
+                    ctx.restore();
+
+
+                }
+                updateSlider();
+            });
+            grid.style.setProperty('display','none');
+        }
+    </script>
+
+    <style>
+        body {
+            display: flex;
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 1em;
+            background-color:#333;
+            color: #ffffff;
+        }
+
+        .sdr-info {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        select {
+            font-size: 0.8em;
+            background-color: #0F0;
+        }
+
+        option{
+            color: yellow;
+        }
+
+        label {
+            font-size: 0.9em;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+            padding: 1em;
+        }
+
+        .spectrogram-display {
+            border: 1px solid #FFF;
+            width: 1030px;
+            height: 390px;
+            padding: 0.5em;
+            background: #000;
+        }
+
+        .display-controls {
+            float: left;
+        }
+
+        .inline-display {
+            display: flex;
+            margin-top: 0.5em;
+            margin-right: 0.5em;
+        }
+
+        .spectrogram {
+            border: 1px solid #CCC;
+        }
+
+        .grid {
+            //user-select: none;
+            //-webkit-user-select: none;
+            //-moz-user-select: none;
+            position:absolute;
+            left:0px;
+            top:0px;
+            display:none;
+        }
+
+        .ctrl-buttons {
+            display:grid;
+            width: 1028px;
+            border: 1px solid #666;
+            //padding: 4px;
+            grid-template-columns: repeat(15, 1fr);
+        }
+
+        .ctrl-button {
+            height: 28px;
+            width: 79px;
+            padding: 4px;
+            background: #333;
+            border: 1px solid #666;
+            color: #0F0;
+            //margin: 1px;
+            font-size: .8em;
+        }
+
+        button {
+            padding: 0.4em;
+            background: #333;
+            border: 1px solid #666;
+            color: #0F0;
+            font-size: 0.9em;
+        }
+
+        button:hover {
+            background: #005;
+        }
+
+        .peak_checkboxes {
+            color: #FFF;
+            margin-top: 10px;
+            float:left;
+            vertical-align: bottom;
+        }
+
+        .peak_values {
+            color: #FFF;
+            margin-top: 10px;
+            float:left;
+            vertical-align: bottom;
+        }
+
+        .range-controls {
+            float:left;
+            vertical-align: bottom;
+        }
+
+        input[type="range"] {
+          -webkit-appearance: none;
+          appearance: none;
+          height: 4px;
+          position: absolute;
+          background-color: #0F0;
+          pointer-events: none;
+        }
+
+        /******** Chrome, Safari, Opera and Edge Chromium styles ********/
+        /* slider track */
+        input[type="range"]::-webkit-slider-runnable-track {
+            background-color: #00FF00;
+            border-radius: 2px;
+            width: 2px;
+            height: 2px;
+        }
+
+        /* slider thumb */
+        input[type="range"]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          margin-top: -6px; /* Centers thumb on the track */
+          border-radius: 2px;
+          height: 14px;
+          width: 5px;
+          pointer-events: all;
+          background-color: #0f0;
+          cursor: pointer;
+        }
+
+        input[type="range"]:focus::-webkit-slider-thumb {
+          outline: 3px solid #00ff00;
+          outline-offset: 0.125rem;
+        }
+
+        /*********** Firefox styles ***********/
+        /* slider track */
+        input[type="range"]::-moz-range-track {
+          background-color: #00FF00;
+          border-radius: 1px;
+          height: 2px;
+        }
+
+        /* slider thumb */
+        input[type="range"]::-moz-range-thumb {
+            border: none; /*Removes extra border that FF applies*/
+            background-color: #00ff00;
+            border-radius: 2px;
+            height: 14px;
+            width: 5px;
+            pointer-events: all;
+            box-shadow: 0 0 0 1px #C6C6C6;
+            cursor: pointer;
+        }
+
+        input[type="range"]:focus::-moz-range-thumb{
+          outline: 3px solid #00ff00;
+          outline-offset: 0.125rem;
+        }
+
+        .lr_input[type=range] {
+            width: 300px;
+            margin-top: 1.35em;
+            margin-left: 0.0em;
+        }
+
+        .ud_input[type=range][orient=vertical] {
+            //-webkit-appearance: none;
+            writing-mode: vertical-lr;
+            width: 4px;
+            left: 1020px;
+            top: -2px;
+        }
+
+        .ud_input[type="range"]::-moz-range-thumb {
+            border: none; /*Removes extra border that FF applies*/
+            background-color: #0000ff;
+            border-radius: 2px;
+            height: 5px;
+            width: 24px;
+            pointer-events: all;
+            box-shadow: 0 0 0 1px #C6C6C6;
+            cursor: pointer;
+        }
+
+        /* slider thumb */
+        .ud_input[type="range"]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          margin-left: -15px; /* Offsets thumb on the track */
+          //border-radius: 2px;
+          height: 5px;
+          width: 24px;
+          pointer-events: all;
+          background-color: #00f;
+          cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+
+    <main>
+        <!-- Spectrogram Display 0 -->
+        <div class="spectrogram-display">
+            <div class="sdr-info">SDR 0: 100 Mhz, bandwidth: 1000 k</div>
+            <div class="inline-display" style="position: absolute; left:30px; top:50px;">
+
+                <div class="spectrogram" style="color: #444; position: absolute; width: 1024px; height: 256px;">
+                    <img id="test_image" src="./spec_sample.jpg" style="display: none;" width="1024px" height="256px">
+                    <canvas id="cvs_xaxis_0" style="background: #444; display: block; width: 1024px; height: 20px; position: absolute; top: 0; left: 0; z-index: 2;" width="1024px" height="20px"></canvas>
+                    <canvas id="cvs_hl_0" style="display: block; width: 1024px; height: 256px; position: relative; top: -20; left: 0; z-index: 1;" width="1024px" height="256px"></canvas>
+                    <canvas id="grid" style="position: absolute; top: 0; left: 0; z-index: 1;" width="1024px" height="256px"></canvas>
+                    <canvas id="cvs_spec_0" style="display: block; width: 1024px; height: 256px; position: absolute; top: 0; left: 0; z-index: 0;" width="1024px" height="256px"></canvas>
+                    <input class="ud_input" id="cvs_spec_0_timeslider" style="height: 256px; z-index: 5" type="range" orient="vertical" min="0" max="100" value="" />
+                </div>
+                <input id="sdr_slider_krnl_input" class="cam_slider" style="position: relative; left: 890px; top: 270px;" type="range" min="1" max="128" step="2" value="9" data-action="" data-target="sdr" onChange="handleGridSlider(this);"/>
+            </div>
+
+            <div class="inline-display" style="float: right; position: absolute; left:775px; top:20px;">
+                <button class="ctrl-button" id="ctrl_live">Live</button>
+                <select id="fileSelector_0" style="width: 200px;">
+                    <option value="rtlsdr_20250616_142944_97000000_2048000.iq">-- Choose File --</option>
+                    <option selected>airport_north_sector_001.iq</option>
+                    <option>drone_detect_2025_06_01.iq</option>
+                    <option>rtlsdr_20250616_142944_97000000_2048000.iq</option>
+                </select>
+            </div>
+
+            <div class="inline-display" style="position: absolute; left:30px; top:303px">
+                <div class="range-controls">
+                    <input class="lr_input" type="range" id="rangeMin_0" min="-100" max="100" step="1" value="-5">
+                    <input class="lr_input" type="range" id="rangeMax_0" min="-100" max="100" step="1" value="30">
+                </div>
+                <div class="peak_checkboxes" style="position: relative; left:320px; top:0px;">
+                    <label><input type="checkbox" id="trackPeaks"> Track Peaks</label>
+                    <label><input type="checkbox" id="holdPeaks"> Hold Peaks</label>
+                </div>
+                <div class="peak_values" style="position: relative; left: 330px; top:2px;">
+                    <label>Freq: 121.50 MHz</label>
+                    <label>Peak dB: -32.1 dB</label>
+                </div>
+
+                <div class="time_display" style="position: absolute; left: 4px; top: -14px;">
+                    <span id="timeDisplay_0_0" class="">00:00:00</span> |
+                    <span id="timeDisplay_0_1" class="">00:00:00</span>
+                </div>
+
+            </div>
+
+            <div class="inline-display" style="position: absolute; left:30px; top:340px;">
+                <div class="ctrl-buttons" style="">
+                        <button class="ctrl-button" id="ctrl_record">Record</button>
+                        <button class="ctrl-button" id="ctrl_play">Play</button>
+                        <button class="ctrl-button" id="ctrl_solo">Solo</button>
+                        <button class="ctrl-button" id="ctrl_mute">Mute</button>
+                        <button class="ctrl-button" id=""></button>
+                        <button class="ctrl-button" id="ctrl_analyze">Analyze</button>
+                        <button class="ctrl-button" id="ctrl_demux">Demux</button>
+                        <button class="ctrl-button" id="ctrl_decode">Decode</button>
+                        <button class="ctrl-button" id="ctrl_encode">Encode</button>
+                        <button class="ctrl-button" id="ctrl_filter">Filter</button>
+                        <button class="ctrl-button" id="ctrl_block">Block</button>
+                        <button class="ctrl-button" id="ctrl_label">Label</button>
+                        <button class="ctrl-button" id="ctrl_alert">Alert</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const cvs_xaxis = document.getElementById("cvs_xaxis_0");
+        const cvs_hl = document.getElementById("cvs_hl_0");
+
+        const fft_size = 1024;
+        const sampling_rate = 2.4e6; // 2.4 MHz
+        let center_freq = 100e6; // 100 MHz
+
+        function freqToX(freq) {
+            const df = sampling_rate / fft_size;
+            return (freq - (center_freq - sampling_rate / 2)) / df;
+        }
+
+		function draw_indicia() {
+            const ctx = cvs_xaxis.getContext("2d");
+            ctx.clearRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
+            ctx.globalAlpha  = 0.5;
+            // Draw center line
+            const centerX = cvs_xaxis.width / 2;
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 10;
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, cvs_xaxis.height);
+            ctx.stroke();
+
+            // Draw frequency labels (simple example)
+            ctx.fillStyle = "white";
+            ctx.font = "12px sans-serif";
+
+            for (let i = 0; i < 5; i++) {
+                let freq = center_freq + (i - 2) * sampling_rate / 4;
+                let x = centerX + (i - 2) * cvs_xaxis.width / 4;
+                ctx.fillText((freq / 1e6).toFixed(1) + " MHz", x - 20, 12);
+            }
+		}
+
+        class Highlight {
+
+            constructor(min_sel, max_sel, alpha, color) {
+                this.min_sel = min_sel;
+                this.max_sel = max_sel;
+                this.alpha = alpha;
+                this.color = color;
+            }
+
+            render(ctx) {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.min_sel, 0, this.max_sel - this.min_sel, ctx.canvas.height);
+                ctx.restore();
+            }
+
+        }
+
+        class HighlightLayer {
+
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext("2d");
+                this.highlights = [];
+            }
+
+            addHighlight(min_sel, max_sel, alpha, color) {
+                this.highlights.push(new Highlight(min_sel, max_sel, alpha, color));
+            }
+
+            addHighlightLine(min_sel, max_sel, alpha, color) {
+                this.highlights.push(new Highlight(min_sel, min_sel+1, alpha, color));
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.highlights.forEach(h => h.render(this.ctx));
+            }
+        }
+
+        class DragManager {
+
+          constructor(canvas) {
+            this.canvas = canvas;
+            this.ctx = canvas.getContext("2d");
+            this.draggables = [];
+            this.active = null;
+            this.lastX = 0;
+
+            canvas.addEventListener("mousedown", e => this._onMouseDown(e));
+            window.addEventListener("mousemove", e => this._onMouseMove(e));
+            window.addEventListener("mouseup", e => this._onMouseUp(e));
+          }
+
+          addDraggable({ hitTest, onDrag, onDragEnd = () => {} }) {
+            this.draggables.push({ hitTest, onDrag, onDragEnd });
+          }
+
+          _onMouseDown(e) {
+            const rect = this.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            this.lastX = x;
+            for (const d of this.draggables) {
+              if (d.hitTest(x)) {
+                this.active = d;
+                break;
+              }
+            }
+          }
+
+          _onMouseMove(e) {
+            if (!this.active) return;
+            const rect = this.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const dx = x - this.lastX;
+            this.active.onDrag(dx);
+            this.lastX = x;
+          }
+
+          _onMouseUp(e) {
+            if (this.active) {
+              this.active.onDragEnd();
+              this.active = null;
+            }
+          }
+        }
+
+        // Instantiate DragManager for frequency axis
+        const dragAxis = new DragManager(cvs_xaxis);
+        dragAxis.addDraggable({
+          hitTest: x => Math.abs(x - cvs_xaxis.width / 2) < 6,
+          onDrag: dx => {
+            const deltaFreq = dx * (sampling_rate / fft_size * (fft_size / cvs_xaxis.width));
+            center_freq += deltaFreq;
+            draw_indicia();
+          }
+        });
+
+        /* Instantiate DragManager for grid
+        const grid = document.getElementById("grid");
+        grid.addEventListener('click', function() { }, false);
+        const gridAxis = new DragManager(grid);
+        dragAxis.addDraggable({
+          hitTest: x => Math.abs(x - cvs_xaxis.width / 2) < 6,
+          onDrag: dx => {
+            const deltaFreq = dx * (sampling_rate / fft_size * (fft_size / cvs_xaxis.width));
+            center_freq += deltaFreq;
+
+          }
+        });
+        */
+
+        draw_indicia();
+
+        // Highlights Setup
+        const hlLayer = new HighlightLayer("cvs_hl_0");
+        const dragHl = new DragManager(hlLayer.canvas);
+
+        const highlights = [
+          { min_sel: 462, max_sel: 565, alpha: 0.4, color: "green" } // 1k bandwidth
+        ];
+
+        highlights.forEach(h => {
+          hlLayer.addHighlight(h.min_sel, h.max_sel, h.alpha, h.color);
+          const [hlInstance] = hlLayer.highlights.slice(-1);
+
+          dragHl.addDraggable({
+            hitTest: x => Math.abs(x - hlInstance.min_sel) < 6,
+            onDrag: dx => {
+              hlInstance.min_sel = Math.max(0, hlInstance.min_sel + dx);
+              hlLayer.render();
+            }
+          });
+
+          dragHl.addDraggable({
+            hitTest: x => Math.abs(x - hlInstance.max_sel) < 6,
+            onDrag: dx => {
+              hlInstance.max_sel = Math.min(cvs_hl.width, hlInstance.max_sel + dx);
+              hlLayer.render();
+            }
+          });
+        });
+
+        /*
+        const ctx_hl = cvs_hl.getContext("2d");
+        ctx_hl.clearRect(0, 0, cvs_hl.width, cvs_hl.height);
+        const centerX2 = cvs_hl.width / 2;
+        ctx_hl.strokeStyle = "white";
+        ctx_hl.lineWidth = 1;
+        ctx_hl.beginPath();
+        ctx_hl.moveTo(centerX2, 0);
+        ctx_hl.lineTo(centerX2, cvs_hl.height);
+        ctx_hl.stroke();
+        */
+
+        hlLayer.render();
+
+        const canvas = document.getElementById("cvs_spec_0");
+        const ctx = cvs_spec_0.getContext("2d");
+        const img = document.getElementById("test_image");
+
+        img.onload = function() {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        };
+
+    </script>
+
+</body>
+</html>
