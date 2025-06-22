@@ -13,6 +13,7 @@
 
                 const slider_output = document.getElementById(slider.id.replace('_input', '_output'));
                 grid.style.setProperty('display','block');
+                grid.style.setProperty('opacity',1);
                 const ctx = grid.getContext("2d");
                 const range = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step))
                 const slider_range = 127;
