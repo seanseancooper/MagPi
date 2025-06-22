@@ -536,20 +536,6 @@
           }
         });
 
-        /* Instantiate DragManager for grid
-        const grid = document.getElementById("grid");
-        grid.addEventListener('click', function() { }, false);
-        const gridAxis = new DragManager(grid);
-        dragAxis.addDraggable({
-          hitTest: x => Math.abs(x - cvs_xaxis.width / 2) < 6,
-          onDrag: dx => {
-            const deltaFreq = dx * (sampling_rate / fft_size * (fft_size / cvs_xaxis.width));
-            center_freq += deltaFreq;
-
-          }
-        });
-        */
-
         draw_indicia();
 
         // Highlights Setup
