@@ -1,27 +1,4 @@
 <script>
-    const rangeMin = document.getElementById("rangeMin");
-    const rangeMax = document.getElementById("rangeMax");
-
-    function updateSliderBounds() {
-        let minVal = parseInt(rangeMin.value);
-        let maxVal = parseInt(rangeMax.value);
-
-        if (minVal > maxVal) {
-            minVal = maxVal;
-            rangeMin.value = minVal;
-        }
-
-        normBounds.minDb = minVal;
-        normBounds.maxDb = maxVal;
-
-        document.getElementById("rangeMinDb").textContent = `${minVal} dB`;
-        document.getElementById("rangeMaxDb").textContent = `${maxVal} dB`;
-
-    }
-
-    rangeMin.addEventListener('input', updateSliderBounds);
-    rangeMax.addEventListener('input', updateSliderBounds);
-
     window.addEventListener('DOMContentLoaded', () => {
         // Instantiate InfoLayer Handlers
         const highlightLayer = new HighlightLayer("cvs_hl");
