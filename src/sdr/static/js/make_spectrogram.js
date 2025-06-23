@@ -415,6 +415,14 @@ function updateInfoDisplay(metadata) {
     document.getElementById("info_snr").textContent = `${metadata.snr.toFixed(1)} dB`;
 }
 
+//function updateInfoDisplay(metadata) {
+//    document.getElementById("info_label").textContent = metadata.label || "Unknown";
+//    document.getElementById("info_freq").textContent = `${(metadata.center_freq / 1e6).toFixed(3)} MHz`;
+//    document.getElementById("info_bw").textContent = `${(metadata.bandwidth / 1e3).toFixed(1)} kHz`;
+//    document.getElementById("info_mod").textContent = metadata.modulation || "—";
+//    document.getElementById("info_snr").textContent = `${metadata.snr.toFixed(1)} dB`;
+//}
+
 function handleGridSlider(slider) {
     const grid = document.getElementById("grid");
 
