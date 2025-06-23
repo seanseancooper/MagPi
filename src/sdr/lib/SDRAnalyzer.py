@@ -96,6 +96,11 @@ class SDRAnalyzer:
 
         self.filter_peaks = False
 
+        # read directly from scanner.retriever...
+        # self.reader = self.scanner.retriever.scan
+
+        # want to swap sources on the fly
+        #
         self.reader = IQFileReader(outfile_path, block_size=self.samp_scan)
         self.image_buffer = -100 * np.ones((self.fft_rows, self.scans_sweep*self.nfft))
 
