@@ -1,96 +1,50 @@
+<script>
+    const rangeMin = document.getElementById("rangeMin");
+    const rangeMax = document.getElementById("rangeMax");
 
+    function updateSliderBounds() {
+        let minVal = parseInt(rangeMin.value);
+        let maxVal = parseInt(rangeMax.value);
 
-    <main>
-        <!-- Spectrogram Display 0 -->
-        <div class="spectrogram-display">
-            <div class="sdr-info">SDR 0: 100 Mhz, bandwidth: 1000 k</div>
-            <div class="inline-display" style="position: absolute; left:30px; top:50px;">
-
-                <div class="spectrogram" style="color: #444; position: absolute; width: 1024px; height: 256px;">
-                    <canvas id="cvs_xaxis" style="background: rgba(0,0,0, 0.2); display: block; width: 1024px; height: 20px; position: absolute; top: 0; left: 0; z-index: 2;" width="1024px" height="20px"></canvas>
-                    <canvas id="cvs_hl" style="display: block; width: 1024px; height: 256px; position: relative; top: -20; left: 0; z-index: 1;" width="1024px" height="256px"></canvas>
-                    <canvas id="grid" style="position: absolute; top: 0; left: 0; z-index: 1;" width="1024px" height="256px"></canvas>
-                    <canvas id="cvs_spec" style="display: block; width: 1024px; height: 256px; position: absolute; top: 0; left: 0; z-index: 0;" width="1024px" height="256px"></canvas>
-                    <input class="ud_input" id="cvs_spec_timeslider" style="height: 256px; z-index: 5" type="range" orient="vertical" min="0" max="100" value="" />
-                </div>
-                <input id="grid_slider_input" class="grid_slider" style="position: relative; left: 860px; top: 270px;" type="range" min="1" max="128" step="2" value="9" data-action="" data-target="sdr" onChange="handleGridSlider(this);"/>
-            </div>
-
-            <div class="inline-display" style="float: right; position: absolute; left:775px; top:20px;">
-                <button class="ctrl-button" id="ctrl_live"><div id="ctrl_live_status">Online</div></button>
-                <select id="fileSelector" style="width: 200px;">
-                    <option value="rtlsdr_20250616_142944_97000000_2048000.iq">-- Choose File --</option>
-                    <option selected>airport_north_sector_001.iq</option>
-                    <option>drone_detect_2025_06_01.iq</option>
-                    <option>rtlsdr_20250616_142944_97000000_2048000.iq</option>
-                </select>
-            </div>
-
-            <div class="inline-display" style="position: absolute; left:30px; top:303px">
-                <div class="range-controls">
-                    <input class="lr_input" type="range" id="rangeMin" min="-100" max="100" step="1" value="-5">
-                    <input class="lr_input" type="range" id="rangeMax" min="-100" max="100" step="1" value="30">
-                </div>
-                <div class="peak_checkboxes" style="position: relative; left:320px; top:0px;">
-                    <label><input type="checkbox" id="trackPeaks"> Track Peaks</label>
-                    <label><input type="checkbox" id="holdPeaks"> Hold Peaks</label>
-                </div>
-                <div class="peak_values" style="position: relative; left: 330px; top:2px;">
-                    <label>Freq: 121.50 MHz</label>
-                    <label>Peak dB: -32.1 dB</label>
-                </div>
-
-                <div class="time_display" style="position: absolute; left: 4px; top: -14px; z-index:2;">
-                    <span id="timeDisplay_0" class="">00:00:00</span> |
-                    <span id="elapsedTimeDisplay" class="">00:00:00</span>
-                </div>
-
-            </div>
-
-            <div class="inline-display" style="position: absolute; left:30px; top:340px;">
-                <div class="ctrl-buttons" style="">
-                        <button class="ctrl-button" id="ctrl_record">Record</button>
-                        <button class="ctrl-button" id="ctrl_play">Play</button>
-                        <button class="ctrl-button" id="ctrl_solo">Solo</button>
-                        <button class="ctrl-button" id="ctrl_mute">Mute</button>
-                        <button class="ctrl-button" id=""></button>
-                        <button class="ctrl-button" id="ctrl_analyze">Analyze</button>
-                        <button class="ctrl-button" id="ctrl_demux">Demux</button>
-                        <button class="ctrl-button" id="ctrl_decode">Decode</button>
-                        <button class="ctrl-button" id="ctrl_encode">Encode</button>
-                        <button class="ctrl-button" id="ctrl_filter">Filter</button>
-                        <button class="ctrl-button" id="ctrl_block">Block</button>
-                        <button class="ctrl-button" id="ctrl_label">Label</button>
-                        <button class="ctrl-button" id="ctrl_alert">Alert</button>
-                </div>
-            </div>
-            <div id="infoLayer"></div>
-        </div>
-    </main>
-
-    <script>
-        const rangeMin = document.getElementById("rangeMin");
-        const rangeMax = document.getElementById("rangeMax");
-
-        function updateSliderBounds() {
-            let minVal = parseInt(rangeMin.value);
-            let maxVal = parseInt(rangeMax.value);
-
-            if (minVal > maxVal) {
-                minVal = maxVal;
-                rangeMin.value = minVal;
-            }
-
-            normBounds.minDb = minVal;
-            normBounds.maxDb = maxVal;
-
-            // document.getElementById("rangeMin").textContent = `Min: ${minVal} dB`;
-            // document.getElementById("rangeMax").textContent = `Max: ${maxVal} dB`;
-
+        if (minVal > maxVal) {
+            minVal = maxVal;
+            rangeMin.value = minVal;
         }
 
-        rangeMin.addEventListener('input', updateSliderBounds);
-        rangeMax.addEventListener('input', updateSliderBounds);
+        normBounds.minDb = minVal;
+        normBounds.maxDb = maxVal;
 
-    </script>
+        // document.getElementById("rangeMin").textContent = `Min: ${minVal} dB`;
+        // document.getElementById("rangeMax").textContent = `Max: ${maxVal} dB`;
+
+    }
+
+    rangeMin.addEventListener('input', updateSliderBounds);
+    rangeMax.addEventListener('input', updateSliderBounds);
+
+    window.addEventListener('DOMContentLoaded', () => {
+        // Instantiate InfoLayer Handlers
+        const highlightLayer = new HighlightLayer("cvs_hl");
+        const highlightData = {};
+        setupInfoLayerHandlers(highlightLayer.canvas, highlightData);
+
+        const latchButton = document.getElementById('ctrl_live');
+        const statusText = document.getElementById('ctrl_live_status');
+        let isLatched = false; // Initial state: button is off
+
+        latchButton.addEventListener('click', () => {
+            isLatched = !isLatched; // Toggle the state
+
+            if (isLatched) {
+                statusText.textContent = 'Online';
+                latchButton.classList.add('active'); // Add a class for styling
+            } else {
+                statusText.textContent = 'Offline';
+                latchButton.classList.remove('active'); // Remove the class
+            }
+        });
+
+    });
+
+</script>
 
