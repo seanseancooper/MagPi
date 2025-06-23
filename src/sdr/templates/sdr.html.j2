@@ -139,122 +139,6 @@
             return (avg > 128)? "00,00,00": "255,255,255";
         };
 
-        function handleGridSlider(slider) {
-            const grid = document.getElementById("grid");
-
-            document.querySelector('#grid_slider_input')
-                .addEventListener('input', evt => {
-
-                const slider_output = document.getElementById(slider.id.replace('_input', '_output'));
-                grid.style.setProperty('display','block');
-                grid.style.setProperty('opacity',1);
-                const ctx = grid.getContext("2d");
-                const range = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step))
-                const slider_range = 127;
-
-                function draw_line(ctx, fx, fy, tx, ty){
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = "white";
-
-                    ctx.beginPath();
-                    ctx.moveTo(fx, fy);
-                    ctx.lineTo(tx, ty);
-                    ctx.stroke();
-                };
-
-                function updateSlider() {
-                    const component = slider.id.replace('_input', '');
-                    //const text = document.getElementById('cam_slider_krnl_output');
-
-                    let stepSz = slider.value;
-                    //text.innerHTML = slider.value;
-
-                    let hw = grid.width/2;
-                    let hh = grid.height/2;
-                    let hs = stepSz/2;
-                    let hsl = slider_range/2
-
-                    var pos_heights = range(0, grid.height, hs);
-                    var pos_widths = range(0, grid.width, hs);
-
-                    ctx.clearRect(0, 0, grid.width, grid.height);
-                    ctx.save();
-
-                    ctx.translate(hw, hh);
-                    ctx.fillRect(-4, -4, 8, 8);
-
-                    for(i=0; i<2; i++){
-
-                        for (y=0; y < pos_heights.length; y++) {
-                            draw_line(ctx, -grid.width, pos_heights[y], grid.width, pos_heights[y]);
-                        };
-
-                        for (x=0; x < pos_widths.length; x++) {
-                            draw_line(ctx, pos_widths[x], -grid.width,  pos_widths[x], grid.width);
-                        }
-                        ctx.rotate(180 * Math.PI / 180);
-                    }
-                    // Restore the transform
-                    ctx.restore();
-                }
-                updateSlider();
-            });
-
-            // fade the grid
-            setTimeout(function(){
-                var fadeEffect = setInterval(function () {
-                    if (!grid.style.opacity) {
-                        grid.style.opacity = 1;
-                    }
-                    if (grid.style.opacity > 0) {
-                        grid.style.opacity -= 0.02;
-                    } else {
-                        clearInterval(fadeEffect);
-                        grid.style.setProperty('display','none');  // get grid out of the way of mouse.
-                    }
-                }, 20);
-            }, 1.5);
-
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const latchButton = document.getElementById('ctrl_live');
-            const statusText = document.getElementById('ctrl_live_status');
-            let isLatched = false; // Initial state: button is off
-
-            latchButton.addEventListener('click', () => {
-                isLatched = !isLatched; // Toggle the state
-
-                if (isLatched) {
-                    statusText.textContent = 'Online';
-                    latchButton.classList.add('active'); // Add a class for styling
-                } else {
-                    statusText.textContent = 'Offline';
-                    latchButton.classList.remove('active'); // Remove the class
-                }
-            });
-        });
-
-        function emitControlCommand(commandName) {
-            const selectedSignalId = getSelectedSignalId(); // Replace with actual logic to identify selected signal
-                socket.emit('control_command', {
-                    command: commandName,
-                    signal_id: selectedSignalId
-                });
-        }
-
-        function getSelectedSignalId() {
-            return window.selectedSignalId || 'default_signal';
-        }
-
-        function updateInfoDisplay(metadata) {
-            document.getElementById("info_label").textContent = metadata.label || "Unknown";
-            document.getElementById("info_freq").textContent = `${(metadata.center_freq / 1e6).toFixed(3)} MHz`;
-            document.getElementById("info_bw").textContent = `${(metadata.bandwidth / 1e3).toFixed(1)} kHz`;
-            document.getElementById("info_mod").textContent = metadata.modulation || "—";
-            document.getElementById("info_snr").textContent = `${metadata.snr.toFixed(1)} dB`;
-        }
-
 
     </script>
 
@@ -264,6 +148,6 @@
 {% set tab = 'scanner' %}
 {% set module = 'sdr' %}
 {% include 'sdr.js.j2' %}
-
+    <script src="{{ url_for('static', filename='js/dom_loaded.js') }}"></script>
 </body>
 </html>

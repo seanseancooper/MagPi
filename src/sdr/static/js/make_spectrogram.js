@@ -113,7 +113,7 @@ let bgcolor = "#000099";
 
 let normBounds = { minDb: -100, maxDb: 100 };
 let highlights = [
-  //{ min_sel: 200, max_sel: 700, alpha: 0.3, color: "red" }
+      { min_sel: 462, max_sel: 565, alpha: 0.4, color: "green" } // 1k bandwidth
 ];
 
 // Matlab Jet ref: stackoverflow.com grayscale-to-red-green-blue-matlab-jet-color-scale
@@ -231,34 +231,6 @@ function freqToX(freq) {
     return (freq - (center_freq - sampling_rate / 2)) / df;
 }
 
-function setupInfoLayerHandlers(canvas, highlight, infoLayerId = 'infoLayer') {
-
-	const container = document.getElementById('cvs_hl');
-	const infoLayer = document.getElementById(infoLayerId);
-	const infoMin = document.getElementById('info-min');
-	const infoMax = document.getElementById('info-max');
-
-	if (!container || !infoLayer || !infoMin || !infoMax) {
-		console.warn('Required DOM elements for info layer not found.');
-		return;
-	}
-
-	let activeHighlight = null;
-
-	container.addEventListener('click', (event) => {
-		const x = event.clientX - canvas.getBoundingClientRect().left;
-
-		if (x >= highlight.min_sel && x <= highlight.max_sel) {
-			infoLayer.style.display = 'block';
-			activeHighlight = highlight;
-		} else {
-			infoLayer.style.display = 'none';
-			activeHighlight = null;
-		}
-	});
-}
-
-
 function processFloat32Data(floatData) {
 
 	function normalizeToUint8(floatData, outArray, minDb = -100, maxDb = 100) {
@@ -326,7 +298,7 @@ function CountingFreqDataGenerator(sampling_rate, nfft) {
 			}
 			currentBuffer.set(uint8magnitudes);     // 4096 magnitudes into buffer
 			blockCount++;
-			console.log(blockCount);
+			//console.log(blockCount);
 			blockReady = false;
 			requestBlock();                         // ask for next block right after processing
 		}
@@ -414,6 +386,131 @@ function calc_params(){
     console.log(fftParams);
 }
 
+function emitControlCommand(commandName) {
+    const selectedSignalId = getSelectedSignalId(); // Replace with actual logic to identify selected signal
+        socket.emit('control_command', {
+            command: commandName,
+            signal_id: selectedSignalId
+        });
+}
+
+function getSelectedSignalId() {
+    return window.selectedSignalId || 'default_signal';
+}
+
+function updateInfoDisplay(metadata) {
+    document.getElementById("info_label").textContent = metadata.label || "Unknown";
+    document.getElementById("info_freq").textContent = `${(metadata.center_freq / 1e6).toFixed(3)} MHz`;
+    document.getElementById("info_bw").textContent = `${(metadata.bandwidth / 1e3).toFixed(1)} kHz`;
+    document.getElementById("info_mod").textContent = metadata.modulation || "—";
+    document.getElementById("info_snr").textContent = `${metadata.snr.toFixed(1)} dB`;
+}
+
+function handleGridSlider(slider) {
+    const grid = document.getElementById("grid");
+
+    document.querySelector('#grid_slider_input')
+        .addEventListener('input', evt => {
+
+        const slider_output = document.getElementById(slider.id.replace('_input', '_output'));
+        grid.style.setProperty('display','block');
+        grid.style.setProperty('opacity',1);
+        const ctx = grid.getContext("2d");
+        const range = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step))
+        const slider_range = 127;
+
+        function draw_line(ctx, fx, fy, tx, ty){
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "white";
+
+            ctx.beginPath();
+            ctx.moveTo(fx, fy);
+            ctx.lineTo(tx, ty);
+            ctx.stroke();
+        };
+
+        function updateSlider() {
+            const component = slider.id.replace('_input', '');
+            //const text = document.getElementById('cam_slider_krnl_output');
+
+            let stepSz = slider.value;
+            //text.innerHTML = slider.value;
+
+            let hw = grid.width/2;
+            let hh = grid.height/2;
+            let hs = stepSz/2;
+            let hsl = slider_range/2
+
+            var pos_heights = range(0, grid.height, hs);
+            var pos_widths = range(0, grid.width, hs);
+
+            ctx.clearRect(0, 0, grid.width, grid.height);
+            ctx.save();
+
+            ctx.translate(hw, hh);
+            ctx.fillRect(-4, -4, 8, 8);
+
+            for(i=0; i<2; i++){
+
+                for (y=0; y < pos_heights.length; y++) {
+                    draw_line(ctx, -grid.width, pos_heights[y], grid.width, pos_heights[y]);
+                };
+
+                for (x=0; x < pos_widths.length; x++) {
+                    draw_line(ctx, pos_widths[x], -grid.width,  pos_widths[x], grid.width);
+                }
+                ctx.rotate(180 * Math.PI / 180);
+            }
+            // Restore the transform
+            ctx.restore();
+        }
+        updateSlider();
+    });
+
+    // fade the grid
+    setTimeout(function(){
+        var fadeEffect = setInterval(function () {
+            if (!grid.style.opacity) {
+                grid.style.opacity = 1;
+            }
+            if (grid.style.opacity > 0) {
+                grid.style.opacity -= 0.02;
+            } else {
+                clearInterval(fadeEffect);
+                grid.style.setProperty('display','none');  // get grid out of the way of mouse.
+            }
+        }, 20);
+    }, 1.5);
+
+}
+
+function setupInfoLayerHandlers(canvas, highlight, infoLayerId = 'infoLayer') {
+
+    const container = document.getElementById('cvs_hl');
+    const infoLayer = document.getElementById(infoLayerId);
+    const infoMin = document.getElementById('info-min');
+    const infoMax = document.getElementById('info-max');
+
+    if (!container || !infoLayer || !infoMin || !infoMax) {
+        console.warn('Required DOM elements for info layer not found.');
+        return;
+    }
+
+    let activeHighlight = null;
+
+    container.addEventListener('click', (event) => {
+        const x = event.clientX - canvas.getBoundingClientRect().left;
+
+        if (x >= highlight.min_sel && x <= highlight.max_sel) {
+            infoLayer.style.display = 'block';
+            activeHighlight = highlight;
+        } else {
+            infoLayer.style.display = 'none';
+            activeHighlight = null;
+        }
+    });
+}
+
 function draw_spec() {
 
     const countingDataGenerator = new CountingFreqDataGenerator(sampling_rate, nfft);
@@ -441,65 +538,46 @@ function draw_spec() {
 	cgo.setWorldCoordsSVG(0, 0, cvs_spec.width/4, cvs_spec.height);
 	//cgo.setWorldCoordsRHC(0, 0, cvs_spec.width, cvs_spec.height/2);
 
+// Clear and prep canvas
+	cvs_xaxis_ctx.clearRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
+	//cvs_xaxis_ctx.fillRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
+
+	// Draw...
+
+    function draw_indicia() {
+        const ctx = cvs_xaxis.getContext("2d");
+        cvs_xaxis_ctx.clearRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
+
+        // Draw center line
+        cvs_xaxis_ctx.strokeStyle = "red";
+        cvs_xaxis_ctx.lineWidth = 10;
+        cvs_xaxis_ctx.beginPath();
+        cvs_xaxis_ctx.moveTo(centerX, 0);
+        cvs_xaxis_ctx.lineTo(centerX, cvs_xaxis.height);
+
+        cvs_xaxis_ctx.stroke();
+
+        // Draw frequency labels (simple example)
+        cvs_xaxis_ctx.fillStyle = "white";
+        cvs_xaxis_ctx.font = "12px sans-serif";
+
+        for (let i = 0; i < 5; i++) {
+            let freq = center_freq + (i - 2) * sampling_rate / 4;
+            let x = centerX + (i - 2) * cvs_xaxis.width / 4;
+            cvs_xaxis_ctx.fillText((freq / 1e6).toFixed(1) + " MHz", x - 20, 12);
+        }
+    }
+
 	dragAxis.addDraggable({
         hitTest: x => Math.abs(x - centerX) < 6,
         onDrag: dx => {
             const deltaFreq = dx * (sampling_rate / nfft * (nfft / cvs_xaxis.width));
             center_freq += deltaFreq;
+            draw_indicia();
         }
 	});
 
-// Clear and prep canvas
-	cvs_xaxis_ctx.clearRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
-	cvs_xaxis_ctx.fillStyle = bgcolor;
-	cvs_xaxis_ctx.fillRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
-
-	// Draw...
-	cvs_xaxis_ctx.beginPath();
-
-    // center line
-	cvs_xaxis_ctx.strokeStyle = "red";
-	cvs_xaxis_ctx.moveTo(centerX, 0);
-	cvs_xaxis_ctx.lineTo(centerX, cvs_xaxis.height);
-	cvs_xaxis_ctx.stroke();
-
-	// frequency labels (simple example)
-	cvs_xaxis_ctx.fillStyle = "white";
-	cvs_xaxis_ctx.font = "12px sans-serif";
-	for (let i = 0; i < 5; i++) {
-		let freq = center_freq + (i - 2) * sampling_rate / 4;
-		let x = centerX + (i - 2) * cvs_xaxis.width / 4;
-		cvs_xaxis_ctx.fillText((freq / 1e6).toFixed(1) + " MHz", x - 20, 12);
-	}
-
-	// vertical lines
-	const indicia = [
-		{ freq: freqToX(min_freq_hz), label: "", color: "white" },
-		{ freq: freqToX(max_freq_hz), label: "", color: "white" }
-	];
-
-	for (let { freq, label, color } of indicia) {
-		cvs_xaxis_ctx.moveTo(freq, 20);
-		cvs_xaxis_ctx.lineTo(freq, cvs_xaxis.height);
-		cvs_xaxis_ctx.strokeStyle = color;
-		cvs_xaxis_ctx.lineWidth = 5;
-		cvs_xaxis_ctx.stroke();
-	}
-
-	const min_indicia = [];
-
-	let step = Math.floor(cvs_xaxis.width/10);
-	for (let i = 0; i < 10; i++) {
-		min_indicia.push({ freq: step*i, label: "", color: "white" });
-	}
-
-	for (let { freq, label, color } of min_indicia) {
-		cvs_xaxis_ctx.moveTo(freq, 25);
-		cvs_xaxis_ctx.lineTo(freq, cvs_xaxis.height);
-		cvs_xaxis_ctx.strokeStyle = color;
-		cvs_xaxis_ctx.lineWidth = 2;
-		cvs_xaxis_ctx.stroke();
-	}
+	draw_indicia();
 
     highlights.forEach(h => {
         cvs_hl.addHighlight(h.min_sel, h.max_sel, h.alpha, h.color);
