@@ -356,60 +356,52 @@ function getDynamicDataBuffer(dataGen) {
 	return { buffer: bufferAry[0] };
 }
 
-function calc_params(){
-
-    function calculateFftParametersForFrameRate({ sampleRate, fftSize, frameRate }) {
-        // Sanity check
-        if (frameRate <= 0) {
-            throw new Error("Frame rate must be positive");
-        }
-
-        // Time between frames in seconds
-        const timeBetweenFrames = 1.0 / frameRate;
-
-        // Total samples that need to be processed per frame
-        const samplesPerFrame = Math.floor(timeBetweenFrames * sampleRate);
-
-        // Ensure samples per frame is enough to compute at least one FFT
-        if (samplesPerFrame < fftSize) {
-            throw new Error(
-                `Frame rate ${frameRate} too high for nfft ${fftSize} at sample rate ${sampleRate}`
-            );
-        }
-
-        // Maximize the number of FFTs we can fit within the frame
-        const numFftsPerFrame = Math.max(1, Math.floor(samplesPerFrame / fftSize));
-
-        // Calculate fft_step based on spacing FFTs evenly
-        const fftStep = Math.floor(samplesPerFrame / numFftsPerFrame);
-
-        return {
-            frameRate: frameRate,
-            fftSize: fftSize,
-            fftStep: fftStep,
-            samplesPerFrame: samplesPerFrame,
-            numFftsPerFrame: numFftsPerFrame,
-            timeBetweenFramesSec: timeBetweenFrames,
-        };
-    }
-
-    const config = {
-        sampling_rate: sampling_rate,
-        nfft: nfft,
-        lineRate: lineRate
-    };
-
-    const fftParams = calculateFftParametersForFrameRate(config);
-    console.log(fftParams);
-}
-
-function emitControlCommand(commandName) {
-    const selectedSignalId = getSelectedSignalId(); // Replace with actual logic to identify selected signal
-        socket.emit('control_command', {
-            command: commandName,
-            signal_id: selectedSignalId
-        });
-}
+//function calc_params(){
+//
+//    function calculateFftParametersForFrameRate({ sampleRate, fftSize, frameRate }) {
+//        // Sanity check
+//        if (frameRate <= 0) {
+//            throw new Error("Frame rate must be positive");
+//        }
+//
+//        // Time between frames in seconds
+//        const timeBetweenFrames = 1.0 / frameRate;
+//
+//        // Total samples that need to be processed per frame
+//        const samplesPerFrame = Math.floor(timeBetweenFrames * sampleRate);
+//
+//        // Ensure samples per frame is enough to compute at least one FFT
+//        if (samplesPerFrame < fftSize) {
+//            throw new Error(
+//                `Frame rate ${frameRate} too high for nfft ${fftSize} at sample rate ${sampleRate}`
+//            );
+//        }
+//
+//        // Maximize the number of FFTs we can fit within the frame
+//        const numFftsPerFrame = Math.max(1, Math.floor(samplesPerFrame / fftSize));
+//
+//        // Calculate fft_step based on spacing FFTs evenly
+//        const fftStep = Math.floor(samplesPerFrame / numFftsPerFrame);
+//
+//        return {
+//            frameRate: frameRate,
+//            fftSize: fftSize,
+//            fftStep: fftStep,
+//            samplesPerFrame: samplesPerFrame,
+//            numFftsPerFrame: numFftsPerFrame,
+//            timeBetweenFramesSec: timeBetweenFrames,
+//        };
+//    }
+//
+//    const config = {
+//        sampling_rate: sampling_rate,
+//        nfft: nfft,
+//        lineRate: lineRate
+//    };
+//
+//    const fftParams = calculateFftParametersForFrameRate(config);
+//    console.log(fftParams);
+//}
 
 function getSelectedSignalId() {
     return window.selectedSignalId || 'default_signal';
