@@ -169,10 +169,16 @@
             </div>
 
             <div class="inline-display" style="position: absolute; left:30px; top:303px">
+
                 <div class="range-controls">
                     <input class="lr_input" type="range" id="rangeMin" min="-100" max="100" step="1" value="-5">
                     <input class="lr_input" type="range" id="rangeMax" min="-100" max="100" step="1" value="30">
                 </div>
+
+                <div class="range-db" style="position: relative; left: 300px; top:6px;">
+                    <span id="rangeMinDb" class="" style=""></span> |<span id="rangeMaxDb" class="" style=""></span>
+                </div>
+
                 <div class="peak_checkboxes" style="position: relative; left:320px; top:0px;">
                     <label><input type="checkbox" id="trackPeaks"> Track Peaks</label>
                     <label><input type="checkbox" id="holdPeaks"> Hold Peaks</label>

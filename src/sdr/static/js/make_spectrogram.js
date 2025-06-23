@@ -542,8 +542,6 @@ function draw_spec() {
 	cvs_xaxis_ctx.clearRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
 	//cvs_xaxis_ctx.fillRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
 
-	// Draw...
-
     function draw_indicia() {
         const ctx = cvs_xaxis.getContext("2d");
         cvs_xaxis_ctx.clearRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
