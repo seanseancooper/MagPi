@@ -44,6 +44,12 @@
             }
         });
 
+        const rangeMin = document.getElementById("rangeMin");
+        const rangeMax = document.getElementById("rangeMax");
+
+        rangeMin.addEventListener('input', updateSliderBounds);
+        rangeMax.addEventListener('input', updateSliderBounds);
+
     });
 
 </script>
