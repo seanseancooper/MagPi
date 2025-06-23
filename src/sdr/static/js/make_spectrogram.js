@@ -231,6 +231,23 @@ function freqToX(freq) {
     return (freq - (center_freq - sampling_rate / 2)) / df;
 }
 
+function updateSliderBounds() {
+    let minVal = parseInt(rangeMin.value);
+    let maxVal = parseInt(rangeMax.value);
+
+    if (minVal > maxVal) {
+        minVal = maxVal;
+        rangeMin.value = minVal;
+    }
+
+    normBounds.minDb = minVal;
+    normBounds.maxDb = maxVal;
+
+    document.getElementById("rangeMinDb").textContent = `${minVal} dB`;
+    document.getElementById("rangeMaxDb").textContent = `${maxVal} dB`;
+
+}
+
 function processFloat32Data(floatData) {
 
 	function normalizeToUint8(floatData, outArray, minDb = -100, maxDb = 100) {
