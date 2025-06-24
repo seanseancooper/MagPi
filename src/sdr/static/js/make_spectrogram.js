@@ -565,7 +565,11 @@ function draw_spec() {
 	const min_freq_hz = center_freq - sampling_rate / 2;
 	const max_freq_hz = center_freq + sampling_rate / 2;
 
-    const wf = new Waterfall(dataObj, nfft, cvs_spec.height, "DOWN", {lineRate: lineRate});
+    const countingDataGenerator = new CountingFreqDataGenerator(sampling_rate, nfft);
+    const dataObj = getDynamicDataBuffer(countingDataGenerator);
+    displayElapsedTime(countingDataGenerator, 'elapsedTimeDisplay');
+
+    const wf = new Waterfall(dataObj, nfft, cvs_spec.height, "DOWN", {lineRate: lineRate}); // cvs_spec.height*time_compression: 1.0... 2.0
     wf.start();
 
 	cgo.clearCanvas(bgcolor);
