@@ -110,7 +110,6 @@ let blockReady = false;
 let latestPeakData = new Uint8Array(1024);                  // Hold latest peak data
 
 let bgcolor = "#000099";
-
 let normBounds = { minDb: -100, maxDb: 100 };
 let highlights = [
       { min_sel: 462, max_sel: 565, alpha: 0.4, color: "green" } // 1k bandwidth
