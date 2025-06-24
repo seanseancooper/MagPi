@@ -37,22 +37,19 @@
 			"DEFAULT_SAMPLE_RATE": 2.048e6
 		},
 		{
-			"DEFAULT_CENTER_FREQ": 100e6
+			"DEFAULT_CENTER_FREQ": 97e6
 		},
 		{
 			"DEFAULT_FREQ_CORRECTION": 60
 		},
 		{
-			"DEFAULT_GAIN": 0.0
+			"DEFAULT_GAIN": 10.0
 		},
 		{
-			"BLOCK_SIZE": 4096
+			"NFFT": 4096
 		},
 		{
-			"FFT_SIZE": 4096
-		},
-		{
-			"FFT_ROWS": 500
+			"FFT_ROWS": 512
 		},
 		{
 			"MQ_MODULE_RETRIEVER": "src.sdr.receivers.RTLSDRReceiver"
@@ -173,7 +170,7 @@
 			"SIGNAL_CACHE_LOG_MAX": -5
 		},
 		{
-			"OUTFILE_PATH": "."
+			"OUTFILE_PATH": "/Users/scooper/PycharmProjects/MagPi/src/sdr"
 		},
 		{
 			"OUT_FILE": "rtlsdr_"
