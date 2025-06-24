@@ -101,7 +101,8 @@ const socket = io();
 const nfft = 4096;                                          // size of PSD. aka NFFT
 const samp_scan = nfft*16;                                  // number of samples per scan
 const lineRate = 10;
-const sampling_rate = 2.048e6;                              // get this from config?? sdr??
+const sampling_rate = 2.048e6;                              // get this from sdr
+let center_freq = 97e6;                                     // Get this from sdr
 
 const signalMetadataMap = new Map();                        // key: highlight ID or position, value: metadata
 let uint8magnitudes = new Uint8Array(nfft);                 // Shared buffer to hold latest block data
