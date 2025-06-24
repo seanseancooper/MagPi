@@ -109,7 +109,6 @@ let uint8magnitudes = new Uint8Array(nfft);                 // Shared buffer to 
 let blockReady = false;
 let latestPeakData = new Uint8Array(1024);                  // Hold latest peak data
 
-let center_freq = 97e6;                                     // Get this from sdr
 let bgcolor = "#000099";
 
 let normBounds = { minDb: -100, maxDb: 100 };
