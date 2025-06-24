@@ -99,15 +99,15 @@ class HighlightLayer {
 
 const socket = io();
 const nfft = 4096;                                          // size of PSD. aka NFFT
-const samp_scan = nfft*16;                                  // number of samples per scan
+//const samp_scan = nfft*16;                                // number of samples per scan
 const lineRate = 10;
-const sampling_rate = 2.048e6;                              // get this from sdr
-let center_freq = 97e6;                                     // Get this from sdr
+const sampling_rate = 2.048e6;                              // matches sdr
+let center_freq = 97e6;                                     // matches sdr
 
-const signalMetadataMap = new Map();                        // key: highlight ID or position, value: metadata
 let uint8magnitudes = new Uint8Array(nfft);                 // Shared buffer to hold latest block data
 let blockReady = false;
 let latestPeakData = new Uint8Array(1024);                  // Hold latest peak data
+const signalMetadataMap = new Map();                        // key: highlight ID or position, value: metadata
 
 let bgcolor = "#000099";
 let normBounds = { minDb: -100, maxDb: 100 };
@@ -262,6 +262,14 @@ function processFloat32Data(floatData) {
 	return magnitudes;
 }
 
+//function displayElapsedTime(generatorInstance, elementId) {
+//	setInterval(() => {
+//		const elapsedMs = generatorInstance.getElapsedTime();
+//		const seconds = (elapsedMs / 1000).toFixed(2);
+//		document.getElementById(elementId).textContent = `Elapsed Time: ${seconds} sec`;
+//	}, 500);
+//}
+
 function FreqDataGenerator(sampling_rate, nfft) {
 
 	this.rawLineTime = 1000 * nfft / sampling_rate;
@@ -281,24 +289,16 @@ function FreqDataGenerator(sampling_rate, nfft) {
 	};
 }
 
-function displayElapsedTime(generatorInstance, elementId) {
-	setInterval(() => {
-		const elapsedMs = generatorInstance.getElapsedTime();
-		const seconds = (elapsedMs / 1000).toFixed(2);
-		document.getElementById(elementId).textContent = `Elapsed Time: ${seconds} sec`;
-	}, 500);
-}
-
 function CountingFreqDataGenerator(sampling_rate, nfft) {
-	this.rawLineTime = 1000 * nfft / sampling_rate; // ms per FFT block
+	this.rawLineTime = 1000 * nfft / sampling_rate; // 2 ms per FFT block
 	this.sampleFreq = sampling_rate;
 	this.nfft = nfft;
 
 	let currentBuffer = new Uint8Array(this.nfft);
 
 	// Time tracking
-	// let blockCount = 0;
-	let startTime = null;
+	let blockCount = 0;
+	this.startTime = performance.now();
 
 	// External access to time
 	this.getElapsedTime = () => {
@@ -307,12 +307,9 @@ function CountingFreqDataGenerator(sampling_rate, nfft) {
 
 	this.getLine = () => {
 		if (blockReady) {
-			if (startTime === null) {
-				startTime = performance.now();
-			}
 			currentBuffer.set(uint8magnitudes);     // 4096 magnitudes into buffer
 			blockCount++;
-			//console.log(blockCount);
+			console.log('blockCount: ' + blockCount + ' getElapsedTime:' + this.getElapsedTime() );
 			blockReady = false;
 			requestBlock();                         // ask for next block right after processing
 		}
@@ -320,38 +317,61 @@ function CountingFreqDataGenerator(sampling_rate, nfft) {
 	};
 }
 
-// Start dynamic polling of new lines
 function getDynamicDataBuffer(dataGen) {
+    const sharedBuffer = new Uint8Array(dataGen.nfft);
 
-	const bufferAry = [];
-	let sigTime = 0;
-	const sigStartTime = Date.now();
+    function genDynamicData() {
+        const result = dataGen.getLine();
 
-	bufferAry[0] = new Uint8Array(dataGen.nfft);
-	bufferAry[1] = new Uint8Array(dataGen.nfft);
+        if (
+            result &&
+            result.buffer instanceof Uint8Array &&
+            result.buffer.length === dataGen.nfft
+        ) {
+            sharedBuffer.set(result.buffer);
+        }
+        let to = dataGen.rawLineTime * lineRate;
 
-	function genDynamicData() {
-		let sigDiff;
+        setTimeout(genDynamicData, to);
+    }
 
-		const result = dataGen.getLine();  // returns { buffer }
-		bufferAry[1].set(result.buffer);
+    requestBlock();
+    genDynamicData();
 
-		// swap
-		const tmp = bufferAry[0];
-		bufferAry[0] = bufferAry[1];
-		bufferAry[1] = tmp;
-
-		sigTime += dataGen.rawLineTime;
-		sigDiff = (Date.now() - sigStartTime) - sigTime;
-
-		setTimeout(genDynamicData, dataGen.rawLineTime - sigDiff);
-	}
-
-	requestBlock();        // Start first fetch
-	genDynamicData();      // Kick off polling loop
-
-	return { buffer: bufferAry[0] };
+    return { buffer: sharedBuffer };
 }
+
+//function getDynamicDataBuffer(dataGen) {
+//
+//	const bufferAry = [];
+//	let sigTime = 0;
+//	const sigStartTime = Date.now();
+//
+//	bufferAry[0] = new Uint8Array(dataGen.nfft);
+//	bufferAry[1] = new Uint8Array(dataGen.nfft);
+//
+//	function genDynamicData() {
+//		let sigDiff;
+//
+//		const result = dataGen.getLine();  // returns { buffer }
+//		bufferAry[1].set(result.buffer);
+//
+//		// swap
+//		const tmp = bufferAry[0];
+//		bufferAry[0] = bufferAry[1];
+//		bufferAry[1] = tmp;
+//
+//		sigTime += dataGen.rawLineTime;
+//		sigDiff = (Date.now() - sigStartTime) - sigTime;
+//
+//		setTimeout(genDynamicData, dataGen.rawLineTime - sigDiff);
+//	}
+//
+//	requestBlock();        // Start first fetch
+//	genDynamicData();      // Kick off polling loop
+//
+//	return { buffer: bufferAry[0] };
+//}
 
 //function calc_params(){
 //
@@ -529,7 +549,7 @@ function draw_spec() {
 
     const countingDataGenerator = new CountingFreqDataGenerator(sampling_rate, nfft);
     const dataObj = getDynamicDataBuffer(countingDataGenerator);
-    displayElapsedTime(countingDataGenerator, 'elapsedTimeDisplay');
+//    displayElapsedTime(countingDataGenerator, 'elapsedTimeDisplay');
 
     const cgo = new Cango("cvs_spec");
     const cvs_spec = document.getElementById('cvs_spec');
@@ -616,7 +636,7 @@ function draw_spec() {
 
 	function draw_waveforms()
 	{
-		const imgObj = cvs_spec_ctx.getImageData(0,0, cvs_spec.width/4, cvs_spec.height);
+		const imgObj = cvs_spec_ctx.getImageData(0,0, cvs_spec.width/4, cvs_spec.height/2);
 		const pxPerLine = imgObj.width;
 		var dataLine = [];
 
