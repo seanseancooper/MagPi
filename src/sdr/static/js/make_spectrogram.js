@@ -309,7 +309,7 @@ function CountingFreqDataGenerator(sampling_rate, nfft) {
 		if (blockReady) {
 			currentBuffer.set(uint8magnitudes);     // 4096 magnitudes into buffer
 			blockCount++;
-			console.log('blockCount: ' + blockCount + ' getElapsedTime:' + this.getElapsedTime() );
+			// console.log('blockCount: ' + blockCount + ' getElapsedTime:' + this.getElapsedTime() );
 			blockReady = false;
 			requestBlock();                         // ask for next block right after processing
 		}
