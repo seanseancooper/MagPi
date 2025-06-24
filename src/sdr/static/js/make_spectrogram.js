@@ -547,10 +547,6 @@ function setupInfoLayerHandlers(canvas, highlight, infoLayerId = 'infoLayer') {
 
 function draw_spec() {
 
-    const countingDataGenerator = new CountingFreqDataGenerator(sampling_rate, nfft);
-    const dataObj = getDynamicDataBuffer(countingDataGenerator);
-//    displayElapsedTime(countingDataGenerator, 'elapsedTimeDisplay');
-
     const cgo = new Cango("cvs_spec");
     const cvs_spec = document.getElementById('cvs_spec');
     const cvs_xaxis = document.getElementById("cvs_xaxis");
