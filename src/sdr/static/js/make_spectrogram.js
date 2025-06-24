@@ -211,7 +211,6 @@ socket.on('meta_data', (data) => {
 	};
 });
 
-// Emit read_block
 function requestBlock() {
 	socket.emit('read_block');
 }
