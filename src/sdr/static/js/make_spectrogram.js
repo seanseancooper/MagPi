@@ -262,13 +262,13 @@ function processFloat32Data(floatData) {
 	return magnitudes;
 }
 
-//function displayElapsedTime(generatorInstance, elementId) {
-//	setInterval(() => {
-//		const elapsedMs = generatorInstance.getElapsedTime();
-//		const seconds = (elapsedMs / 1000).toFixed(2);
-//		document.getElementById(elementId).textContent = `Elapsed Time: ${seconds} sec`;
-//	}, 500);
-//}
+function displayElapsedTime(generatorInstance, elementId) {
+	setInterval(() => {
+		const elapsedMs = generatorInstance.getElapsedTime();
+		const seconds = (elapsedMs / 1000).toFixed(2);
+		document.getElementById(elementId).textContent = `Elapsed Time: ${seconds} sec`;
+	}, 10);
+}
 
 function FreqDataGenerator(sampling_rate, nfft) {
 
