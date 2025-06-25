@@ -21,7 +21,28 @@ class IQFileReader:
 
     def read_block(self):
         while True:
+
+            def test_signal(num_samples):
+                import numpy as np
+
+                samplerate = 2.048e6
+                samples = np.arange(num_samples) / samplerate
+
+                amplitude = 1.0
+                base_signal = amplitude * np.sin(2 * np.pi * 97e6 * samples)
+                complex_signal = np.exp(1j * base_signal)
+
+                noise = (np.random.randn(num_samples) + 1j * np.random.randn(num_samples)) / np.sqrt(2)  # complex noise with unity power
+                noise_power = 2
+                noisy_complex_signal = complex_signal + noise * np.sqrt(noise_power)
+
+                # return base_signal.astype(np.complex64)
+                # return noise.astype(np.complex64)
+                return complex_signal.astype(np.complex64)
+                # return noisy_complex_signal.astype(np.complex64)
+
             data = np.fromfile(self.file, dtype=np.complex64, count=self.block_size)
+            # data = test_signal(self.block_size)
             if data.size == 0:
                 time.sleep(0.01)
                 continue

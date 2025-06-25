@@ -112,6 +112,24 @@ class RTLSDRReceiver(threading.Thread):
         self.set_block(scanned)
         return self.block
 
+    def test_signal(self, num_samples):
+        import numpy as np
+
+        samplerate = self.config['DEFAULT_SAMPLE_RATE']
+        samples = np.arange(num_samples) / samplerate
+
+        amplitude = 1.0
+        base_signal = amplitude * np.sin(2 * np.pi * self.config['DEFAULT_CENTER_FREQ'] * samples)
+        complex_signal = np.exp(1j * base_signal)
+
+        noise = (np.random.randn(num_samples) + 1j * np.random.randn(num_samples)) / np.sqrt(2)  # complex noise with unity power
+        noise_power = 2
+        noisy_complex_signal = complex_signal + noise * np.sqrt(noise_power)
+
+        # return base_signal.astype(np.complex64)
+        # return complex_signal.astype(np.complex64)
+        return noisy_complex_signal.astype(np.complex64)
+
     def get_parsed_cells(self, scanned):
 
         if not scanned:
@@ -209,8 +227,10 @@ class RTLSDRReceiver(threading.Thread):
 
         return [scanned]  # contract is list of T
 
-    def read_samples(self, num_samples):
+    def read_samples(self, num_samples, test=False):
         """Read samples from the SDR."""
+        if test:
+            return self.test_signal(num_samples)
         return self.sdr.read_samples(num_samples)
 
     def print_device_info(self):
