@@ -70,7 +70,7 @@ class SDRAnalyzer:
     def __init__(self):
         self.config = {}
         self.peaks = []
-        # self.reader = None
+        self.reader = None
         self.image_buffer = None
 
         self.sample_rate = None
@@ -96,12 +96,7 @@ class SDRAnalyzer:
 
         self.filter_peaks = False
 
-        # read directly from scanner.retriever...
-        # self.reader = self.scanner.retriever.scan
-
-        # want to swap sources on the fly
-        #
-        # self.reader = IQFileReader(outfile_path, block_size=self.samp_scan)
+        self.reader = IQFileReader(outfile_path, block_size=self.samp_scan)
         self.image_buffer = -100 * np.ones((self.fft_rows, self.scans_sweep*self.nfft))
 
     def detect_peak_bins(self, magnitude_db):
@@ -140,18 +135,18 @@ class SDRAnalyzer:
         freq_max = (self.center_freq + self.sample_rate / 2) / 1e6
         return [freq_min, freq_max, self.fft_rows, 0]
 
-    # def extract_signal(self, center_freq, bandwidth, start_time, end_time):
-    #     offset = center_freq - self.center_freq
-    #     start_sample = int(start_time * self.sample_rate)
-    #     end_sample = int(end_time * self.sample_rate)
-    #     num_samples = end_sample - start_sample
-    #
-    #     self.reader.seek_time(start_time, self.sample_rate)
-    #     data = self.reader.read_range(num_samples)
-    #
-    #     # Frequency shift
-    #     t = np.arange(len(data)) / self.sample_rate
-    #     data_shifted = data * np.exp(-2j * np.pi * offset * t)
-    #
-    #     # Band-pass filter placeholder (you can add scipy.signal.butter here)
-    #     return data_shifted
+    def extract_signal(self, center_freq, bandwidth, start_time, end_time):
+        offset = center_freq - self.center_freq
+        start_sample = int(start_time * self.sample_rate)
+        end_sample = int(end_time * self.sample_rate)
+        num_samples = end_sample - start_sample
+
+        self.reader.seek_time(start_time, self.sample_rate)
+        data = self.reader.read_range(num_samples)
+
+        # Frequency shift
+        t = np.arange(len(data)) / self.sample_rate
+        data_shifted = data * np.exp(-2j * np.pi * offset * t)
+
+        # Band-pass filter placeholder (you can add scipy.signal.butter here)
+        return data_shifted

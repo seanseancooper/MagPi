@@ -32,7 +32,7 @@ class FlaskSDRStreamer:
             this is a new convention thatI'm playing with; there are other
             ways to do this, but what does it buy me to inject this type of
             business logic here. """
-        self.port = int(port) + 10
+        self.port = int(port)
 
     def setup_routes(self):
         @self.app.route('/')
