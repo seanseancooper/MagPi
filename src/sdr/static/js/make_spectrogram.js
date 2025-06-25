@@ -97,7 +97,7 @@ class HighlightLayer {
 	}
 }
 
-const socket = io();
+const socket = io.connect(':5008');
 const nfft = 4096;                                          // size of PSD. aka NFFT
 //const samp_scan = nfft*16;                                // number of samples per scan
 const lineRate = 10;
@@ -466,18 +466,18 @@ function handleGridSlider(slider) {
         const slider_output = document.getElementById(slider.id.replace('_input', '_output'));
         grid.style.setProperty('display','block');
         grid.style.setProperty('opacity',1);
-        const ctx = grid.getContext("2d");
+        const grid_ctx = grid.getContext("2d", {willReadFrequently: true});
         const range = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step))
         const slider_range = 127;
 
-        function draw_line(ctx, fx, fy, tx, ty){
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = "white";
+        function draw_line(grid_ctx, fx, fy, tx, ty){
+            grid_ctx.lineWidth = 1;
+            grid_ctx.strokeStyle = "white";
 
-            ctx.beginPath();
-            ctx.moveTo(fx, fy);
-            ctx.lineTo(tx, ty);
-            ctx.stroke();
+            grid_ctx.beginPath();
+            grid_ctx.moveTo(fx, fy);
+            grid_ctx.lineTo(tx, ty);
+            grid_ctx.stroke();
         };
 
         function updateSlider() {
@@ -495,25 +495,25 @@ function handleGridSlider(slider) {
             var pos_heights = range(0, grid.height, hs);
             var pos_widths = range(0, grid.width, hs);
 
-            ctx.clearRect(0, 0, grid.width, grid.height);
-            ctx.save();
+            grid_ctx.clearRect(0, 0, grid.width, grid.height);
+            grid_ctx.save();
 
-            ctx.translate(hw, hh);
-            ctx.fillRect(-4, -4, 8, 8);
+            grid_ctx.translate(hw, hh);
+            grid_ctx.fillRect(-4, -4, 8, 8);
 
             for(i=0; i<2; i++){
 
                 for (y=0; y < pos_heights.length; y++) {
-                    draw_line(ctx, -grid.width, pos_heights[y], grid.width, pos_heights[y]);
+                    draw_line(grid_ctx, -grid.width, pos_heights[y], grid.width, pos_heights[y]);
                 };
 
                 for (x=0; x < pos_widths.length; x++) {
-                    draw_line(ctx, pos_widths[x], -grid.width,  pos_widths[x], grid.width);
+                    draw_line(grid_ctx, pos_widths[x], -grid.width,  pos_widths[x], grid.width);
                 }
-                ctx.rotate(180 * Math.PI / 180);
+                grid_ctx.rotate(180 * Math.PI / 180);
             }
             // Restore the transform
-            ctx.restore();
+            grid_ctx.restore();
         }
         updateSlider();
     });
@@ -594,7 +594,7 @@ function draw_spec() {
 	//cvs_xaxis_ctx.fillRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
 
     function draw_indicia() {
-        const ctx = cvs_xaxis.getContext("2d");
+        const ctx = cvs_xaxis.getContext("2d", {willReadFrequently: true});
         cvs_xaxis_ctx.clearRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
 
         // Draw center line
