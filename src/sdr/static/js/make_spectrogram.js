@@ -240,8 +240,8 @@ function updateSliderBounds() {
     normBounds.minDb = minVal;
     normBounds.maxDb = maxVal;
 
-    document.getElementById("rangeMinDb").textContent = `${minVal} dB`;
-    document.getElementById("rangeMaxDb").textContent = `${maxVal} dB`;
+    document.getElementById("rangeMinDb").textContent = `${minVal}`;
+    document.getElementById("rangeMaxDb").textContent = `${maxVal}`;
 
 }
 
@@ -263,10 +263,27 @@ function processFloat32Data(floatData) {
 }
 
 function displayElapsedTime(generatorInstance, elementId) {
+
 	setInterval(() => {
+
+        function convertSecondsToHMS(totalSeconds) {
+          const hours = Math.floor(totalSeconds / 3600);
+          const minutes = Math.floor((totalSeconds % 3600) / 60);
+          const seconds = totalSeconds % 60;
+
+          // Optional: Add leading zeros for formatting (e.g., 05:03:09)
+          const formattedHours = String(hours).padStart(2, '0');
+          const formattedMinutes = String(minutes).padStart(2, '0');
+          const formattedSeconds = String(seconds).padStart(2, '0');
+
+          return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+        }
+
 		const elapsedMs = generatorInstance.getElapsedTime();
-		const seconds = (elapsedMs / 1000).toFixed(2);
-		document.getElementById(elementId).textContent = `Elapsed Time: ${seconds} sec`;
+		const seconds = elapsedMs * lineRate / 1000  ;
+		let formattedTime = convertSecondsToHMS(seconds);
+		//console.log(formattedTime); // Output: 02:37:42
+		document.getElementById(elementId).textContent = formattedTime;
 	}, 10);
 }
 
@@ -465,10 +482,10 @@ function handleGridSlider(slider) {
 
         function updateSlider() {
             const component = slider.id.replace('_input', '');
-            //const text = document.getElementById('cam_slider_krnl_output');
+            const text = document.getElementById('grid_slider_output');
 
             let stepSz = slider.value;
-            //text.innerHTML = slider.value;
+            text.innerHTML = slider.value;
 
             let hw = grid.width/2;
             let hh = grid.height/2;
