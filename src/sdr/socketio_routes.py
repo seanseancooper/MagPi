@@ -1,24 +1,18 @@
-import threading
-
 from flask import Blueprint, jsonify, render_template
-from flask_socketio import SocketIO
 import logging
 
+import threading
 from src.lib.Scanner import Scanner
 from src.sdr.lib import SDRAnalyzer
 
-socketio = SocketIO()
-
-
-scanner = Scanner()             # run as thread interior to Cotroller
-analyzer = SDRAnalyzer()        # sidecar...
+scanner = Scanner()             # run as thread interior to Controller
 scanner.configure('sdr.json')
+
+analyzer = SDRAnalyzer()        # sidecar...
 analyzer.config = scanner.config
 
 t = threading.Thread(target=scanner.run, daemon=True)
 t.start()
-
-
 
 sdr_bp = Blueprint(
         'sdr_bp', __name__, subdomain='sdr',
@@ -30,11 +24,7 @@ sdr_bp = Blueprint(
 speech_logger = logging.getLogger('speech_logger')
 
 
-# @sdr_bp.route('/', methods=['GET'], subdomain='sdr')
-# def index():
-#     return render_template('sdr.html.j2', analyzer=scanner.module_retriever.analyzer)
-
-@sdr_bp.route('/')
+@sdr_bp.route('/', methods=['GET'], subdomain='sdr')
 def index():
     return render_template('sdr.html.j2', analyzer=analyzer)
 

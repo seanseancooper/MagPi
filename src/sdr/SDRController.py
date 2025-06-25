@@ -4,7 +4,6 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 import numpy as np
 import socketio_routes as routes
-from src.net.FlaskRESTServer import RESTServer
 
 class SDRController(threading.Thread):
 
@@ -22,7 +21,7 @@ class SDRController(threading.Thread):
         CORS(self.app)
         self.app.config['CORS_HEADERS'] = 'Content-Type'
 
-        self.socketio = SocketIO(self.app, cors_allowed_origins="*")  # <- ensure this matches your front-end host
+        self.socketio = SocketIO(self.app, cors_allowed_origins="*")  # <- ensure this matches front-end host
         socketio = self.socketio
 
         @socketio.on('extract_signal')
@@ -41,7 +40,6 @@ class SDRController(threading.Thread):
 
         @socketio.on('read_block')
         def read_block():
-            # data = routes.scanner.module_retriever.iq_queue.get()
             data = routes.scanner.module_retriever.block.copy()
             block = routes.analyzer.get_magnitudes(data)
 
@@ -82,20 +80,13 @@ class SDRController(threading.Thread):
 
             def stop():
                 routes.scanner.stop()
-
             atexit.register(stop)
 
             self.app = self.create_app()
-
-            def start_socketio():
-                host, port = routes.scanner.config['SERVER_NAME'].split(':')
-                self.socketio.run(self.app, host=host, port=int(port), allow_unsafe_werkzeug=True)
-
-            start_socketio()
-
+            host, port = routes.scanner.config['SERVER_NAME'].split(':')
+            self.socketio.run(self.app, host=host, port=int(port), allow_unsafe_werkzeug=True)
         except KeyboardInterrupt:
             pass
-
 
 if __name__ == '__main__':
     SDRController().run()
