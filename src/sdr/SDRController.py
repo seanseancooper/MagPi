@@ -3,7 +3,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 import numpy as np
-import socketio_routes as routes
+import routes as routes
 
 class SDRController(threading.Thread):
 
