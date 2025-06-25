@@ -73,6 +73,7 @@ class FrameObjektTracker(object):
         tmp = {}
         readConfig('cam.json', tmp)
         self.config = tmp['PLUGIN']
+        self.config['MODULE'] = "cam"  # missing from config
 
         try:
             self.f_limit = int(self.config['tracker'].get('f_limit', 1))
