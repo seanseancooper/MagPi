@@ -28,7 +28,7 @@
 			"MODULE_RETRIEVER": "src.sdr.receivers.RTLSDRReceiver"
 		},
 		{
-			"MQ_MODULE_RETRIEVER": "src.sdr.receivers.RTLSDRReceiver"
+			"MQ_MODULE_RETRIEVER": ""
 		},
 		{
 			"DEFAULT_SDR": "00000001"
@@ -50,9 +50,6 @@
 		},
 		{
 			"FFT_ROWS": 512
-		},
-		{
-			"MQ_MODULE_RETRIEVER": "src.sdr.receivers.RTLSDRReceiver"
 		},
 		{
 			"TEMPLATE_AJAX_URL": "http://sdr.localhost:5008/scan"
