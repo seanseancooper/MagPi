@@ -9,7 +9,7 @@
 
     <script type="text/javascript" src="{{ url_for('wifi_bp.static', filename='js/luxon.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('wifi_bp.static', filename='tabulator/js/tabulator.min.js') }}"></script>
-    <script src="{{ url_for('wifi_bp.static', filename='js/peity-vanilla.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('wifi_bp.static', filename='js/peity-vanilla.js') }}"></script>
 
     <script>
         const VIEW_TIMEOUT = {{ scanner.config.get('VIEW_TIMEOUT') * 1000 }};
