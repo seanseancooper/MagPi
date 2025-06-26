@@ -26,6 +26,11 @@ speech_logger = logging.getLogger('speech_logger')
 
 @sdr_bp.route('/', methods=['GET'], subdomain='sdr')
 def index():
+    return redirect('/scan', code=302)
+
+
+@sdr_bp.route('/sdr', methods=['GET'], subdomain='sdr')
+def sdr_sdr():
     return render_template('sdr.html.j2', analyzer=analyzer)
 
 
