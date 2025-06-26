@@ -59,7 +59,7 @@ class TextFileTextRetriever(threading.Thread):
 
     def scan(self):
         try:
-            with open('/src/wifi/lib/scanned.xml') as f:
+            with open('/Users/scooper/PycharmProjects/MagPi/src/wifi/lib/scanned.xml') as f:
                 scanned = f.read()
             return scanned
 
