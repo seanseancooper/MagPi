@@ -90,7 +90,7 @@ class ViewContainer(threading.Thread):
         _, ZMQ_OK = check_zmq_available()
         # _, IMQ_OK = check_imq_available()
         _, RMQ_OK = check_rmq_available(m)
-        mq_retriever = self.module_configs[m].get('MODULE_RETRIEVER', None)
+        mq_retriever = self.module_configs[m].get('MQ_MODULE_RETRIEVER', None)
 
         # the check for MQ should be specific to the retriever type.
         if mq_retriever and ZMQ_OK:
