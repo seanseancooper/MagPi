@@ -76,7 +76,7 @@ main {
     margin-right: 0.5em;
 }
 
-select {
+.sdr-select {
     font-size: 0.8em;
     background-color: #000;
     color: #0F0;
@@ -84,7 +84,7 @@ select {
     outline:0px;
 }
 
-option{
+.sdr-select option{
     color: yellow;
 }
 
@@ -156,19 +156,13 @@ option{
     grid-template-columns: repeat(15, 1fr);
 }
 
-button {
+.ctrl-button {
     padding: 0.4em;
     background: #333;
     border: 1px solid #666;
     color: #0F0;
     font-size: 0.9em;
-}
 
-button:hover {
-    background: #005;
-}
-
-.ctrl-button {
     height: 28px;
     width: 79px;
     padding: 4px;
@@ -177,6 +171,10 @@ button:hover {
     color: #0F0;
     //margin: 1px;
     font-size: .8em;
+}
+
+.ctrl-button:hover {
+    background: #005;
 }
 
 /*----------------*/
