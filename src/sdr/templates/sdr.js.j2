@@ -1,6 +1,8 @@
-
-
-
+{% if container %}
+<div id="sdr" class="module_tab" style="position:relative; display:none;">
+{% else %}
+<div id="sdr" class="module_tab" style="position:relative; display:block;">
+{% endif %}
 
     <script src="{{ url_for('static', filename='js/socket.io.js') }}"></script>
     <script src="{{ url_for('static', filename='js/Cango-29v04.js') }}"></script>
@@ -125,3 +127,4 @@
         });
     </script>
 
+</div>
