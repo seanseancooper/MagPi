@@ -41,7 +41,7 @@
 		{
 			"MODULE_TABS": {
 				"wifi": {
-					"scanner": 30,
+					"wifi": 30,
 					"tracked": 5,
 					"ghosts": 5,
 					"workers": 5
