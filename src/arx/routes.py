@@ -20,7 +20,7 @@ def index():
 
 @arx_bp.route('/player', methods=['GET'], subdomain='arx')
 def arx_player():
-    return render_template("audio_player.html.j2", recorder=arxRec)
+    return render_template("arx.html.j2", recorder=arxRec)
 
 
 @arx_bp.route('/meter', methods=['GET'], subdomain='arx')

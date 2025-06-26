@@ -1,4 +1,4 @@
-<div id="scanner" class="module_tab" style="position:relative;display:block;">
+<div id="wifi" class="module_tab" style="position:relative;display:block;">
 {% if container %}
     {% set scanner = {} %}
     {% set config = scanner.__setitem__("config", {}) %}
@@ -88,7 +88,7 @@
         };
     </script>
     <script>
-        var scanner = new Tabulator("#scanner", {
+        var scanner = new Tabulator("#wifi", {
             ajaxURL:"{{ scanner.config.TEMPLATE_AJAX_URL  }}",      // request URI
             ajaxConfig:"GET",                                       // ajax config options go here
             headerVisible:true,
