@@ -33,6 +33,7 @@
 		{
 			"MODULES": [
 				"wifi",
+				"sdr",
 				"cam",
 				"map"
 			]
@@ -44,6 +45,9 @@
 					"tracked": 5,
 					"ghosts": 5,
 					"workers": 5
+				},
+				"sdr": {
+					"sdr": 0
 				},
 				"cam": {
 					"cam": 0
