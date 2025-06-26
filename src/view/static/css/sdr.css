@@ -1,11 +1,3 @@
-body {
-    //display: flex;
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 1em;
-    background-color:#333;
-    color: #ffffff;
-}
-
 .sdr-info {
     font-family: Helvetica, Arial, sans-serif;
     font-size: 1em;
@@ -30,7 +22,7 @@ main {
 
 .spectrogram-display {
     border: 1px solid #FFF;
-    width: 1025px;
+    width: 1035px;
     height: 400px;
     padding: 0.5em;
     background: #000;
@@ -67,15 +59,14 @@ main {
 /*----------------*/
 
 .fileselector-display {
-    display: flex;
-    float: right;
-    position: absolute;
-    left:778px;
-    top:20px;
-    margin-top: 0.5em;
-    margin-right: 0.5em;
+    //display: flex;
+    //float: right;
+    position: relative;
+    left:745px;
+    top:-20px;
+    //margin-top: 0.5em;
+    //margin-right: 0.5em;
 }
-
 .sdr-select {
     font-size: 0.8em;
     background-color: #000;
