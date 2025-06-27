@@ -1,9 +1,11 @@
 {% if container %}
 <div id="sdr" class="module_tab" style="position:relative; display:none;">
+{% set config = container.get_module_config('sdr') %}
+{% set sdr_host = config['SDR_HOST'] %}
+{% set sdr_port = config['SDR_PORT'] %}
+    <iframe src="http://sdr.{{ sdr_host }}:{{ sdr_port }}/sdr" allow="" height="700" width="1280"></iframe>
 {% else %}
 <div id="sdr" class="module_tab" style="position:relative; display:block;">
-{% endif %}
-
     <script src="{{ url_for('static', filename='js/socket.io.js') }}"></script>
     <script src="{{ url_for('static', filename='js/Cango-29v04.js') }}"></script>
     <script src="{{ url_for('static', filename='js/CangoAxes-10v06.js') }}"></script>
@@ -14,13 +16,13 @@
 
     <main>
         <!-- Spectrogram Display 0 -->
-        <div class="spectrogram-display">
+        <div class="spectrogram">
             <div class="sdr-info">SDR 0: 100 Mhz, bandwidth: 1000 k</div>
             <div class="time_display" style="z-index:2;">
                 <span id="elapsedTimeDisplay" class=""></span>
             </div>
-            <div class="inline-display" style="position: absolute; left:30px; top:50px;">
-                <div class="spectrogram" style="color: #444; position: absolute; width: 1024px; height: 256px;">
+            <div class="spectrogram-display" style="">
+                <div class="spectrogram-canvas" style="">
                     <canvas id="cvs_xaxis" style="background: rgba(0,0,0, 0.2); display: block; width: 1024px; height: 20px; position: absolute; top: 0; left: 0; z-index: 2;" width="1024px" height="20px"></canvas>
                     <canvas id="cvs_hl" style="display: block; width: 1024px; height: 256px; position: relative; top: -20; left: 0; z-index: 1;" width="1024px" height="256px"></canvas>
                     <canvas id="grid" style="position: absolute; top: 0; left: 0; z-index: 1;" width="1024px" height="256px"></canvas>
@@ -41,21 +43,14 @@
                     <option>rtlsdr_20250616_142944_97000000_2048000.iq</option>
                 </select>
             </div>
-
             <div class="range-controls" style="">
-<!--                <div class="rangeMinDb" style="">-->
-<!--                    <span id="rangeMinDb">0 dB</span>-->
-<!--                </div>-->
                 <div class="range-control" style="">
-                    <label><input class="lr_input" type="range" id="rangeMin" min="-100" max="100" step="1" value="-5">
-                    <output for="rangeMin" style=""><span id="rangeMinDb"></span></output></label>
-                    <label><input class="lr_input" type="range" id="rangeMax" min="-100" max="100" step="1" value="100">
-                    <output for="rangeMax" style=""><span id="rangeMaxDb"></span></output></label>
+                    <input class="lr_input" type="range" id="rangeMin" min="-100" max="100" step="1" value="-5">
+                    <input class="lr_input" type="range" id="rangeMax" min="-100" max="100" step="1" value="100">
                 </div>
-<!--                <div class="rangeMaxDb" style="">-->
-<!--                    <span id="rangeMaxDb"></span>-->
-<!--                </div>-->
             </div>
+            <div id="rangeMinDb" class="rangeMinDb" style="">0 dB</div>
+            <div id="rangeMaxDb" class="rangeMaxDb" style="">0 dB</div>
 
             <div class="peak-display" style="">
                 <div class="peak_checkboxes" style="">
@@ -126,5 +121,5 @@
 
         });
     </script>
-
+{% endif %}
 </div>
