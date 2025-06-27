@@ -2,39 +2,53 @@
     font-family: Helvetica, Arial, sans-serif;
     font-size: 1em;
     font-weight: bold;
+    color: #FFF;
 }
 
 main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 1em;
-    padding: 1em;
+    //flex: 1;
+    //display: flex;
+    //flex-direction: column;
+    //gap: 1em;
+    //padding: 1em;
 }
 
 .time_display {
-    position: absolute;
-    left: 30px;
-    top: 345px;
+    position: relative;
+    left: 5px;
+    top: 265px;
+    font-family: courier, serif;
+    font-size: 1em;
+    color: #FFF;
 }
 
 /*----------------*/
 
-.spectrogram-display {
+.spectrogram {
     border: 1px solid #FFF;
     width: 1035px;
     height: 400px;
     padding: 0.5em;
     background: #000;
+    position: absolute;
+    left: 0;
+    top: 0;
 }
 
-.inline-display {
+.spectrogram-display {
     display: flex;
+    position: absolute;
+    left:10px;
+    top:50px;
     margin-top: 0.5em;
     margin-right: 0.5em;
 }
 
-.spectrogram {
+.spectrogram-canvas {
+    color: #444;
+    position: absolute;
+    width: 1024px;
+    height: 256px;
     border: 1px solid #CCC;
 }
 
@@ -50,7 +64,7 @@ main {
     //user-select: none;
     //-webkit-user-select: none;
     //-moz-user-select: none;
-    position:absolute;
+    position:relative;
     left:0px;
     top:0px;
     display:none;
@@ -79,43 +93,47 @@ main {
 /*----------------*/
 
 .range-controls {
-    position: absolute;
-    left:30px;
-    top:313px;
-    float:left;
-    vertical-align: bottom;
+    position: relative;
+    left:0px;
+    top:240px;
+    //float:left;
+    //vertical-align: bottom;
 }
 
 .rangeMinDb {
-    position: absolute;
-    top: 30px;
-    left: 110px;
+    position: relative;
+    top: 270px;
+    left: 0px;
     font-size: 0.7em;
+    color: #FFF;
 }
 
 .rangeMaxDb {
-    position: absolute;
-    top: 30px;
-    left: 160px;
+    position: relative;
+    top: 255px;
+    left: 282px;
     font-size: 0.7em;
+    color: #FFF;
 }
 
 /*----------------*/
 
 .peak_checkboxes {
     position: relative;
-    left:400px;
-    top:34px;
+    left:380px;
+    top:0px;
     color: #FFF;
+
 }
 
 .peak-display {
-    position: absolute;
-    left:40px;
-    top:305px;
+    position: relative;
+    left:0px;
+    top:300px;
     display: flex;
     margin-top: 0.5em;
     margin-right: 0.5em;
+    display: none;
 }
 
 .peak_values {
@@ -128,9 +146,9 @@ main {
 /*----------------*/
 
 .button-display {
-    position: absolute;
-    left:30px;
-    top:365px;
+    position: relative;
+    left:0px;
+    top:255px;
     display: flex;
     margin-top: 0.5em;
     margin-right: 0.5em;
@@ -140,7 +158,6 @@ main {
     display:grid;
     width: 1028px;
     border: 1px solid #666;
-    //padding: 4px;
     grid-template-columns: repeat(15, 1fr);
 }
 
@@ -165,23 +182,22 @@ main {
     background: #005;
 }
 
-/*----------------*/
-
+/*
 label {
-  --c: #CCC;             /* slider color */
-  --g: round(.3em,1px);  /* the gap */
-  --l: round(.2em,1px);  /* line thickness*/
-  --s: round(1.3em,1px); /* thumb size*/
-  --t: round(.8em,1px);  /* tooltip tail size */
-  --r: round(.8em,1px);  /* tooltip radius */
+  --c: #CCC;             // slider color
+  --g: round(.3em,1px);  // the gap
+  --l: round(.2em,1px);  // line thickness
+  --s: round(1.3em,1px); // thumb size
+  --t: round(.8em,1px);  // tooltip tail size
+  --r: round(.8em,1px);  // tooltip radius
   timeline-scope: --thumb-view;
-  position: relative;    /* No, It's not useless so don't remove it (or remove it and see what happens) */
+  position: relative;    // No, It's not useless so don't remove it (or remove it and see what happens)
   font-size: 0.9em;
 }
 
 output {
   position-anchor: --thumb;
-  position: absolute;
+  position: relative;
   position-area: top;
   inset: 0 -4em;
   color: #fff;
@@ -227,8 +243,7 @@ output:before {
     display: none;
   }
 }
-
-/*----------------*/
+*/
 
 input[type="range"] {
   -webkit-appearance: none;
