@@ -1,4 +1,3 @@
-<!-- https://stackoverflow.com/questions/5867985/full-screen-iframe-with-a-height-of-100 -->
 {% if container %}
 <div id="map" class="module_tab" style="position:relative;display:none;">
     {% set config = container.get_module_config('map') %}
@@ -8,5 +7,6 @@
 {% endif %}
 {% set map_host = config['MAP_HOST'] %}
 {% set map_port = config['MAP_PORT'] %}
+    <!-- https://stackoverflow.com/questions/5867985/full-screen-iframe-with-a-height-of-100 -->
     <iframe src="http://{{ map_host }}:{{ map_port }}/" allow="geolocation" height="720px;" width="100%"></iframe>
 </div>
