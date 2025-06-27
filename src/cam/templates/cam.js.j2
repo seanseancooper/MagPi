@@ -6,11 +6,9 @@
         {% set plugin = { 'frame_shape': (720, 1280, 0), 'majic_color': (255, 0, 0) } %}
     {% endif %}
 {% endif %}
-
 {% set cam_host, cam_port = config['SERVER_NAME'].split(':') %}
 {% set streaming_host = config['PLUGIN']['streaming_host'] %}
 {% set streaming_port = config['PLUGIN']['streaming_port'] %}
-
 <link rel="stylesheet" href="http://cam.{{ cam_host }}:{{ cam_port }}/static/css/cropper.css">
 <link rel="stylesheet" href="http://cam.{{ cam_host }}:{{ cam_port }}/static/css/cam_controller.css">
 <script>
