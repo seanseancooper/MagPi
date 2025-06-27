@@ -6,8 +6,6 @@
     <title>{{ container.title }}</title>
     <link href="{{ url_for('vc_bp.static', filename='tabulator/css/tabulator_midnight.min.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('vc_bp.static', filename='css/container.css') }}">
-    <link rel="stylesheet" href="{{ url_for('vc_bp.static', filename='css/cropper.css') }}">
-    <link rel="stylesheet" href="{{ url_for('vc_bp.static', filename='css/cam_controller.css') }}">
     <script type="text/javascript" src="{{ url_for('vc_bp.static', filename='js/luxon.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('vc_bp.static', filename='tabulator/js/tabulator.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('vc_bp.static', filename='js/peity-vanilla.js') }}"></script>
@@ -47,7 +45,7 @@
                 f_cb.style.display = "block";
             }
 
-            // THIS SHOULD NOT BE HERE !!!
+            // TODO: try to move this to cam...
             if (tabName == 'cam'){
                 load_video();
 
@@ -96,7 +94,6 @@
         <button id="container_tab_{{ containerTab.tab }}" class="tab_button{{ ' active' if loop.index0 == 0 }}" onclick="loadTab(event, '{{ containerTab.tab }}')">{{ containerTab.tab }}</button>
 {% endfor %}
     </div>
-
 {%- for containerTab in container.module_tabs: -%}
     {% set module = containerTab.module %}
     {% if containerTab.timeout > 0 %}
@@ -105,15 +102,12 @@
     </div>
     {% endif %}
 {%- endfor -%}
-
 {% include 'buttons.js.j2' %}
-
     <script>
         {%- for containerTab in container.module_tabs: %}
         function {{ containerTab.tab }}_reload(){
               {{ containerTab.tab }}.replaceData();
         }
-
         {%- endfor %}
     </script>
     <script>
@@ -132,9 +126,7 @@
             return (avg > 128)? "00,00,00": "255,255,255";
         };
     </script>
-
 {%- for containerTab in container.module_tabs: -%}
-    {% set module = containerTab.module %}
     {% if containerTab.timeout > 0 %}
         {% include 'autoloader.js.j2' %}
     <div id="{{ containerTab.tab }}_bar_container" style="padding-top:2px;padding-bottom:3px;{{ 'display:none;' if loop.index0 > 0 }}" class="bar_container">
@@ -142,20 +134,15 @@
     </div>
     {% endif %}
 {%- endfor -%}
-
 {%- for containerTab in container.module_tabs: -%}
-    {% set module = containerTab.module %}
     {% set module_fragment = containerTab.get_module_fragment() %}
     {% include module_fragment ignore missing %}
 {%- endfor -%}
-
     <script>
         container_elements = [];
-
         {%- for containerTab in container.module_tabs: %}
         container_elements.push(document.getElementById('{{ containerTab.tab }}'));
         {%- endfor %}
-
         {%- for containerTab in container.module_tabs: %}
         {% if containerTab.timeout >  0 %}
         container_elements.push(document.getElementById("{{ containerTab.tab }}_all_button"));
@@ -164,7 +151,6 @@
         container_elements.push(document.getElementById("{{ containerTab.tab }}_reload_button"));
         {% endif %}
         {%- endfor %}
-
         container_elements.forEach(function(element) {
 
             element.addEventListener('click', function(event) {
