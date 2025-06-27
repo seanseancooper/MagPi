@@ -13,13 +13,19 @@
 			"SERVER_NAME": "localhost:5008"
 		},
 		{
+			"SDR_HOST": "localhost"
+		},
+		{
+			"SDR_PORT": 5008
+		},
+		{
 			"TEMPLATE_FOLDER": "templates"
 		},
 		{
 			"STATIC_FOLDER": "static"
 		},
 		{
-			"SCANNER": "Tabulator"
+			"SCANNER": "src.lib.Scanner"
 		},
 		{
 			"MODULE_TRACKER": "src.sdr.lib.SDRTracker"
