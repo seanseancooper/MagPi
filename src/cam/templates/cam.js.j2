@@ -22,7 +22,7 @@
     //todo: socketio? bytearrays?
     function load_video(){
         var _video = document.getElementById("video");
-        // const stream = "/stream";
+
         const stream  = "http://{{ streaming_host }}:{{ streaming_port }}/stream";
 
         while (_video.src != stream) {
