@@ -1,8 +1,7 @@
 {% if container %}
 <div id="sdr" class="module_tab" style="position:relative; display:none;">
 {% set config = container.get_module_config('sdr') %}
-{% set sdr_host = config['SDR_HOST'] %}
-{% set sdr_port = config['SDR_PORT'] %}
+{% set sdr_host, sdr_port = config['SERVER_NAME'].split(':') %}
     <iframe src="http://sdr.{{ sdr_host }}:{{ sdr_port }}/sdr" allow="" height="700" width="1280"></iframe>
 {% else %}
 <div id="sdr" class="module_tab" style="position:relative; display:block;">
