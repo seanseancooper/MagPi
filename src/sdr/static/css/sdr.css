@@ -5,14 +5,6 @@
     color: #FFF;
 }
 
-main {
-    //flex: 1;
-    //display: flex;
-    //flex-direction: column;
-    //gap: 1em;
-    //padding: 1em;
-}
-
 .time_display {
     position: relative;
     left: 5px;
@@ -54,16 +46,13 @@ main {
 
 /*----------------*/
 
-.grid_slider {
+.sdr_grid_slider {
     position: relative;
     left: 895px;
     top: 270px;
 }
 
 .grid {
-    //user-select: none;
-    //-webkit-user-select: none;
-    //-moz-user-select: none;
     position:relative;
     left:0px;
     top:0px;
@@ -72,7 +61,7 @@ main {
 
 /*----------------*/
 
-.fileselector-display {
+.sdr-fileselector-display {
     position: relative;
     left:745px;
     top:-20px;
@@ -92,7 +81,7 @@ main {
 
 /*----------------*/
 
-.range-controls {
+.sdr-range-controls {
     position: relative;
     left:0px;
     top:240px;
@@ -118,15 +107,7 @@ main {
 
 /*----------------*/
 
-.peak_checkboxes {
-    position: relative;
-    left:380px;
-    top:0px;
-    color: #FFF;
-
-}
-
-.peak-display {
+.sdr-peak-display {
     position: relative;
     left:0px;
     top:300px;
@@ -136,7 +117,15 @@ main {
     display: none;
 }
 
-.peak_values {
+.sdr-peak-checkboxes {
+    position: relative;
+    left:380px;
+    top:0px;
+    color: #FFF;
+
+}
+
+.sdr-peak-values {
     position: relative;
     left: 180px;
     top:12px;
@@ -145,7 +134,7 @@ main {
 
 /*----------------*/
 
-.button-display {
+.sdr-button-display {
     position: relative;
     left:0px;
     top:255px;
@@ -154,14 +143,14 @@ main {
     margin-right: 0.5em;
 }
 
-.ctrl-buttons {
+.sdr-buttons {
     display:grid;
     width: 1028px;
     border: 1px solid #666;
     grid-template-columns: repeat(15, 1fr);
 }
 
-.ctrl-button {
+.sdr-button {
     padding: 0.4em;
     background: #333;
     border: 1px solid #666;
@@ -178,7 +167,7 @@ main {
     font-size: .8em;
 }
 
-.ctrl-button:hover {
+.sdr-button:hover {
     background: #005;
 }
 
