@@ -28,8 +28,8 @@ class IQFileReader:
         iq_files = glob.glob(self.outfile_path + '/*.iq')
         if not iq_files:
             raise FileNotFoundError("No .iq file found in the parent directory.")
-        f = sorted(iq_files)[-1]
-        print(f'Reading: {f}')
+
+        f = target if target else sorted(iq_files)[-1]
 
         self.file = open(f, 'rb')  # read as bytes
         self.path = f
