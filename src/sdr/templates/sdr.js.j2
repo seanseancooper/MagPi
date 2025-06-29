@@ -37,7 +37,7 @@
                 &nbsp;
                 <select id="fileSelector" class="sdr-select" style="width: 200px;" onchange="handleFileSelect();">
                     {% for filename in analyzer.reader.iq_files : %}
-                    <option value="{{ loop.index0 }}">{{ filename.split('/')[-1] }}</option>
+                    <option value="{{ filename }}">{{ filename.split('/')[-1] }}</option>
                     {% endfor %}
                 </select>
             </div>
