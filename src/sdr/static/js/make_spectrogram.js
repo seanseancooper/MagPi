@@ -213,6 +213,7 @@ socket.on('meta_data', (data) => {
 
 function requestBlock() {
 	socket.emit('read_block');
+	//socket.emit('read_file');
 }
 
 function requestPeaks() {
