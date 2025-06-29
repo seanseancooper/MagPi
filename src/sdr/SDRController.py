@@ -54,6 +54,7 @@ class SDRController(threading.Thread):
 
         @socketio.on('read_block')
         def read_block():
+            # data = routes.scanner.scanned[0]???
             data = routes.scanner.module_retriever.block.copy()
             block = routes.analyzer.get_magnitudes(data)
 
