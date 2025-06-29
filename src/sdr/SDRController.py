@@ -47,7 +47,7 @@ class SDRController(threading.Thread):
             if block is not None:
                 emit('file_data', block.astype(np.float32).tobytes())
             else:
-                emit('block_data', [])  # or handle error case
+                emit('file_data', [])  # or handle error case
 
         @socketio.on('read_block')
         def read_block():
