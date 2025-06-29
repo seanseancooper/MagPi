@@ -8,7 +8,7 @@ from src.sdr.lib import SDRAnalyzer
 scanner = Scanner()             # run as thread interior to Controller
 scanner.configure('sdr.json')
 
-analyzer = SDRAnalyzer()        # sidecar...
+analyzer = SDRAnalyzer()
 analyzer.config = scanner.config
 
 t = threading.Thread(target=scanner.run, daemon=True)
