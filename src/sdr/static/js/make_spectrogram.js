@@ -241,8 +241,8 @@ function freqToX(freq) {
 }
 
 function handleFileSelect() {
-    console.log('select: ' + document.getElementById("fileSelector").value);
-    // pass the index to read_static_block(idx)
+    console.log('selected: ' + document.getElementById("fileSelector").value);
+    socket.emit('read_file', document.getElementById("fileSelector").value);
 }
 
 function updateSliderBounds() {
