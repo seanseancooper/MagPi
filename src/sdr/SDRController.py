@@ -45,7 +45,7 @@ class SDRController(threading.Thread):
             block = routes.analyzer.get_magnitudes(data)
 
             if block is not None:
-                emit('block_data', block.astype(np.float32).tobytes())
+                emit('file_data', block.astype(np.float32).tobytes())
             else:
                 emit('block_data', [])  # or handle error case
 
