@@ -10,6 +10,21 @@ class IQFileReader:
         self.block_size = block_size
         self.outfile_path = outfile_path
 
+        # iq_files = glob.glob(self.outfile_path + '/*.iq')
+        # if not iq_files:
+        #     raise FileNotFoundError("No .iq file found in the parent directory.")
+        # f = sorted(iq_files)[-1]
+        # print(f'Reading: {f}')
+
+        # self.file = open(f, 'rb')  # read as bytes
+        # self.path = f
+
+        self.file = None
+        self.path = None
+        load_file();
+
+    def load_file(self, target=None):
+        """ set self.file to either latest or target """
         iq_files = glob.glob(self.outfile_path + '/*.iq')
         if not iq_files:
             raise FileNotFoundError("No .iq file found in the parent directory.")
