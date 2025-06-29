@@ -130,7 +130,13 @@
             rangeMax.addEventListener('input', updateSliderBounds);
 
             const fileSelector = document.getElementById("fileSelector");
-            fileSelector.addEventListener('onselect', handleFileSelect());
+            fileSelector.addEventListener("change", handleFileSelect);
+            /*
+            fileSelector.addEventListener("change", (event) => {
+              // Code to execute when a new option is selected
+                    console.log("New Option Selected:", event.target.value); // Logs the value of the selected option
+            });
+            */
 
         });
     </script>
