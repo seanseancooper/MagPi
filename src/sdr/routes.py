@@ -31,6 +31,7 @@ def index():
 
 @sdr_bp.route('/sdr', methods=['GET'], subdomain='sdr')
 def sdr_sdr():
+    analyzer.configure('sdr.json')
     return render_template('sdr.html.j2', analyzer=analyzer)
 
 
