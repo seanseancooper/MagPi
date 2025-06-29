@@ -38,6 +38,20 @@ class SDRController(threading.Thread):
                 'sample_rate': routes.analyzer.sample_rate
             })
 
+        @socketio.on('read_static_block')
+        def read_static_block(filename):
+
+            # point analyzer @filename
+            self.analyzer.reader.load_file(os.path.join(self.analyzer.config['OUTFILE_PATH'], filename))
+
+            data = self.analyzer.reader.read_block()
+            block = self.analyzer.get_magnitudes(data)
+
+            if block is not None:
+                emit('block_data', block.astype(np.float32).tobytes())
+            else:
+                emit('block_data', [])  # or handle error case
+
         @socketio.on('read_block')
         def read_block():
             data = routes.scanner.module_retriever.block.copy()
