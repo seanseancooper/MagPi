@@ -35,7 +35,7 @@
             <div class="sdr-fileselector-display" style="">
                 <button class="sdr-button" id="ctrl_live"><span id="ctrl_live_status">Online</span></button>
                 &nbsp;
-                <select id="fileSelector" class="sdr-select" style="width: 200px;">
+                <select id="fileSelector" class="sdr-select" style="width: 200px;" onchange="handleFileSelect();">
                     {% for filename in analyzer.reader.iq_files : %}
                     <option value="{{ loop.index0 }}">{{ filename.split('/')[-1] }}</option>
                     {% endfor %}
