@@ -32,6 +32,7 @@ class IQFileReader:
         f = target if target else sorted(iq_files)[-1]
 
         self.file = open(f, 'rb')  # read as bytes
+        print(f'Reading: {self.file}')
         self.path = f
 
     def read_block(self):
