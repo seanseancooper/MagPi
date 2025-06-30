@@ -199,17 +199,6 @@ socket.on('block_data', (block) => {
 	}
 });
 
-socket.on('file_data', (block) => {
-	if (block) {                                            // 16384 complex32 numbers
-		const floatArray = new Float32Array(block);         // 4096 float32 values
-		//requestPeaks();                                   // MOVE/OMIT trigger peaks for block
-		uint8magnitudes = processFloat32Data(floatArray);   // convert 4096 float32 to 4096 0..255
-		blockReady = true;
-	} else {
-		console.warn("Invalid file_data received");
-	}
-});
-
 socket.on('peak_data', (peaks) => {
 	if (peaks) {
 		latestPeakData = peaks;
