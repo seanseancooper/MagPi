@@ -229,6 +229,12 @@ function requestBlock() {
 	//socket.emit('read_file');
 }
 
+function handleFileSelect() {
+    currentFile = document.getElementById("fileSelector").value;
+    socket.emit('set_file', currentFile);
+    console.log('selected: ' + currentFile);
+}
+
 function requestPeaks() {
 	socket.emit('get_peaks');
 }
