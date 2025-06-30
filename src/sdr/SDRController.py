@@ -11,6 +11,7 @@ class SDRController(threading.Thread):
         super().__init__()
         self.app = None
         self.socketio = None
+        self.file_is_set = False
 
     def create_app(self):
         """Create Flask application."""
@@ -59,8 +60,10 @@ class SDRController(threading.Thread):
 
         @socketio.on('set_file')
         def set_file(fileName):
+
             routes.analyzer.reader.set_path(fileName)
             routes.analyzer.reader.load_file(fileName)  # point analyzer @filename one time
+            self.file_is_set = True
             emit('set_file')
 
         @socketio.on('meta_data')
