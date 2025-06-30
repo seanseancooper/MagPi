@@ -236,11 +236,6 @@ function freqToX(freq) {
     return (freq - (center_freq - sampling_rate / 2)) / df;
 }
 
-function handleFileSelect() {
-    console.log('selected: ' + document.getElementById("fileSelector").value);
-    socket.emit('read_file', document.getElementById("fileSelector").value);
-}
-
 function updateSliderBounds() {
     let minVal = parseInt(rangeMin.value);
     let maxVal = parseInt(rangeMax.value);
