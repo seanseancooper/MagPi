@@ -65,6 +65,12 @@ class SDRController(threading.Thread):
         def get_peaks():
             emit('peak_data', routes.analyzer.peaks.tolist())
 
+        @socketio.on('set_file')
+        def set_file(fileName):
+            routes.analyzer.reader.set_path(fileName)
+            routes.analyzer.reader.load_file(fileName)  # point analyzer @filename one time
+            emit('set_file')
+
         @socketio.on('meta_data')
         def get_meta_data():
             meta_data = {  # fake data!!!
