@@ -225,8 +225,7 @@ socket.on('meta_data', (data) => {
 let currentFile = null;
 
 function requestBlock() {
-	socket.emit('read_block');
-	//socket.emit('read_file');
+    socket.emit('read_block');
 }
 
 function handleFileSelect() {
