@@ -5,6 +5,10 @@
     color: #FFF;
 }
 
+body {
+    background-color: #333;
+}
+
 .time_display {
     position: relative;
     left: 5px;
