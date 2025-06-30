@@ -94,7 +94,7 @@ function handleSlider(slider) {
 }
 
 function handleGridSlider(slider) {
-    const grid = document.getElementById("grid");
+    const grid = document.getElementById("cam_grid");
 
 
     document.querySelector('#cam_slider_krnl_input')
