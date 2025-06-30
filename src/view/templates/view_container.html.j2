@@ -49,7 +49,7 @@
             if (tabName == 'cam'){
                 load_video();
 
-                var image = document.querySelector('#target');
+                var image = document.querySelector('#cam_target');
                 var cropper = new Cropper(image, {
                     viewMode: 1,
                     center: true,
@@ -90,9 +90,9 @@
 </head>
 <body>
     <div id="tabs" style="height:30px">
-{%- for containerTab in container.module_tabs: -%}
+{% for containerTab in container.module_tabs: -%}
         <button id="container_tab_{{ containerTab.tab }}" class="tab_button{{ ' active' if loop.index0 == 0 }}" onclick="loadTab(event, '{{ containerTab.tab }}')">{{ containerTab.tab }}</button>
-{% endfor %}
+{% endfor -%}
     </div>
 {%- for containerTab in container.module_tabs: -%}
     {% set module = containerTab.module %}
@@ -110,22 +110,6 @@
         }
         {%- endfor %}
     </script>
-    <script>
-        const dataLoaderLoading = "&nbsp;";
-
-        function colorUniqId(data, splt){
-            var parts = data.split(splt);
-            var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
-            var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
-            var B = (parseInt(parts[4], 16) + parseInt(parts[5], 16)) % 255;
-            return [R,G,B];
-        };
-
-        function averageColor([R,G,B]){
-            let avg = R+G+B/3;
-            return (avg > 128)? "00,00,00": "255,255,255";
-        };
-    </script>
 {%- for containerTab in container.module_tabs: -%}
     {% if containerTab.timeout > 0 %}
         {% include 'autoloader.js.j2' %}
@@ -135,6 +119,7 @@
     {% endif %}
 {%- endfor -%}
 {%- for containerTab in container.module_tabs: -%}
+    {% set module = containerTab.module %}
     {% set module_fragment = containerTab.get_module_fragment() %}
     {% include module_fragment ignore missing %}
 {%- endfor -%}
