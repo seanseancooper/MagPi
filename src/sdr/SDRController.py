@@ -38,10 +38,7 @@ class SDRController(threading.Thread):
                 'sample_rate': routes.analyzer.sample_rate
             })
 
-        @socketio.on('read_block')
-        def read_block():
-            # data = routes.scanner.scanned[0]???
-            data = routes.scanner.module_retriever.block.copy()
+        def emits_block(data):
             block = routes.analyzer.get_magnitudes(data)
 
             if block is not None:
