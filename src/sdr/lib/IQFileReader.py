@@ -13,7 +13,13 @@ class IQFileReader:
         self.iq_files  = None
         self.file = None
         self.path = None
-        self.load_file();
+        self.load_file()
+
+    def set_path(self, path):
+        self.path = path
+
+    def get_path(self):
+        return self.path
 
     def load_file(self, target=None):
         """ set self.file to either latest or target """
