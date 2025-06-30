@@ -60,6 +60,18 @@ class SDRController(threading.Thread):
             else:
                 emit('block_data', [])  # or handle error case
 
+        @socketio.on('read_file')
+        def read_file(filename):
+            routes.analyzer.reader.load_file(filename)  # point analyzer @filename
+            data = routes.analyzer.reader.read_block()
+            block = routes.analyzer.get_magnitudes(data)
+
+            if block is not None:
+                emit('file_data', block.astype(np.float32).tobytes())
+            else:
+                emit('file_data', [])  # or handle error case
+
+
         @socketio.on('get_peaks')
         def get_peaks():
             emit('peak_data', routes.analyzer.peaks.tolist())
