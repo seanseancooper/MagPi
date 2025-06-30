@@ -50,8 +50,8 @@ class SDRController(threading.Thread):
             if self.file_is_set:
                 data = routes.analyzer.reader.read_block()
             else:
-                emit('file_data', [])  # or handle error case
-
+                data = routes.scanner.module_retriever.block.copy()
+            emits_block(data)
 
         @socketio.on('get_peaks')
         def get_peaks():
