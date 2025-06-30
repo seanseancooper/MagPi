@@ -21,10 +21,8 @@ class IQFileReader:
         if not self.iq_files:
             raise FileNotFoundError("No .iq file found in the parent directory.")
 
-        f = target if target else self.iq_files[-1]
-
-        self.file = open(f, 'rb')  # read as bytes
-        self.path = f
+        self.path = target if target else self.iq_files[-1] # target or current file.
+        self.file = open(self.path, 'rb')  # read as bytes
         print(f'Reading: {self.path}')
 
     def read_block(self):
