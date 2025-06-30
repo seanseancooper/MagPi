@@ -12,7 +12,7 @@
             ajaxURL:"http://wifi.localhost:5006/workers",                   // request URI
             ajaxConfig:"GET",                                               // ajax config options go here
             headerVisible:true,                                             // show header
-            dataLoaderLoading:dataLoaderLoading,                            // change "Loading" message to "&nbsp;"
+            dataLoaderLoading: "&nbsp;",                                    // change "Loading" message to "&nbsp;"
             index:"{{ scanner.CELL_IDENT_FIELD  }}",                                                  // use BSSID as index
             rowFormatter:function(row){
                 row.getElement().style = "height:24px";
