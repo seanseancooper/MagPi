@@ -167,7 +167,7 @@
 			"SIGNAL_CACHE_LOG_MAX": -5
 		},
 		{
-			"OUTFILE_PATH": "/Users/scooper/PycharmProjects/MagPi/src/sdr"
+			"OUTFILE_PATH": "../../_out"
 		},
 		{
 			"OUT_FILE": "rtlsdr_"
