@@ -1,34 +1,41 @@
-<script>
-    const {{ containerTab.tab }}_scan_timeout = {{ containerTab.timeout * 1000 }}
+{%- for containerTab in container.module_tabs: -%}
+    {% if containerTab.timeout > 0 %}
+    <script>
+        const {{ containerTab.tab }}_scan_timeout = {{ containerTab.timeout * 1000 }}
 
-    function {{ containerTab.tab }}_make_deadline_bar() {
+        function {{ containerTab.tab }}_make_deadline_bar() {
 
-        var {{ containerTab.tab }}_iteration = 0;
-        let {{ containerTab.tab }}_iter_timeout = 100;
-        var bar_div = document.createElement('div');
-        bar_div.id = '{{ containerTab.tab }}_bar_div';
+            var {{ containerTab.tab }}_iteration = 0;
+            let {{ containerTab.tab }}_iter_timeout = 100;
+            var bar_div = document.createElement('div');
+            bar_div.id = '{{ containerTab.tab }}_bar_div';
 
-        function {{ containerTab.tab }}_update_deadline_bar() {
+            function {{ containerTab.tab }}_update_deadline_bar() {
 
-            setTimeout(function() {
+                setTimeout(function() {
 
-                bar_div.className = 'bar';
-                var {{ containerTab.tab }}_percentage = ({{ containerTab.tab }}_iteration * {{ containerTab.tab }}_iter_timeout)/{{ containerTab.tab }}_scan_timeout * 100;
+                    bar_div.className = 'bar';
+                    var {{ containerTab.tab }}_percentage = ({{ containerTab.tab }}_iteration * {{ containerTab.tab }}_iter_timeout)/{{ containerTab.tab }}_scan_timeout * 100;
 
-                document.getElementById('{{ containerTab.tab }}_bar_div').style = "background-color:rgba(0,255,0,0.50);transition: all " + 0.1 +"s;";
-                document.getElementById('{{ containerTab.tab }}_bar_div').style.width = 100 - {{ containerTab.tab }}_percentage + '%';
+                    document.getElementById('{{ containerTab.tab }}_bar_div').style = "background-color:rgba(0,255,0,0.50);transition: all " + 0.1 +"s;";
+                    document.getElementById('{{ containerTab.tab }}_bar_div').style.width = 100 - {{ containerTab.tab }}_percentage + '%';
 
-                if ({{ containerTab.tab }}_percentage >= 100){
-                    {{ containerTab.tab }}.replaceData();
-                    {{ containerTab.tab }}_iteration = 0;
-                }
+                    if ({{ containerTab.tab }}_percentage >= 100){
+                        {{ containerTab.tab }}.replaceData();
+                        {{ containerTab.tab }}_iteration = 0;
+                    }
 
-                {{ containerTab.tab }}_update_deadline_bar();
-                {{ containerTab.tab }}_iteration++;
+                    {{ containerTab.tab }}_update_deadline_bar();
+                    {{ containerTab.tab }}_iteration++;
 
-            }, {{ containerTab.tab }}_iter_timeout);
+                }, {{ containerTab.tab }}_iter_timeout);
+            }
+            document.getElementById('{{ containerTab.tab }}_meter').appendChild(bar_div);
+            {{ containerTab.tab }}_update_deadline_bar();
         }
-        document.getElementById('{{ containerTab.tab }}_meter').appendChild(bar_div);
-        {{ containerTab.tab }}_update_deadline_bar();
-    }
-</script>
+    </script>
+    <div id="{{ containerTab.tab }}_bar_container" style="padding-top:2px;padding-bottom:3px;{{ 'display:none;' if loop.index0 > 0 }}" class="bar_container">
+        <div id="{{ containerTab.tab }}_meter" style=""><script>{{ containerTab.tab }}_make_deadline_bar();</script></div>
+    </div>
+    {% endif %}
+{%- endfor -%}

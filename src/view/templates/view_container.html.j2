@@ -28,9 +28,15 @@
                 if (f_c != null) {
                     f_c.style.display = "none";
                 }
+
+                let f_b = document.getElementById(module_tab[i].id + '_container_buttons');
+                if (f_b != null) {
+                    f_b.style.display = "none";
+                }
             }
 
             tab_button = document.getElementsByClassName("tab_button");
+
             for (i = 0; i < tab_button.length; i++) {
                 tab_button[i].className = tab_button[i].className.replace(" active", "");
             }
@@ -43,6 +49,11 @@
             let f_cb = document.getElementById(tabName + '_container_filters');
             if (f_cb != null) {
                 f_cb.style.display = "block";
+            }
+
+            let c_bb = document.getElementById(tabName + '_container_buttons');
+            if (c_bb != null) {
+                c_bb.style.display = "block";
             }
 
             // TODO: try to move this to cam...
@@ -90,51 +101,92 @@
 </head>
 <body>
     <div id="tabs" style="height:30px">
-{% for containerTab in container.module_tabs: -%}
+{% for containerTab in container.module_tabs: %}
         <button id="container_tab_{{ containerTab.tab }}" class="tab_button{{ ' active' if loop.index0 == 0 }}" onclick="loadTab(event, '{{ containerTab.tab }}')">{{ containerTab.tab }}</button>
-{% endfor -%}
+{% endfor %}
     </div>
-{%- for containerTab in container.module_tabs: -%}
-    {% set module = containerTab.module %}
-    {% if containerTab.timeout > 0 %}
-    <div id="{{ containerTab.tab }}_container_filters" style="{{ 'display:none;' if loop.index0 > 0 }}" class="container_filters">
-    {% include 'filter.html.js.j2' %}
-    </div>
-    {% endif %}
-{%- endfor -%}
+{% include 'filter.html.js.j2' %}
 {% include 'buttons.js.j2' %}
+{% include 'autoloader.js.j2' %}
     <script>
-        {%- for containerTab in container.module_tabs: %}
-        function {{ containerTab.tab }}_reload(){
-              {{ containerTab.tab }}.replaceData();
+
+        // from WIFI module, now homeless...
+
+        function write_tracked(button, trgt){
+
+            var xhttp = new XMLHttpRequest();
+
+            xhttp.open('POST', "http://wifi.localhost:5006/write", true);
+            setsHeaders(xhttp);
+            xhttp.setRequestHeader('TARGET', trgt);
+            xhttp.send();
+
+            xhttp.onload = function() {
+                document.getElementById("write_button").innerHTML = (xhttp.response == "OK")? "DONE": "FAILED";
+            };
         }
-        {%- endfor %}
+
+        peity.defaults.line = {
+            delimiter: ",",
+            fill: "#777",
+            height: 18,
+            width: 150,
+            max: -100,
+            min: 0,
+            stroke: "#00ff00",
+            strokeWidth: 2
+        }
+
+        Tabulator.extendModule("mutator", "mutators", {
+            signalMutator:function(value, data, type, mutatorParams){
+
+            var sgnlList = [];
+            for (const pt of value) {
+                sgnlList.push(pt['sgnl'])
+            }
+            return sgnlList;
+
+            },
+        });
+
+        // Formatter to generate peity charts
+        var chartFormatter = function(cell, formatterParams, onRendered){
+
+            var content = document.createElement("span");
+            var values = cell.getValue();
+            content.classList.add('line');
+            content.innerHTML = values.join(",");
+
+            // after the cell element has been added to the DOM
+            onRendered(function(){
+                peity(content, 'line');
+            });
+
+            return content;
+        };
+
+        function colorUniqId(data, splt){
+            var parts = data.split(splt);
+            var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
+            var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
+            var B = (parseInt(parts[4], 16) + parseInt(parts[5], 16)) % 255;
+            return [R,G,B];
+        };
+
+        function averageColor([R,G,B]){
+            let avg = R+G+B/3;
+            return (avg > 128)? "00,00,00": "255,255,255";
+        };
+
     </script>
 {%- for containerTab in container.module_tabs: -%}
-    {% if containerTab.timeout > 0 %}
-        {% include 'autoloader.js.j2' %}
-    <div id="{{ containerTab.tab }}_bar_container" style="padding-top:2px;padding-bottom:3px;{{ 'display:none;' if loop.index0 > 0 }}" class="bar_container">
-        <div id="{{ containerTab.tab }}_meter" style=""><script>{{ containerTab.tab }}_make_deadline_bar();</script></div>
-    </div>
-    {% endif %}
-{%- endfor -%}
-{%- for containerTab in container.module_tabs: -%}
-    {% set module = containerTab.module %}
-    {% set module_fragment = containerTab.get_module_fragment() %}
-    {% include module_fragment ignore missing %}
+{% set module = containerTab.module %}
+{% set module_fragment = containerTab.get_module_fragment() %}
+{% include module_fragment ignore missing %}
 {%- endfor -%}
     <script>
-        container_elements = [];
         {%- for containerTab in container.module_tabs: %}
         container_elements.push(document.getElementById('{{ containerTab.tab }}'));
-        {%- endfor %}
-        {%- for containerTab in container.module_tabs: %}
-        {% if containerTab.timeout >  0 %}
-        container_elements.push(document.getElementById("{{ containerTab.tab }}_all_button"));
-        container_elements.push(document.getElementById("{{ containerTab.tab }}_none_button"));
-        container_elements.push(document.getElementById("{{ containerTab.tab }}_write_button"));
-        container_elements.push(document.getElementById("{{ containerTab.tab }}_reload_button"));
-        {% endif %}
         {%- endfor %}
         container_elements.forEach(function(element) {
 
@@ -152,29 +204,6 @@
                 if (event.target.classList.contains('mute_btn')) {
                     mute(event.target.value, event.target.attributes['data-target'].value);
                 };
-
-                if (event.target.classList.contains('all_button')) {
-                    select_all(this, event.target.attributes['data-target'].value);
-                };
-
-                if (event.target.classList.contains('none_button')) {
-                    select_none(this, event.target.attributes['data-target'].value);
-                };
-
-                if (event.target.classList.contains('write_button')) {
-                    write_tracked(this, event.target.attributes['data-target'].value); // 'wifi' the http header
-                };
-
-                if (event.target.classList.contains('reload_button')) {
-                    reload();
-                };
-
-                // # IdeA: perhaps this can the basis for supporting a module specific button fragment?
-                //  add an id for the button on the app side to identify it.
-                //  the value could go into data-value... as JSON
-                //if (event.target.classList.contains('' + '_custom_button')) {
-                //    alert('' + '_custom_button');
-                //};
             });
         });
     </script>

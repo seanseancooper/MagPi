@@ -1,126 +1,61 @@
 <script>
-    function setsHeaders(xhttp) {
-        xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
-        xhttp.setRequestHeader('Access-Control-Allow-Methods', 'POST');
-        xhttp.setRequestHeader('Content-Type', 'text/html');
-        xhttp.setRequestHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-*');
+    {%- for containerTab in container.module_tabs: %}
+    function {{ containerTab.tab }}_reload(){
+          {{ containerTab.tab }}.replaceData();
+    }
+    {%- endfor %}
+</script>
+    {%- for containerTab in container.module_tabs: %}
+    {% set module = containerTab.module %}
+    {% if containerTab.timeout > 0: %}
+<div id="{{ containerTab.tab }}_container_buttons" style="{{ 'display:none;' if loop.index0 > 0 }}" class="container_buttons">
+    <button id="{{ containerTab.tab }}_all_button" class="all_button button" value="all_button" data-action=""  data-target="{{ module }}">ALL</button>
+    <button id="{{ containerTab.tab }}_none_button" class="none_button button" value="none_button" data-action=""  data-target="{{ module }}">NONE</button>
+    <button id="{{ containerTab.tab }}_write_button" class="write_button button" value="write_button" data-action=""  data-target="{{ module }}">WRITE</button>
+    <button id="{{ containerTab.tab }}_reload_button" class="reload_button button" value="reload_button" data-action=""  data-target="{{ module }}">RELOAD</button>
+</div>
+    {% endif %}
+    {%- endfor %}
+<script>
+
+    var container_elements = [];
+
+    function select_all(b){
+        console.log(b);
     }
 
-    function add(uniqId, trgt){
-        var xhttp = new XMLHttpRequest();
-        xhttp.open("POST", "{{ url_for('.index') }}add/" + uniqId, true);
-        setsHeaders(xhttp);
-        xhttp.setRequestHeader('TARGET', trgt);
-        xhttp.send();
+    function reload(){
+        document.location.reload();
+    }
 
-        xhttp.onload = function() {
-            const resp = xhttp.response;
-            var aButton = document.getElementById("add_button_" + uniqId);
-            if (resp == "OK"){
-                aButton.classList.value = "adding_button";
-                aButton.innerHTML = "------";
-                setTimeout(function() {
-                    aButton.classList.value = "add_btn added_button";
-                    aButton.innerHTML = "ADDED";
-                }, 250);
-            } else {
-                aButton.classList.value = "adding_failed_button";
-                aButton.innerHTML = "FAILED!";
+    {%- for containerTab in container.module_tabs: %}
+    {% if containerTab.timeout > 0: %}
+    container_elements.push(document.getElementById("{{ containerTab.tab }}_all_button"));
+    container_elements.push(document.getElementById("{{ containerTab.tab }}_none_button"));
+    container_elements.push(document.getElementById("{{ containerTab.tab }}_write_button"));
+    container_elements.push(document.getElementById("{{ containerTab.tab }}_reload_button"));
+
+    container_elements.forEach(function(element) {
+
+        element.addEventListener('click', function(event) {
+
+            if (event.target.classList.contains('{{ containerTab.tab }}_all_button')) {
+                select_all(this, true);
             };
-        };
-    }
 
-    function mute(uniqId, trgt){
-        var xhttp = new XMLHttpRequest();
-
-        xhttp.open("POST", "{{ url_for('.index') }}mute/" + uniqId, true);
-        setsHeaders(xhttp);
-        xhttp.setRequestHeader('TARGET', trgt);
-        xhttp.send();
-
-        xhttp.onload = function() {
-            const resp = xhttp.response;
-            var mButton = document.getElementById("mute_button_" + uniqId);
-
-            if (resp == "False"){
-                mButton.classList.value = "muting_button";
-                mButton.innerHTML = "------";
-                setTimeout(function() {
-                    mButton.classList.value = "mute_btn unmute_button";
-                    mButton.innerHTML = "MUTE";
-                }, 250);
-            }
-
-            if (resp == "True"){
-                mButton.classList.value = "muting_button";
-                mButton.innerHTML = "------";
-                setTimeout(function() {
-                    mButton.classList.value = "mute_btn mute_button";
-                    mButton.innerHTML = "UNMUTE";
-                }, 250);
+            if (event.target.classList.contains('{{ containerTab.tab }}_none_button')) {
+                select_all(this, false);
             };
-        };
-    }
 
-    function remove(uniqId, trgt){
-        var xhttp = new XMLHttpRequest();
-        xhttp.open("POST", "{{ url_for('.index') }}remove/" + uniqId, true);
-        setsHeaders(xhttp);
-        xhttp.setRequestHeader('TARGET', trgt);
-        xhttp.send();
-
-        xhttp.onload = function() {
-            const resp = xhttp.response;
-            rButton = document.getElementById("remove_button_" + uniqId);
-            if (resp == "OK"){
-                rButton.classList.value = "rem_button";
-                rButton.style = "color:white;";
-                rButton.innerHTML = "*";
-                setTimeout(function() {
-                    mButton = document.getElementById("mute_button_" + uniqId);
-                    uButton = document.getElementById("unmute_button_" + uniqId);
-
-                    if (mButton) {
-                            mButton.style = "display:none;"
-                    };
-
-                    if (uButton) {
-                            uButton.style = "display:none;"
-                    };
-
-                    // note width increase
-                    rButton.classList.value = "rem_button removed_button button";
-                    rButton.innerHTML = "REMOVED";
-
-                }, 250);
-            } else {
-                rButton.classList.value = "remove_failed_button";
-                rButton.innerHTML = "x";
+            if (event.target.classList.contains('{{ containerTab.tab }}_write_button')) {
+                write_tracked(this, event.target.attributes['data-target'].value);
             };
-        };
-    }
 
-    function write_tracked(button, trgt){
-
-        var xhttp = new XMLHttpRequest();
-
-        xhttp.open('POST', "{{ url_for('.index') }}write", true);
-        setsHeaders(xhttp);
-        xhttp.setRequestHeader('TARGET', trgt);
-        xhttp.send();
-
-        xhttp.onload = function() {
-            button.innerHTML = (xhttp.response == "OK")? "DONE": "FAILED";
-        };
-    }
-
-    function select_all(button, trgt){
-        // not sure how this should work yet
-        alert('select all: ' + trgt + ' ' + button.id);
-    }
-
-    function select_none(button, trgt){
-    // not sure how this should work yet
-        alert('select none: ' + trgt + ' ' + button.id);
-    }
+            if (event.target.classList.contains('{{ containerTab.tab }}_reload_button')) {
+                reload();
+            };
+        });
+    });
+    {% endif %}
+    {%- endfor %}
 </script>

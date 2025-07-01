@@ -143,17 +143,17 @@ button {
 }
 
 
-container_filters {
-    position:absolute;
+.container_filters {
+    position:relative;
     height:25px;
     left:0px;
     top:0px;
 }
 
 .container_buttons {
-    position:absolute;
-    left:442px;
-    top:8px;
+    position:relative;
+    left:406px;
+    top:-25px;
 }
 
 .write_button {
