@@ -281,8 +281,8 @@
 
     <div id="videodiv" class="videodiv" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;">
         <iframe id="video" class="video" style="width:{{ plugin.frame_shape[1] }}px;height:{{ plugin.frame_shape[0] }}px;" src="http://{{ streaming_host }}:{{ streaming_port }}/stream"></iframe>
-        <canvas id="target" class="cam_target" width="{{ plugin.frame_shape[1] }}px" height="{{ plugin.frame_shape[0] }}px"></canvas>
-        <canvas id="grid" class="cam_grid" width="{{ plugin.frame_shape[1] }}px" height="{{ plugin.frame_shape[0] }}px"></canvas>
+        <canvas id="cam_target" class="cam_target" width="{{ plugin.frame_shape[1] }}px" height="{{ plugin.frame_shape[0] }}px"></canvas>
+        <canvas id="cam_grid" class="cam_grid" width="{{ plugin.frame_shape[1] }}px" height="{{ plugin.frame_shape[0] }}px"></canvas>
     </div>
 
     <script src="{{ url_for('.static', filename='cropperjs/dist/cropper.js') }}"></script>
@@ -290,7 +290,7 @@
     {% if not container %}
     <script>
         window.addEventListener('DOMContentLoaded', function () {
-            var image = document.querySelector('#target');
+            var image = document.querySelector('#cam_target');
             var cropper = new Cropper(image, {
                 viewMode: 1,
                 center: true,
