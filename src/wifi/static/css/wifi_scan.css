@@ -153,17 +153,17 @@ button {
 }
 
 
-wifi_scanner_filters {
-    position:absolute;
+.wifi_filters {
+    position:relative;
     height:25px;
     left:0px;
     top:0px;
 }
 
-.wifi_scanner_buttons {
-    position:absolute;
-    left:442px;
-    top:8px;
+.wifi_buttons {
+    position:relative;
+    left:406px;
+    top:-25px;
 }
 
 .write_button {

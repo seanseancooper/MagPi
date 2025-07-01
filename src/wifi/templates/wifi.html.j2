@@ -6,13 +6,307 @@
     <title>MagPi Tabulator [ {{ scanner.polling_count }} ]</title>
     <link rel="stylesheet" href="{{ url_for('wifi_bp.static', filename='tabulator/css/tabulator_midnight.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('wifi_bp.static', filename='css/wifi_scan.css') }}">
-
     <script type="text/javascript" src="{{ url_for('wifi_bp.static', filename='js/luxon.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('wifi_bp.static', filename='tabulator/js/tabulator.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('wifi_bp.static', filename='js/peity-vanilla.js') }}"></script>
-
+{% set tab = 'wifi' %}
+{% set module = tab %}
     <script>
         const VIEW_TIMEOUT = {{ scanner.config.get('VIEW_TIMEOUT') * 1000 }};
+
+        let wifi_elements = [];
+        let active_tabulator = '{{ module }}';
+
+        function loadTab(event, tabName){
+
+            var i, module_tab, tablinks;
+            module_tab = document.getElementsByClassName("module_tab");
+
+            for (i = 0; i < module_tab.length; i++) {
+                module_tab[i].style.display = "none";
+            }
+
+            // Get all elements with class="tablinks" and remove the class "active"
+            tab_button = document.getElementsByClassName("tab_button");
+
+            for (i = 0; i < tab_button.length; i++) {
+                tab_button[i].className = tab_button[i].className.replace(" active", "");
+            }
+
+            // Show the current tab, and add an "active" class to the button that opened the tab
+            document.getElementById(tabName).style.display = "block";
+            event.currentTarget.className += " active";
+            active_tabulator = tabName;
+
+        }
+    </script>
+</head>
+<body>
+
+    <div id="tabs" style="height:30px">
+        <button id="scanner_tab_wifi" class="tab_button" onclick="loadTab(event, 'wifi')">wifi</button>
+        <button id="scanner_tab_tracked" class="tab_button" onclick="loadTab(event, 'tracked')">tracked</button>
+        <button id="scanner_tab_ghosts" class="tab_button" onclick="loadTab(event, 'ghosts')">ghosts</button>
+        <button id="scanner_tab_workers" class="tab_button" onclick="loadTab(event, 'workers')">workers</button>
+    </div>
+
+
+
+
+    <div id="wifi_filters" style="" class="wifi_filters">
+        <select id="wifi_filter_field">
+            <option></option>
+            <option value="is_mute">Muted</option>
+            <option value="tracked">Tracked</option>
+            <option value="created">Found</option>
+            <option value="updated">Last</option>
+
+            <option value="{{ scanner.CELL_IDENT_FIELD }}">{{ scanner.CELL_IDENT_FIELD }}</option>
+            <option value="{{ scanner.CELL_NAME_FIELD }}">{{ scanner.CELL_NAME_FIELD }}</option>
+            <option value="{{ scanner.CELL_STRENGTH_FIELD }}">{{ scanner.CELL_STRENGTH_FIELD }}</option>
+
+            <!-- these should iterate over *module* text_attributes -->
+            <option value="Channel">Channel</option>
+            <option value="Frequency">Frequency</option>
+            <option value="Quality">Quality</option>
+            <option value="Encryption">Encryption</option>
+            <option value="Vendor">Vendor</option>
+
+        </select>
+        <select id="wifi_filter_type">
+            <option value="=">=</option>
+            <option value="<"><</option>
+            <option value="<="><=</option>
+            <option value=">">></option>
+            <option value=">=">>=</option>
+            <option value="!=">!=</option>
+            <option value="like">like</option>
+        </select>
+        <input id="wifi_filter_value" type="text" size="16"  placeholder="value to filter">
+        <button id="wifi_filter_clear" class="clear_button"><span id="clear_button_text">CLEAR</span></button>
+    </div>
+    <script>
+        // Define variables for input elements
+        var fieldEl = document.getElementById("wifi_filter_field");
+        var typeEl = document.getElementById("wifi_filter_type");
+        var valueEl = document.getElementById("wifi_filter_value");
+
+        // filter
+        function customFilter(data){
+            return data.field1 && data.field2 < 3;
+        }
+
+        // Trigger setFilter function with correct parameters
+        function updateFilter(){
+            var filterVal = fieldEl.options[fieldEl.selectedIndex].value;
+            var typeVal = typeEl.options[typeEl.selectedIndex].value;
+
+            // enable filter
+            var filter = filterVal == "function" ? customFilter : filterVal;
+
+            if(filterVal == "function" ){
+                typeEl.disabled = true;
+                valueEl.disabled = true;
+            } else {
+                typeEl.disabled = false;
+                valueEl.disabled = false;
+            }
+
+            if(filterVal){
+                wifi.setFilter(filter,typeVal, valueEl.value);
+            }
+        }
+
+        fieldEl.addEventListener("change", updateFilter);
+        typeEl.addEventListener("change", updateFilter);
+        valueEl.addEventListener("keyup", updateFilter);
+
+        document.getElementById("wifi_filter_clear").addEventListener("click", function(){
+            fieldEl.value = "";
+            typeEl.value = "=";
+            valueEl.value = "";
+            //  not in scope !!
+            // var table = Tabulator.prototype.findTable(active_tabulator)[0];
+            // table.clearFilter();
+        });
+    </script>
+
+
+
+    <div id="wifi_buttons" style="" class="wifi_buttons">
+        <button id="all_button" class="all_button button" value="all_button" data-action=""  data-target="{{ module }}">ALL</button>
+        <button id="none_button" class="none_button button" value="none_button" data-action=""  data-target="{{ module }}">NONE</button>
+        <button id="write_button" class="write_button button" value="write_button" data-action=""  data-target="{{ module }}">WRITE</button>
+        <button id="reload_button" class="reload_button button" value="reload_button" data-action=""  data-target="{{ module }}">RELOAD</button>
+    </div>
+    <script>
+
+        function select_all(b){
+            console.log(b);
+        }
+
+        function write_tracked(button, trgt){
+
+            var xhttp = new XMLHttpRequest();
+
+            xhttp.open('POST', "{{ url_for('wifi_bp.wifi_write') }}", true);
+            setsHeaders(xhttp);
+            xhttp.setRequestHeader('TARGET', trgt);
+            xhttp.send();
+
+            xhttp.onload = function() {
+                document.getElementById("write_button").innerHTML = (xhttp.response == "OK")? "DONE": "FAILED";
+            };
+        }
+
+        function reload(){
+            document.location.reload();
+        }
+
+        wifi_elements.push(document.getElementById("all_button"));
+        wifi_elements.push(document.getElementById("none_button"));
+        wifi_elements.push(document.getElementById("write_button"));
+        wifi_elements.push(document.getElementById("reload_button"));
+
+        wifi_elements.forEach(function(element) {
+
+            element.addEventListener('click', function(event) {
+
+                if (event.target.classList.contains('all_button')) {
+                    select_all(true);
+                };
+
+                if (event.target.classList.contains('none_button')) {
+                    select_all(false);
+                };
+
+                if (event.target.classList.contains('write_button')) {
+                    write_tracked(this, event.target.attributes['data-target'].value);
+                };
+
+                if (event.target.classList.contains('reload_button')) {
+                    reload();
+                };
+
+            });
+        });
+    </script>
+    <script>
+
+        /*
+        a draggable bar would be nice to have!
+        https://codepen.io/manishady/pen/xGYvEK
+        https://codepen.io/GreenSock/pen/eRBdzM
+        */
+
+        function make_deadline_bar() {
+
+            var iteration = 0;
+            let iter_timeout = 100;
+            var bar_div = document.createElement('div');
+            bar_div.id = 'bar_div';
+
+            function update_deadline_bar() {
+
+                setTimeout(function() {
+
+                    bar_div.className = 'bar';
+                    var percentage = (iteration * iter_timeout)/VIEW_TIMEOUT * 100;
+
+                    document.getElementById('bar_div').style = "background-color:rgba(0,255,0,0.50);transition: all " + 0.1 +"s;";
+                    document.getElementById('bar_div').style.width = 100 - percentage + '%';
+
+                    if (percentage >= 100){
+                        replace_data();
+                        iteration = 0;
+                    }
+
+                    update_deadline_bar();
+                    iteration++;
+
+                }, iter_timeout);
+            }
+            document.getElementById('meter').appendChild(bar_div);
+            update_deadline_bar();
+        }
+    </script>
+    <div id="bar_container" style="padding-top:2px;padding-bottom:3px;" class="bar_container">
+        <div id="meter" style=""><script>make_deadline_bar();</script></div>
+    </div>
+
+
+
+
+    <script>
+        peity.defaults.line = {
+            delimiter: ",",
+            fill: "#777",
+            height: 18,
+            width: 150,
+            max: -100,
+            min: 0,
+            stroke: "#00ff00",
+            strokeWidth: 2
+        }
+
+        Tabulator.extendModule("mutator", "mutators", {
+            signalMutator:function(value, data, type, mutatorParams){
+
+            var sgnlList = [];
+            for (const pt of value) {
+                sgnlList.push(pt['sgnl'])
+            }
+            return sgnlList;
+
+            },
+        });
+
+        // Formatter to generate peity charts
+        var chartFormatter = function(cell, formatterParams, onRendered){
+
+            var content = document.createElement("span");
+            var values = cell.getValue();
+            content.classList.add('line');
+            content.innerHTML = values.join(",");
+
+            // after the cell element has been added to the DOM
+            onRendered(function(){
+                peity(content, 'line');
+            });
+
+            return content;
+        };
+
+        function colorUniqId(data, splt){
+            var parts = data.split(splt);
+            var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
+            var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
+            var B = (parseInt(parts[4], 16) + parseInt(parts[5], 16)) % 255;
+            return [R,G,B];
+        };
+
+        function averageColor([R,G,B]){
+            let avg = R+G+B/3;
+            return (avg > 128)? "00,00,00": "255,255,255";
+        };
+    </script>
+{% include 'wifi.js.j2' %}
+{% include 'tracked.js.j2' %}
+{% include 'ghosts.js.j2' %}
+{% include 'workers.js.j2' %}
+    <script>
+
+        function replace_data(){
+            wifi.replaceData();
+            tracked.replaceData();
+            ghosts.replaceData();
+            workers.replaceData();
+        }
+
+        wifi_elements.push(document.getElementById('wifi'));
+        wifi_elements.push(document.getElementById('tracked'));
+        wifi_elements.push(document.getElementById('ghosts'));
+        wifi_elements.push(document.getElementById('workers'));
 
         function setsHeaders(xhttp) {
             xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
@@ -115,224 +409,25 @@
             };
         }
 
-        function write_tracked(button, trgt){
+        wifi_elements.forEach(function(element) {
 
-            var xhttp = new XMLHttpRequest();
+            element.addEventListener('click', function(event) {
 
-            xhttp.open('POST', "{{ url_for('wifi_bp.wifi_write') }}", true);
-            setsHeaders(xhttp);
-            xhttp.setRequestHeader('TARGET', trgt);
-            xhttp.send();
-
-            xhttp.onload = function() {
-                document.getElementById("write_button").innerHTML = (xhttp.response == "OK")? "DONE": "FAILED";
-            };
-        }
-
-        function loadTab(event, tabName){
-
-            var i, module_tab, tablinks;
-            module_tab = document.getElementsByClassName("module_tab");
-
-            for (i = 0; i < module_tab.length; i++) {
-                module_tab[i].style.display = "none";
-            }
-
-            // Get all elements with class="tablinks" and remove the class "active"
-            tab_button = document.getElementsByClassName("tab_button");
-            for (i = 0; i < tab_button.length; i++) {
-                tab_button[i].className = tab_button[i].className.replace(" active", "");
-            }
-
-            // Show the current tab, and add an "active" class to the button that opened the tab
-            document.getElementById(tabName).style.display = "block";
-            event.currentTarget.className += " active";
-
-        }
-
-        function reload(){
-            document.location.reload();
-        }
-
-        function select_all(selectParam){
-            console.log(selectParam);
-        }
-
-        function replace_data(){
-            // use foreach...
-            wifi.replaceData();
-            tracked.replaceData();
-            ghosts.replaceData();
-            workers.replaceData();
-        }
-
-        const dataLoaderLoading = "&nbsp;";
-
-        function colorUniqId(data, splt){
-            var parts = data.split(splt);
-            var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
-            var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
-            var B = (parseInt(parts[4], 16) + parseInt(parts[5], 16)) % 255;
-            return [R,G,B];
-        };
-
-        function averageColor([R,G,B]){
-            let avg = R+G+B/3;
-            return (avg > 128)? "00,00,00": "255,255,255";
-        };
-
-        /*
-        a draggable bar would be nice to have!
-        https://codepen.io/manishady/pen/xGYvEK
-        https://codepen.io/GreenSock/pen/eRBdzM
-        */
-
-        function make_deadline_bar() {
-
-            var iteration = 0;
-            let iter_timeout = 100;
-            var bar_div = document.createElement('div');
-            bar_div.id = 'bar_div';
-
-            function update_deadline_bar() {
-
-                setTimeout(function() {
-
-                    bar_div.className = 'bar';
-                    var percentage = (iteration * iter_timeout)/VIEW_TIMEOUT * 100;
-
-                    document.getElementById('bar_div').style = "background-color:rgba(0,255,0,0.50);transition: all " + 0.1 +"s;";
-                    document.getElementById('bar_div').style.width = 100 - percentage + '%';
-
-                    if (percentage >= 100){
-                        replace_data();
-                        iteration = 0;
-                    }
-
-                    update_deadline_bar();
-                    iteration++;
-
-                }, iter_timeout);
-            }
-            document.getElementById('meter').appendChild(bar_div);
-            update_deadline_bar();
-        }
-    </script>
-</head>
-<body>
-
-    <div id="tabs" style="height:30px">
-        <button id="scanner_tab_wifi" class="tab_button" onclick="loadTab(event, 'wifi')">wifi</button>
-        <button id="scanner_tab_tracked" class="tab_button" onclick="loadTab(event, 'tracked')">tracked</button>
-        <button id="scanner_tab_ghosts" class="tab_button" onclick="loadTab(event, 'ghosts')">ghosts</button>
-        <button id="scanner_tab_workers" class="tab_button" onclick="loadTab(event, 'workers')">workers</button>
-    </div>
-
-    <div id="scanner_filters" style="" class="scanner_filters">
-        <select id="filter-field">
-            <option></option>
-            <option value="is_mute">Muted</option>
-            <option value="tracked">Tracked</option>
-            <option value="created">Found</option>
-            <option value="updated">Last</option>
-
-            <option value="{{ scanner.CELL_IDENT_FIELD }}">{{ scanner.CELL_IDENT_FIELD }}</option>
-            <option value="{{ scanner.CELL_NAME_FIELD }}">{{ scanner.CELL_NAME_FIELD }}</option>
-            <option value="{{ scanner.CELL_STRENGTH_FIELD }}">{{ scanner.CELL_STRENGTH_FIELD }}</option>
-
-            <!-- these should iterate over *module* text_attributes -->
-            <option value="Channel">Channel</option>
-            <option value="Frequency">Frequency</option>
-            <option value="Quality">Quality</option>
-            <option value="Encryption">Encryption</option>
-            <option value="Vendor">Vendor</option>
-
-        </select>
-        <select id="filter-type">
-            <option value="=">=</option>
-            <option value="<"><</option>
-            <option value="<="><=</option>
-            <option value=">">></option>
-            <option value=">=">>=</option>
-            <option value="!=">!=</option>
-            <option value="like">like</option>
-        </select>
-        <input id="filter-value" type="text" size="16"  placeholder="value to filter">
-        <button id="filter-clear" class="clear_button">
-            <span id="clear_button_text">CLEAR</span>
-        </button>
-
-        <button id="all_button" class="all_button" value="" onClick="select_all(true);">
-            <span id="all_button_text">ALL</span>
-        </button>
-        <button id="none_button" class="none_button" value="" onClick="select_all(false);">
-            <span id="none_button_text">NONE</span>
-        </button>
-        <button id="write_button" class="write_button" value="" onClick="write_tracked();">
-            <span id="write_button_text">WRITE</span>
-        </button>
-        <button id="reload_button" class="reload_button" value="" onClick="reload();">
-            <span id="load_button_text">RELOAD</span>
-        </button>
-
-    </div>
-    <div id="bar_container" style="padding-top:2px;padding-bottom:3px;" class="bar_container">
-        <div id="meter" style=""><script>make_deadline_bar();</script></div>
-    </div>
-{% set tab = 'wifi' %}
-{% set module = 'wifi' %}
-{% include 'wifi.js.j2' %}
-{% include 'tracked.js.j2' %}
-{% include 'ghosts.js.j2' %}
-{% include 'workers.js.j2' %}
-<script>
-    scanner_elements = [];
-
-    scanner_elements.push(document.getElementById('wifi'));
-    scanner_elements.push(document.getElementById('tracked'));
-    scanner_elements.push(document.getElementById('ghosts'));
-    scanner_elements.push(document.getElementById('workers'));
-
-    scanner_elements.push(document.getElementById("all_button"));
-    scanner_elements.push(document.getElementById("none_button"));
-    scanner_elements.push(document.getElementById("write_button"));
-    scanner_elements.push(document.getElementById("reload_button"));
-
-    scanner_elements.forEach(function(element) {
-
-        element.addEventListener('click', function(event) {
-
-            if (event.target.classList.contains('trk_btn')) {
-                if (event.target.classList.contains('add_button')) {
-                    add(event.target.value, event.target.attributes['data-target'].value);
+                if (event.target.classList.contains('trk_btn')) {
+                    if (event.target.classList.contains('add_button')) {
+                        add(event.target.value, event.target.attributes['data-target'].value);
+                    };
+                    if (event.target.classList.contains('rem_button')) {
+                        remove(event.target.value, event.target.attributes['data-target'].value)
+                    };
                 };
-                if (event.target.classList.contains('rem_button')) {
-                    remove(event.target.value, event.target.attributes['data-target'].value)
+
+                if (event.target.classList.contains('mute_btn')) {
+                    mute(event.target.value, event.target.attributes['data-target'].value);
                 };
-            };
 
-            if (event.target.classList.contains('mute_btn')) {
-                mute(event.target.value, event.target.attributes['data-target'].value);
-            };
-
-            if (event.target.classList.contains('all_button')) {
-                alert('select all');
-            };
-
-            if (event.target.classList.contains('none_button')) {
-                alert('select none');
-            };
-
-            if (event.target.classList.contains('write_button')) {
-                write_tracked(this, event.target.attributes['data-target'].value); // 'wifi' the http header
-            };
-
-            if (event.target.classList.contains('reload_button')) {
-                reload();
-            };
-
+            });
         });
-    });
-</script>
+    </script>
 </body>
 </html>
