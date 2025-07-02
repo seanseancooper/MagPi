@@ -24,8 +24,8 @@ class IQFileReader:
     def load_file(self, target=None):
         """ set self.file to either latest or target """
         self.iq_files = sorted(glob.glob(self.outfile_path + '/*.iq'))
-        if not self.iq_files:
-            raise FileNotFoundError("No .iq file found in the parent directory.")
+        if self.iq_files:
+            print(f".iq file found: {self.iq_files}")
 
         self.path = target if target else self.iq_files[-1] # target or current file.
         self.file = open(self.path, 'rb')  # read as bytes
