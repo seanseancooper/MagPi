@@ -141,10 +141,6 @@
     </div>
     <script>
 
-        function select_all(b){
-            console.log(b);
-        }
-
         function write_tracked(button, trgt){
 
             var xhttp = new XMLHttpRequest();
@@ -155,11 +151,15 @@
             xhttp.send();
 
             xhttp.onload = function() {
-                document.getElementById("write_button").innerHTML = (xhttp.response == "OK")? "DONE": "FAILED";
+                button.innerHTML = (xhttp.response == "OK")? "DONE": "FAILED";
             };
         }
 
-        function reload(){
+        function select_all(button, trgt){
+            console.log(button, trgt);
+        }
+
+        function reload(button, trgt){
             document.location.reload();
         }
 
@@ -173,11 +173,11 @@
             element.addEventListener('click', function(event) {
 
                 if (event.target.classList.contains('all_button')) {
-                    select_all(true);
+                    select_all(true, event.target.attributes['data-target'].value);
                 };
 
                 if (event.target.classList.contains('none_button')) {
-                    select_all(false);
+                    select_all(false, event.target.attributes['data-target'].value);
                 };
 
                 if (event.target.classList.contains('write_button')) {
@@ -185,9 +185,8 @@
                 };
 
                 if (event.target.classList.contains('reload_button')) {
-                    reload();
+                    reload(this, event.target.attributes['data-target'].value);
                 };
-
             });
         });
     </script>
@@ -233,63 +232,6 @@
     <div id="bar_container" style="padding-top:2px;padding-bottom:3px;" class="bar_container">
         <div id="meter" style=""><script>make_deadline_bar();</script></div>
     </div>
-
-
-
-
-    <script>
-        peity.defaults.line = {
-            delimiter: ",",
-            fill: "#777",
-            height: 18,
-            width: 150,
-            max: -100,
-            min: 0,
-            stroke: "#00ff00",
-            strokeWidth: 2
-        }
-
-        Tabulator.extendModule("mutator", "mutators", {
-            signalMutator:function(value, data, type, mutatorParams){
-
-            var sgnlList = [];
-            for (const pt of value) {
-                sgnlList.push(pt['sgnl'])
-            }
-            return sgnlList;
-
-            },
-        });
-
-        // Formatter to generate peity charts
-        var chartFormatter = function(cell, formatterParams, onRendered){
-
-            var content = document.createElement("span");
-            var values = cell.getValue();
-            content.classList.add('line');
-            content.innerHTML = values.join(",");
-
-            // after the cell element has been added to the DOM
-            onRendered(function(){
-                peity(content, 'line');
-            });
-
-            return content;
-        };
-
-        function colorUniqId(data, splt){
-            var parts = data.split(splt);
-            var R = (parseInt(parts[0], 16) + parseInt(parts[1], 16)) % 255;
-            var G = (parseInt(parts[2], 16) + parseInt(parts[3], 16)) % 255;
-            var B = (parseInt(parts[4], 16) + parseInt(parts[5], 16)) % 255;
-            return [R,G,B];
-        };
-
-        function averageColor([R,G,B]){
-            let avg = R+G+B/3;
-            return (avg > 128)? "00,00,00": "255,255,255";
-        };
-    </script>
 {% include 'wifi.js.j2' %}
 {% include 'tracked.js.j2' %}
 {% include 'ghosts.js.j2' %}

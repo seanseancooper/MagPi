@@ -112,21 +112,9 @@
 
         // from WIFI module, now homeless...
 
-        function write_tracked(button, trgt){
 
-            var xhttp = new XMLHttpRequest();
 
-            xhttp.open('POST', "http://wifi.localhost:5006/write", true);
-            setsHeaders(xhttp);
-            xhttp.setRequestHeader('TARGET', trgt);
-            xhttp.send();
-
-            xhttp.onload = function() {
-                document.getElementById("write_button").innerHTML = (xhttp.response == "OK")? "DONE": "FAILED";
-            };
-        }
-
-        peity.defaults.line = {
+       peity.defaults.line = {
             delimiter: ",",
             fill: "#777",
             height: 18,
@@ -136,18 +124,6 @@
             stroke: "#00ff00",
             strokeWidth: 2
         }
-
-        Tabulator.extendModule("mutator", "mutators", {
-            signalMutator:function(value, data, type, mutatorParams){
-
-            var sgnlList = [];
-            for (const pt of value) {
-                sgnlList.push(pt['sgnl'])
-            }
-            return sgnlList;
-
-            },
-        });
 
         // Formatter to generate peity charts
         var chartFormatter = function(cell, formatterParams, onRendered){
@@ -177,6 +153,16 @@
             let avg = R+G+B/3;
             return (avg > 128)? "00,00,00": "255,255,255";
         };
+
+        Tabulator.extendModule("mutator", "mutators", {
+            signalMutator:function(value, data, type, mutatorParams) {
+                var sgnlList = [];
+                for (const pt of value) {
+                    sgnlList.push(pt['sgnl'])
+                }
+                return sgnlList;
+            },
+        });
 
     </script>
 {%- for containerTab in container.module_tabs: -%}
