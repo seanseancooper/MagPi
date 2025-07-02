@@ -663,7 +663,7 @@ function draw_spec() {
 
 	function draw_waveforms()
 	{
-		const imgObj = cvs_spec_ctx.getImageData(0,0, cvs_spec.width, cvs_spec.height);
+		const imgObj = cvs_spec_ctx.getImageData(0,0, width, height);
 		const pxPerLine = imgObj.width;
 		var dataLine = [];
 
