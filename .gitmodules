@@ -1,3 +1,0 @@
-[submodule "src/sdr/jupyter_bokeh-main"]
-	path = src/sdr/jupyter_bokeh-main
-	url = https://github.com/bokeh/jupyter_bokeh.git
