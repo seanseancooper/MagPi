@@ -51,7 +51,8 @@ class SDRController(threading.Thread):
             if self.file_is_set:
                 data = routes.analyzer.reader.read_block()
             else:
-                data = routes.scanner.module_retriever.block.copy()
+                # data = routes.scanner.module_retriever.block.copy() # read directly from hardware unbuffered.
+                data = routes.scanner.scanned[0]                      # use buffered data from Scanner.
             emits_block(data)
 
         @socketio.on('get_peaks')
