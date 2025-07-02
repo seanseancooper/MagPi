@@ -589,14 +589,14 @@ function draw_spec() {
     const countingDataGenerator = new CountingFreqDataGenerator(sampling_rate, nfft);
     const dataObj = getDynamicDataBuffer(countingDataGenerator);
     displayElapsedTime(countingDataGenerator, 'elapsedTimeDisplay');
-    const width = cvs_spec.width;
-    const height = cvs_spec.height;
+    const width = 1024;
+    const height = 256;
 
-    const wf = new Waterfall(dataObj, nfft, cvs_spec.height, "DOWN", {lineRate: lineRate}); // cvs_spec.height*time_compression: 1.0... 2.0
+    const wf = new Waterfall(dataObj, nfft, height, "DOWN", {lineRate: lineRate}); // cvs_spec.height*time_compression: 1.0... 2.0
     wf.start();
 
 	cgo.clearCanvas(bgcolor);
-	cgo.setWorldCoordsSVG(0, 0, cvs_spec.width/4, cvs_spec.height);
+	cgo.setWorldCoordsSVG(0, 0, width/4, height);
 	//cgo.setWorldCoordsRHC(0, 0, cvs_spec.width, cvs_spec.height/2);
 
 // Clear and prep canvas
