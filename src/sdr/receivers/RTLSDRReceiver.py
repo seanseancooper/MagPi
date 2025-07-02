@@ -195,6 +195,9 @@ class RTLSDRReceiver(threading.Thread):
                 self.config['OUT_FILE_EXT']
                 )
 
+        if not os.path.exists(self.config['OUTFILE_PATH']):
+            os.mkdir(self.config['OUTFILE_PATH'])
+
         self.iq_outfile = self.config['OUTFILE_PATH'] + '/' + name
 
         self.thread = threading.Thread(
