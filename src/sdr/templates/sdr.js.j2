@@ -33,13 +33,37 @@
             </div>
 
             <div class="sdr-fileselector-display" style="">
-                <button class="sdr-button" id="ctrl_live"><span id="ctrl_live_status">Online</span></button>
+                <button class="sdr-button" id="sdr_online"><span id="sdr_online_status">Offline</span></button>
                 &nbsp;
                 <select id="fileSelector" class="sdr-select" style="width: 200px;">
+                    <option value="">Select File</option>
                     {% for filename in analyzer.reader.iq_files : %}
                     <option value="{{ filename }}">{{ filename.split('/')[-1] }}</option>
                     {% endfor %}
                 </select>
+                <script>
+                    const online_btn = document.getElementById('sdr_online');
+                    const online_status_text = document.getElementById('sdr_online_status');
+
+                    let isLatched = false; // Initial state: button is off
+
+                    function handleLatch(isLatched){
+                        isLatched = !isLatched; // Toggle the state
+
+                        if (isLatched) {
+                            online_status_text.textContent = 'Online';
+                            online_btn.classList.add('sdr_online'); // Add a class for styling
+                        } else {
+                            online_status_text.textContent = 'Offline';
+                            online_btn.classList.remove('sdr_online'); // Remove the class
+                        }
+                    }
+
+                    online_btn.addEventListener('click', handleLatch);
+        
+                    const fileSelector = document.getElementById("fileSelector");
+                    fileSelector.addEventListener('change', handleFileSelect);
+                </script>
             </div>
 
             <div class="sdr-range-controls" style="">
@@ -107,37 +131,11 @@
             const highlightData = {};
             setupInfoLayerHandlers(highlightLayer.canvas, highlightData);
 
-            const latchButton = document.getElementById('ctrl_live');
-            const statusText = document.getElementById('ctrl_live_status');
-            let isLatched = false; // Initial state: button is off
-
-            latchButton.addEventListener('click', () => {
-                isLatched = !isLatched; // Toggle the state
-
-                if (isLatched) {
-                    statusText.textContent = 'Online';
-                    latchButton.classList.add('active'); // Add a class for styling
-                } else {
-                    statusText.textContent = 'Offline';
-                    latchButton.classList.remove('active'); // Remove the class
-                }
-            });
-
             const rangeMin = document.getElementById("rangeMin");
             const rangeMax = document.getElementById("rangeMax");
 
             rangeMin.addEventListener('input', updateSliderBounds);
             rangeMax.addEventListener('input', updateSliderBounds);
-
-            const fileSelector = document.getElementById("fileSelector");
-            fileSelector.addEventListener("change", handleFileSelect);
-            /*
-            fileSelector.addEventListener("change", (event) => {
-              // Code to execute when a new option is selected
-                    console.log("New Option Selected:", event.target.value); // Logs the value of the selected option
-            });
-            */
-
         });
     </script>
 {% endif %}
