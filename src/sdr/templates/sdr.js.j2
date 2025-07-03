@@ -33,10 +33,9 @@
             </div>
 
             <div class="sdr-fileselector-display" style="">
-                <button class="sdr-button" id="sdr_online"><span id="sdr_online_status">Offline</span></button>
+                <button class="sdr-button sdr_online" id="sdr_online"><span id="sdr_online_status">Online</span></button>
                 &nbsp;
                 <select id="fileSelector" class="sdr-select" style="width: 200px;">
-                    <option value="">Select File</option>
                     {% for filename in analyzer.reader.iq_files : %}
                     <option value="{{ filename }}" {% if loop.last: %}selected{% endif %}>{{ filename.split('/')[-1] }}</option>
                     {% endfor %}
@@ -45,7 +44,7 @@
                     const online_btn = document.getElementById('sdr_online');
                     const online_status_text = document.getElementById('sdr_online_status');
 
-                    let isLatched = false; // Initial state: button is off
+                    let isLatched = true; // Initial state: button is off
 
                     function handleLatch(isLatched){
                         isLatched = !isLatched; // Toggle the state
