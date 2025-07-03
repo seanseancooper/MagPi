@@ -205,6 +205,10 @@ socket.on('peak_data', (peaks) => {
 	}
 });
 
+socket.on('center_freq', (f) => {
+    console.log('set hardware center_freq: ' + f)
+});
+
 socket.on('meta_data', (data) => {
 	if (data) {
 		signalMetadataMap = data;
@@ -225,6 +229,10 @@ function handleFileSelect() {
 
 function requestPeaks() {
 	socket.emit('get_peaks');
+}
+
+function setFrequency(new_center_freq) {
+	socket.emit('set_freq', new_center_freq);
 }
 
 function requestMetadata() {
@@ -632,6 +640,8 @@ function draw_spec() {
         onDrag: dx => {
             const deltaFreq = dx * (sampling_rate / nfft * (nfft / cvs_xaxis.width));
             center_freq += deltaFreq;
+            // send center_freq to the hardware
+            setFrequency(center_freq);
             draw_indicia();
         }
 	});

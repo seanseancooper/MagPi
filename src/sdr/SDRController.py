@@ -59,6 +59,10 @@ class SDRController(threading.Thread):
         def get_peaks():
             emit('peak_data', routes.analyzer.peaks.tolist())
 
+        @socketio.on('set_freq')
+        def set_freq(new_center_freq):
+            emit('center_freq', routes.scanner.module_retriever.set_center_freq(new_center_freq))
+
         @socketio.on('set_file')
         def set_file(fileName):
 
