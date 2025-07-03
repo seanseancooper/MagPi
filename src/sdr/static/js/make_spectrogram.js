@@ -101,8 +101,8 @@ const socket = io.connect(':5008');
 const nfft = 4096;                                          // size of PSD. aka NFFT
 //const samp_scan = nfft*16;                                // number of samples per scan
 const lineRate = 10;
-const sampling_rate = 2.048e6;                              // matches sdr
-let center_freq = 97e6;                                     // matches sdr
+const sampling_rate = 2.048e6;                              // config, sdr or recorded rate;
+let center_freq = 97e6;                                     // matches config, then sdr
 
 let uint8magnitudes = new Uint8Array(nfft);                 // Shared buffer to hold latest block data
 let blockReady = false;
@@ -224,6 +224,7 @@ function requestBlock() {
 function handleFileSelect() {
     currentFile = document.getElementById("fileSelector").value;
     socket.emit('set_file', currentFile);
+    handleLatch(document.getElementById("fileSelector").value == null)
     console.log('selected: ' + currentFile);
 }
 
@@ -233,6 +234,7 @@ function requestPeaks() {
 
 function setFrequency(new_center_freq) {
 	socket.emit('set_freq', new_center_freq);
+	center_freq = new_center_freq;
 }
 
 function requestMetadata() {
