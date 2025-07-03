@@ -217,8 +217,18 @@ socket.on('meta_data', (data) => {
 
 let currentFile = null;
 
+//function requestBlock() {
+//    socket.emit('read_block');
+//}
+
 function requestBlock() {
-    socket.emit('read_block');
+
+    const sdr_online = document.getElementById("sdr_online");
+    if (sdr_online.classList.contains('sdr_online')) {
+        socket.emit('read_block');
+    } else {
+        socket.emit('read_blank');
+    }
 }
 
 function handleFileSelect() {
