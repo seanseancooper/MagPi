@@ -55,6 +55,10 @@ class SDRController(threading.Thread):
                 data = routes.scanner.scanned[0]                      # use buffered data from Scanner.
             emits_block(data)
 
+        @socketio.on('read_blank')
+        def read_blank():
+            emits_block(np.zeros((routes.scanner.config['NFFT']*4,), dtype=np.complex128))
+
         @socketio.on('get_peaks')
         def get_peaks():
             emit('peak_data', routes.analyzer.peaks.tolist())
