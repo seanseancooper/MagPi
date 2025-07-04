@@ -2,7 +2,7 @@ class DragManager {
 
     constructor(canvas) {
         this.canvas = canvas;
-        this.ctx = canvas.getContext("2d", {willReadFrequently: true});
+        this.ctx = canvas.getContext("2d");
         this.draggables = [];
         this.active = null;
         this.lastX = 0;
@@ -83,7 +83,7 @@ class HighlightLayer {
 
 	constructor(canvasId) {
 		this.canvas = document.getElementById(canvasId);
-		this.ctx = this.canvas.getContext("2d", {willReadFrequently: true});
+		this.ctx = this.canvas.getContext("2d");
 		this.highlights = [];
 	}
 
@@ -295,24 +295,14 @@ function displayElapsedTime(generatorInstance, elementId) {
 	setInterval(() => {
 
         function convertSecondsToHMS(totalSeconds) {
-          const hours = Math.floor(totalSeconds / 3600);
-          const minutes = Math.floor((totalSeconds % 3600) / 60);
-          const seconds = totalSeconds % 60;
-
-          // Optional: Add leading zeros for formatting (e.g., 05:03:09)
-          const formattedHours = String(hours).padStart(2, '0');
-          const formattedMinutes = String(minutes).padStart(2, '0');
-          const formattedSeconds = String(seconds).padStart(2, '0');
-
-          return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+          return new Date(totalSeconds * 1000).toISOString().slice(11, 19);
         }
 
 		const elapsedMs = generatorInstance.getElapsedTime();
-		const seconds = elapsedMs * lineRate / 1000  ;
+		const seconds = elapsedMs * (lineRate / 1000);
 		let formattedTime = convertSecondsToHMS(seconds);
-		//console.log(formattedTime); // Output: 02:37:42
 		document.getElementById(elementId).textContent = formattedTime;
-	}, 10);
+	}, 100);
 }
 
 function FreqDataGenerator(sampling_rate, nfft) {
@@ -347,7 +337,8 @@ function CountingFreqDataGenerator(sampling_rate, nfft) {
 
 	// External access to time
 	this.getElapsedTime = () => {
-		return blockCount * this.rawLineTime; // in ms
+		// return blockCount * this.rawLineTime;            // latency?
+		return (performance.now() - this.startTime) / 10;   // better, but not 'true' time!
 	};
 
 	this.getLine = () => {
@@ -494,7 +485,7 @@ function handleGridSlider(slider) {
         const slider_output = document.getElementById(slider.id.replace('_input', '_output'));
         grid.style.setProperty('display','block');
         grid.style.setProperty('opacity',1);
-        const grid_ctx = grid.getContext("2d", {willReadFrequently: true});
+        const grid_ctx = grid.getContext("2d");
         const range = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step))
         const slider_range = 127;
 
@@ -598,8 +589,8 @@ function draw_spec() {
     const cvs_hl = new HighlightLayer("cvs_hl");
     const hl_drag = new DragManager(cvs_hl.canvas); // for highlights
     const dragAxis = new DragManager(cvs_xaxis);	// for center frequency
-    const cvs_spec_ctx = cvs_spec.getContext("2d", {willReadFrequently: true});
-    const cvs_xaxis_ctx = cvs_xaxis.getContext("2d", {willReadFrequently: true});
+    const cvs_spec_ctx = cvs_spec.getContext("2d", { willReadFrequently: true });
+    const cvs_xaxis_ctx = cvs_xaxis.getContext("2d");
 
 	// Frequencies
 	const centerX = cvs_xaxis.width / 2;
@@ -612,19 +603,17 @@ function draw_spec() {
     const width = 1024;
     const height = 256;
 
-    const wf = new Waterfall(dataObj, nfft, height, "DOWN", {lineRate: lineRate}); // cvs_spec.height*time_compression: 1.0... 2.0
+    const wf = new Waterfall(dataObj, nfft, height, "DOWN", {lineRate: lineRate}); // stretch = height * time_compression (1.0... 2.0)
     wf.start();
 
 	cgo.clearCanvas(bgcolor);
 	cgo.setWorldCoordsSVG(0, 0, width/4, height);
-	//cgo.setWorldCoordsRHC(0, 0, cvs_spec.width, cvs_spec.height/2);
 
 // Clear and prep canvas
 	cvs_xaxis_ctx.clearRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
-	//cvs_xaxis_ctx.fillRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
 
     function draw_indicia() {
-        const ctx = cvs_xaxis.getContext("2d", {willReadFrequently: true});
+
         cvs_xaxis_ctx.clearRect(0, 0, cvs_xaxis.width, cvs_xaxis.height);
 
         // Draw center line
@@ -683,36 +672,38 @@ function draw_spec() {
         setupInfoLayerHandlers(cvs_hl.canvas, hlInstance);
     });
 
-	function draw_waveforms()
+	function draw_waveforms() // prints on spectrogram canvas
 	{
-		const imgObj = cvs_spec_ctx.getImageData(0,0, width, height);
-		const pxPerLine = imgObj.width;
+		const specPx = cvs_spec_ctx.getImageData(0,0, width, height);
+		const pxPerLine = specPx.width;                                 // 1024
 		var dataLine = [];
 
-		dataLine =  dataObj.buffer;
+		dataLine =  dataObj.buffer; // take what is in buffer now
 
 		// Loop through each row of the canvas
 		for (let row = 0; row < cvs_spec.height; row++) {
 			for (let px = 0; px < pxPerLine; px++) {
 
-				//Calculate index in the image data buffer
+				// where pixel is
 				let i = 4 * (row * pxPerLine + px);
 
-				//Get the corresponding color from the color map
+				// Get the corresponding color from the color map
 				let val =  dataLine[px];
 				const rgba = colMap[val];
 
-				// Set RGBA values in the image data buffer
-				imgObj.data[i]     = rgba[0]; // red
-				imgObj.data[i + 1] = rgba[1]; // green
-				imgObj.data[i + 2] = rgba[2]; // blue
-				imgObj.data[i + 3] = rgba[3]; // alpha
+				// Set the spectrogram canvas pixel values to new
+				// RGBA values in the cvs_spec 2d Context
+				specPx.data[i]     = rgba[0]; // red
+				specPx.data[i + 1] = rgba[1]; // green
+				specPx.data[i + 2] = rgba[2]; // blue
+				specPx.data[i + 3] = rgba[3]; // alpha
 			}
 		}
 
-		let wfImg = new Img(wf.offScreenCvs, { imgWidth: cvs_spec.width/4, imgHeight: cvs_spec.height }); // bandwidth 100% - 25%
+        // make a new image from the Waterfall offscreen canvas
+		let wfImg = new Img(wf.offScreenCvs, { imgWidth: cvs_spec.width/4, imgHeight: cvs_spec.height }); // control bandwidth, magnification
 
-		cgo.render(wfImg);
+		cgo.render(wfImg);  // render the new image in the Cango context
 		cvs_hl.render();
 
 		window.requestAnimationFrame(draw_waveforms);
