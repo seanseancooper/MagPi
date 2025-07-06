@@ -101,6 +101,6 @@ def wifi_write():
         if scanner.config['SPEECH_ENABLED']:
             speech_logger.info(f'logged {len(scanner.get_tracked_signals())} items')
         return "OK", 200
-    return "", 500
+    return "", 404
 
 
