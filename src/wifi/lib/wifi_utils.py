@@ -9,8 +9,7 @@ def write_to_scanlist(config, searchmap):
     """Write current searchmap out as JSON"""
     make_path(config.get('OUTFILE_PATH', "out"))
     _time = datetime.now().strftime(config.get('DATETIME_FORMAT', "%Y%m%d_%H%M%S"))
-    if len(searchmap) > 0:  # don't write nothing; write something.
-        # todo: process this as above....
+    if len(searchmap) > 0:
         return write_file(config['OUTFILE_PATH'], "scanlist_" + _time + ".json", json.dumps(searchmap, indent=1), "x")
 
 def print_table(table):
