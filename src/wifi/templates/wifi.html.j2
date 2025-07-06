@@ -141,6 +141,13 @@
     </div>
     <script>
 
+        function setsHeaders(xhttp) {
+            xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
+            xhttp.setRequestHeader('Access-Control-Allow-Methods', 'POST');
+            xhttp.setRequestHeader('Content-Type', 'text/html');
+            xhttp.setRequestHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-*');
+        }
+
         function write_tracked(button, trgt){
 
             var xhttp = new XMLHttpRequest();
