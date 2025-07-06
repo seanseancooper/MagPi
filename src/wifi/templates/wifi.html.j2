@@ -257,13 +257,6 @@
         wifi_elements.push(document.getElementById('ghosts'));
         wifi_elements.push(document.getElementById('workers'));
 
-        function setsHeaders(xhttp) {
-            xhttp.setRequestHeader('Access-Control-Allow-Origin', 'localhost:*');
-            xhttp.setRequestHeader('Access-Control-Allow-Methods', 'POST');
-            xhttp.setRequestHeader('Content-Type', 'text/html');
-            xhttp.setRequestHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-*');
-        }
-
         function add(uniqId, trgt){
             var xhttp = new XMLHttpRequest();
             xhttp.open("POST", "{{ url_for('.index') }}add/" + uniqId, true);
