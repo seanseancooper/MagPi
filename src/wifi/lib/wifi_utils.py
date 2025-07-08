@@ -13,7 +13,7 @@ def write_to_scanlist(config, searchmap):
     outfile = "scanlist_" + t.replace('-', '').replace(':', '').replace(' ', '_') + ".json"
 
     if len(searchmap) > 0:
-        return write_file(config['OUTFILE_PATH'], "scanlist_" + _time + ".json", json.dumps(searchmap, indent=1), "x")
+        return write_file(out_path, outfile, json.dumps(searchmap, indent=1), "x")
 
 def print_table(table):
     # Functional black magic.
