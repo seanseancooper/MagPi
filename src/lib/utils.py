@@ -42,6 +42,7 @@ def make_path(outdir):
     PATH = os.path.join(os.getcwd(), outdir)
     if not os.path.exists(PATH):
         os.makedirs(PATH)
+    return PATH
 
 def write_file(path, filename, message, mode):
     with open(os.path.join(path, filename), mode) as outfile:
