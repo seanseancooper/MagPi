@@ -75,6 +75,11 @@ class SDRController(threading.Thread):
             self.file_is_set = True
             emit('set_file')
 
+        @socketio.on('get_time')
+        def get_time():
+            ms = routes.scanner.elapsed.microseconds
+            emit('get_time', ms * 100)
+
         @socketio.on('meta_data')
         def get_meta_data():
             meta_data = {  # fake data!!!
