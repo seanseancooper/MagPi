@@ -50,7 +50,7 @@
 
 127.0.0.1:5003 xxx.localhost
 
-127.0.0.1:5004 mcp.localhost                                <-- NOT YET ASSIGNED IN HOSTS
+127.0.0.1:5004 mcp.localhost                                <-- PLANNED, NOT YET ASSIGNED IN HOSTS
 
 127.0.0.1:5005 map.localhost
 127.0.0.1:5005 gps.localhost                                <-- MAINTAINS DOMAIN FOR GPS RESOLUTION
